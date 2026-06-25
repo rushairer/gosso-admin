@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import Callback from './pages/Callback';
 import Login from './pages/Login';
 import Admin from './pages/Admin';
+import Settings from './pages/Settings';
 
 function Layout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -44,6 +45,11 @@ function Layout({ children }: { children: React.ReactNode }) {
             <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
               Welcome
             </NavLink>
+            {logged && (
+              <NavLink to="/settings" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                Security Settings
+              </NavLink>
+            )}
             {logged && isUserAdmin && (
               <NavLink to="/admin" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
                 Admin Dashboard
@@ -104,6 +110,7 @@ export default function App() {
 
         {/* Regular layouts */}
         <Route path="/" element={<Layout><Home /></Layout>} />
+        <Route path="/settings" element={<Layout><Settings /></Layout>} />
         <Route path="/admin" element={<Layout><Admin /></Layout>} />
       </Routes>
     </BrowserRouter>
