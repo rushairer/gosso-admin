@@ -60,6 +60,10 @@ services:
     container_name: sso-admin-seed
     environment:
       - PG_DSN=host=db user=postgres password=password dbname=gosso port=5432 sslmode=disable
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=admin123
+      - ADMIN_DISPLAY_NAME=System Admin
+      - OAUTH2_CLIENT_REDIRECT_URIS=http://localhost:8080/callback
     depends_on:
       db:
         condition: service_healthy

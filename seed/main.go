@@ -5,9 +5,11 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -36,15 +38,59 @@ func hashPassword(password string) (string, error) {
 		Argon2Memory, Argon2Time, Argon2Threads, saltB64, hashB64), nil
 }
 
+func parseRedirectURIs(envVal string) (string, error) {
+	if envVal == "" {
+		return `["http://localhost:8080/callback"]`, nil
+	}
+	envVal = strings.TrimSpace(envVal)
+	if strings.HasPrefix(envVal, "[") && strings.HasSuffix(envVal, "]") {
+		var uris []string
+		if err := json.Unmarshal([]byte(envVal), &uris); err != nil {
+			return "", fmt.Errorf("invalid JSON in redirect URIs: %w", err)
+		}
+		return envVal, nil
+	}
+	parts := strings.Split(envVal, ",")
+	var uris []string
+	for _, p := range parts {
+		trimmed := strings.TrimSpace(p)
+		if trimmed != "" {
+			uris = append(uris, trimmed)
+		}
+	}
+	bytes, err := json.Marshal(uris)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
+}
+
 func main() {
 	dsn := os.Getenv("PG_DSN")
 	if dsn == "" {
 		log.Fatal("PG_DSN environment variable is required")
 	}
 
+	adminUsername := os.Getenv("ADMIN_USERNAME")
+	if adminUsername == "" {
+		adminUsername = "admin"
+	}
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	if adminPassword == "" {
+		adminPassword = "admin123"
+	}
+	adminDisplayName := os.Getenv("ADMIN_DISPLAY_NAME")
+	if adminDisplayName == "" {
+		adminDisplayName = "System Admin"
+	}
+
+	redirectURIsEnv := os.Getenv("OAUTH2_CLIENT_REDIRECT_URIS")
+	redirectURIsJSON, err := parseRedirectURIs(redirectURIsEnv)
+	if err != nil {
+		log.Fatalf("Failed to parse OAUTH2_CLIENT_REDIRECT_URIS: %v", err)
+	}
 	log.Println("Connecting to GOSSO database...")
 	var db *sql.DB
-	var err error
 
 	// Wait and retry database connection
 	for i := 0; i < 30; i++ {
@@ -89,42 +135,42 @@ func main() {
 
 	// 1. Seed Admin User
 	var adminCount int
-	err = db.QueryRowContext(ctx, "SELECT COUNT(*) FROM accounts WHERE username = 'admin'").Scan(&adminCount)
+	err = db.QueryRowContext(ctx, "SELECT COUNT(*) FROM accounts WHERE username = $1", adminUsername).Scan(&adminCount)
 	if err != nil {
 		log.Fatalf("Failed to query admin user count: %v", err)
 	}
 
 	adminID := "00000000-0000-0000-0000-000000000001"
 	if adminCount == 0 {
-		log.Println("Seeding default admin user...")
+		log.Printf("Seeding default admin user '%s'...\n", adminUsername)
 		_, err = db.ExecContext(ctx,
-			"INSERT INTO accounts (id, username, display_name, status) VALUES ($1, 'admin', 'System Admin', 'active')",
-			adminID,
+			"INSERT INTO accounts (id, username, display_name, status) VALUES ($1, $2, $3, 'active')",
+			adminID, adminUsername, adminDisplayName,
 		)
 		if err != nil {
 			log.Fatalf("Failed to seed admin account: %v", err)
 		}
 
-		pwHash, err := hashPassword("admin123")
+		pwHash, err := hashPassword(adminPassword)
 		if err != nil {
 			log.Fatalf("Failed to hash password: %v", err)
 		}
 
 		_, err = db.ExecContext(ctx,
 			`INSERT INTO account_credentials (account_id, credential_type, identifier, credential_value, verified, primary_credential)
-			 VALUES ($1, 'password', 'admin', $2, true, true)`,
-			adminID, pwHash,
+			 VALUES ($1, 'password', $2, $3, true, true)`,
+			adminID, adminUsername, pwHash,
 		)
 		if err != nil {
 			log.Fatalf("Failed to seed admin password credential: %v", err)
 		}
 		log.Println("Admin user seeded successfully.")
 	} else {
-		err = db.QueryRowContext(ctx, "SELECT id FROM accounts WHERE username = 'admin'").Scan(&adminID)
+		err = db.QueryRowContext(ctx, "SELECT id FROM accounts WHERE username = $1", adminUsername).Scan(&adminID)
 		if err != nil {
 			log.Fatalf("Failed to get admin ID: %v", err)
 		}
-		log.Println("Admin user already exists.")
+		log.Printf("Admin user '%s' already exists.\n", adminUsername)
 	}
 
 	// 2. Seed Admin Role
@@ -173,18 +219,26 @@ func main() {
 		_, err = db.ExecContext(ctx,
 			`INSERT INTO oauth2_clients (account_id, client_id, name, description, redirect_uris, grant_types, scopes, is_confidential)
 			 VALUES ($1, 'gosso-admin-spa', 'GOSSO Admin Console', 'OAuth2 Client for React GOSSO Admin Frontend', 
-			         '["http://localhost:8080/callback"]'::jsonb, 
+			         $2::jsonb, 
 			         '["authorization_code"]'::jsonb, 
 			         '["openid", "profile", "email"]'::jsonb, 
 			         false)`,
-			adminID,
+			adminID, redirectURIsJSON,
 		)
 		if err != nil {
 			log.Fatalf("Failed to seed OAuth2 client: %v", err)
 		}
 		log.Println("OAuth2 client seeded successfully.")
 	} else {
-		log.Println("OAuth2 client 'gosso-admin-spa' already exists.")
+		log.Println("OAuth2 client 'gosso-admin-spa' already exists. Updating redirect URIs...")
+		_, err = db.ExecContext(ctx,
+			`UPDATE oauth2_clients SET redirect_uris = $1::jsonb WHERE client_id = 'gosso-admin-spa'`,
+			redirectURIsJSON,
+		)
+		if err != nil {
+			log.Fatalf("Failed to update OAuth2 client redirect URIs: %v", err)
+		}
+		log.Println("OAuth2 client 'gosso-admin-spa' redirect URIs updated.")
 	}
 
 	log.Println("Database seeding completed successfully.")

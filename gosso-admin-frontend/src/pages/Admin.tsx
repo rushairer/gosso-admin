@@ -61,6 +61,19 @@ export default function Admin() {
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [newRoleInput, setNewRoleInput] = useState('');
+
+  // Password Dialog State
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+
+  // Self Password Dialog State
+  const [showSelfPasswordModal, setShowSelfPasswordModal] = useState(false);
+  const [currentPasswordInput, setCurrentPasswordInput] = useState('');
+  const [newSelfPasswordInput, setNewSelfPasswordInput] = useState('');
+  const [selfPasswordError, setSelfPasswordError] = useState<string | null>(null);
+  const [selfPasswordSuccess, setSelfPasswordSuccess] = useState<string | null>(null);
   
   const token = getAccessToken();
   const currentAdmin = getUserProfile();
@@ -294,6 +307,106 @@ export default function Admin() {
     }
   };
 
+  // Self Password Management Handlers
+  const handleOpenSelfPasswordModal = () => {
+    setCurrentPasswordInput('');
+    setNewSelfPasswordInput('');
+    setSelfPasswordError(null);
+    setSelfPasswordSuccess(null);
+    setShowSelfPasswordModal(true);
+  };
+
+  const handleSelfPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentPasswordInput || !newSelfPasswordInput) return;
+
+    if (newSelfPasswordInput.length < 12) {
+      setSelfPasswordError('New password must be at least 12 characters long.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/v1/auth/password/change`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          current_password: currentPasswordInput,
+          new_password: newSelfPasswordInput
+        })
+      });
+
+      const body = await response.json();
+      if (!response.ok) {
+        throw new Error(body.message || 'Failed to change password');
+      }
+
+      setSelfPasswordSuccess('Password updated successfully. You will be redirected to log in again shortly.');
+      setSelfPasswordError(null);
+      setCurrentPasswordInput('');
+      setNewSelfPasswordInput('');
+      
+      setTimeout(() => {
+        setShowSelfPasswordModal(false);
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user_profile');
+        document.cookie = 'access_token=; path=/; max-age=-1; SameSite=Lax';
+        window.location.href = '/';
+      }, 2500);
+    } catch (err: any) {
+      setSelfPasswordError(err.message || 'Error updating password');
+      setSelfPasswordSuccess(null);
+    }
+  };
+
+  // Password Management Handlers
+  const handleOpenPasswordModal = (account: Account) => {
+    setSelectedAccount(account);
+    setNewPassword('');
+    setPasswordError(null);
+    setPasswordSuccess(null);
+    setShowPasswordModal(true);
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedAccount || !newPassword) return;
+
+    if (newPassword.length < 12) {
+      setPasswordError('Password must be at least 12 characters long.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/v1/admin/accounts/${selectedAccount.id}/password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ new_password: newPassword })
+      });
+
+      const body = await response.json();
+      if (!response.ok) {
+        throw new Error(body.message || 'Failed to change password');
+      }
+
+      setPasswordSuccess('Password updated successfully. All user sessions have been revoked.');
+      setPasswordError(null);
+      setNewPassword('');
+      setTimeout(() => {
+        setShowPasswordModal(false);
+      }, 2500);
+    } catch (err: any) {
+      setPasswordError(err.message || 'Error updating password');
+      setPasswordSuccess(null);
+    }
+  };
+
   // Role Management Handlers
   const handleOpenRoleModal = (account: Account) => {
     setSelectedAccount(account);
@@ -399,12 +512,18 @@ export default function Admin() {
             System configuration console. Manage authentication clients and system credentials.
           </p>
         </div>
-        {activeTab === 'clients' && (
-          <button className="btn btn-primary" onClick={() => handleOpenClientModal(null)}>
-            <PlusIcon style={{ width: '16px', height: '16px' }} />
-            Register Client
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button className="btn btn-secondary" onClick={handleOpenSelfPasswordModal}>
+            <KeyIcon style={{ width: '16px', height: '16px' }} />
+            Change My Password
           </button>
-        )}
+          {activeTab === 'clients' && (
+            <button className="btn btn-primary" onClick={() => handleOpenClientModal(null)}>
+              <PlusIcon style={{ width: '16px', height: '16px' }} />
+              Register Client
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Tabs */}
@@ -565,6 +684,16 @@ export default function Admin() {
                           <button className="btn btn-secondary btn-sm" onClick={() => handleOpenRoleModal(acc)} title="Manage Roles">
                             <ShieldIcon style={{ width: '13px', height: '13px' }} />
                             Roles
+                          </button>
+                          <button 
+                            className="btn btn-secondary btn-sm" 
+                            style={{ opacity: acc.id === currentAdmin?.sub ? 0.4 : 1 }}
+                            onClick={() => handleOpenPasswordModal(acc)} 
+                            title="Change Password"
+                            disabled={acc.id === currentAdmin?.sub}
+                          >
+                            <KeyIcon style={{ width: '13px', height: '13px' }} />
+                            Password
                           </button>
                           <button 
                             className={`btn btn-secondary btn-sm`} 
@@ -838,6 +967,121 @@ export default function Admin() {
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={() => setShowRoleModal(false)}>Close</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Change Password Modal */}
+      {showPasswordModal && selectedAccount && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title">Change Password</h3>
+              <button className="modal-close-btn" onClick={() => setShowPasswordModal(false)}>
+                <XIcon style={{ width: '18px', height: '18px' }} />
+              </button>
+            </div>
+            <form onSubmit={handlePasswordSubmit}>
+              <div className="modal-body">
+                <p style={{ fontSize: '14px', color: 'var(--color-text-dark)', marginBottom: '16px' }}>
+                  Set a new password for user <strong>{selectedAccount.display_name || selectedAccount.username}</strong>.
+                </p>
+
+                {passwordError && (
+                  <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--danger-color)', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '13px' }}>
+                    {passwordError}
+                  </div>
+                )}
+
+                {passwordSuccess && (
+                  <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', color: 'var(--success-color)', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '13px' }}>
+                    {passwordSuccess}
+                  </div>
+                )}
+
+                <div className="form-group" style={{ marginBottom: '0px' }}>
+                  <label className="form-label">New Password (min 12 chars)</label>
+                  <input
+                    type="password"
+                    className="input-field"
+                    placeholder="Enter new password"
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    required
+                    disabled={!!passwordSuccess}
+                    autoFocus
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowPasswordModal(false)} disabled={!!passwordSuccess}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={!newPassword || !!passwordSuccess}>Update Password</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Self Change Password Modal */}
+      {showSelfPasswordModal && (
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title">Change My Password</h3>
+              <button className="modal-close-btn" onClick={() => setShowSelfPasswordModal(false)}>
+                <XIcon style={{ width: '18px', height: '18px' }} />
+              </button>
+            </div>
+            <form onSubmit={handleSelfPasswordSubmit}>
+              <div className="modal-body">
+                <p style={{ fontSize: '14px', color: 'var(--color-text-dark)', marginBottom: '16px' }}>
+                  Update your administrator account password. For security, you must provide your current password.
+                </p>
+
+                {selfPasswordError && (
+                  <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--danger-color)', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '13px' }}>
+                    {selfPasswordError}
+                  </div>
+                )}
+
+                {selfPasswordSuccess && (
+                  <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', color: 'var(--success-color)', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '13px' }}>
+                    {selfPasswordSuccess}
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label className="form-label">Current Password</label>
+                  <input
+                    type="password"
+                    className="input-field"
+                    placeholder="Enter current password"
+                    value={currentPasswordInput}
+                    onChange={e => setCurrentPasswordInput(e.target.value)}
+                    required
+                    disabled={!!selfPasswordSuccess}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '0px' }}>
+                  <label className="form-label">New Password (min 12 chars)</label>
+                  <input
+                    type="password"
+                    className="input-field"
+                    placeholder="Enter new password"
+                    value={newSelfPasswordInput}
+                    onChange={e => setNewSelfPasswordInput(e.target.value)}
+                    required
+                    disabled={!!selfPasswordSuccess}
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowSelfPasswordModal(false)} disabled={!!selfPasswordSuccess}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={!currentPasswordInput || !newSelfPasswordInput || !!selfPasswordSuccess}>Update Password</button>
+              </div>
+            </form>
           </div>
         </div>
       )}

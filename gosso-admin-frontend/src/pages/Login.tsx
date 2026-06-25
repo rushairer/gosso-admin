@@ -4,8 +4,8 @@ import { setCookie } from '../auth';
 
 export default function Login() {
   const [searchParams] = useSearchParams();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('admin123');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -106,10 +106,6 @@ export default function Login() {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
-        
-        <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '13px', color: 'var(--color-text-dark)' }}>
-          System seeded credentials: <strong>admin</strong> / <strong>admin123</strong>
-        </div>
       </div>
     </div>
   );
