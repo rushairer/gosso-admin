@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+gosso-admin-frontend/node_modules/
+
+# Production builds
+dist/
+gosso-admin-frontend/dist/
+gosso-admin-frontend/dist-ssr/
+
+# Local binaries and scripts
+seed/seed
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS and Editor files
+.DS_Store
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Private key files (do not commit keys)
+*.pem
+gosso/keys/*
+!gosso/keys/.gitkeep
