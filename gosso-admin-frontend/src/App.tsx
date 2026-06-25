@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link, NavLink } from 'react-router-dom';
 import { LogIn, LogOut, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { isLoggedIn, logout, getUserProfile, redirectToAuthorize } from './auth';
+import { isLoggedIn, logout, getUserProfile, redirectToAuthorize, isAdmin } from './auth';
 import type { UserProfile } from './auth';
 
 // Import Pages
@@ -13,10 +13,12 @@ import Admin from './pages/Admin';
 function Layout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [logged, setLogged] = useState(false);
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
 
   useEffect(() => {
     setLogged(isLoggedIn());
     setUser(getUserProfile());
+    setIsUserAdmin(isAdmin());
   }, []);
 
   const handleLogout = () => {
@@ -42,7 +44,7 @@ function Layout({ children }: { children: React.ReactNode }) {
             <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
               Welcome
             </NavLink>
-            {logged && (
+            {logged && isUserAdmin && (
               <NavLink to="/admin" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
                 Admin Dashboard
               </NavLink>
