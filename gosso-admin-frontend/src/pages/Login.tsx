@@ -1,6 +1,33 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Key } from 'lucide-react';
 import { setCookie, fetchUserProfile } from '../auth';
+
+function bufferToBase64URL(buffer: ArrayBuffer): string {
+  if (!buffer) return '';
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+function base64URLToBuffer(base64url: string): Uint8Array {
+  if (!base64url) return new Uint8Array(0);
+  const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+  const padLen = (4 - (base64.length % 4)) % 4;
+  const padded = base64 + '='.repeat(padLen);
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
 
 export default function Login() {
   const [searchParams] = useSearchParams();
@@ -8,6 +35,7 @@ export default function Login() {
   const [password, setPassword] = useState('admin123');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
 
   // MFA state
   const [mfaRequired, setMfaRequired] = useState(false);
@@ -22,6 +50,65 @@ export default function Login() {
       window.location.href = `${window.location.origin}${redirectUri}`;
     } else {
       window.location.href = redirectUri;
+    }
+  };
+
+  const handlePasskeyLogin = async () => {
+    setPasskeyLoading(true);
+    setError(null);
+
+    try {
+      // Step 1: Begin passkey login (discoverable — no account_id)
+      const beginRes = await fetch('/api/v1/passkey/login/begin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      const beginBody = await beginRes.json();
+      if (!beginRes.ok) throw new Error(beginBody.message || 'Failed to begin passkey login');
+
+      const { options, request_id } = beginBody.data;
+      if (!options?.challenge) throw new Error('Server returned invalid WebAuthn options');
+
+      // Step 2: Browser WebAuthn assertion
+      const publicKeyOptions: PublicKeyCredentialRequestOptions = {
+        ...options,
+        challenge: base64URLToBuffer(options.challenge),
+        allowCredentials: (options.allowCredentials || []).map((cred: any) => ({
+          ...cred,
+          id: base64URLToBuffer(cred.id),
+        })),
+      };
+      const assertion = (await navigator.credentials.get({ publicKey: publicKeyOptions })) as any;
+      if (!assertion?.response) throw new Error('Passkey authentication cancelled or failed');
+
+      // Step 3: Complete login
+      const completeBody = {
+        request_id,
+        id: assertion.id,
+        rawId: bufferToBase64URL(assertion.rawId),
+        type: assertion.type,
+        response: {
+          clientDataJSON: bufferToBase64URL(assertion.response.clientDataJSON),
+          authenticatorData: bufferToBase64URL(assertion.response.authenticatorData),
+          signature: bufferToBase64URL(assertion.response.signature),
+          userHandle: assertion.response.userHandle ? bufferToBase64URL(assertion.response.userHandle) : null,
+        },
+      };
+      const completeRes = await fetch('/api/v1/passkey/login/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(completeBody),
+      });
+      const completeRespBody = await completeRes.json();
+      if (!completeRes.ok) throw new Error(completeRespBody.message || 'Passkey login failed');
+
+      await storeTokensAndRedirect(completeRespBody.data);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Passkey login failed. Please try again.');
+    } finally {
+      setPasskeyLoading(false);
     }
   };
 
@@ -157,6 +244,23 @@ export default function Login() {
 
             <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
               {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '16px 0' }}>
+              <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border-color, #374151)' }} />
+              <span style={{ color: 'var(--color-text-muted)', fontSize: '13px' }}>or</span>
+              <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border-color, #374151)' }} />
+            </div>
+
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              onClick={handlePasskeyLogin}
+              disabled={passkeyLoading}
+            >
+              <Key size={16} />
+              {passkeyLoading ? 'Verifying passkey...' : 'Sign in with Passkey'}
             </button>
           </form>
         ) : (
