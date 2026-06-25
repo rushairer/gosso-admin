@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Key, Laptop, Trash2, QrCode, Clipboard, AlertTriangle, CheckCircle, RefreshCw, Lock, Unlock, Check, Copy, User, Calendar, MapPin, Eye, EyeOff, Plus } from 'lucide-react';
-import { getAccessToken, getUserProfile, logout } from '../auth';
+import { getUserProfile, logout, apiFetch, isLoggedIn, redirectToAuthorize } from '../auth';
 
 interface Session {
   id: string;
@@ -23,6 +23,7 @@ interface MFAStatus {
 
 // WebAuthn array buffer utilities
 function bufferToBase64URL(buffer: ArrayBuffer): string {
+  if (!buffer) return '';
   const bytes = new Uint8Array(buffer);
   let binary = '';
   for (let i = 0; i < bytes.byteLength; i++) {
@@ -35,6 +36,7 @@ function bufferToBase64URL(buffer: ArrayBuffer): string {
 }
 
 function base64URLToBuffer(base64url: string): Uint8Array {
+  if (!base64url) return new Uint8Array(0);
   const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
   const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
   const binary = atob(padded);
@@ -47,11 +49,11 @@ function base64URLToBuffer(base64url: string): Uint8Array {
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState<'profile' | 'mfa' | 'passkeys' | 'sessions'>('profile');
-  const token = getAccessToken();
   const profile = getUserProfile();
 
   // Loaders
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -81,16 +83,33 @@ export default function Settings() {
 
   // Load data on tab active
   useEffect(() => {
-    if (activeTab === 'mfa') {
-      fetchMFAStatus();
-    } else if (activeTab === 'passkeys') {
-      fetchPasskeys();
-    } else if (activeTab === 'sessions') {
-      fetchSessions();
+    if (!isLoggedIn()) {
+      redirectToAuthorize('/settings');
+      return;
     }
-    setError(null);
-    setSuccess(null);
+    loadTabContent();
   }, [activeTab]);
+
+  const loadTabContent = async () => {
+    try {
+      setLoading(true);
+      setLoadError(null);
+      setError(null);
+      setSuccess(null);
+      if (activeTab === 'mfa') {
+        await fetchMFAStatus();
+      } else if (activeTab === 'passkeys') {
+        await fetchPasskeys();
+      } else if (activeTab === 'sessions') {
+        await fetchSessions();
+      }
+    } catch (err: any) {
+      console.error(err);
+      setLoadError(err.message || 'Error loading settings data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const clearMessages = () => {
     setError(null);
@@ -111,11 +130,10 @@ export default function Settings() {
 
     try {
       setLoading(true);
-      const response = await fetch('/api/v1/auth/password/change', {
+      const response = await apiFetch('/api/v1/auth/password/change', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           current_password: currentPassword,
@@ -141,29 +159,20 @@ export default function Settings() {
 
   // 2. MFA Status and Operations
   const fetchMFAStatus = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/v1/auth/mfa', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const body = await response.json();
-      if (response.ok) {
-        setMfaStatus(body.data || { enabled: false, types: [] });
-      }
-    } catch (err) {
-      console.error('Error fetching MFA status', err);
-    } finally {
-      setLoading(false);
+    const response = await apiFetch('/api/v1/auth/mfa');
+    if (!response.ok) {
+      throw new Error('Failed to load multi-factor authentication status');
     }
+    const body = await response.json();
+    setMfaStatus(body.data || { enabled: false, types: [] });
   };
 
   const handleEnrollMFA = async () => {
     clearMessages();
     try {
       setLoading(true);
-      const response = await fetch('/api/v1/auth/mfa/enroll', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await apiFetch('/api/v1/auth/mfa/enroll', {
+        method: 'POST'
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.message || 'Failed to enroll MFA');
@@ -180,11 +189,10 @@ export default function Settings() {
     clearMessages();
     try {
       setLoading(true);
-      const response = await fetch('/api/v1/auth/mfa/activate', {
+      const response = await apiFetch('/api/v1/auth/mfa/activate', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ code: totpCode })
       });
@@ -194,12 +202,11 @@ export default function Settings() {
       setSuccess('MFA activated successfully!');
       setMfaEnrollment(null);
       setTotpCode('');
-      fetchMFAStatus();
+      await fetchMFAStatus();
 
       // Automatically generate backup codes for the user
-      const codesRes = await fetch('/api/v1/auth/mfa/backup-codes', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const codesRes = await apiFetch('/api/v1/auth/mfa/backup-codes', {
+        method: 'POST'
       });
       const codesBody = await codesRes.json();
       if (codesRes.ok && codesBody.data?.backup_codes) {
@@ -217,11 +224,10 @@ export default function Settings() {
     clearMessages();
     try {
       setLoading(true);
-      const response = await fetch('/api/v1/auth/mfa', {
+      const response = await apiFetch('/api/v1/auth/mfa', {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ current_password: confirmPasswordForMFA })
       });
@@ -232,7 +238,7 @@ export default function Settings() {
       setShowDisableModal(false);
       setConfirmPasswordForMFA('');
       setBackupCodes([]);
-      fetchMFAStatus();
+      await fetchMFAStatus();
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -247,9 +253,8 @@ export default function Settings() {
     }
     try {
       setLoading(true);
-      const response = await fetch('/api/v1/auth/mfa/backup-codes', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await apiFetch('/api/v1/auth/mfa/backup-codes', {
+        method: 'POST'
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.message || 'Failed to generate backup codes');
@@ -264,20 +269,12 @@ export default function Settings() {
 
   // 3. Passkeys (WebAuthn)
   const fetchPasskeys = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/v1/passkeys', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const body = await response.json();
-      if (response.ok) {
-        setPasskeys(body.data || []);
-      }
-    } catch (err) {
-      console.error('Error fetching passkeys', err);
-    } finally {
-      setLoading(false);
+    const response = await apiFetch('/api/v1/passkeys');
+    if (!response.ok) {
+      throw new Error('Failed to load passkeys');
     }
+    const body = await response.json();
+    setPasskeys(body.data || []);
   };
 
   const handleRegisterPasskey = async (e: React.FormEvent) => {
@@ -291,14 +288,18 @@ export default function Settings() {
     try {
       setLoading(true);
       // Step 1: Begin registration
-      const beginRes = await fetch('/api/v1/passkey/register/begin', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const beginRes = await apiFetch('/api/v1/passkey/register/begin', {
+        method: 'POST'
       });
       const beginBody = await beginRes.json();
       if (!beginRes.ok) throw new Error(beginBody.message || 'Failed to initialize WebAuthn ceremony');
+      if (!beginBody.data) throw new Error('Server returned no registration data');
 
       const { options, request_id } = beginBody.data;
+      if (!options || !options.challenge) {
+        console.error('Invalid WebAuthn options from server:', beginBody);
+        throw new Error('Server returned invalid WebAuthn options (missing challenge)');
+      }
 
       // Format options for navigator.credentials.create
       const publicKeyOptions = {
@@ -306,7 +307,7 @@ export default function Settings() {
         challenge: base64URLToBuffer(options.challenge),
         user: {
           ...options.user,
-          id: base64URLToBuffer(options.user.id)
+          id: base64URLToBuffer(options.user?.id)
         },
         excludeCredentials: (options.excludeCredentials || []).map((cred: any) => ({
           ...cred,
@@ -319,7 +320,7 @@ export default function Settings() {
         publicKey: publicKeyOptions
       })) as any;
 
-      if (!credential) {
+      if (!credential || !credential.response) {
         throw new Error('Credential creation cancelled or failed');
       }
 
@@ -328,19 +329,19 @@ export default function Settings() {
         id: credential.id,
         rawId: bufferToBase64URL(credential.rawId),
         type: credential.type,
+        name: newPasskeyName.trim(),
         response: {
           clientDataJSON: bufferToBase64URL(credential.response.clientDataJSON),
-          attestationObject: bufferToBase64URL(credential.response.attestationObject),
+          attestationObject: bufferToBase64URL((credential.response as AuthenticatorAttestationResponse).attestationObject),
           transports: typeof credential.response.getTransports === 'function' ? credential.response.getTransports() : []
         }
       };
 
       // Step 3: Complete registration
-      const completeRes = await fetch(`/api/v1/passkey/register/complete?request_id=${request_id}`, {
+      const completeRes = await apiFetch(`/api/v1/passkey/register/complete?request_id=${request_id}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(attestationResponse)
       });
@@ -350,7 +351,7 @@ export default function Settings() {
       setSuccess(`Passkey "${newPasskeyName}" registered successfully.`);
       setShowPasskeyModal(false);
       setNewPasskeyName('');
-      fetchPasskeys();
+      await fetchPasskeys();
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'WebAuthn registration failed.');
@@ -366,14 +367,13 @@ export default function Settings() {
     }
     try {
       setLoading(true);
-      const response = await fetch(`/api/v1/passkeys/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await apiFetch(`/api/v1/passkeys/${id}`, {
+        method: 'DELETE'
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.message || 'Failed to remove passkey');
       setSuccess('Passkey removed successfully.');
-      fetchPasskeys();
+      await fetchPasskeys();
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -383,29 +383,23 @@ export default function Settings() {
 
   // 4. Active Sessions
   const fetchSessions = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/v1/auth/sessions', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const body = await response.json();
-      if (response.ok) {
-        setSessions(body.data || []);
-      }
-
-      // Check current session ID by calling validate session endpoint
-      const curResponse = await fetch('/api/v1/auth/session', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const curBody = await curResponse.json();
-      if (curResponse.ok) {
-        setCurrentSessionId(curBody.data?.id || null);
-      }
-    } catch (err) {
-      console.error('Error fetching sessions', err);
-    } finally {
-      setLoading(false);
+    const response = await apiFetch('/api/v1/auth/sessions');
+    if (!response.ok) {
+      throw new Error('Failed to load active sessions');
     }
+    const body = await response.json();
+    const sorted = (body.data || []).sort(
+      (a: Session, b: Session) => new Date(b.last_active_at).getTime() - new Date(a.last_active_at).getTime()
+    );
+    setSessions(sorted);
+
+    // Check current session ID by calling validate session endpoint
+    const curResponse = await apiFetch('/api/v1/auth/session');
+    if (!curResponse.ok) {
+      throw new Error('Failed to validate current session');
+    }
+    const curBody = await curResponse.json();
+    setCurrentSessionId(curBody.data?.id || null);
   };
 
   const handleRevokeSession = async (sessionId: string) => {
@@ -415,14 +409,13 @@ export default function Settings() {
     }
     try {
       setLoading(true);
-      const response = await fetch(`/api/v1/auth/sessions/${sessionId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await apiFetch(`/api/v1/auth/sessions/${sessionId}`, {
+        method: 'DELETE'
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.message || 'Failed to revoke session');
       setSuccess('Session revoked.');
-      fetchSessions();
+      await fetchSessions();
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -443,79 +436,49 @@ export default function Settings() {
   };
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '20px auto 0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
       {/* Title */}
       <div>
-        <h1 style={{ fontSize: '28px', color: 'var(--color-text-main)' }}>Security & Profile Settings</h1>
+        <h2 style={{ fontSize: '28px', color: 'var(--color-text-main)' }}>Security & Profile Settings</h2>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '14.5px', marginTop: '4px' }}>
           Manage your identity credentials, passwords, multi-factor authentication devices, and active login sessions.
         </p>
       </div>
 
-      {/* Main Panel Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: '24px', alignItems: 'start' }}>
-        
-        {/* Navigation Sidebar */}
-        <div className="glass-card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <button 
-            onClick={() => setActiveTab('profile')} 
-            className="btn" 
-            style={{ 
-              justifyContent: 'flex-start', 
-              width: '100%', 
-              backgroundColor: activeTab === 'profile' ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
-              color: activeTab === 'profile' ? 'var(--color-primary)' : 'var(--color-text-main)'
-            }}
-          >
-            <User style={{ width: '16px', height: '16px' }} />
-            Profile & Password
-          </button>
-          
-          <button 
-            onClick={() => setActiveTab('mfa')} 
-            className="btn" 
-            style={{ 
-              justifyContent: 'flex-start', 
-              width: '100%', 
-              backgroundColor: activeTab === 'mfa' ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
-              color: activeTab === 'mfa' ? 'var(--color-primary)' : 'var(--color-text-main)'
-            }}
-          >
-            <Shield style={{ width: '16px', height: '16px' }} />
-            Multi-Factor (2FA)
-          </button>
-          
-          <button 
-            onClick={() => setActiveTab('passkeys')} 
-            className="btn" 
-            style={{ 
-              justifyContent: 'flex-start', 
-              width: '100%', 
-              backgroundColor: activeTab === 'passkeys' ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
-              color: activeTab === 'passkeys' ? 'var(--color-primary)' : 'var(--color-text-main)'
-            }}
-          >
-            <Key style={{ width: '16px', height: '16px' }} />
-            Passkeys (FIDO2)
-          </button>
-          
-          <button 
-            onClick={() => setActiveTab('sessions')} 
-            className="btn" 
-            style={{ 
-              justifyContent: 'flex-start', 
-              width: '100%', 
-              backgroundColor: activeTab === 'sessions' ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
-              color: activeTab === 'sessions' ? 'var(--color-primary)' : 'var(--color-text-main)'
-            }}
-          >
-            <Laptop style={{ width: '16px', height: '16px' }} />
-            Active Sessions
-          </button>
-        </div>
+      {/* Tabs */}
+      <div className="tabs-header">
+        <button className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
+          <User style={{ width: '16px', height: '16px', marginRight: '8px', display: 'inline', verticalAlign: 'middle' }} />
+          Profile & Password
+        </button>
+        <button className={`tab-btn ${activeTab === 'mfa' ? 'active' : ''}`} onClick={() => setActiveTab('mfa')}>
+          <Shield style={{ width: '16px', height: '16px', marginRight: '8px', display: 'inline', verticalAlign: 'middle' }} />
+          Multi-Factor (2FA)
+        </button>
+        <button className={`tab-btn ${activeTab === 'passkeys' ? 'active' : ''}`} onClick={() => setActiveTab('passkeys')}>
+          <Key style={{ width: '16px', height: '16px', marginRight: '8px', display: 'inline', verticalAlign: 'middle' }} />
+          Passkeys (FIDO2)
+        </button>
+        <button className={`tab-btn ${activeTab === 'sessions' ? 'active' : ''}`} onClick={() => setActiveTab('sessions')}>
+          <Laptop style={{ width: '16px', height: '16px', marginRight: '8px', display: 'inline', verticalAlign: 'middle' }} />
+          Active Sessions
+        </button>
+      </div>
 
-        {/* Tab Content Area */}
+      {/* Loading & Error States */}
+      {loading ? (
+        <div style={{ padding: '60px 0', textAlign: 'center' }}>
+          <div style={{ margin: '0 auto 16px auto', width: '32px', height: '32px', borderRadius: '50%', border: '3px solid rgba(255,255,255,0.06)', borderTopColor: 'var(--color-primary)', animation: 'spin 1s linear infinite' }} />
+          <p style={{ color: 'var(--color-text-muted)' }}>Loading settings data...</p>
+        </div>
+      ) : loadError ? (
+        <div className="glass-card" style={{ borderLeft: '4px solid var(--danger-color)', padding: '20px' }}>
+          <h3 style={{ color: 'var(--danger-color)', marginBottom: '8px' }}>Settings Load Error</h3>
+          <p style={{ color: 'var(--color-text-muted)' }}>{loadError}</p>
+          <button className="btn btn-secondary btn-sm" style={{ marginTop: '16px' }} onClick={loadTabContent}>Retry Load</button>
+        </div>
+      ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
           {/* Notifications */}
@@ -969,8 +932,7 @@ export default function Settings() {
           )}
 
         </div>
-
-      </div>
+      )}
 
       {/* MODAL 1: Disable MFA Confirmation */}
       {showDisableModal && (

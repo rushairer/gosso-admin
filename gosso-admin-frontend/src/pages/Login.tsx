@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { setCookie } from '../auth';
+import { setCookie, fetchUserProfile } from '../auth';
 
 export default function Login() {
   const [searchParams] = useSearchParams();
@@ -9,8 +9,35 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // MFA state
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [mfaToken, setMfaToken] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
+
   // Capture where we should redirect back to (e.g. GOSSO authorize URL)
   const redirectUri = searchParams.get('redirect_uri') || '/admin';
+
+  const doRedirect = () => {
+    if (redirectUri.startsWith('/')) {
+      window.location.href = `${window.location.origin}${redirectUri}`;
+    } else {
+      window.location.href = redirectUri;
+    }
+  };
+
+  const storeTokensAndRedirect = async (data: { access_token: string; refresh_token: string; expires_in: number }) => {
+    localStorage.setItem('access_token', data.access_token);
+    localStorage.setItem('refresh_token', data.refresh_token);
+    setCookie('access_token', data.access_token, data.expires_in || 900);
+
+    try {
+      await fetchUserProfile(data.access_token);
+    } catch (profileErr) {
+      console.warn('Failed to fetch user profile after login:', profileErr);
+    }
+
+    doRedirect();
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,13 +52,8 @@ export default function Login() {
     try {
       const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
       });
 
       const body = await response.json();
@@ -39,24 +61,54 @@ export default function Login() {
         throw new Error(body.message || 'Login failed. Please check your credentials.');
       }
 
-      const { access_token, refresh_token, expires_in } = body.data;
-
-      // Store tokens
-      localStorage.setItem('access_token', access_token);
-      localStorage.setItem('refresh_token', refresh_token);
-      
-      // Set access token cookie so GOSSO can see it on page redirect
-      setCookie('access_token', access_token, expires_in || 900);
-
-      // Redirect back to OIDC authorization page (or destination)
-      if (redirectUri.startsWith('/')) {
-        window.location.href = `${window.location.origin}${redirectUri}`;
-      } else {
-        window.location.href = redirectUri;
+      // Check if MFA is required
+      if (body.data?.requires_mfa) {
+        setMfaRequired(true);
+        setMfaToken(body.data.mfa_token);
+        setMfaCode('');
+        setLoading(false);
+        return;
       }
+
+      await storeTokensAndRedirect(body.data);
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Network error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMfaVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mfaCode.trim()) {
+      setError('Please enter the verification code.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/v1/auth/mfa/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mfa_token: mfaToken,
+          code: mfaCode.trim(),
+          type: 'totp',
+        }),
+      });
+
+      const body = await response.json();
+      if (!response.ok) {
+        throw new Error(body.message || 'Verification failed. Please try again.');
+      }
+
+      await storeTokensAndRedirect(body.data);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Verification failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -76,36 +128,73 @@ export default function Login() {
           </div>
         )}
 
-        <form onSubmit={handleLogin}>
-          <div className="form-group">
-            <label className="form-label">Username / Email</label>
-            <input 
-              type="text" 
-              className="input-field" 
-              placeholder="Enter your username" 
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              disabled={loading}
-              autoFocus
-            />
-          </div>
+        {!mfaRequired ? (
+          <form onSubmit={handleLogin}>
+            <div className="form-group">
+              <label className="form-label">Username / Email</label>
+              <input
+                type="text"
+                className="input-field"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                disabled={loading}
+                autoFocus
+              />
+            </div>
 
-          <div className="form-group" style={{ marginBottom: '28px' }}>
-            <label className="form-label">Password</label>
-            <input 
-              type="password" 
-              className="input-field" 
-              placeholder="Enter your password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-            />
-          </div>
+            <div className="form-group" style={{ marginBottom: '28px' }}>
+              <label className="form-label">Password</label>
+              <input
+                type="password"
+                className="input-field"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+              />
+            </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleMfaVerify}>
+            <div style={{ background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.25)', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', color: 'var(--color-primary)' }}>
+              Two-factor authentication required. Enter the code from your authenticator app.
+            </div>
+
+            <div className="form-group" style={{ marginBottom: '28px' }}>
+              <label className="form-label">Verification Code</label>
+              <input
+                type="text"
+                maxLength={8}
+                className="input-field"
+                placeholder="Enter 6-digit code"
+                value={mfaCode}
+                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
+                disabled={loading}
+                autoFocus
+                style={{ textAlign: 'center', fontSize: '20px', letterSpacing: '0.15em', fontWeight: 'bold' }}
+              />
+            </div>
+
+            <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+              {loading ? 'Verifying...' : 'Verify'}
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ width: '100%', marginTop: '10px' }}
+              onClick={() => { setMfaRequired(false); setError(null); setMfaCode(''); }}
+              disabled={loading}
+            >
+              Back to Login
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Plus as PlusIcon, Edit2 as EditIcon, Trash2 as TrashIcon, Key as KeyIcon, User as UserIcon, Shield as ShieldIcon, X as XIcon, Copy as CopyIcon, Check as CheckIcon, Info as InfoIcon, Lock as LockIcon, Unlock as UnlockIcon, FileText as AuditIcon, CheckSquare as ConsentIcon, RefreshCw } from 'lucide-react';
-import { isLoggedIn, isAdmin, getAccessToken, redirectToAuthorize, getUserProfile } from '../auth';
+import { isLoggedIn, isAdmin, redirectToAuthorize, getUserProfile, apiFetch } from '../auth';
 
 interface OAuth2Client {
   client_id: string;
@@ -104,14 +104,6 @@ export default function Admin() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
 
-  // Self Password Dialog State
-  const [showSelfPasswordModal, setShowSelfPasswordModal] = useState(false);
-  const [currentPasswordInput, setCurrentPasswordInput] = useState('');
-  const [newSelfPasswordInput, setNewSelfPasswordInput] = useState('');
-  const [selfPasswordError, setSelfPasswordError] = useState<string | null>(null);
-  const [selfPasswordSuccess, setSelfPasswordSuccess] = useState<string | null>(null);
-  
-  const token = getAccessToken();
   const currentAdmin = getUserProfile();
 
   useEffect(() => {
@@ -154,7 +146,7 @@ export default function Admin() {
 
   const fetchSystemStatus = async () => {
     try {
-      const readRes = await fetch('/readiness');
+      const readRes = await apiFetch('/readiness');
       const readBody = await readRes.json();
       setSystemHealth(readBody);
     } catch (e) {
@@ -163,7 +155,7 @@ export default function Admin() {
     }
 
     try {
-      const oidcRes = await fetch('/.well-known/openid-configuration');
+      const oidcRes = await apiFetch('/.well-known/openid-configuration');
       const oidcBody = await oidcRes.json();
       setOidcConfig(oidcBody);
     } catch (e) {
@@ -172,18 +164,14 @@ export default function Admin() {
   };
 
   const fetchClients = async () => {
-    const response = await fetch('/api/v1/oauth2/clients', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const response = await apiFetch('/api/v1/oauth2/clients');
     if (!response.ok) throw new Error('Failed to load OAuth2 clients');
     const body = await response.json();
     setClients(body.data || []);
   };
 
   const fetchAccounts = async () => {
-    const response = await fetch('/api/v1/admin/accounts?page_size=100', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const response = await apiFetch('/api/v1/admin/accounts?page_size=100');
     if (!response.ok) throw new Error('Failed to load accounts');
     const body = await response.json();
     const fetchedAccounts: Account[] = body.data?.items || [];
@@ -196,9 +184,7 @@ export default function Admin() {
         let lockoutAttempts = 0;
 
         try {
-          const rolesRes = await fetch(`/api/v1/admin/accounts/${acc.id}/roles`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
+          const rolesRes = await apiFetch(`/api/v1/admin/accounts/${acc.id}/roles`);
           if (rolesRes.ok) {
             const rolesBody = await rolesRes.json();
             roles = rolesBody.data || [];
@@ -208,9 +194,7 @@ export default function Admin() {
         }
 
         try {
-          const lockoutRes = await fetch(`/api/v1/admin/accounts/${acc.id}/lockout`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
+          const lockoutRes = await apiFetch(`/api/v1/admin/accounts/${acc.id}/lockout`);
           if (lockoutRes.ok) {
             const lockoutBody = await lockoutRes.json();
             lockedOut = lockoutBody.data?.locked_out || false;
@@ -292,11 +276,10 @@ export default function Admin() {
     try {
       if (editingClient) {
         // Edit Client
-        const response = await fetch(`/api/v1/oauth2/clients/${editingClient.client_id}`, {
+        const response = await apiFetch(`/api/v1/oauth2/clients/${editingClient.client_id}`, {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify(payload)
         });
@@ -308,11 +291,10 @@ export default function Admin() {
         fetchClients();
       } else {
         // Register New Client
-        const response = await fetch('/api/v1/oauth2/clients', {
+        const response = await apiFetch('/api/v1/oauth2/clients', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify(payload)
         });
@@ -340,9 +322,8 @@ export default function Admin() {
   const handleDeleteClient = async (clientId: string) => {
     if (!confirm('Are you sure you want to delete this OAuth2 client? This action is permanent.')) return;
     try {
-      const response = await fetch(`/api/v1/oauth2/clients/${clientId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await apiFetch(`/api/v1/oauth2/clients/${clientId}`, {
+        method: 'DELETE'
       });
       if (!response.ok) throw new Error('Failed to delete client');
       fetchClients();
@@ -383,11 +364,10 @@ export default function Admin() {
     }
 
     try {
-      const response = await fetch('/api/v1/admin/accounts', {
+      const response = await apiFetch('/api/v1/admin/accounts', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           username: createUserForm.username.trim(),
@@ -426,9 +406,8 @@ export default function Admin() {
     if (!confirm(`Are you sure you want to ${action} user "${account.username}"?`)) return;
     
     try {
-      const response = await fetch(`/api/v1/admin/accounts/${account.id}/${action}`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await apiFetch(`/api/v1/admin/accounts/${account.id}/${action}`, {
+        method: 'POST'
       });
       
       if (!response.ok) {
@@ -449,9 +428,8 @@ export default function Admin() {
     }
     if (!confirm('Are you sure you want to permanently delete this user account?')) return;
     try {
-      const response = await fetch(`/api/v1/admin/accounts/${userId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await apiFetch(`/api/v1/admin/accounts/${userId}`, {
+        method: 'DELETE'
       });
       if (!response.ok) {
         const body = await response.json();
@@ -460,61 +438,6 @@ export default function Admin() {
       fetchAccounts();
     } catch (err: any) {
       alert(err.message || 'Error deleting user');
-    }
-  };
-
-  // Self Password Management Handlers
-  const handleOpenSelfPasswordModal = () => {
-    setCurrentPasswordInput('');
-    setNewSelfPasswordInput('');
-    setSelfPasswordError(null);
-    setSelfPasswordSuccess(null);
-    setShowSelfPasswordModal(true);
-  };
-
-  const handleSelfPasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentPasswordInput || !newSelfPasswordInput) return;
-
-    if (newSelfPasswordInput.length < 12) {
-      setSelfPasswordError('New password must be at least 12 characters long.');
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/v1/auth/password/change`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          current_password: currentPasswordInput,
-          new_password: newSelfPasswordInput
-        })
-      });
-
-      const body = await response.json();
-      if (!response.ok) {
-        throw new Error(body.message || 'Failed to change password');
-      }
-
-      setSelfPasswordSuccess('Password updated successfully. You will be redirected to log in again shortly.');
-      setSelfPasswordError(null);
-      setCurrentPasswordInput('');
-      setNewSelfPasswordInput('');
-      
-      setTimeout(() => {
-        setShowSelfPasswordModal(false);
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user_profile');
-        document.cookie = 'access_token=; path=/; max-age=-1; SameSite=Lax';
-        window.location.href = '/';
-      }, 2500);
-    } catch (err: any) {
-      setSelfPasswordError(err.message || 'Error updating password');
-      setSelfPasswordSuccess(null);
     }
   };
 
@@ -537,11 +460,10 @@ export default function Admin() {
     }
 
     try {
-      const response = await fetch(`/api/v1/admin/accounts/${selectedAccount.id}/password`, {
+      const response = await apiFetch(`/api/v1/admin/accounts/${selectedAccount.id}/password`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ new_password: newPassword })
       });
@@ -574,9 +496,8 @@ export default function Admin() {
     }
 
     try {
-      const response = await fetch(`/api/v1/admin/accounts/${account.id}/mfa/reset`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await apiFetch(`/api/v1/admin/accounts/${account.id}/mfa/reset`, {
+        method: 'POST'
       });
       const body = await response.json();
       if (!response.ok) {
@@ -601,11 +522,10 @@ export default function Admin() {
     if (!selectedAccount || !newRoleInput) return;
     
     try {
-      const response = await fetch(`/api/v1/admin/accounts/${selectedAccount.id}/roles`, {
+      const response = await apiFetch(`/api/v1/admin/accounts/${selectedAccount.id}/roles`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ role_id: newRoleInput })
       });
@@ -616,9 +536,7 @@ export default function Admin() {
       }
       
       // Reload roles for selected user
-      const rolesRes = await fetch(`/api/v1/admin/accounts/${selectedAccount.id}/roles`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const rolesRes = await apiFetch(`/api/v1/admin/accounts/${selectedAccount.id}/roles`);
       if (rolesRes.ok) {
         const rolesBody = await rolesRes.json();
         const updatedRoles = rolesBody.data || [];
@@ -642,9 +560,8 @@ export default function Admin() {
     if (!confirm('Are you sure you want to remove this role from the user?')) return;
     
     try {
-      const response = await fetch(`/api/v1/admin/accounts/${selectedAccount.id}/roles/${roleId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await apiFetch(`/api/v1/admin/accounts/${selectedAccount.id}/roles/${roleId}`, {
+        method: 'DELETE'
       });
       
       if (!response.ok) {
@@ -653,9 +570,7 @@ export default function Admin() {
       }
       
       // Reload roles
-      const rolesRes = await fetch(`/api/v1/admin/accounts/${selectedAccount.id}/roles`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const rolesRes = await apiFetch(`/api/v1/admin/accounts/${selectedAccount.id}/roles`);
       if (rolesRes.ok) {
         const rolesBody = await rolesRes.json();
         const updatedRoles = rolesBody.data || [];
@@ -679,9 +594,7 @@ export default function Admin() {
       if (filterAccountID) {
         url += `&account_id=${encodeURIComponent(filterAccountID)}`;
       }
-      const response = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await apiFetch(url);
       if (!response.ok) throw new Error('Failed to load audit logs');
       const body = await response.json();
       setAuditLogs(body.data?.items || []);
@@ -704,9 +617,8 @@ export default function Admin() {
     if (!confirm('Are you sure you want to clear the lockout for this account?')) return;
     
     try {
-      const response = await fetch(`/api/v1/admin/accounts/${accountID}/lockout/clear`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await apiFetch(`/api/v1/admin/accounts/${accountID}/lockout/clear`, {
+        method: 'POST'
       });
       if (!response.ok) {
         const body = await response.json();
@@ -728,9 +640,7 @@ export default function Admin() {
     setConsentsLoading(true);
     
     try {
-      const response = await fetch(`/api/v1/admin/accounts/${account.id}/consents`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await apiFetch(`/api/v1/admin/accounts/${account.id}/consents`);
       if (response.ok) {
         const body = await response.json();
         setConsentsList(body.data || []);
@@ -755,9 +665,8 @@ export default function Admin() {
     if (!confirm('Are you sure you want to revoke authorization for this application?')) return;
     
     try {
-      const response = await fetch(`/api/v1/admin/accounts/${selectedAccount.id}/consents/${clientID}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await apiFetch(`/api/v1/admin/accounts/${selectedAccount.id}/consents/${clientID}`, {
+        method: 'DELETE'
       });
       if (!response.ok) {
         const body = await response.json();
@@ -765,9 +674,7 @@ export default function Admin() {
       }
       
       alert('Consent successfully revoked.');
-      const consentsRes = await fetch(`/api/v1/admin/accounts/${selectedAccount.id}/consents`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const consentsRes = await apiFetch(`/api/v1/admin/accounts/${selectedAccount.id}/consents`);
       if (consentsRes.ok) {
         const consentsBody = await consentsRes.json();
         setConsentsList(consentsBody.data || []);
@@ -821,10 +728,6 @@ export default function Admin() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn btn-secondary" onClick={handleOpenSelfPasswordModal}>
-            <KeyIcon style={{ width: '16px', height: '16px' }} />
-            Change My Password
-          </button>
           {activeTab === 'clients' && (
             <button className="btn btn-primary" onClick={() => handleOpenClientModal(null)}>
               <PlusIcon style={{ width: '16px', height: '16px' }} />
@@ -1810,70 +1713,6 @@ export default function Admin() {
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowPasswordModal(false)} disabled={!!passwordSuccess}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={!newPassword || !!passwordSuccess}>Update Password</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Self Change Password Modal */}
-      {showSelfPasswordModal && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '400px' }}>
-            <div className="modal-header">
-              <h3 className="modal-title">Change My Password</h3>
-              <button className="modal-close-btn" onClick={() => setShowSelfPasswordModal(false)}>
-                <XIcon style={{ width: '18px', height: '18px' }} />
-              </button>
-            </div>
-            <form onSubmit={handleSelfPasswordSubmit}>
-              <div className="modal-body">
-                <p style={{ fontSize: '14px', color: 'var(--color-text-dark)', marginBottom: '16px' }}>
-                  Update your administrator account password. For security, you must provide your current password.
-                </p>
-
-                {selfPasswordError && (
-                  <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--danger-color)', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '13px' }}>
-                    {selfPasswordError}
-                  </div>
-                )}
-
-                {selfPasswordSuccess && (
-                  <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', color: 'var(--success-color)', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '13px' }}>
-                    {selfPasswordSuccess}
-                  </div>
-                )}
-
-                <div className="form-group">
-                  <label className="form-label">Current Password</label>
-                  <input
-                    type="password"
-                    className="input-field"
-                    placeholder="Enter current password"
-                    value={currentPasswordInput}
-                    onChange={e => setCurrentPasswordInput(e.target.value)}
-                    required
-                    disabled={!!selfPasswordSuccess}
-                    autoFocus
-                  />
-                </div>
-
-                <div className="form-group" style={{ marginBottom: '0px' }}>
-                  <label className="form-label">New Password (min 12 chars)</label>
-                  <input
-                    type="password"
-                    className="input-field"
-                    placeholder="Enter new password"
-                    value={newSelfPasswordInput}
-                    onChange={e => setNewSelfPasswordInput(e.target.value)}
-                    required
-                    disabled={!!selfPasswordSuccess}
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowSelfPasswordModal(false)} disabled={!!selfPasswordSuccess}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={!currentPasswordInput || !newSelfPasswordInput || !!selfPasswordSuccess}>Update Password</button>
               </div>
             </form>
           </div>

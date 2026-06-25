@@ -108,11 +108,15 @@ export async function exchangeCodeForToken(code: string, state: string): Promise
     throw new Error(`Token exchange failed: ${errText}`);
   }
 
+  // The OAuth2 /token endpoint returns tokens at the top level (RFC 6749),
+  // not wrapped in a "data" field like the /api/v1/auth/* endpoints.
   const data: TokenResponse = await response.json();
-  
+
   localStorage.setItem('access_token', data.access_token);
-  localStorage.setItem('refresh_token', data.refresh_token);
-  
+  if (data.refresh_token) {
+    localStorage.setItem('refresh_token', data.refresh_token);
+  }
+
   setCookie('access_token', data.access_token, data.expires_in);
 
   localStorage.removeItem('pkce_verifier');
@@ -180,3 +184,85 @@ export function logout() {
   deleteCookie('access_token');
   window.location.href = '/';
 }
+
+let refreshPromise: Promise<string> | null = null;
+
+export async function refreshAccessToken(): Promise<string> {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const refreshToken = localStorage.getItem('refresh_token');
+      if (!refreshToken) {
+        throw new Error('No refresh token found');
+      }
+
+      const response = await fetch(`${SSO_ISSUER}/api/v1/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ refresh_token: refreshToken })
+      });
+
+      const body = await response.json();
+      if (!response.ok) {
+        // Do NOT call logout() here — let the caller decide how to handle
+        // refresh failures. Calling logout() causes a page redirect that
+        // interrupts the calling code's error handling (e.g. fetchSessions),
+        // leading to a 401 → refresh fail → logout cascade with no error UI.
+        throw new Error(body.message || 'Token refresh failed');
+      }
+
+      const data = body.data;
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('refresh_token', data.refresh_token);
+      setCookie('access_token', data.access_token, data.expires_in);
+
+      return data.access_token;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+export async function apiFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  let token = getAccessToken();
+  
+  const headers = new Headers(options.headers || {});
+  if (token && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+  
+  const config = { ...options, headers };
+  let response = await fetch(url, config);
+  
+  if (response.status === 401 && localStorage.getItem('refresh_token')) {
+    try {
+      await refreshAccessToken();
+      // Re-read the fresh token from localStorage (refreshAccessToken updates it)
+      const freshToken = getAccessToken();
+      if (freshToken) {
+        headers.set('Authorization', `Bearer ${freshToken}`);
+      }
+      response = await fetch(url, { ...options, headers });
+    } catch (err) {
+      // Refresh failed (token expired, session revoked, etc.) — redirect to login.
+      // Do NOT call logout() here as it triggers window.location.href = '/' which
+      // can race with the caller's error handling.
+      console.error('Failed to auto-refresh token on 401', err);
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_profile');
+      window.location.href = '/login';
+    }
+  }
+  
+  return response;
+}
+
+
