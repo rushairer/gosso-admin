@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus as PlusIcon, Edit2 as EditIcon, Trash2 as TrashIcon, Key as KeyIcon, User as UserIcon, Shield as ShieldIcon, X as XIcon, Copy as CopyIcon, Check as CheckIcon, Info as InfoIcon, Lock as LockIcon, Unlock as UnlockIcon, FileText as AuditIcon, CheckSquare as ConsentIcon } from 'lucide-react';
+import { Plus as PlusIcon, Edit2 as EditIcon, Trash2 as TrashIcon, Key as KeyIcon, User as UserIcon, Shield as ShieldIcon, X as XIcon, Copy as CopyIcon, Check as CheckIcon, Info as InfoIcon, Lock as LockIcon, Unlock as UnlockIcon, FileText as AuditIcon, CheckSquare as ConsentIcon, RefreshCw } from 'lucide-react';
 import { isLoggedIn, isAdmin, getAccessToken, redirectToAuthorize, getUserProfile } from '../auth';
 
 interface OAuth2Client {
@@ -32,7 +32,7 @@ interface Role {
 
 export default function Admin() {
 
-  const [activeTab, setActiveTab] = useState<'clients' | 'users' | 'audit-logs'>('clients');
+  const [activeTab, setActiveTab] = useState<'clients' | 'users' | 'audit-logs' | 'system'>('clients');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [accessDenied, setAccessDenied] = useState(false);
@@ -55,6 +55,10 @@ export default function Admin() {
   const [showConsentModal, setShowConsentModal] = useState(false);
   const [consentsList, setConsentsList] = useState<any[]>([]);
   const [consentsLoading, setConsentsLoading] = useState(false);
+
+  // System Health & OIDC discovery states
+  const [systemHealth, setSystemHealth] = useState<any>(null);
+  const [oidcConfig, setOidcConfig] = useState<any>(null);
   
   
   // Modal / Form State
@@ -135,6 +139,8 @@ export default function Admin() {
         await fetchClients();
       } else if (activeTab === 'audit-logs') {
         await fetchAuditLogs(1);
+      } else if (activeTab === 'system') {
+        await fetchSystemStatus();
       } else {
         await fetchAccounts();
       }
@@ -143,6 +149,25 @@ export default function Admin() {
       setError(err.message || 'Error loading dashboard data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSystemStatus = async () => {
+    try {
+      const readRes = await fetch('/readiness');
+      const readBody = await readRes.json();
+      setSystemHealth(readBody);
+    } catch (e) {
+      console.error('Error fetching readiness health status', e);
+      setSystemHealth({ status: 'unavailable', ready: false, checks: { database: 'error', redis: 'error' } });
+    }
+
+    try {
+      const oidcRes = await fetch('/.well-known/openid-configuration');
+      const oidcBody = await oidcRes.json();
+      setOidcConfig(oidcBody);
+    } catch (e) {
+      console.error('Error fetching OIDC configuration metadata', e);
     }
   };
 
@@ -538,6 +563,32 @@ export default function Admin() {
     }
   };
 
+  const handleResetUserMFA = async (account: Account) => {
+    if (account.id === currentAdmin?.sub) {
+      alert('You cannot reset MFA on your own admin account. Please use Security Settings page instead.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to reset MFA for user "${account.username}"? This will disable TOTP, Backup Codes, and WebAuthn Passkeys for their account.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/v1/admin/accounts/${account.id}/mfa/reset`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const body = await response.json();
+      if (!response.ok) {
+        throw new Error(body.message || 'Failed to reset MFA');
+      }
+      alert(`MFA successfully reset for user "${account.username}".`);
+      loadDashboardData();
+    } catch (err: any) {
+      alert(err.message || 'Error resetting MFA');
+    }
+  };
+
   // Role Management Handlers
   const handleOpenRoleModal = (account: Account) => {
     setSelectedAccount(account);
@@ -803,6 +854,10 @@ export default function Admin() {
           <AuditIcon style={{ width: '16px', height: '16px', marginRight: '8px', display: 'inline', verticalAlign: 'middle' }} />
           Audit Logs
         </button>
+        <button className={`tab-btn ${activeTab === 'system' ? 'active' : ''}`} onClick={() => setActiveTab('system')}>
+          <ShieldIcon style={{ width: '16px', height: '16px', marginRight: '8px', display: 'inline', verticalAlign: 'middle' }} />
+          System Status
+        </button>
       </div>
 
       {/* Loading & Error States */}
@@ -999,7 +1054,7 @@ export default function Admin() {
                               <KeyIcon style={{ width: '13px', height: '13px' }} />
                               Password
                             </button>
-                            <button 
+                             <button 
                               className={`btn btn-secondary btn-sm`} 
                               style={{ opacity: acc.id === currentAdmin?.sub ? 0.4 : 1 }}
                               onClick={() => handleToggleUserStatus(acc)}
@@ -1011,6 +1066,16 @@ export default function Admin() {
                               ) : (
                                 <UnlockIcon style={{ width: '13px', height: '13px', stroke: 'var(--success-color)' }} />
                               )}
+                            </button>
+                            <button 
+                              className="btn btn-secondary btn-sm" 
+                              style={{ opacity: acc.id === currentAdmin?.sub ? 0.4 : 1 }}
+                              onClick={() => handleResetUserMFA(acc)} 
+                              title="Reset User MFA"
+                              disabled={acc.id === currentAdmin?.sub}
+                            >
+                              <ShieldIcon style={{ width: '13px', height: '13px', stroke: 'var(--warning-color)' }} />
+                              Reset MFA
                             </button>
                             <button 
                               className="btn btn-danger btn-sm" 
@@ -1191,6 +1256,136 @@ export default function Admin() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Tab Content: System Status */}
+          {activeTab === 'system' && (
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              
+              {/* Health checks card */}
+              <div className="glass-card">
+                <h3 style={{ fontSize: '18px', marginBottom: '16px', color: 'var(--color-text-main)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '10px' }}>
+                  Infrastructure Health Status
+                </h3>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                  
+                  {/* Database Health */}
+                  <div style={{ 
+                    background: 'rgba(255,255,255,0.01)', 
+                    padding: '16px', 
+                    borderRadius: '10px', 
+                    border: '1px solid rgba(255,255,255,0.04)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '14px'
+                  }}>
+                    <div style={{ 
+                      background: systemHealth?.checks?.database === 'ok' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)', 
+                      padding: '10px', 
+                      borderRadius: '50%',
+                      color: systemHealth?.checks?.database === 'ok' ? 'var(--success-color)' : 'var(--danger-color)'
+                    }}>
+                      <ShieldIcon style={{ width: '22px', height: '22px' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>Database Connection</div>
+                      <div style={{ fontSize: '16px', fontWeight: 'bold', marginTop: '2px', color: systemHealth?.checks?.database === 'ok' ? 'var(--success-color)' : 'var(--danger-color)' }}>
+                        {systemHealth?.checks?.database === 'ok' ? 'HEALTHY' : 'UNAVAILABLE'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Redis Health */}
+                  <div style={{ 
+                    background: 'rgba(255,255,255,0.01)', 
+                    padding: '16px', 
+                    borderRadius: '10px', 
+                    border: '1px solid rgba(255,255,255,0.04)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '14px'
+                  }}>
+                    <div style={{ 
+                      background: systemHealth?.checks?.redis === 'ok' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)', 
+                      padding: '10px', 
+                      borderRadius: '50%',
+                      color: systemHealth?.checks?.redis === 'ok' ? 'var(--success-color)' : 'var(--danger-color)'
+                    }}>
+                      <RefreshCw style={{ width: '22px', height: '22px' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>Redis Cache & Lock Manager</div>
+                      <div style={{ fontSize: '16px', fontWeight: 'bold', marginTop: '2px', color: systemHealth?.checks?.redis === 'ok' ? 'var(--success-color)' : 'var(--danger-color)' }}>
+                        {systemHealth?.checks?.redis === 'ok' ? 'HEALTHY' : 'UNAVAILABLE'}
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* OIDC configuration info card */}
+              {oidcConfig && (
+                <div className="glass-card">
+                  <h3 style={{ fontSize: '18px', marginBottom: '16px', color: 'var(--color-text-main)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '10px' }}>
+                    OpenID Connect Identity Provider Profile
+                  </h3>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    
+                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '8px' }}>
+                      <div style={{ width: '180px', color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: '600' }}>Issuer Identifier</div>
+                      <div style={{ flex: 1, fontFamily: 'monospace', fontSize: '13.5px', wordBreak: 'break-all' }}>{oidcConfig.issuer}</div>
+                    </div>
+
+                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '8px' }}>
+                      <div style={{ width: '180px', color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: '600' }}>Authorization Endpoint</div>
+                      <div style={{ flex: 1, fontFamily: 'monospace', fontSize: '13.5px', wordBreak: 'break-all' }}>{oidcConfig.authorization_endpoint}</div>
+                    </div>
+
+                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '8px' }}>
+                      <div style={{ width: '180px', color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: '600' }}>Token Endpoint</div>
+                      <div style={{ flex: 1, fontFamily: 'monospace', fontSize: '13.5px', wordBreak: 'break-all' }}>{oidcConfig.token_endpoint}</div>
+                    </div>
+
+                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '8px' }}>
+                      <div style={{ width: '180px', color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: '600' }}>Userinfo Endpoint</div>
+                      <div style={{ flex: 1, fontFamily: 'monospace', fontSize: '13.5px', wordBreak: 'break-all' }}>{oidcConfig.userinfo_endpoint}</div>
+                    </div>
+
+                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '8px' }}>
+                      <div style={{ width: '180px', color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: '600' }}>JWKS URI</div>
+                      <div style={{ flex: 1, fontFamily: 'monospace', fontSize: '13.5px', wordBreak: 'break-all' }}>
+                        <a href={oidcConfig.jwks_uri} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>
+                          {oidcConfig.jwks_uri}
+                        </a>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '8px' }}>
+                      <div style={{ width: '180px', color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: '600' }}>Supported Scopes</div>
+                      <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                        {oidcConfig.scopes_supported?.map((scope: string) => (
+                          <span key={scope} className="badge badge-secondary" style={{ margin: 0 }}>{scope}</span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex' }}>
+                      <div style={{ width: '180px', color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: '600' }}>Grant Types Supported</div>
+                      <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                        {oidcConfig.grant_types_supported?.map((gt: string) => (
+                          <span key={gt} className="badge badge-secondary" style={{ margin: 0 }}>{gt}</span>
+                        ))}
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              )}
+
             </div>
           )}
         </div>

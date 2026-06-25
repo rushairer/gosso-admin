@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Key, Laptop, Trash2, QrCode, Clipboard, AlertTriangle, CheckCircle, RefreshCw, Lock, Unlock, Check, Copy, User, Calendar, MapPin, Eye, EyeOff } from 'lucide-react';
+import { Shield, Key, Laptop, Trash2, QrCode, Clipboard, AlertTriangle, CheckCircle, RefreshCw, Lock, Unlock, Check, Copy, User, Calendar, MapPin, Eye, EyeOff, Plus } from 'lucide-react';
 import { getAccessToken, getUserProfile, logout } from '../auth';
 
 interface Session {
