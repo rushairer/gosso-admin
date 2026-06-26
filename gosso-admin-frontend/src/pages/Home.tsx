@@ -29,47 +29,33 @@ export default function Home() {
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '40px auto 0 auto', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
-      {/* Hero Welcome Card */}
-      <div className="glass-card" style={{ padding: '48px 40px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        {/* Abstract Glowing Accent */}
-        <div style={{
-          position: 'absolute',
-          top: '-10%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '300px',
-          height: '100px',
-          background: 'radial-gradient(ellipse at center, rgba(99, 102, 241, 0.25) 0%, transparent 70%)',
-          filter: 'blur(20px)',
-          zIndex: 0,
-          pointerEvents: 'none'
-        }} />
-
-        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+      <div className="glass-card" style={{ padding: '32px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{
-            background: 'rgba(99, 102, 241, 0.12)',
-            padding: '16px',
-            borderRadius: '50%',
+            background: 'rgba(59, 130, 246, 0.12)',
+            padding: '12px',
+            borderRadius: '8px',
             display: 'inline-flex',
-            border: '1px solid rgba(99, 102, 241, 0.2)'
+            width: 'fit-content',
+            border: '1px solid rgba(59, 130, 246, 0.22)'
           }}>
-            <ShieldCheck style={{ width: '48px', height: '48px', stroke: 'var(--color-primary)' }} />
+            <ShieldCheck style={{ width: '28px', height: '28px', stroke: 'var(--color-primary)' }} />
           </div>
 
-          <h1 style={{ fontSize: '36px', lineHeight: '1.2', background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '8px' }}>
+          <h2 style={{ fontSize: '26px', lineHeight: '1.25', color: 'var(--color-text-main)' }}>
             GOSSO Admin Console
-          </h1>
+          </h2>
           
-          <p style={{ fontSize: '16px', color: 'var(--color-text-muted)', maxWidth: '550px', margin: '0 auto', lineHeight: '1.6' }}>
+          <p style={{ fontSize: '15px', color: 'var(--color-text-muted)', maxWidth: '680px', lineHeight: '1.6' }}>
             Welcome to the self-hosted OpenID Connect / OAuth 2.0 identity provider administration interface. Manage security credentials, clients, user scopes, and active sessions.
           </p>
 
-          <div style={{ marginTop: '16px' }}>
+          <div>
             {logged ? (
               userAdmin ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
                   <p style={{ color: 'var(--success-color)', fontWeight: '600', fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--success-color)' }} />
                     Logged in as {user?.preferred_username || user?.name || 'Administrator'}
@@ -80,7 +66,7 @@ export default function Home() {
                   </button>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
                   <p style={{ color: 'var(--warning-color)', fontWeight: '600', fontSize: '15px' }}>
                     Access Denied: Account lacks administrator permissions.
                   </p>
@@ -99,8 +85,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Feature Cards Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '16px' }}>
         
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '24px' }}>
           <div style={{ display: 'inline-flex', color: 'var(--color-primary)' }}>

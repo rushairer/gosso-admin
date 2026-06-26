@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { exchangeCodeForToken, fetchUserProfile } from '../auth';
+import { authSession, exchangeCodeForToken, fetchUserProfile } from '../auth';
 
 export default function Callback() {
   const [searchParams] = useSearchParams();
@@ -22,8 +22,8 @@ export default function Callback() {
         await fetchUserProfile(tokenSet.access_token);
         
         // Redirect back to the post-login destination or default to admin panel
-        const postLoginRedirect = localStorage.getItem('post_login_redirect') || '/admin';
-        localStorage.removeItem('post_login_redirect');
+        const postLoginRedirect = authSession.getPostLoginRedirect('/admin');
+        authSession.clearPostLoginRedirect();
         navigate(postLoginRedirect);
       } catch (err: any) {
         console.error(err);

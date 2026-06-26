@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Key } from 'lucide-react';
-import { setCookie, fetchUserProfile } from '../auth';
+import { authSession, fetchUserProfile } from '../auth';
+import { Feedback, FormField } from '../components/ui';
 
 function bufferToBase64URL(buffer: ArrayBuffer): string {
   if (!buffer) return '';
@@ -113,9 +114,7 @@ export default function Login() {
   };
 
   const storeTokensAndRedirect = async (data: { access_token: string; refresh_token: string; expires_in: number }) => {
-    localStorage.setItem('access_token', data.access_token);
-    localStorage.setItem('refresh_token', data.refresh_token);
-    setCookie('access_token', data.access_token, data.expires_in || 900);
+    authSession.saveTokenSet(data);
 
     try {
       await fetchUserProfile(data.access_token);
@@ -205,20 +204,17 @@ export default function Login() {
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
       <div className="glass-card" style={{ maxWidth: '440px', width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <h1 style={{ background: 'var(--accent-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '32px', marginBottom: '8px' }}>GOSSO</h1>
+          <h1 style={{ color: 'var(--color-text-main)', fontSize: '32px', marginBottom: '8px' }}>GOSSO</h1>
           <p style={{ color: 'var(--color-text-muted)', fontSize: '14.5px' }}>Identity & Access Provider Console</p>
         </div>
 
         {error && (
-          <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--danger-color)', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px' }}>
-            {error}
-          </div>
+          <div style={{ marginBottom: '20px' }}><Feedback type="error">{error}</Feedback></div>
         )}
 
         {!mfaRequired ? (
           <form onSubmit={handleLogin}>
-            <div className="form-group">
-              <label className="form-label">Username / Email</label>
+            <FormField label="Username / Email">
               <input
                 type="text"
                 className="input-field"
@@ -228,10 +224,9 @@ export default function Login() {
                 disabled={loading}
                 autoFocus
               />
-            </div>
+            </FormField>
 
-            <div className="form-group" style={{ marginBottom: '28px' }}>
-              <label className="form-label">Password</label>
+            <FormField label="Password">
               <input
                 type="password"
                 className="input-field"
@@ -240,7 +235,7 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
               />
-            </div>
+            </FormField>
 
             <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
               {loading ? 'Signing in...' : 'Sign In'}
@@ -265,12 +260,11 @@ export default function Login() {
           </form>
         ) : (
           <form onSubmit={handleMfaVerify}>
-            <div style={{ background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.25)', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', color: 'var(--color-primary)' }}>
+            <div className="notice-card" style={{ marginBottom: '20px', fontSize: '14px', color: 'var(--color-primary)' }}>
               Two-factor authentication required. Enter the code from your authenticator app.
             </div>
 
-            <div className="form-group" style={{ marginBottom: '28px' }}>
-              <label className="form-label">Verification Code</label>
+            <FormField label="Verification Code">
               <input
                 type="text"
                 maxLength={8}
@@ -282,7 +276,7 @@ export default function Login() {
                 autoFocus
                 style={{ textAlign: 'center', fontSize: '20px', letterSpacing: '0.15em', fontWeight: 'bold' }}
               />
-            </div>
+            </FormField>
 
             <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
               {loading ? 'Verifying...' : 'Verify'}

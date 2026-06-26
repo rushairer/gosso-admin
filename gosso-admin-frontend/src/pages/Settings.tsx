@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Key, Laptop, Trash2, QrCode, Clipboard, AlertTriangle, CheckCircle, RefreshCw, Lock, Unlock, Check, Copy, User, Calendar, MapPin, Eye, EyeOff, Plus } from 'lucide-react';
+import { Shield, Key, Laptop, Trash2, QrCode, Clipboard, AlertTriangle, RefreshCw, Lock, Unlock, Check, Copy, User, Calendar, MapPin, Eye, EyeOff, Plus } from 'lucide-react';
 import { getUserProfile, logout, apiFetch, isLoggedIn, redirectToAuthorize } from '../auth';
+import { ButtonGroup, DataTable, DefinitionList, DefinitionRow, EmptyState, Feedback, FormField, ListRow, ListStack, Panel, PanelBody, PanelHeader, PlainSection, StatusBadge, Tag } from '../components/ui';
 
 interface Session {
   id: string;
@@ -438,14 +439,6 @@ export default function Settings() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
-      {/* Title */}
-      <div>
-        <h2 style={{ fontSize: '28px', color: 'var(--color-text-main)' }}>Security & Profile Settings</h2>
-        <p style={{ color: 'var(--color-text-muted)', fontSize: '14.5px', marginTop: '4px' }}>
-          Manage your identity credentials, passwords, multi-factor authentication devices, and active login sessions.
-        </p>
-      </div>
-
       {/* Tabs */}
       <div className="tabs-header">
         <button className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
@@ -483,65 +476,38 @@ export default function Settings() {
           
           {/* Notifications */}
           {error && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '12px 16px', borderRadius: '8px', color: '#fca5a5' }}>
-              <AlertTriangle style={{ width: '18px', height: '18px', flexShrink: 0 }} />
-              <div style={{ fontSize: '14px' }}>{error}</div>
-            </div>
+            <Feedback type="error">{error}</Feedback>
           )}
 
           {success && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '12px 16px', borderRadius: '8px', color: '#a7f3d0' }}>
-              <CheckCircle style={{ width: '18px', height: '18px', flexShrink: 0 }} />
-              <div style={{ fontSize: '14px' }}>{success}</div>
-            </div>
+            <Feedback type="success">{success}</Feedback>
           )}
 
           {/* TAB 1: Profile & Password */}
           {activeTab === 'profile' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              
-              {/* Profile Details Card */}
-              <div className="glass-card">
-                <h3 style={{ fontSize: '18px', marginBottom: '16px', color: 'var(--color-text-main)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '10px' }}>
-                  Account Profile
-                </h3>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.04)' }}>
-                    <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginBottom: '4px' }}>Username</div>
-                    <div style={{ fontSize: '15px', fontWeight: '600' }}>{profile?.preferred_username || '-'}</div>
-                  </div>
-                  
-                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.04)' }}>
-                    <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginBottom: '4px' }}>Display Name</div>
-                    <div style={{ fontSize: '15px', fontWeight: '600' }}>{profile?.name || '-'}</div>
-                  </div>
-
-                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.04)' }}>
-                    <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginBottom: '4px' }}>Email Address</div>
-                    <div style={{ fontSize: '15px', fontWeight: '600' }}>{profile?.email || 'Not configured'}</div>
-                  </div>
-
-                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.04)' }}>
-                    <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginBottom: '4px' }}>Security Role</div>
-                    <div style={{ display: 'flex', gap: '6px', marginTop: '2px' }}>
+            <Panel>
+              <PanelHeader
+                title="Profile & Password"
+                description="Review account attributes and update the password used for username and password sign-in."
+              />
+              <PlainSection title="Account Profile">
+                <DefinitionList>
+                  <DefinitionRow label="Username">{profile?.preferred_username || '-'}</DefinitionRow>
+                  <DefinitionRow label="Display Name">{profile?.name || '-'}</DefinitionRow>
+                  <DefinitionRow label="Email Address">{profile?.email || 'Not configured'}</DefinitionRow>
+                  <DefinitionRow label="Security Role">
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                       {profile?.roles?.map(role => (
-                        <span key={role} className="badge" style={{ margin: 0 }}>{role}</span>
-                      )) || <span className="badge badge-secondary" style={{ margin: 0 }}>Standard User</span>}
+                        <Tag key={role}>{role}</Tag>
+                      )) || <Tag tone="secondary">Standard User</Tag>}
                     </div>
-                  </div>
-                </div>
-              </div>
+                  </DefinitionRow>
+                </DefinitionList>
+              </PlainSection>
 
-              {/* Password Mutation Card */}
-              <div className="glass-card">
-                <h3 style={{ fontSize: '18px', marginBottom: '16px', color: 'var(--color-text-main)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '10px' }}>
-                  Update Password
-                </h3>
-                
-                <form onSubmit={handleChangePassword} style={{ maxWidth: '460px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label">Current Password</label>
+              <PlainSection title="Update Password">
+                <form onSubmit={handleChangePassword} style={{ maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <FormField label="Current Password" noMargin>
                     <div style={{ position: 'relative' }}>
                       <input 
                         type={showCurrentPwd ? 'text' : 'password'}
@@ -559,10 +525,9 @@ export default function Settings() {
                         {showCurrentPwd ? <EyeOff style={{ width: '16px', height: '16px' }} /> : <Eye style={{ width: '16px', height: '16px' }} />}
                       </button>
                     </div>
-                  </div>
+                  </FormField>
 
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label">New Password</label>
+                  <FormField label="New Password" noMargin>
                     <div style={{ position: 'relative' }}>
                       <input 
                         type={showNewPwd ? 'text' : 'password'}
@@ -580,10 +545,9 @@ export default function Settings() {
                         {showNewPwd ? <EyeOff style={{ width: '16px', height: '16px' }} /> : <Eye style={{ width: '16px', height: '16px' }} />}
                       </button>
                     </div>
-                  </div>
+                  </FormField>
 
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label">Confirm New Password</label>
+                  <FormField label="Confirm New Password" noMargin>
                     <input 
                       type="password" 
                       className="input-field" 
@@ -592,46 +556,40 @@ export default function Settings() {
                       onChange={e => setConfirmPassword(e.target.value)}
                       placeholder="Repeat new password"
                     />
-                  </div>
+                  </FormField>
 
                   <button className="btn btn-primary" type="submit" disabled={loading} style={{ alignSelf: 'flex-start', marginTop: '8px' }}>
                     <Lock style={{ width: '16px', height: '16px' }} />
                     {loading ? 'Updating...' : 'Change Password'}
                   </button>
                 </form>
-              </div>
-
-            </div>
+              </PlainSection>
+            </Panel>
           )}
 
           {/* TAB 2: Multi-Factor (MFA) */}
           {activeTab === 'mfa' && (
-            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              
-              {/* Header */}
-              <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <h3 style={{ fontSize: '18px', color: 'var(--color-text-main)' }}>Two-Factor Authentication (2FA)</h3>
-                  <p style={{ color: 'var(--color-text-muted)', fontSize: '13.5px', marginTop: '2px' }}>
-                    Protect your account with an authenticator app generating one-time passcode verification.
-                  </p>
-                </div>
-                <div>
-                  {mfaStatus.enabled ? (
-                    <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: 'var(--success-color)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>Active</span>
+            <Panel>
+              <PanelHeader
+                title="Two-Factor Authentication (2FA)"
+                description="Protect your account with an authenticator app generating one-time passcode verification."
+                action={
+                  mfaStatus.enabled ? (
+                    <StatusBadge tone="success">Active</StatusBadge>
                   ) : (
-                    <span className="badge badge-secondary">Disabled</span>
-                  )}
-                </div>
-              </div>
+                    <StatusBadge tone="neutral">Disabled</StatusBadge>
+                  )
+                }
+              />
+              <PanelBody stack>
 
               {/* Status Section */}
               {!mfaStatus.enabled && !mfaEnrollment && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '16px' }}>
                   <p style={{ fontSize: '14.5px', lineHeight: '1.6', color: 'var(--color-text-muted)' }}>
                     Two-Factor Authentication adds an extra layer of security. Once activated, logging in will require your password and a verification code from your mobile authenticator app.
                   </p>
-                  <button className="btn btn-primary" onClick={handleEnrollMFA} style={{ alignSelf: 'flex-start' }}>
+                  <button className="btn btn-primary" onClick={handleEnrollMFA}>
                     <QrCode style={{ width: '16px', height: '16px' }} />
                     Set Up Authenticator App
                   </button>
@@ -640,8 +598,8 @@ export default function Settings() {
 
               {/* Enrollment setup view */}
               {mfaEnrollment && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', background: 'rgba(255,255,255,0.02)', padding: '24px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <h4 style={{ fontSize: '15.5px', color: 'var(--color-text-main)' }}>Step-up Authenticator Application</h4>
+                <div>
+                  <h4 className="setup-title">Step-up Authenticator Application</h4>
                   
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', alignItems: 'center' }}>
                     {/* QR Code Container */}
@@ -677,8 +635,7 @@ export default function Settings() {
 
                   {/* Verification Form */}
                   <form onSubmit={handleActivateMFA} style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '320px' }}>
-                    <div className="form-group" style={{ margin: 0 }}>
-                      <label className="form-label">Verification Code</label>
+                    <FormField label="Verification Code" noMargin>
                       <input 
                         type="text"
                         maxLength={8}
@@ -689,9 +646,9 @@ export default function Settings() {
                         placeholder="Enter 6-digit code"
                         style={{ textAlign: 'center', fontSize: '18px', letterSpacing: '0.1em', fontWeight: 'bold' }}
                       />
-                    </div>
+                    </FormField>
                     
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    <ButtonGroup>
                       <button className="btn btn-primary" type="submit" disabled={loading}>
                         <Check style={{ width: '16px', height: '16px' }} />
                         Verify and Activate
@@ -699,7 +656,7 @@ export default function Settings() {
                       <button className="btn btn-secondary" type="button" onClick={() => setMfaEnrollment(null)}>
                         Cancel
                       </button>
-                    </div>
+                    </ButtonGroup>
                   </form>
                 </div>
               )}
@@ -707,7 +664,7 @@ export default function Settings() {
               {/* MFA Active state view */}
               {mfaStatus.enabled && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: 'rgba(16, 185, 129, 0.06)', border: '1px solid rgba(16, 185, 129, 0.15)', borderRadius: '10px', color: '#a7f3d0' }}>
+                  <div className="inline-status-row" style={{ color: '#a7f3d0', paddingTop: 0 }}>
                     <Shield style={{ width: '24px', height: '24px', color: 'var(--success-color)' }} />
                     <div>
                       <div style={{ fontWeight: '600', fontSize: '15px' }}>Your account is protected by 2FA</div>
@@ -717,7 +674,7 @@ export default function Settings() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '12px' }}>
+                  <ButtonGroup>
                     <button className="btn btn-secondary" onClick={handleGenerateBackupCodes}>
                       <RefreshCw style={{ width: '14px', height: '14px' }} />
                       Regenerate Backup Codes
@@ -726,13 +683,13 @@ export default function Settings() {
                       <Unlock style={{ width: '14px', height: '14px' }} />
                       Disable Two-Factor Auth
                     </button>
-                  </div>
+                  </ButtonGroup>
                 </div>
               )}
 
               {/* Backup Codes Display */}
               {backupCodes.length > 0 && (
-                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '10px' }}>
+                <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--warning-color)' }}>
                     <AlertTriangle style={{ width: '16px', height: '16px' }} />
                     <h4 style={{ fontSize: '14.5px', fontWeight: 'bold' }}>Recovery Backup Codes</h4>
@@ -748,7 +705,7 @@ export default function Settings() {
                     ))}
                   </div>
 
-                  <div style={{ display: 'flex', gap: '12px' }}>
+                  <ButtonGroup>
                     <button 
                       className="btn btn-secondary btn-sm" 
                       onClick={() => { 
@@ -759,105 +716,72 @@ export default function Settings() {
                       <Clipboard style={{ width: '13px', height: '13px' }} />
                       Copy Codes
                     </button>
-                  </div>
+                  </ButtonGroup>
                 </div>
               )}
 
-            </div>
+              </PanelBody>
+            </Panel>
           )}
 
           {/* TAB 3: Passkeys */}
           {activeTab === 'passkeys' && (
-            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              
-              {/* Header */}
-              <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <h3 style={{ fontSize: '18px', color: 'var(--color-text-main)' }}>Passkeys</h3>
-                  <p style={{ color: 'var(--color-text-muted)', fontSize: '13.5px', marginTop: '2px' }}>
-                    Register biometrics or hardware security keys (WebAuthn / FIDO2) to log in instantly.
-                  </p>
-                </div>
-                <button className="btn btn-primary btn-sm" onClick={() => setShowPasskeyModal(true)}>
-                  <Plus style={{ width: '13px', height: '13px' }} />
-                  Add a Passkey
-                </button>
-              </div>
+            <Panel>
+              <PanelHeader
+                title="Passkeys"
+                description="Register biometrics or hardware security keys for passwordless FIDO2 sign-in."
+                action={
+                  <button className="btn btn-primary content-action" onClick={() => setShowPasskeyModal(true)}>
+                    <Plus />
+                    Add a Passkey
+                  </button>
+                }
+              />
 
               {/* Passkeys List */}
               {passkeys.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--color-text-muted)', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '12px' }}>
-                  <Key style={{ width: '36px', height: '36px', stroke: 'var(--color-text-dark)', marginBottom: '12px', display: 'inline-block' }} />
-                  <div style={{ fontSize: '14.5px', fontWeight: '500' }}>No passkeys registered yet</div>
-                  <p style={{ fontSize: '13px', marginTop: '4px', maxWidth: '320px', margin: '4px auto 0 auto' }}>
-                    Add your computer's built-in Touch ID/Face ID or an external FIDO2 key.
-                  </p>
-                </div>
+                <EmptyState icon={<Key />} title="No passkeys registered yet" description="Add your computer's built-in Touch ID/Face ID or an external FIDO2 key." />
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <PanelBody>
+                <ListStack>
                   {passkeys.map(passkey => (
-                    <div 
+                    <ListRow
                       key={passkey.id} 
-                      style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center', 
-                        background: 'rgba(255,255,255,0.01)', 
-                        border: '1px solid rgba(255,255,255,0.04)', 
-                        padding: '12px 16px', 
-                        borderRadius: '8px' 
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.2)', padding: '8px', borderRadius: '50%', color: 'var(--color-secondary)' }}>
-                          <Key style={{ width: '16px', height: '16px' }} />
-                        </div>
-                        <div>
-                          <div style={{ fontSize: '14.5px', fontWeight: '600' }}>{passkey.name}</div>
-                          <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Calendar style={{ width: '11px', height: '11px' }} />
-                            {passkey.created_at ? new Date(passkey.created_at).toLocaleString() : 'Registered device'}
-                          </div>
-                        </div>
-                      </div>
-
-                      <button 
-                        className="btn btn-danger btn-sm" 
-                        onClick={() => handleDeletePasskey(passkey.id, passkey.name)}
-                        style={{ padding: '6px' }}
-                        title="Remove Passkey"
-                      >
-                        <Trash2 style={{ width: '14px', height: '14px' }} />
-                      </button>
-                    </div>
+                      icon={<Key style={{ width: '16px', height: '16px' }} />}
+                      title={passkey.name}
+                      meta={<><Calendar style={{ width: '11px', height: '11px' }} />{passkey.created_at ? new Date(passkey.created_at).toLocaleString() : 'Registered device'}</>}
+                      action={
+                        <button 
+                          className="btn btn-danger btn-sm" 
+                          onClick={() => handleDeletePasskey(passkey.id, passkey.name)}
+                          style={{ padding: '6px' }}
+                          title="Remove Passkey"
+                        >
+                          <Trash2 style={{ width: '14px', height: '14px' }} />
+                        </button>
+                      }
+                    />
                   ))}
-                </div>
+                </ListStack>
+                </PanelBody>
               )}
 
-            </div>
+            </Panel>
           )}
 
           {/* TAB 4: Active Sessions */}
           {activeTab === 'sessions' && (
-            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              
-              {/* Header */}
-              <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '12px' }}>
-                <h3 style={{ fontSize: '18px', color: 'var(--color-text-main)' }}>Active Sessions</h3>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '13.5px', marginTop: '2px' }}>
-                  A list of browsers and devices currently signed in to your account.
-                </p>
-              </div>
+            <Panel>
+              <PanelHeader title="Active Sessions" description="A list of browsers and devices currently signed in to your account." />
 
               {/* Sessions Table */}
-              <div style={{ overflowX: 'auto' }}>
-                <table className="table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <DataTable>
                   <thead>
-                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                      <th style={{ padding: '12px 8px', fontSize: '13px', color: 'var(--color-text-muted)' }}>Device / Browser</th>
-                      <th style={{ padding: '12px 8px', fontSize: '13px', color: 'var(--color-text-muted)' }}>IP Address</th>
-                      <th style={{ padding: '12px 8px', fontSize: '13px', color: 'var(--color-text-muted)' }}>Last Active</th>
-                      <th style={{ padding: '12px 8px', fontSize: '13px', color: 'var(--color-text-muted)', textAlign: 'right' }}>Actions</th>
+                    <tr>
+                      <th>Device / Browser</th>
+                      <th>IP Address</th>
+                      <th>Last Active</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -867,11 +791,10 @@ export default function Settings() {
                         <tr 
                           key={session.id} 
                           style={{ 
-                            borderBottom: '1px solid rgba(255,255,255,0.04)',
                             backgroundColor: isCurrent ? 'rgba(99, 102, 241, 0.03)' : 'transparent' 
                           }}
                         >
-                          <td style={{ padding: '14px 8px' }}>
+                          <td>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                               <Laptop style={{ width: '16px', height: '16px', color: isCurrent ? 'var(--color-primary)' : 'var(--color-text-muted)' }} />
                               <div>
@@ -879,34 +802,21 @@ export default function Settings() {
                                   {parseUserAgent(session.user_agent)}
                                 </span>
                                 {isCurrent && (
-                                  <span 
-                                    className="badge" 
-                                    style={{ 
-                                      marginLeft: '8px', 
-                                      padding: '1px 6px', 
-                                      fontSize: '9px',
-                                      backgroundColor: 'rgba(99, 102, 241, 0.15)',
-                                      color: 'var(--color-primary)',
-                                      border: '1px solid rgba(99, 102, 241, 0.3)',
-                                      margin: 0
-                                    }}
-                                  >
-                                    Current
-                                  </span>
+                                  <Tag>Current</Tag>
                                 )}
                               </div>
                             </div>
                           </td>
-                          <td style={{ padding: '14px 8px', fontSize: '13.5px', color: 'var(--color-text-main)' }}>
+                          <td style={{ fontSize: '13.5px', color: 'var(--color-text-main)' }}>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <MapPin style={{ width: '12px', height: '12px', color: 'var(--color-text-dark)' }} />
                               {session.ip}
                             </span>
                           </td>
-                          <td style={{ padding: '14px 8px', fontSize: '13.5px', color: 'var(--color-text-muted)' }}>
+                          <td style={{ fontSize: '13.5px', color: 'var(--color-text-muted)' }}>
                             {new Date(session.last_active_at).toLocaleString()}
                           </td>
-                          <td style={{ padding: '14px 8px', textAlign: 'right' }}>
+                          <td style={{ textAlign: 'right' }}>
                             {isCurrent ? (
                               <button className="btn btn-secondary btn-sm" onClick={logout} style={{ fontSize: '11px', padding: '4px 10px' }}>
                                 Sign Out
@@ -925,10 +835,9 @@ export default function Settings() {
                       );
                     })}
                   </tbody>
-                </table>
-              </div>
+              </DataTable>
 
-            </div>
+            </Panel>
           )}
 
         </div>
@@ -936,19 +845,18 @@ export default function Settings() {
 
       {/* MODAL 1: Disable MFA Confirmation */}
       {showDisableModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div className="glass-card" style={{ maxWidth: '400px', width: '100%', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <h3 style={{ fontSize: '18px', color: 'var(--color-text-main)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '8px' }}>
-              Confirm Disabling 2FA
-            </h3>
-            
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title">Confirm Disabling 2FA</h3>
+            </div>
+            <div className="modal-body">
             <p style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
               For security, you must enter your current account password to confirm disabling Two-Factor Authentication.
             </p>
 
-            <form onSubmit={handleDisableMFA} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div className="form-group" style={{ margin: 0 }}>
-                <label className="form-label">Account Password</label>
+            <form onSubmit={handleDisableMFA} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '16px' }}>
+              <FormField label="Account Password" noMargin>
                 <input 
                   type="password"
                   className="input-field" 
@@ -957,36 +865,36 @@ export default function Settings() {
                   onChange={e => setConfirmPasswordForMFA(e.target.value)}
                   placeholder="Enter current password"
                 />
-              </div>
+              </FormField>
 
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '8px' }}>
+              <ButtonGroup align="right">
                 <button className="btn btn-danger" type="submit" disabled={loading}>
                   {loading ? 'Disabling...' : 'Confirm Disable'}
                 </button>
                 <button className="btn btn-secondary" type="button" onClick={() => { setShowDisableModal(false); setConfirmPasswordForMFA(''); }}>
                   Cancel
                 </button>
-              </div>
+              </ButtonGroup>
             </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* MODAL 2: Register Passkey Name Dialog */}
       {showPasskeyModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div className="glass-card" style={{ maxWidth: '400px', width: '100%', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <h3 style={{ fontSize: '18px', color: 'var(--color-text-main)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '8px' }}>
-              Register Passkey
-            </h3>
-            
+        <div className="modal-backdrop">
+          <div className="modal-content" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h3 className="modal-title">Register Passkey</h3>
+            </div>
+            <div className="modal-body">
             <p style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
               Choose a friendly name for this passkey device so you can identify it later.
             </p>
 
-            <form onSubmit={handleRegisterPasskey} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div className="form-group" style={{ margin: 0 }}>
-                <label className="form-label">Passkey Name</label>
+            <form onSubmit={handleRegisterPasskey} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '16px' }}>
+              <FormField label="Passkey Name" noMargin>
                 <input 
                   type="text"
                   className="input-field" 
@@ -995,17 +903,18 @@ export default function Settings() {
                   onChange={e => setNewPasskeyName(e.target.value)}
                   placeholder="e.g. My YubiKey, Work Macbook TouchID"
                 />
-              </div>
+              </FormField>
 
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '8px' }}>
+              <ButtonGroup align="right">
                 <button className="btn btn-primary" type="submit" disabled={loading}>
                   {loading ? 'Registering...' : 'Register Device'}
                 </button>
                 <button className="btn btn-secondary" type="button" onClick={() => { setShowPasskeyModal(false); setNewPasskeyName(''); }}>
                   Cancel
                 </button>
-              </div>
+              </ButtonGroup>
             </form>
+            </div>
           </div>
         </div>
       )}

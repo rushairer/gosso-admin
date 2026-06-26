@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Plus as PlusIcon, Edit2 as EditIcon, Trash2 as TrashIcon, Key as KeyIcon, User as UserIcon, Shield as ShieldIcon, X as XIcon, Copy as CopyIcon, Check as CheckIcon, Info as InfoIcon, Lock as LockIcon, Unlock as UnlockIcon, FileText as AuditIcon, CheckSquare as ConsentIcon, RefreshCw } from 'lucide-react';
 import { isLoggedIn, isAdmin, redirectToAuthorize, getUserProfile, apiFetch } from '../auth';
+import { ButtonGroup, CheckboxField, CheckboxGroup, DataTable, DefinitionList, DefinitionRow, EmptyState, Feedback, FormField, ListRow, ListStack, Panel, PanelHeader, PlainSection, StatusBadge, Tag } from '../components/ui';
 
 interface OAuth2Client {
   client_id: string;
@@ -765,30 +766,6 @@ export default function Admin() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
-      {/* Title block */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h2 style={{ fontSize: '28px', color: 'var(--color-text-main)' }}>GOSSO Administration Console</h2>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', marginTop: '4px' }}>
-            System configuration console. Manage authentication clients and system credentials.
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          {activeTab === 'clients' && (
-            <button className="btn btn-primary" onClick={() => handleOpenClientModal(null)}>
-              <PlusIcon style={{ width: '16px', height: '16px' }} />
-              Register Client
-            </button>
-          )}
-          {activeTab === 'users' && (
-            <button className="btn btn-primary" onClick={handleOpenCreateUserModal}>
-              <PlusIcon style={{ width: '16px', height: '16px' }} />
-              Add User
-            </button>
-          )}
-        </div>
-      </div>
-
       {/* Tabs */}
       <div className="tabs-header">
         <button className={`tab-btn ${activeTab === 'clients' ? 'active' : ''}`} onClick={() => setActiveTab('clients')}>
@@ -816,116 +793,118 @@ export default function Admin() {
           <p style={{ color: 'var(--color-text-muted)' }}>Loading console data...</p>
         </div>
       ) : error ? (
-        <div className="glass-card" style={{ borderLeft: '4px solid var(--danger-color)', padding: '20px' }}>
-          <h3 style={{ color: 'var(--danger-color)', marginBottom: '8px' }}>Console Load Error</h3>
-          <p style={{ color: 'var(--color-text-muted)' }}>{error}</p>
+        <div>
+          <Feedback type="error">
+            <strong>Console Load Error</strong>
+            <div>{error}</div>
+          </Feedback>
           <button className="btn btn-secondary btn-sm" style={{ marginTop: '16px' }} onClick={loadDashboardData}>Retry Load</button>
         </div>
       ) : (
-        <div className="glass-card" style={{ padding: 0 }}>
+        <Panel>
           
           {/* Tab Content: Clients */}
           {activeTab === 'clients' && (
-            clients.length === 0 ? (
-              <div style={{ padding: '48px', textAlign: 'center' }}>
-                <KeyIcon style={{ width: '48px', height: '48px', color: 'var(--color-text-dark)', marginBottom: '16px' }} />
-                <h3>No Clients Registered</h3>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', marginTop: '6px' }}>
-                  Begin by registering your first application client to integrate OIDC authentication.
-                </p>
-                <button className="btn btn-primary" style={{ marginTop: '20px' }} onClick={() => handleOpenClientModal(null)}>
-                  Register Client
-                </button>
-              </div>
-            ) : (
-              <div className="table-wrapper">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Name / ID</th>
-                      <th>Type</th>
-                      <th>Redirect URIs</th>
-                      <th>Grant Types</th>
-                      <th>Scopes</th>
-                      <th style={{ width: '120px' }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {clients.map(client => (
-                      <tr key={client.client_id}>
-                        <td>
-                          <div style={{ fontWeight: '600' }}>{client.name}</div>
-                          <div style={{ fontSize: '12px', color: 'var(--color-text-dark)', fontFamily: 'monospace' }}>{client.client_id}</div>
-                          {client.description && (
-                            <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginTop: '4px' }}>{client.description}</div>
-                          )}
-                        </td>
-                        <td>
-                          {client.is_confidential ? (
-                            <span className="status-pill disabled" style={{ textTransform: 'uppercase', fontSize: '11px' }}>Confidential</span>
-                          ) : (
-                            <span className="status-pill active" style={{ textTransform: 'uppercase', fontSize: '11px' }}>Public</span>
-                          )}
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxWidth: '300px' }}>
-                            {client.redirect_uris.map((uri, idx) => (
-                              <span key={idx} style={{ fontSize: '13px', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={uri}>
-                                {uri}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                            {client.grant_types.map(g => (
-                              <span key={g} className="badge badge-secondary" style={{ fontSize: '11px', textTransform: 'capitalize' }}>
-                                {g.replace('_', ' ')}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                            {client.scopes.map(s => (
-                              <span key={s} className="badge" style={{ fontSize: '11px' }}>{s}</span>
-                            ))}
-                          </div>
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            <button className="btn btn-secondary btn-sm" onClick={() => handleOpenClientModal(client)} title="Edit Client">
-                              <EditIcon style={{ width: '13px', height: '13px' }} />
-                            </button>
-                            <button className="btn btn-danger btn-sm" onClick={() => handleDeleteClient(client.client_id)} title="Delete Client">
-                              <TrashIcon style={{ width: '13px', height: '13px' }} />
-                            </button>
-                          </div>
-                        </td>
+            <div>
+              <PanelHeader
+                title="OAuth2 Clients"
+                description="Register applications, redirect URIs, grant types, and scopes for OIDC integrations."
+                action={
+                  <button className="btn btn-primary content-action" onClick={() => handleOpenClientModal(null)}>
+                    <PlusIcon />
+                    Register Client
+                  </button>
+                }
+              />
+              {clients.length === 0 ? (
+                <EmptyState icon={<KeyIcon />} title="No Clients Registered" description="Begin by registering your first application client to integrate OIDC authentication." />
+              ) : (
+                <DataTable>
+                    <thead>
+                      <tr>
+                        <th>Name / ID</th>
+                        <th>Type</th>
+                        <th>Redirect URIs</th>
+                        <th>Grant Types</th>
+                        <th>Scopes</th>
+                        <th style={{ width: '120px' }}>Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )
+                    </thead>
+                    <tbody>
+                      {clients.map(client => (
+                        <tr key={client.client_id}>
+                          <td>
+                            <div style={{ fontWeight: '600' }}>{client.name}</div>
+                            <div style={{ fontSize: '12px', color: 'var(--color-text-dark)', fontFamily: 'monospace' }}>{client.client_id}</div>
+                            {client.description && (
+                              <div style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginTop: '4px' }}>{client.description}</div>
+                            )}
+                          </td>
+                          <td>
+                            {client.is_confidential ? (
+                              <StatusBadge tone="danger" compact>Confidential</StatusBadge>
+                            ) : (
+                              <StatusBadge tone="success" compact>Public</StatusBadge>
+                            )}
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxWidth: '300px' }}>
+                              {client.redirect_uris.map((uri, idx) => (
+                                <span key={idx} style={{ fontSize: '13px', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={uri}>
+                                  {uri}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                              {client.grant_types.map(g => (
+                                <Tag key={g} tone="secondary">{g.replace('_', ' ')}</Tag>
+                              ))}
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                              {client.scopes.map(s => (
+                                <Tag key={s}>{s}</Tag>
+                              ))}
+                            </div>
+                          </td>
+                          <td>
+                            <ButtonGroup compact>
+                              <button className="btn btn-secondary btn-sm" onClick={() => handleOpenClientModal(client)} title="Edit Client">
+                                <EditIcon style={{ width: '13px', height: '13px' }} />
+                              </button>
+                              <button className="btn btn-danger btn-sm" onClick={() => handleDeleteClient(client.client_id)} title="Delete Client">
+                                <TrashIcon style={{ width: '13px', height: '13px' }} />
+                              </button>
+                            </ButtonGroup>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                </DataTable>
+              )}
+            </div>
           )}
 
           {/* Tab Content: Users */}
           {activeTab === 'users' && (
-            accounts.length === 0 ? (
-              <div style={{ padding: '48px', textAlign: 'center' }}>
-                <UserIcon style={{ width: '48px', height: '48px', color: 'var(--color-text-dark)', marginBottom: '16px' }} />
-                <h3>No User Accounts</h3>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', marginTop: '6px' }}>
-                  Create the first managed user account, then assign roles if needed.
-                </p>
-                <button className="btn btn-primary" style={{ marginTop: '20px' }} onClick={handleOpenCreateUserModal}>
-                  Add User
-                </button>
-              </div>
-            ) : (
-              <div className="table-wrapper">
-                <table className="admin-table">
+            <div>
+              <PanelHeader
+                title="User Accounts"
+                description="Create accounts, manage status, assign roles, and inspect authorized applications."
+                action={
+                  <button className="btn btn-primary content-action" onClick={handleOpenCreateUserModal}>
+                    <PlusIcon />
+                    Add User
+                  </button>
+                }
+              />
+              {accounts.length === 0 ? (
+                <EmptyState icon={<UserIcon />} title="No User Accounts" description="Create the first managed user account, then assign roles if needed." />
+              ) : (
+                <DataTable>
                   <thead>
                     <tr>
                       <th>User</th>
@@ -944,15 +923,13 @@ export default function Admin() {
                         <td>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start' }}>
                             {acc.status === 'active' ? (
-                              <span className="status-pill active">Active</span>
+                              <StatusBadge tone="success">Active</StatusBadge>
                             ) : (
-                              <span className="status-pill disabled">Suspended</span>
+                              <StatusBadge tone="danger">Suspended</StatusBadge>
                             )}
                             {acc.locked_out && (
                               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <span className="status-pill disabled" style={{ textTransform: 'none', background: 'rgba(245, 158, 11, 0.12)', color: '#fde68a', borderColor: 'rgba(245, 158, 11, 0.2)' }}>
-                                  Locked ({acc.lockout_attempts} attempts)
-                                </span>
+                                <StatusBadge tone="warning">Locked ({acc.lockout_attempts} attempts)</StatusBadge>
                                 <button 
                                   className="btn btn-secondary btn-sm" 
                                   style={{ padding: '2px 6px', fontSize: '11px', height: '20px' }}
@@ -969,10 +946,10 @@ export default function Admin() {
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                             {acc.roles && acc.roles.length > 0 ? (
                               acc.roles.map(role => (
-                                <span key={role.id} className="badge" title={role.description}>
+                                <Tag key={role.id} title={role.description}>
                                   <ShieldIcon style={{ width: '10px', height: '10px', marginRight: '4px', display: 'inline' }} />
                                   {role.name}
-                                </span>
+                                </Tag>
                               ))
                             ) : (
                               <span style={{ fontSize: '13px', color: 'var(--color-text-dark)', fontStyle: 'italic' }}>No roles assigned</span>
@@ -980,7 +957,7 @@ export default function Admin() {
                           </div>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', gap: '8px' }}>
+                          <ButtonGroup compact>
                             <button className="btn btn-secondary btn-sm" onClick={() => handleOpenRoleModal(acc)} title="Manage Roles">
                               <ShieldIcon style={{ width: '13px', height: '13px' }} />
                               Roles
@@ -1035,22 +1012,24 @@ export default function Admin() {
                             >
                               <TrashIcon style={{ width: '13px', height: '13px' }} />
                             </button>
-                          </div>
+                          </ButtonGroup>
                         </td>
                       </tr>
                     ))}
                   </tbody>
-                </table>
-              </div>
-            )
+                </DataTable>
+              )}
+            </div>
           )}
 
           {/* Tab Content: Audit Logs */}
           {activeTab === 'audit-logs' && (
-            <div style={{ padding: '24px' }}>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginBottom: '24px', alignItems: 'flex-end' }}>
+            <div>
+              <PanelHeader title="Audit Logs" description="Search security and administration events recorded by the identity service." />
+              <div className="panel-body" style={{ borderBottom: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'flex-end' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label className="form-label" style={{ marginBottom: 0 }}>Event Type</label>
+                  <FormField label="Event Type" noMargin>
                   <input 
                     type="text" 
                     className="input-field" 
@@ -1059,9 +1038,10 @@ export default function Admin() {
                     onChange={(e) => setFilterEventType(e.target.value)}
                     style={{ width: '220px' }}
                   />
+                  </FormField>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <label className="form-label" style={{ marginBottom: 0 }}>User Account ID</label>
+                  <FormField label="User Account ID" noMargin>
                   <input 
                     type="text" 
                     className="input-field" 
@@ -1070,8 +1050,9 @@ export default function Admin() {
                     onChange={(e) => setFilterAccountID(e.target.value)}
                     style={{ width: '300px' }}
                   />
+                  </FormField>
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <ButtonGroup compact>
                   <button className="btn btn-primary" onClick={() => fetchAuditLogs(1)}>
                     Search
                   </button>
@@ -1084,7 +1065,8 @@ export default function Admin() {
                   }}>
                     Clear
                   </button>
-                </div>
+                </ButtonGroup>
+              </div>
               </div>
 
               {auditLoading ? (
@@ -1093,17 +1075,10 @@ export default function Admin() {
                   <p style={{ color: 'var(--color-text-muted)', fontSize: '14px' }}>Loading audit logs...</p>
                 </div>
               ) : auditLogs.length === 0 ? (
-                <div style={{ padding: '48px', textAlign: 'center' }}>
-                  <AuditIcon style={{ width: '48px', height: '48px', color: 'var(--color-text-dark)', marginBottom: '16px' }} />
-                  <h3>No Audit Logs Found</h3>
-                  <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', marginTop: '6px' }}>
-                    No system audit logs match the query criteria.
-                  </p>
-                </div>
+                <EmptyState icon={<AuditIcon />} title="No Audit Logs Found" description="No system audit logs match the query criteria." />
               ) : (
                 <div>
-                  <div className="table-wrapper" style={{ margin: '0 -24px' }}>
-                    <table className="admin-table">
+                  <DataTable>
                       <thead>
                         <tr>
                           <th>Time</th>
@@ -1120,9 +1095,7 @@ export default function Admin() {
                               {log.created_at ? new Date(log.created_at).toLocaleString() : '-'}
                             </td>
                             <td>
-                              <span className="badge" style={{ fontFamily: 'monospace', textTransform: 'none', background: 'rgba(99, 102, 241, 0.1)', color: '#a5b4fc', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
-                                {log.action}
-                              </span>
+                              <Tag>{log.action}</Tag>
                             </td>
                             <td style={{ fontSize: '13px', fontFamily: 'monospace' }}>{log.actor}</td>
                             <td style={{ fontSize: '13px', fontFamily: 'monospace', color: 'var(--color-text-muted)' }}>{log.account_id || '-'}</td>
@@ -1137,15 +1110,14 @@ export default function Admin() {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
-                  </div>
+                  </DataTable>
 
                   {/* Pagination */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
                     <div style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>
                       Total: {auditTotal} logs
                     </div>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <ButtonGroup compact>
                       <button 
                         className="btn btn-secondary btn-sm" 
                         disabled={auditPage <= 1} 
@@ -1161,7 +1133,7 @@ export default function Admin() {
                       >
                         Next
                       </button>
-                    </div>
+                    </ButtonGroup>
                   </div>
                 </div>
               )}
@@ -1170,43 +1142,41 @@ export default function Admin() {
 
           {/* Tab Content: System Status */}
           {activeTab === 'system' && (
-            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              
-              {/* Health checks card */}
-              <div className="glass-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '10px' }}>
-                  <h3 style={{ fontSize: '18px', margin: 0, color: 'var(--color-text-main)' }}>
-                    Infrastructure Health Status
-                  </h3>
+            <div>
+              <PanelHeader
+                title="System Status"
+                description="Readiness checks and public OpenID Connect discovery metadata for this deployment."
+                action={
                   <button
-                    className="btn btn-secondary"
+                    className="btn btn-secondary content-action"
                     type="button"
                     onClick={fetchSystemStatus}
                     disabled={loading}
                     title="Refresh system status"
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                   >
-                    <RefreshCw style={{ width: '16px', height: '16px' }} />
+                    <RefreshCw />
                     Refresh
                   </button>
-                </div>
+                }
+              />
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', marginBottom: '16px' }}>
-                  <div style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
-                    Checked at
-                    <div style={{ marginTop: '4px', color: 'var(--color-text-main)', fontSize: '14px' }}>
+              <PlainSection title="Infrastructure Health">
+                <div className="metric-strip">
+                  <div className="metric-item">
+                    <div className="field-label">Checked at</div>
+                    <div className="field-value">
                       {formatHealthTimestamp(systemHealth?.checked_at || systemHealth?.fetched_at)}
                     </div>
                   </div>
-                  <div style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
-                    HTTP status
-                    <div style={{ marginTop: '4px', color: 'var(--color-text-main)', fontSize: '14px' }}>
+                  <div className="metric-item">
+                    <div className="field-label">HTTP status</div>
+                    <div className="field-value">
                       {systemHealth?.http_status || 'n/a'}
                     </div>
                   </div>
-                  <div style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
-                    Probe duration
-                    <div style={{ marginTop: '4px', color: 'var(--color-text-main)', fontSize: '14px' }}>
+                  <div className="metric-item">
+                    <div className="field-label">Probe duration</div>
+                    <div className="field-value">
                       {typeof systemHealth?.duration_ms === 'number' ? `${systemHealth.duration_ms} ms` : 'n/a'}
                     </div>
                   </div>
@@ -1218,22 +1188,12 @@ export default function Admin() {
                   </div>
                 )}
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                <div className="inline-status-list" style={{ marginTop: '16px' }}>
                   
                   {/* Database Health */}
-                  <div style={{ 
-                    background: 'rgba(255,255,255,0.01)', 
-                    padding: '16px', 
-                    borderRadius: '10px', 
-                    border: '1px solid rgba(255,255,255,0.04)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '14px'
-                  }}>
-                    <div style={{ 
+                  <div className="inline-status-row">
+                    <div className="inline-icon" style={{ 
                       background: systemHealth?.checks?.database === 'ok' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)', 
-                      padding: '10px', 
-                      borderRadius: '50%',
                       color: systemHealth?.checks?.database === 'ok' ? 'var(--success-color)' : 'var(--danger-color)'
                     }}>
                       <ShieldIcon style={{ width: '22px', height: '22px' }} />
@@ -1247,19 +1207,9 @@ export default function Admin() {
                   </div>
 
                   {/* Redis Health */}
-                  <div style={{ 
-                    background: 'rgba(255,255,255,0.01)', 
-                    padding: '16px', 
-                    borderRadius: '10px', 
-                    border: '1px solid rgba(255,255,255,0.04)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '14px'
-                  }}>
-                    <div style={{ 
+                  <div className="inline-status-row">
+                    <div className="inline-icon" style={{ 
                       background: systemHealth?.checks?.redis === 'ok' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)', 
-                      padding: '10px', 
-                      borderRadius: '50%',
                       color: systemHealth?.checks?.redis === 'ok' ? 'var(--success-color)' : 'var(--danger-color)'
                     }}>
                       <RefreshCw style={{ width: '22px', height: '22px' }} />
@@ -1273,71 +1223,50 @@ export default function Admin() {
                   </div>
 
                 </div>
-              </div>
+              </PlainSection>
 
               {/* OIDC configuration info card */}
               {oidcConfig && (
-                <div className="glass-card">
-                  <h3 style={{ fontSize: '18px', marginBottom: '16px', color: 'var(--color-text-main)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '10px' }}>
-                    OpenID Connect Identity Provider Profile
-                  </h3>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <PlainSection title="OpenID Connect Identity Provider Profile">
+                  <DefinitionList>
                     
-                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '8px' }}>
-                      <div style={{ width: '180px', color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: '600' }}>Issuer Identifier</div>
-                      <div style={{ flex: 1, fontFamily: 'monospace', fontSize: '13.5px', wordBreak: 'break-all' }}>{oidcConfig.issuer}</div>
-                    </div>
+                    <DefinitionRow label="Issuer Identifier" mono>{oidcConfig.issuer}</DefinitionRow>
 
-                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '8px' }}>
-                      <div style={{ width: '180px', color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: '600' }}>Authorization Endpoint</div>
-                      <div style={{ flex: 1, fontFamily: 'monospace', fontSize: '13.5px', wordBreak: 'break-all' }}>{oidcConfig.authorization_endpoint}</div>
-                    </div>
+                    <DefinitionRow label="Authorization Endpoint" mono>{oidcConfig.authorization_endpoint}</DefinitionRow>
 
-                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '8px' }}>
-                      <div style={{ width: '180px', color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: '600' }}>Token Endpoint</div>
-                      <div style={{ flex: 1, fontFamily: 'monospace', fontSize: '13.5px', wordBreak: 'break-all' }}>{oidcConfig.token_endpoint}</div>
-                    </div>
+                    <DefinitionRow label="Token Endpoint" mono>{oidcConfig.token_endpoint}</DefinitionRow>
 
-                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '8px' }}>
-                      <div style={{ width: '180px', color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: '600' }}>Userinfo Endpoint</div>
-                      <div style={{ flex: 1, fontFamily: 'monospace', fontSize: '13.5px', wordBreak: 'break-all' }}>{oidcConfig.userinfo_endpoint}</div>
-                    </div>
+                    <DefinitionRow label="Userinfo Endpoint" mono>{oidcConfig.userinfo_endpoint}</DefinitionRow>
 
-                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '8px' }}>
-                      <div style={{ width: '180px', color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: '600' }}>JWKS URI</div>
-                      <div style={{ flex: 1, fontFamily: 'monospace', fontSize: '13.5px', wordBreak: 'break-all' }}>
+                    <DefinitionRow label="JWKS URI" mono>
                         <a href={oidcConfig.jwks_uri} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)', textDecoration: 'none' }}>
                           {oidcConfig.jwks_uri}
                         </a>
-                      </div>
-                    </div>
+                    </DefinitionRow>
 
-                    <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '8px' }}>
-                      <div style={{ width: '180px', color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: '600' }}>Supported Scopes</div>
-                      <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    <DefinitionRow label="Supported Scopes">
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                         {oidcConfig.scopes_supported?.map((scope: string) => (
-                          <span key={scope} className="badge badge-secondary" style={{ margin: 0 }}>{scope}</span>
+                          <Tag key={scope} tone="secondary">{scope}</Tag>
                         ))}
                       </div>
-                    </div>
+                    </DefinitionRow>
 
-                    <div style={{ display: 'flex' }}>
-                      <div style={{ width: '180px', color: 'var(--color-text-muted)', fontSize: '14px', fontWeight: '600' }}>Grant Types Supported</div>
-                      <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    <DefinitionRow label="Grant Types Supported">
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                         {oidcConfig.grant_types_supported?.map((gt: string) => (
-                          <span key={gt} className="badge badge-secondary" style={{ margin: 0 }}>{gt}</span>
+                          <Tag key={gt} tone="secondary">{gt}</Tag>
                         ))}
                       </div>
-                    </div>
+                    </DefinitionRow>
 
-                  </div>
-                </div>
+                  </DefinitionList>
+                </PlainSection>
               )}
 
             </div>
           )}
-        </div>
+        </Panel>
       )}
 
       {/* Client Register/Edit Modal */}
@@ -1352,8 +1281,7 @@ export default function Admin() {
             </div>
             <form onSubmit={handleClientFormSubmit}>
               <div className="modal-body">
-                <div className="form-group">
-                  <label className="form-label">Client Name</label>
+                <FormField label="Client Name">
                   <input
                     type="text"
                     className="input-field"
@@ -1361,9 +1289,8 @@ export default function Admin() {
                     value={clientForm.name}
                     onChange={e => setClientForm(p => ({ ...p, name: e.target.value }))}
                   />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Description</label>
+                </FormField>
+                <FormField label="Description">
                   <input
                     type="text"
                     className="input-field"
@@ -1371,9 +1298,11 @@ export default function Admin() {
                     value={clientForm.description}
                     onChange={e => setClientForm(p => ({ ...p, description: e.target.value }))}
                   />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Redirect URIs (comma-separated)</label>
+                </FormField>
+                <FormField
+                  label="Redirect URIs (comma-separated)"
+                  hint="Absolute URLs allowed to receive auth codes. Multiple URLs separated by commas."
+                >
                   <input
                     type="text"
                     className="input-field"
@@ -1381,13 +1310,9 @@ export default function Admin() {
                     value={clientForm.redirect_uris}
                     onChange={e => setClientForm(p => ({ ...p, redirect_uris: e.target.value }))}
                   />
-                  <span style={{ fontSize: '11px', color: 'var(--color-text-dark)', marginTop: '4px', display: 'block' }}>
-                    Absolute URLs allowed to receive auth codes. Multiple URLs separated by commas.
-                  </span>
-                </div>
+                </FormField>
                 
-                <div className="form-group">
-                  <label className="form-label">Post-Logout Redirect URIs (comma-separated)</label>
+                <FormField label="Post-Logout Redirect URIs (comma-separated)">
                   <input
                     type="text"
                     className="input-field"
@@ -1395,53 +1320,41 @@ export default function Admin() {
                     value={clientForm.post_logout_redirect_uris}
                     onChange={e => setClientForm(p => ({ ...p, post_logout_redirect_uris: e.target.value }))}
                   />
-                </div>
+                </FormField>
 
-                <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
-                  <input
-                    type="checkbox"
+                <FormField label="Client Type">
+                  <CheckboxField
                     id="is_confidential"
+                    label="Confidential Client (Requires Server-Side Secret)"
                     checked={clientForm.is_confidential}
-                    onChange={e => setClientForm(p => ({ ...p, is_confidential: e.target.checked }))}
-                    style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                    onChange={(checked) => setClientForm(p => ({ ...p, is_confidential: checked }))}
                     disabled={!!editingClient}
                   />
-                  <label htmlFor="is_confidential" style={{ color: 'var(--color-text-main)', fontSize: '14.5px', cursor: 'pointer' }}>
-                    Confidential Client (Requires Server-Side Secret)
-                  </label>
-                </div>
+                </FormField>
                 
-                <div className="form-group" style={{ marginTop: '16px' }}>
-                  <label className="form-label">Grant Types</label>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '8px' }}>
+                <CheckboxGroup label="Grant Types">
                     {['authorization_code', 'client_credentials', 'refresh_token', 'device_code'].map(gt => (
-                      <label key={gt} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13.5px', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={clientForm.grant_types.includes(gt)}
-                          onChange={() => handleCheckboxChange('grant_types', gt)}
-                        />
-                        {gt.replace('_', ' ')}
-                      </label>
+                      <CheckboxField
+                        key={gt}
+                        id={`grant-type-${gt}`}
+                        label={gt.replace('_', ' ')}
+                        checked={clientForm.grant_types.includes(gt)}
+                        onChange={() => handleCheckboxChange('grant_types', gt)}
+                      />
                     ))}
-                  </div>
-                </div>
+                </CheckboxGroup>
 
-                <div className="form-group" style={{ marginTop: '16px' }}>
-                  <label className="form-label">Authorized Scopes</label>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '8px' }}>
+                <CheckboxGroup label="Authorized Scopes">
                     {['openid', 'profile', 'email'].map(sc => (
-                      <label key={sc} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13.5px', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={clientForm.scopes.includes(sc)}
-                          onChange={() => handleCheckboxChange('scopes', sc)}
-                        />
-                        {sc}
-                      </label>
+                      <CheckboxField
+                        key={sc}
+                        id={`scope-${sc}`}
+                        label={sc}
+                        checked={clientForm.scopes.includes(sc)}
+                        onChange={() => handleCheckboxChange('scopes', sc)}
+                      />
                     ))}
-                  </div>
-                </div>
+                </CheckboxGroup>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowClientModal(false)}>Cancel</button>
@@ -1460,31 +1373,29 @@ export default function Admin() {
               <h3 className="modal-title" style={{ color: 'var(--color-secondary)' }}>Client Secret Issued</h3>
             </div>
             <div className="modal-body">
-              <div className="glass-card" style={{ background: 'rgba(168, 85, 247, 0.05)', display: 'flex', gap: '12px', padding: '16px', marginBottom: '20px', border: '1px solid rgba(168, 85, 247, 0.15)' }}>
+              <div className="notice-card" style={{ flexDirection: 'row', marginBottom: '20px' }}>
                 <InfoIcon style={{ width: '20px', height: '20px', stroke: 'var(--color-secondary)', flexShrink: 0 }} />
                 <p style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', textAlign: 'left', lineHeight: '1.5' }}>
                   Please copy the client secret credential. It will <strong>NOT</strong> be displayed again for security reasons.
                 </p>
               </div>
               
-              <div className="form-group">
-                <label className="form-label">Client ID</label>
+              <FormField label="Client ID">
                 <div style={{ background: 'rgba(255,255,255,0.03)', padding: '10px 14px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
                   {newClientDetails.client_id}
                 </div>
-              </div>
+              </FormField>
 
-              <div className="form-group">
-                <label className="form-label">Client Secret</label>
-                <div style={{ display: 'flex', gap: '8px' }}>
+              <FormField label="Client Secret">
+                <ButtonGroup compact>
                   <div style={{ flex: 1, background: 'rgba(255,255,255,0.03)', padding: '10px 14px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '14px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {newClientDetails.client_secret}
                   </div>
                   <button className="btn btn-secondary" onClick={copySecret} style={{ padding: '0 16px' }} title="Copy Secret">
                     {copied ? <CheckIcon style={{ width: '16px', height: '16px', stroke: 'var(--success-color)' }} /> : <CopyIcon style={{ width: '16px', height: '16px' }} />}
                   </button>
-                </div>
-              </div>
+                </ButtonGroup>
+              </FormField>
             </div>
             <div className="modal-footer">
               <button className="btn btn-primary" onClick={() => { setShowSecretModal(false); setNewClientDetails(null); }}>
@@ -1512,20 +1423,15 @@ export default function Admin() {
                 </p>
 
                 {createUserError && (
-                  <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--danger-color)', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '13px' }}>
-                    {createUserError}
-                  </div>
+                  <div style={{ marginBottom: '16px' }}><Feedback type="error">{createUserError}</Feedback></div>
                 )}
 
                 {createUserSuccess && (
-                  <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', color: 'var(--success-color)', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '13px' }}>
-                    {createUserSuccess}
-                  </div>
+                  <div style={{ marginBottom: '16px' }}><Feedback type="success">{createUserSuccess}</Feedback></div>
                 )}
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <div className="form-group">
-                    <label className="form-label">Username</label>
+                  <FormField label="Username">
                     <input
                       type="text"
                       className="input-field"
@@ -1536,9 +1442,8 @@ export default function Admin() {
                       disabled={!!createUserSuccess}
                       autoFocus
                     />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Display Name</label>
+                  </FormField>
+                  <FormField label="Display Name">
                     <input
                       type="text"
                       className="input-field"
@@ -1548,12 +1453,11 @@ export default function Admin() {
                       required
                       disabled={!!createUserSuccess}
                     />
-                  </div>
+                  </FormField>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <div className="form-group">
-                    <label className="form-label">Email</label>
+                  <FormField label="Email">
                     <input
                       type="email"
                       className="input-field"
@@ -1562,9 +1466,8 @@ export default function Admin() {
                       onChange={e => setCreateUserForm(p => ({ ...p, email: e.target.value }))}
                       disabled={!!createUserSuccess}
                     />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Phone</label>
+                  </FormField>
+                  <FormField label="Phone">
                     <input
                       type="text"
                       className="input-field"
@@ -1573,14 +1476,13 @@ export default function Admin() {
                       onChange={e => setCreateUserForm(p => ({ ...p, phone: e.target.value }))}
                       disabled={!!createUserSuccess}
                     />
-                  </div>
+                  </FormField>
                 </div>
-                <span style={{ fontSize: '11px', color: 'var(--color-text-dark)', marginTop: '-10px', marginBottom: '16px', display: 'block' }}>
+                <div className="form-hint" style={{ marginTop: '-10px', marginBottom: '16px' }}>
                   Provide at least one contact method. Email and phone must be unique.
-                </span>
+                </div>
 
-                <div className="form-group">
-                  <label className="form-label">Initial Password (min 12 chars)</label>
+                <FormField label="Initial Password (min 12 chars)">
                   <input
                     type="password"
                     className="input-field"
@@ -1590,11 +1492,10 @@ export default function Admin() {
                     required
                     disabled={!!createUserSuccess}
                   />
-                </div>
+                </FormField>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">Locale</label>
+                  <FormField label="Locale" noMargin>
                     <input
                       type="text"
                       className="input-field"
@@ -1602,9 +1503,8 @@ export default function Admin() {
                       onChange={e => setCreateUserForm(p => ({ ...p, locale: e.target.value }))}
                       disabled={!!createUserSuccess}
                     />
-                  </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">Timezone</label>
+                  </FormField>
+                  <FormField label="Timezone" noMargin>
                     <input
                       type="text"
                       className="input-field"
@@ -1612,7 +1512,7 @@ export default function Admin() {
                       onChange={e => setCreateUserForm(p => ({ ...p, timezone: e.target.value }))}
                       disabled={!!createUserSuccess}
                     />
-                  </div>
+                  </FormField>
                 </div>
               </div>
               <div className="modal-footer">
@@ -1638,41 +1538,40 @@ export default function Admin() {
             </div>
             <div className="modal-body">
               {/* Existing roles list */}
-              <label className="form-label">Active Roles</label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: '8px 0 24px 0' }}>
+              <div className="plain-section-title">Active Roles</div>
+              <div style={{ margin: '8px 0 24px 0' }}>
                 {selectedAccount.roles && selectedAccount.roles.length > 0 ? (
-                  selectedAccount.roles.map(role => (
-                    <div key={role.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '10px 14px', borderRadius: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <ShieldIcon style={{ width: '16px', height: '16px', color: 'var(--color-primary)' }} />
-                        <div>
-                          <div style={{ fontSize: '14.5px', fontWeight: '600' }}>{role.name}</div>
-                          {role.description && <div style={{ fontSize: '12px', color: 'var(--color-text-dark)' }}>{role.description}</div>}
-                        </div>
-                      </div>
-                      <button 
-                        className="btn btn-danger btn-sm" 
-                        style={{ padding: '4px 8px', fontSize: '11px', opacity: selectedAccount.id === currentAdmin?.sub ? 0.4 : 1 }} 
-                        onClick={() => handleRemoveRole(role.id)}
-                        disabled={selectedAccount.id === currentAdmin?.sub}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))
+                  <ListStack>
+                    {selectedAccount.roles.map(role => (
+                      <ListRow
+                        key={role.id}
+                        icon={<ShieldIcon style={{ width: '16px', height: '16px' }} />}
+                        title={role.name}
+                        meta={role.description}
+                        action={
+                          <button 
+                            className="btn btn-danger btn-sm" 
+                            style={{ padding: '4px 8px', fontSize: '11px', opacity: selectedAccount.id === currentAdmin?.sub ? 0.4 : 1 }} 
+                            onClick={() => handleRemoveRole(role.id)}
+                            disabled={selectedAccount.id === currentAdmin?.sub}
+                          >
+                            Remove
+                          </button>
+                        }
+                      />
+                    ))}
+                  </ListStack>
                 ) : (
-                  <div style={{ padding: '16px', textAlign: 'center', background: 'rgba(255,255,255,0.01)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: '8px', color: 'var(--color-text-dark)', fontStyle: 'italic' }}>
-                    No roles assigned to this account.
-                  </div>
+                  <EmptyState title="No roles assigned" description="No roles assigned to this account." />
                 )}
               </div>
 
               {/* Add role form */}
               {selectedAccount.id !== currentAdmin?.sub && (
                 <form onSubmit={handleAddRoleSubmit} style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '20px' }}>
-                  <label className="form-label">Assign New Role</label>
-                  <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                    <div style={{ flex: 1 }}>
+                  <FormField label="Assign New Role" noMargin>
+                    <ButtonGroup>
+                      <div style={{ flex: 1 }}>
                       {discoveredRoles.length > 0 ? (
                         <select 
                           className="input-field"
@@ -1696,14 +1595,15 @@ export default function Admin() {
                           onChange={e => setNewRoleInput(e.target.value)}
                         />
                       )}
+                      </div>
+                      <button type="submit" className="btn btn-primary" disabled={!newRoleInput}>
+                        Assign
+                      </button>
+                    </ButtonGroup>
+                    <div className="form-hint">
+                      Select a previously loaded role from user databases, or input a specific Role UUID.
                     </div>
-                    <button type="submit" className="btn btn-primary" disabled={!newRoleInput}>
-                      Assign
-                    </button>
-                  </div>
-                  <span style={{ fontSize: '11px', color: 'var(--color-text-dark)', marginTop: '6px', display: 'block' }}>
-                    Select a previously loaded role from user databases, or input a specific Role UUID.
-                  </span>
+                  </FormField>
                 </form>
               )}
             </div>
@@ -1731,19 +1631,14 @@ export default function Admin() {
                 </p>
 
                 {passwordError && (
-                  <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', color: 'var(--danger-color)', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '13px' }}>
-                    {passwordError}
-                  </div>
+                  <div style={{ marginBottom: '16px' }}><Feedback type="error">{passwordError}</Feedback></div>
                 )}
 
                 {passwordSuccess && (
-                  <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', color: 'var(--success-color)', padding: '10px', borderRadius: '6px', marginBottom: '16px', fontSize: '13px' }}>
-                    {passwordSuccess}
-                  </div>
+                  <div style={{ marginBottom: '16px' }}><Feedback type="success">{passwordSuccess}</Feedback></div>
                 )}
 
-                <div className="form-group" style={{ marginBottom: '0px' }}>
-                  <label className="form-label">New Password (min 12 chars)</label>
+                <FormField label="New Password (min 12 chars)" noMargin>
                   <input
                     type="password"
                     className="input-field"
@@ -1754,7 +1649,7 @@ export default function Admin() {
                     disabled={!!passwordSuccess}
                     autoFocus
                   />
-                </div>
+                </FormField>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowPasswordModal(false)} disabled={!!passwordSuccess}>Cancel</button>
@@ -1786,40 +1681,42 @@ export default function Admin() {
                   <p style={{ color: 'var(--color-text-muted)', fontSize: '14px' }}>Loading authorized applications...</p>
                 </div>
               ) : consentsList.length === 0 ? (
-                <div style={{ padding: '32px', textAlign: 'center', background: 'rgba(255,255,255,0.01)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: '8px', color: 'var(--color-text-dark)', fontStyle: 'italic' }}>
-                  This user has not authorized any OIDC applications yet.
-                </div>
+                <EmptyState title="No authorized applications" description="This user has not authorized any OIDC applications yet." />
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <ListStack>
                   {consentsList.map(consent => (
-                    <div key={consent.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '12px 16px', borderRadius: '8px' }}>
+                    <ListRow
+                      key={consent.id}
+                      action={
+                        <button 
+                          className="btn btn-danger btn-sm" 
+                          style={{ padding: '6px 12px', opacity: selectedAccount.id === currentAdmin?.sub ? 0.4 : 1 }}
+                          onClick={() => handleRevokeConsent(consent.client_id)}
+                          disabled={selectedAccount.id === currentAdmin?.sub}
+                        >
+                          Revoke Access
+                        </button>
+                      }
+                    >
                       <div style={{ flex: 1, marginRight: '16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <ConsentIcon style={{ width: '16px', height: '16px', color: 'var(--color-secondary)' }} />
-                          <div style={{ fontSize: '15px', fontWeight: '600' }}>Client ID: {consent.client_id}</div>
+                          <span className="list-icon">
+                            <ConsentIcon style={{ width: '16px', height: '16px' }} />
+                          </span>
+                          <div className="list-title">Client ID: {consent.client_id}</div>
                         </div>
                         <div style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                           {consent.scopes?.map((scope: string) => (
-                            <span key={scope} className="badge" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--color-text-muted)' }}>
-                              {scope}
-                            </span>
+                            <Tag key={scope} tone="secondary">{scope}</Tag>
                           ))}
                         </div>
                         <div style={{ fontSize: '12px', color: 'var(--color-text-dark)', marginTop: '8px' }}>
                           Authorized At: {consent.granted_at ? new Date(consent.granted_at).toLocaleString() : '-'}
                         </div>
                       </div>
-                      <button 
-                        className="btn btn-danger btn-sm" 
-                        style={{ padding: '6px 12px', opacity: selectedAccount.id === currentAdmin?.sub ? 0.4 : 1 }}
-                        onClick={() => handleRevokeConsent(consent.client_id)}
-                        disabled={selectedAccount.id === currentAdmin?.sub}
-                      >
-                        Revoke Access
-                      </button>
-                    </div>
+                    </ListRow>
                   ))}
-                </div>
+                </ListStack>
               )}
             </div>
             <div className="modal-footer">
