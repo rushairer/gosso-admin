@@ -30,6 +30,22 @@ interface Role {
   description?: string;
 }
 
+type DependencyStatus = 'ok' | 'unavailable' | 'error' | 'unknown';
+
+interface SystemHealth {
+  status: string;
+  ready: boolean;
+  checks: {
+    database?: DependencyStatus;
+    redis?: DependencyStatus;
+  };
+  checked_at?: string;
+  duration_ms?: number;
+  http_status?: number;
+  fetched_at?: string;
+  fetch_error?: string;
+}
+
 export default function Admin() {
 
   const [activeTab, setActiveTab] = useState<'clients' | 'users' | 'audit-logs' | 'system'>('clients');
@@ -57,7 +73,7 @@ export default function Admin() {
   const [consentsLoading, setConsentsLoading] = useState(false);
 
   // System Health & OIDC discovery states
-  const [systemHealth, setSystemHealth] = useState<any>(null);
+  const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
   const [oidcConfig, setOidcConfig] = useState<any>(null);
   
   
@@ -147,11 +163,27 @@ export default function Admin() {
   const fetchSystemStatus = async () => {
     try {
       const readRes = await apiFetch('/readiness');
-      const readBody = await readRes.json();
-      setSystemHealth(readBody);
-    } catch (e) {
+      const contentType = readRes.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        const text = await readRes.text();
+        throw new Error(`Readiness returned ${readRes.status} ${contentType || 'unknown content-type'}: ${text.slice(0, 120)}`);
+      }
+      const readBody = await readRes.json() as SystemHealth;
+      setSystemHealth({
+        ...readBody,
+        http_status: readBody.http_status ?? readRes.status,
+        fetched_at: new Date().toISOString(),
+      });
+    } catch (e: any) {
       console.error('Error fetching readiness health status', e);
-      setSystemHealth({ status: 'unavailable', ready: false, checks: { database: 'error', redis: 'error' } });
+      setSystemHealth({
+        status: 'unavailable',
+        ready: false,
+        checks: { database: 'error', redis: 'error' },
+        http_status: 0,
+        fetched_at: new Date().toISOString(),
+        fetch_error: e?.message || 'Failed to reach readiness endpoint',
+      });
     }
 
     try {
@@ -161,6 +193,20 @@ export default function Admin() {
     } catch (e) {
       console.error('Error fetching OIDC configuration metadata', e);
     }
+  };
+
+  const dependencyLabel = (status?: DependencyStatus) => {
+    if (status === 'ok') return 'HEALTHY';
+    if (status === 'unavailable') return 'UNAVAILABLE';
+    if (status === 'error') return 'CHECK FAILED';
+    return 'UNKNOWN';
+  };
+
+  const dependencyIsHealthy = (status?: DependencyStatus) => status === 'ok';
+
+  const formatHealthTimestamp = (value?: string) => {
+    if (!value) return 'Not checked yet';
+    return new Date(value).toLocaleString();
   };
 
   const fetchClients = async () => {
@@ -1083,9 +1129,9 @@ export default function Admin() {
                             <td>
                               <button 
                                 className="btn btn-secondary btn-sm" 
-                                onClick={() => setSelectedAuditLog(selectedAuditLog?.id === log.id ? null : log)}
+                                onClick={() => setSelectedAuditLog(log)}
                               >
-                                {selectedAuditLog?.id === log.id ? 'Close' : 'View'}
+                                View
                               </button>
                             </td>
                           </tr>
@@ -1093,46 +1139,6 @@ export default function Admin() {
                       </tbody>
                     </table>
                   </div>
-
-                  {/* Detail Panel */}
-                  {selectedAuditLog && (
-                    <div className="glass-card" style={{ marginTop: '20px', padding: '20px', borderLeft: '4px solid var(--color-primary)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <h4 style={{ color: 'var(--color-text-main)' }}>Audit Log Details</h4>
-                        <button className="btn btn-secondary btn-sm" onClick={() => setSelectedAuditLog(null)}>Close</button>
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div>
-                          <strong style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Log Entry ID:</strong>
-                          <div style={{ fontSize: '14px', marginTop: '2px', fontFamily: 'monospace' }}>{selectedAuditLog.id}</div>
-                        </div>
-                        <div>
-                          <strong style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Action:</strong>
-                          <div style={{ fontSize: '14px', marginTop: '2px', fontFamily: 'monospace' }}>{selectedAuditLog.action}</div>
-                        </div>
-                        <div>
-                          <strong style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Actor IP / Agent:</strong>
-                          <div style={{ fontSize: '14px', marginTop: '2px', fontFamily: 'monospace' }}>{selectedAuditLog.actor}</div>
-                        </div>
-                        {selectedAuditLog.resource && (
-                          <div>
-                            <strong style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Resource Data:</strong>
-                            <pre style={{ margin: '4px 0 0 0', padding: '12px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '6px', fontSize: '12px', color: '#818cf8', overflowX: 'auto', fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-                              {JSON.stringify(selectedAuditLog.resource, null, 2)}
-                            </pre>
-                          </div>
-                        )}
-                        {selectedAuditLog.meta && (
-                          <div>
-                            <strong style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Meta Context:</strong>
-                            <pre style={{ margin: '4px 0 0 0', padding: '12px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '6px', fontSize: '12px', color: '#c084fc', overflowX: 'auto', fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-                              {JSON.stringify(selectedAuditLog.meta, null, 2)}
-                            </pre>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
 
                   {/* Pagination */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
@@ -1168,9 +1174,49 @@ export default function Admin() {
               
               {/* Health checks card */}
               <div className="glass-card">
-                <h3 style={{ fontSize: '18px', marginBottom: '16px', color: 'var(--color-text-main)', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '10px' }}>
-                  Infrastructure Health Status
-                </h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '10px' }}>
+                  <h3 style={{ fontSize: '18px', margin: 0, color: 'var(--color-text-main)' }}>
+                    Infrastructure Health Status
+                  </h3>
+                  <button
+                    className="btn btn-secondary"
+                    type="button"
+                    onClick={fetchSystemStatus}
+                    disabled={loading}
+                    title="Refresh system status"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                  >
+                    <RefreshCw style={{ width: '16px', height: '16px' }} />
+                    Refresh
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
+                    Checked at
+                    <div style={{ marginTop: '4px', color: 'var(--color-text-main)', fontSize: '14px' }}>
+                      {formatHealthTimestamp(systemHealth?.checked_at || systemHealth?.fetched_at)}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
+                    HTTP status
+                    <div style={{ marginTop: '4px', color: 'var(--color-text-main)', fontSize: '14px' }}>
+                      {systemHealth?.http_status || 'n/a'}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
+                    Probe duration
+                    <div style={{ marginTop: '4px', color: 'var(--color-text-main)', fontSize: '14px' }}>
+                      {typeof systemHealth?.duration_ms === 'number' ? `${systemHealth.duration_ms} ms` : 'n/a'}
+                    </div>
+                  </div>
+                </div>
+
+                {systemHealth?.fetch_error && (
+                  <div style={{ marginBottom: '16px', padding: '12px 14px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.10)', border: '1px solid rgba(239, 68, 68, 0.16)', color: '#fecaca', fontSize: '13px' }}>
+                    {systemHealth.fetch_error}
+                  </div>
+                )}
                 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
                   
@@ -1194,8 +1240,8 @@ export default function Admin() {
                     </div>
                     <div>
                       <div style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>Database Connection</div>
-                      <div style={{ fontSize: '16px', fontWeight: 'bold', marginTop: '2px', color: systemHealth?.checks?.database === 'ok' ? 'var(--success-color)' : 'var(--danger-color)' }}>
-                        {systemHealth?.checks?.database === 'ok' ? 'HEALTHY' : 'UNAVAILABLE'}
+                      <div style={{ fontSize: '16px', fontWeight: 'bold', marginTop: '2px', color: dependencyIsHealthy(systemHealth?.checks?.database) ? 'var(--success-color)' : 'var(--danger-color)' }}>
+                        {dependencyLabel(systemHealth?.checks?.database)}
                       </div>
                     </div>
                   </div>
@@ -1220,8 +1266,8 @@ export default function Admin() {
                     </div>
                     <div>
                       <div style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>Redis Cache & Lock Manager</div>
-                      <div style={{ fontSize: '16px', fontWeight: 'bold', marginTop: '2px', color: systemHealth?.checks?.redis === 'ok' ? 'var(--success-color)' : 'var(--danger-color)' }}>
-                        {systemHealth?.checks?.redis === 'ok' ? 'HEALTHY' : 'UNAVAILABLE'}
+                      <div style={{ fontSize: '16px', fontWeight: 'bold', marginTop: '2px', color: dependencyIsHealthy(systemHealth?.checks?.redis) ? 'var(--success-color)' : 'var(--danger-color)' }}>
+                        {dependencyLabel(systemHealth?.checks?.redis)}
                       </div>
                     </div>
                   </div>
@@ -1778,6 +1824,69 @@ export default function Admin() {
             </div>
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={() => setShowConsentModal(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Audit Log Detail Modal */}
+      {selectedAuditLog && (
+        <div className="modal-backdrop" onClick={() => setSelectedAuditLog(null)}>
+          <div
+            className="modal-content"
+            style={{ maxWidth: '720px' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <h3 className="modal-title">Audit Log Details</h3>
+              <button className="modal-close-btn" onClick={() => setSelectedAuditLog(null)}>
+                <XIcon style={{ width: '18px', height: '18px' }} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div>
+                  <strong style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Log Entry ID:</strong>
+                  <div style={{ fontSize: '14px', marginTop: '2px', fontFamily: 'monospace', wordBreak: 'break-all' }}>{selectedAuditLog.id}</div>
+                </div>
+                <div>
+                  <strong style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Action:</strong>
+                  <div style={{ fontSize: '14px', marginTop: '2px', fontFamily: 'monospace' }}>{selectedAuditLog.action}</div>
+                </div>
+                <div>
+                  <strong style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Actor:</strong>
+                  <div style={{ fontSize: '14px', marginTop: '2px', fontFamily: 'monospace', wordBreak: 'break-all' }}>{selectedAuditLog.actor}</div>
+                </div>
+                <div>
+                  <strong style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Target User:</strong>
+                  <div style={{ fontSize: '14px', marginTop: '2px', fontFamily: 'monospace', wordBreak: 'break-all' }}>{selectedAuditLog.account_id || '-'}</div>
+                </div>
+                <div>
+                  <strong style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Created At:</strong>
+                  <div style={{ fontSize: '14px', marginTop: '2px' }}>
+                    {selectedAuditLog.created_at ? new Date(selectedAuditLog.created_at).toLocaleString() : '-'}
+                  </div>
+                </div>
+                {selectedAuditLog.resource && (
+                  <div>
+                    <strong style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Resource Data:</strong>
+                    <pre style={{ margin: '6px 0 0 0', padding: '12px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '6px', fontSize: '12px', color: '#818cf8', overflowX: 'auto', fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                      {JSON.stringify(selectedAuditLog.resource, null, 2)}
+                    </pre>
+                  </div>
+                )}
+                {selectedAuditLog.meta && (
+                  <div>
+                    <strong style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>Meta Context:</strong>
+                    <pre style={{ margin: '6px 0 0 0', padding: '12px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '6px', fontSize: '12px', color: '#c084fc', overflowX: 'auto', fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                      {JSON.stringify(selectedAuditLog.meta, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setSelectedAuditLog(null)}>Close</button>
             </div>
           </div>
         </div>
