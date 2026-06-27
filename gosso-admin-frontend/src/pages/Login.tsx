@@ -6,6 +6,7 @@ import { authSession, fetchUserProfile } from '../auth';
 import { Feedback, FormField } from '../components/ui';
 import { bufferToBase64URL, base64URLToBuffer } from '../utils/webauthn';
 import { logger } from '../utils/logger';
+import type { WebAuthnCredential } from '../types/api';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -53,25 +54,26 @@ export default function Login() {
       const publicKeyOptions: PublicKeyCredentialRequestOptions = {
         ...options,
         challenge: base64URLToBuffer(options.challenge),
-        allowCredentials: (options.allowCredentials || []).map((cred: any) => ({
+        allowCredentials: (options.allowCredentials || []).map((cred: WebAuthnCredential) => ({
           ...cred,
           id: base64URLToBuffer(cred.id),
         })),
       };
-      const assertion = (await navigator.credentials.get({ publicKey: publicKeyOptions })) as any;
+      const assertion = (await navigator.credentials.get({ publicKey: publicKeyOptions })) as PublicKeyCredential | null;
       if (!assertion?.response) throw new Error('Passkey authentication cancelled or failed');
 
       // Step 3: Complete login
+      const assertionResponse = assertion.response as AuthenticatorAssertionResponse;
       const completeBody = {
         request_id,
         id: assertion.id,
         rawId: bufferToBase64URL(assertion.rawId),
         type: assertion.type,
         response: {
-          clientDataJSON: bufferToBase64URL(assertion.response.clientDataJSON),
-          authenticatorData: bufferToBase64URL(assertion.response.authenticatorData),
-          signature: bufferToBase64URL(assertion.response.signature),
-          userHandle: assertion.response.userHandle ? bufferToBase64URL(assertion.response.userHandle) : null,
+          clientDataJSON: bufferToBase64URL(assertionResponse.clientDataJSON),
+          authenticatorData: bufferToBase64URL(assertionResponse.authenticatorData),
+          signature: bufferToBase64URL(assertionResponse.signature),
+          userHandle: assertionResponse.userHandle ? bufferToBase64URL(assertionResponse.userHandle) : null,
         },
       };
       const completeRes = await fetch('/api/v1/passkey/login/complete', {
@@ -83,9 +85,10 @@ export default function Login() {
       if (!completeRes.ok) throw new Error(completeRespBody.message || 'Passkey login failed');
 
       await storeTokensAndRedirect(completeRespBody.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
       logger.error('Passkey login error', err);
-      setError(err.message || t('login.passkeyLoginFailed'));
+      setError(message || t('login.passkeyLoginFailed'));
     } finally {
       setPasskeyLoading(false);
     }
@@ -135,9 +138,10 @@ export default function Login() {
       }
 
       await storeTokensAndRedirect(body.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
       logger.error('Login error', err);
-      setError(err.message || t('login.networkError'));
+      setError(message || t('login.networkError'));
     } finally {
       setLoading(false);
     }
@@ -170,9 +174,10 @@ export default function Login() {
       }
 
       await storeTokensAndRedirect(body.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
       logger.error('MFA verification error', err);
-      setError(err.message || t('login.mfaVerificationFailed'));
+      setError(message || t('login.mfaVerificationFailed'));
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import QRCode from 'qrcode';
 import {
   Shield,
   QrCode,
@@ -22,6 +23,7 @@ import {
   StatusBadge,
   useToast,
 } from '../../components/ui';
+import { logger } from '../../utils/logger';
 
 interface MFAStatus {
   enabled: boolean;
@@ -33,6 +35,7 @@ export default function MFAPanel() {
   const { showSuccess } = useToast();
   const [mfaStatus, setMfaStatus] = useState<MFAStatus>({ enabled: false, types: [] });
   const [mfaEnrollment, setMfaEnrollment] = useState<{ secret: string; otpauth_url: string } | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [totpCode, setTotpCode] = useState('');
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [showDisableModal, setShowDisableModal] = useState(false);
@@ -50,6 +53,23 @@ export default function MFAPanel() {
   useEffect(() => {
     loadMFAStatus();
   }, []);
+
+  useEffect(() => {
+    if (mfaEnrollment?.otpauth_url) {
+      QRCode.toDataURL(mfaEnrollment.otpauth_url, {
+        width: 180,
+        margin: 1,
+        color: { dark: '#000000', light: '#ffffff' },
+      })
+        .then(setQrDataUrl)
+        .catch((err) => {
+          logger.error('Failed to generate QR code', err);
+          setQrDataUrl(null);
+        });
+    } else {
+      setQrDataUrl(null);
+    }
+  }, [mfaEnrollment]);
 
   const loadMFAStatus = async () => {
     try {
@@ -245,11 +265,17 @@ export default function MFAPanel() {
                     boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
                   }}
                 >
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(mfaEnrollment.otpauth_url)}`}
-                    alt={t('mfa.qrCodeAlt')}
-                    style={{ width: '180px', height: '180px' }}
-                  />
+                  {qrDataUrl ? (
+                    <img
+                      src={qrDataUrl}
+                      alt={t('mfa.qrCodeAlt')}
+                      style={{ width: '180px', height: '180px' }}
+                    />
+                  ) : (
+                    <div style={{ width: '180px', height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
+                      {t('common.loading')}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex-1 flex-col gap-md" style={{ minWidth: '260px' }}>
@@ -291,7 +317,7 @@ export default function MFAPanel() {
                         cursor: 'pointer',
                         padding: 0,
                       }}
-                      title="Copy Secret"
+                      title={t('mfa.copySecret')}
                     >
                       <Copy style={{ width: '14px', height: '14px' }} />
                     </button>

@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import i18n from '../i18n';
 import { logger } from '../utils/logger';
 
 interface Props {
@@ -73,10 +74,10 @@ export class ErrorBoundary extends Component<Props, State> {
               }}
             />
             <h2 style={{ color: 'var(--color-text-main)', marginBottom: '12px', fontSize: '22px' }}>
-              Something went wrong
+              {i18n.t('errorBoundary.title')}
             </h2>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', lineHeight: 1.6, marginBottom: '8px' }}>
-              An unexpected error occurred while rendering this page.
+              {i18n.t('errorBoundary.description')}
             </p>
             {import.meta.env.DEV && this.state.error && (
               <pre
@@ -103,10 +104,10 @@ export class ErrorBoundary extends Component<Props, State> {
             <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '24px' }}>
               <button className="btn btn-primary" onClick={this.handleReload}>
                 <RefreshCw style={{ width: '16px', height: '16px' }} />
-                Reload Page
+                {i18n.t('errorBoundary.reloadPage')}
               </button>
               <button className="btn btn-secondary" onClick={this.handleGoHome}>
-                Go Home
+                {i18n.t('errorBoundary.goHome')}
               </button>
             </div>
           </div>

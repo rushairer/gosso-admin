@@ -112,32 +112,26 @@ export default function UsersTab() {
 
       const accountsWithRolesAndLockout = await Promise.all(
         fetchedAccounts.map(async (acc) => {
-          let roles: Role[] = [];
-          let lockedOut = false;
-          let lockoutAttempts = 0;
+          const [rolesResult, lockoutResult] = await Promise.allSettled([
+            apiFetch(`/api/v1/admin/accounts/${acc.id}/roles`),
+            apiFetch(`/api/v1/admin/accounts/${acc.id}/lockout`),
+          ]);
 
-          try {
-            const rolesRes = await apiFetch(`/api/v1/admin/accounts/${acc.id}/roles`);
-            if (rolesRes.ok) {
-              const rolesBody = await rolesRes.json();
-              roles = rolesBody.data || [];
-            }
-          } catch (e) {
-            logger.error(`Failed to fetch roles for user ${acc.username}`, e);
+          let roles: Role[] = [];
+          if (rolesResult.status === 'fulfilled' && rolesResult.value.ok) {
+            const rolesBody = await rolesResult.value.json();
+            roles = rolesBody.data || [];
           }
 
-          try {
-            const lockoutRes = await apiFetch(`/api/v1/admin/accounts/${acc.id}/lockout`);
-            if (lockoutRes.ok) {
-              const lockoutBody = await lockoutRes.json();
-              lockedOut = lockoutBody.data?.locked_out || false;
-              const counters = lockoutBody.data?.counters || [];
-              if (counters.length > 0) {
-                lockoutAttempts = Math.max(...counters.map((c: { attempts?: number }) => c.attempts || 0));
-              }
+          let lockedOut = false;
+          let lockoutAttempts = 0;
+          if (lockoutResult.status === 'fulfilled' && lockoutResult.value.ok) {
+            const lockoutBody = await lockoutResult.value.json();
+            lockedOut = lockoutBody.data?.locked_out || false;
+            const counters = lockoutBody.data?.counters || [];
+            if (counters.length > 0) {
+              lockoutAttempts = Math.max(...counters.map((c: { attempts?: number }) => c.attempts || 0));
             }
-          } catch (e) {
-            logger.error(`Failed to fetch lockout status for user ${acc.username}`, e);
           }
 
           return { ...acc, roles, locked_out: lockedOut, lockout_attempts: lockoutAttempts };
@@ -221,10 +215,13 @@ export default function UsersTab() {
     }
 
     const action = account.status === 'active' ? 'disable' : 'enable';
+    const confirmMsg = action === 'disable'
+      ? t('users.disableConfirmMessage', { username: account.username })
+      : t('users.enableConfirmMessage', { username: account.username });
     const confirmed = await new Promise<boolean>((resolve) => {
       setConfirmState({
         title: action === 'disable' ? t('users.suspendUser') : t('users.activateUser'),
-        message: `Are you sure you want to ${action} user "${account.username}"?`,
+        message: confirmMsg,
         onConfirm: () => { setConfirmState(null); resolve(true); },
         onCancel: () => { setConfirmState(null); resolve(false); },
       });
@@ -379,7 +376,7 @@ export default function UsersTab() {
     }
     const confirmed = await new Promise<boolean>((resolve) => {
       setConfirmState({
-        title: 'Remove Role',
+        title: t('users.removeRole'),
         message: t('users.removeRoleConfirmMessage'),
         onConfirm: () => { setConfirmState(null); resolve(true); },
         onCancel: () => { setConfirmState(null); resolve(false); },
@@ -417,7 +414,7 @@ export default function UsersTab() {
     }
     const confirmed = await new Promise<boolean>((resolve) => {
       setConfirmState({
-        title: 'Clear Lockout',
+        title: t('users.clearLockout'),
         message: t('users.clearLockoutConfirmMessage'),
         onConfirm: () => { setConfirmState(null); resolve(true); },
         onCancel: () => { setConfirmState(null); resolve(false); },
@@ -472,7 +469,7 @@ export default function UsersTab() {
     }
     const confirmed = await new Promise<boolean>((resolve) => {
       setConfirmState({
-        title: 'Revoke Consent',
+        title: t('users.revokeConsent'),
         message: t('users.revokeConsentConfirmMessage'),
         onConfirm: () => { setConfirmState(null); resolve(true); },
         onCancel: () => { setConfirmState(null); resolve(false); },

@@ -1,4 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -14,11 +15,14 @@ export function ConfirmDialog({
   open,
   title,
   message,
-  confirmLabel = 'Confirm',
+  confirmLabel,
   confirmVariant = 'danger',
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation();
+  const resolvedConfirmLabel = confirmLabel ?? t('common.confirm');
+
   if (!open) return null;
 
   return (
@@ -41,10 +45,10 @@ export function ConfirmDialog({
         </div>
         <div className="modal-footer">
           <button className="btn btn-secondary" onClick={onCancel}>
-            Cancel
+            {t('common.cancel')}
           </button>
           <button className={`btn btn-${confirmVariant}`} onClick={onConfirm}>
-            {confirmLabel}
+            {resolvedConfirmLabel}
           </button>
         </div>
       </div>

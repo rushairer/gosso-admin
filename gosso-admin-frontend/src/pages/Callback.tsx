@@ -28,9 +28,10 @@ export default function Callback() {
         const postLoginRedirect = authSession.getPostLoginRedirect('/admin');
         authSession.clearPostLoginRedirect();
         navigate(postLoginRedirect);
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
         logger.error('Auth callback error', err);
-        setError(err.message || t('auth.codeExchangeFailed'));
+        setError(message || t('auth.codeExchangeFailed'));
       }
     }
 
