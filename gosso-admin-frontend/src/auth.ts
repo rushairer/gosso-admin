@@ -7,14 +7,7 @@ import {
   refreshAccessToken,
 } from './services/authSession';
 
-export {
-  apiFetch,
-  authSession,
-  exchangeCodeForToken,
-  fetchUserProfile,
-  redirectToAuthorize,
-  refreshAccessToken,
-};
+export { apiFetch, authSession, exchangeCodeForToken, fetchUserProfile, redirectToAuthorize, refreshAccessToken };
 export type { TokenResponse, UserProfile } from './services/authSession';
 
 export function getAccessToken(): string | null {

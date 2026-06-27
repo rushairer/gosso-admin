@@ -1,5 +1,6 @@
 export * from './Badge';
 export * from './ButtonGroup';
+export * from './ConfirmDialog';
 export * from './DataTable';
 export * from './DefinitionList';
 export * from './EmptyState';
@@ -7,3 +8,4 @@ export * from './Feedback';
 export * from './Form';
 export * from './List';
 export * from './Panel';
+export * from './Toast';

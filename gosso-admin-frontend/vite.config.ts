@@ -14,5 +14,16 @@ export default defineConfig({
       '/oidc': 'http://localhost:8080',
       '/.well-known': 'http://localhost:8080'
     }
-  }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router')) {
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
 })

@@ -1,39 +1,17 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Key } from 'lucide-react';
 import { authSession, fetchUserProfile } from '../auth';
 import { Feedback, FormField } from '../components/ui';
-
-function bufferToBase64URL(buffer: ArrayBuffer): string {
-  if (!buffer) return '';
-  const bytes = new Uint8Array(buffer);
-  let binary = '';
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
-}
-
-function base64URLToBuffer(base64url: string): Uint8Array {
-  if (!base64url) return new Uint8Array(0);
-  const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
-  const padLen = (4 - (base64.length % 4)) % 4;
-  const padded = base64 + '='.repeat(padLen);
-  const binary = atob(padded);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes;
-}
+import { bufferToBase64URL, base64URLToBuffer } from '../utils/webauthn';
+import { logger } from '../utils/logger';
 
 export default function Login() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('admin123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [passkeyLoading, setPasskeyLoading] = useState(false);
@@ -106,8 +84,8 @@ export default function Login() {
 
       await storeTokensAndRedirect(completeRespBody.data);
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || 'Passkey login failed. Please try again.');
+      logger.error('Passkey login error', err);
+      setError(err.message || t('login.passkeyLoginFailed'));
     } finally {
       setPasskeyLoading(false);
     }
@@ -119,7 +97,7 @@ export default function Login() {
     try {
       await fetchUserProfile(data.access_token);
     } catch (profileErr) {
-      console.warn('Failed to fetch user profile after login:', profileErr);
+      logger.warn('Failed to fetch user profile after login', profileErr);
     }
 
     doRedirect();
@@ -128,7 +106,7 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !password) {
-      setError('Please enter both username and password.');
+      setError(t('login.enterBothFields'));
       return;
     }
 
@@ -144,7 +122,7 @@ export default function Login() {
 
       const body = await response.json();
       if (!response.ok) {
-        throw new Error(body.message || 'Login failed. Please check your credentials.');
+        throw new Error(body.message || t('login.loginFailed'));
       }
 
       // Check if MFA is required
@@ -158,8 +136,8 @@ export default function Login() {
 
       await storeTokensAndRedirect(body.data);
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || 'Network error occurred. Please try again.');
+      logger.error('Login error', err);
+      setError(err.message || t('login.networkError'));
     } finally {
       setLoading(false);
     }
@@ -168,7 +146,7 @@ export default function Login() {
   const handleMfaVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!mfaCode.trim()) {
-      setError('Please enter the verification code.');
+      setError(t('login.mfaCodeRequired'));
       return;
     }
 
@@ -188,37 +166,39 @@ export default function Login() {
 
       const body = await response.json();
       if (!response.ok) {
-        throw new Error(body.message || 'Verification failed. Please try again.');
+        throw new Error(body.message || t('login.mfaVerificationFailed'));
       }
 
       await storeTokensAndRedirect(body.data);
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || 'Verification failed. Please try again.');
+      logger.error('MFA verification error', err);
+      setError(err.message || t('login.mfaVerificationFailed'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+    <div className="flex-row items-center justify-center" style={{ height: '100vh' }}>
       <div className="glass-card" style={{ maxWidth: '440px', width: '100%' }}>
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <h1 style={{ color: 'var(--color-text-main)', fontSize: '32px', marginBottom: '8px' }}>GOSSO</h1>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '14.5px' }}>Identity & Access Provider Console</p>
+        <div className="text-center" style={{ marginBottom: '32px' }}>
+          <h1 style={{ color: 'var(--color-text-main)', fontSize: '32px', marginBottom: '8px' }}>{t('login.title')}</h1>
+          <p className="text-muted" style={{ fontSize: '14.5px' }}>{t('login.subtitle')}</p>
         </div>
 
         {error && (
-          <div style={{ marginBottom: '20px' }}><Feedback type="error">{error}</Feedback></div>
+          <div className="mb-md">
+            <Feedback type="error">{error}</Feedback>
+          </div>
         )}
 
         {!mfaRequired ? (
           <form onSubmit={handleLogin}>
-            <FormField label="Username / Email">
+            <FormField label={t('login.usernameLabel')}>
               <input
                 type="text"
                 className="input-field"
-                placeholder="Enter your username"
+                placeholder={t('login.usernamePlaceholder')}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={loading}
@@ -226,50 +206,73 @@ export default function Login() {
               />
             </FormField>
 
-            <FormField label="Password">
+            <FormField label={t('login.passwordLabel')}>
               <input
                 type="password"
                 className="input-field"
-                placeholder="Enter your password"
+                placeholder={t('login.passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
               />
             </FormField>
 
+            {import.meta.env.DEV && !username && !password && (
+              <div
+                style={{
+                  marginBottom: '16px',
+                  padding: '10px 14px',
+                  borderRadius: '6px',
+                  background: 'rgba(59, 130, 246, 0.08)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  fontSize: '13px',
+                  color: 'var(--color-text-muted)',
+                  lineHeight: '1.5',
+                }}
+              >
+                <strong style={{ color: 'var(--color-primary)' }}>Dev mode:</strong>{' '}
+                Default credentials are <code style={{ color: 'var(--color-secondary)' }}>admin</code> /{' '}
+                <code style={{ color: 'var(--color-secondary)' }}>admin123</code>.
+                Configure via <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code> env vars in docker-compose.yml.
+              </div>
+            )}
+
             <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? t('login.signInLoading') : t('login.signInButton')}
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '16px 0' }}>
+            <div className="flex-row items-center gap-md" style={{ margin: '16px 0' }}>
               <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border-color, #374151)' }} />
-              <span style={{ color: 'var(--color-text-muted)', fontSize: '13px' }}>or</span>
+              <span className="text-sm text-muted">{t('common.or')}</span>
               <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border-color, #374151)' }} />
             </div>
 
             <button
               type="button"
-              className="btn btn-secondary"
-              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              className="btn btn-secondary flex-row items-center justify-center gap-sm"
+              style={{ width: '100%' }}
               onClick={handlePasskeyLogin}
               disabled={passkeyLoading}
             >
               <Key size={16} />
-              {passkeyLoading ? 'Verifying passkey...' : 'Sign in with Passkey'}
+              {passkeyLoading ? t('login.passkeyLoading') : t('login.passkeyButton')}
             </button>
           </form>
         ) : (
           <form onSubmit={handleMfaVerify}>
-            <div className="notice-card" style={{ marginBottom: '20px', fontSize: '14px', color: 'var(--color-primary)' }}>
-              Two-factor authentication required. Enter the code from your authenticator app.
+            <div
+              className="notice-card"
+              style={{ marginBottom: '20px', fontSize: '14px', color: 'var(--color-primary)' }}
+            >
+              {t('login.mfaRequired')}
             </div>
 
-            <FormField label="Verification Code">
+            <FormField label={t('login.verificationCodeLabel')}>
               <input
                 type="text"
                 maxLength={8}
                 className="input-field"
-                placeholder="Enter 6-digit code"
+                placeholder={t('login.verificationCodePlaceholder')}
                 value={mfaCode}
                 onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
                 disabled={loading}
@@ -279,17 +282,21 @@ export default function Login() {
             </FormField>
 
             <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-              {loading ? 'Verifying...' : 'Verify'}
+              {loading ? t('login.verifyLoading') : t('login.verifyButton')}
             </button>
 
             <button
               type="button"
               className="btn btn-secondary"
               style={{ width: '100%', marginTop: '10px' }}
-              onClick={() => { setMfaRequired(false); setError(null); setMfaCode(''); }}
+              onClick={() => {
+                setMfaRequired(false);
+                setError(null);
+                setMfaCode('');
+              }}
               disabled={loading}
             >
-              Back to Login
+              {t('login.backToLogin')}
             </button>
           </form>
         )}

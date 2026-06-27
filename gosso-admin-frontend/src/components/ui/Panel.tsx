@@ -39,9 +39,7 @@ export function PanelBody({
   flush?: boolean;
   className?: string;
 }) {
-  const classes = ['panel-body', stack ? 'panel-stack' : '', flush ? 'flush' : '', className]
-    .filter(Boolean)
-    .join(' ');
+  const classes = ['panel-body', stack ? 'panel-stack' : '', flush ? 'flush' : '', className].filter(Boolean).join(' ');
   return <div className={classes}>{children}</div>;
 }
 

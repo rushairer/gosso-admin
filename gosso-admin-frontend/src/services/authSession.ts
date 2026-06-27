@@ -1,3 +1,5 @@
+import { logger } from '../utils/logger';
+
 const SSO_ISSUER = window.location.origin;
 const CLIENT_ID = 'gosso-admin-spa';
 const REDIRECT_URI = `${window.location.origin}/callback`;
@@ -9,6 +11,8 @@ const storageKeys = {
   pkceVerifier: 'pkce_verifier',
   authState: 'auth_state',
   postLoginRedirect: 'post_login_redirect',
+  tokenIssuedAt: 'token_issued_at',
+  tokenExpiresIn: 'token_expires_in',
 };
 
 export interface TokenResponse {
@@ -52,14 +56,12 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
   for (let i = 0; i < bytes.byteLength; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
-  return btoa(binary)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 function setCookie(name: string, value: string, maxAgeSeconds: number) {
-  document.cookie = `${name}=${value}; path=/; max-age=${maxAgeSeconds}; SameSite=Lax`;
+  const secure = location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${name}=${value}; path=/; max-age=${maxAgeSeconds}; SameSite=Lax${secure}`;
 }
 
 function deleteCookie(name: string) {
@@ -81,6 +83,8 @@ function persistTokenSet(data: TokenResponse | { access_token: string; refresh_t
   if (data.refresh_token) {
     localStorage.setItem(storageKeys.refreshToken, data.refresh_token);
   }
+  localStorage.setItem(storageKeys.tokenIssuedAt, String(Date.now()));
+  localStorage.setItem(storageKeys.tokenExpiresIn, String(data.expires_in || 900));
   setCookie('access_token', data.access_token, data.expires_in || 900);
 }
 
@@ -88,6 +92,8 @@ function clearTokenSet() {
   localStorage.removeItem(storageKeys.accessToken);
   localStorage.removeItem(storageKeys.refreshToken);
   localStorage.removeItem(storageKeys.userProfile);
+  localStorage.removeItem(storageKeys.tokenIssuedAt);
+  localStorage.removeItem(storageKeys.tokenExpiresIn);
   deleteCookie('access_token');
 }
 
@@ -99,7 +105,7 @@ function readRolesFromAccessToken(accessToken: string): string[] | undefined {
     const payload = JSON.parse(decodeURIComponent(escape(atob(padded))));
     return payload.roles;
   } catch (e) {
-    console.error('Error parsing token roles', e);
+    logger.error('Error parsing token roles', e);
     return undefined;
   }
 }
@@ -284,7 +290,26 @@ export async function refreshAccessToken(): Promise<string> {
 }
 
 export async function apiFetch(url: string, options: RequestInit = {}): Promise<Response> {
-  const token = authSession.getAccessToken();
+  let token = authSession.getAccessToken();
+
+  if (!token) {
+    window.location.href = '/login';
+    return new Response(null, { status: 401 });
+  }
+
+  // Client-side token expiry pre-check
+  const issuedAt = Number(localStorage.getItem(storageKeys.tokenIssuedAt));
+  const expiresIn = Number(localStorage.getItem(storageKeys.tokenExpiresIn)) || 900;
+  if (issuedAt && Date.now() - issuedAt > expiresIn * 1000) {
+    try {
+      token = await refreshAccessToken();
+    } catch {
+      authSession.clear();
+      window.location.href = '/login';
+      return new Response(null, { status: 401 });
+    }
+  }
+
   const headers = new Headers(options.headers || {});
   if (token && !headers.has('Authorization')) {
     headers.set('Authorization', `Bearer ${token}`);
@@ -298,7 +323,7 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
       headers.set('Authorization', `Bearer ${freshToken}`);
       response = await fetch(url, { ...options, headers });
     } catch (err) {
-      console.error('Failed to auto-refresh token on 401', err);
+      logger.error('Failed to auto-refresh token on 401', err);
       authSession.clear();
       window.location.href = '/login';
     }

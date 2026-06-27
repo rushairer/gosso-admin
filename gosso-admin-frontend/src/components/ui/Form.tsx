@@ -47,13 +47,7 @@ export function CheckboxField({
   );
 }
 
-export function CheckboxGroup({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+export function CheckboxGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="form-group">
       <label className="form-label">{label}</label>
