@@ -25,8 +25,8 @@ describe('Login', () => {
             expires_in: 900,
           },
         }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } },
-      ),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      )
     );
     vi.mocked(fetchUserProfile).mockResolvedValue({ sub: 'admin' });
     vi.mocked(redirectToAuthorize).mockResolvedValue(undefined);
@@ -36,7 +36,7 @@ describe('Login', () => {
     render(
       <MemoryRouter initialEntries={['/login']}>
         <Login />
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
     await userEvent.type(screen.getByPlaceholderText(/username|用户名/i), 'admin');

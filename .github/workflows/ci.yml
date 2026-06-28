@@ -1,16 +1,21 @@
-name: Frontend CI
+name: P0 Release Gate
 
 on:
   push:
     branches: [main, master]
-    paths: ['gosso-admin-frontend/**']
   pull_request:
     branches: [main, master]
-    paths: ['gosso-admin-frontend/**']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p0-release-gate-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  quality:
-    name: Lint, Typecheck, Test & Build
+  frontend:
+    name: Frontend quality
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -19,6 +24,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -39,8 +46,63 @@ jobs:
       - name: Type check
         run: npx tsc -b --noEmit
 
-      - name: Run tests
+      - name: Unit tests
         run: npm run test:run
 
       - name: Build
         run: npm run build
+
+  backend:
+    name: Backend quality
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: gosso
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: gosso/go.mod
+          cache-dependency-path: gosso/go.sum
+
+      - name: Architecture invariants
+        run: make architecture-check
+
+      - name: Coverage gate
+        run: make coverage-check
+
+      - name: Critical package coverage
+        run: make critical-coverage-check
+
+      - name: HTTP integration package compile
+        run: go test -run '^$' ./tests/http
+
+  release-baseline:
+    name: Release baseline
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js for OpenAPI lint
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Development preflight
+        run: ./scripts/preflight.sh development
+
+      - name: Docker Compose config validation
+        run: docker compose config
+
+      - name: OpenAPI lint
+        run: npx --yes @redocly/cli@latest lint gosso/docs/openapi.yaml --skip-rule security-defined

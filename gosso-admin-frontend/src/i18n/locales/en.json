@@ -76,7 +76,10 @@
     "passkeyInvalidOptions": "Server returned invalid WebAuthn options",
     "passkeyCancelled": "Passkey authentication cancelled or failed",
     "passkeyCompleteFailed": "Passkey login failed",
-    "mfaCodeRequired": "Please enter the verification code."
+    "mfaCodeRequired": "Please enter the verification code.",
+    "devCredentialsTitle": "Local development:",
+    "devCredentialsPrefix": "Seeded credentials are",
+    "devCredentialsSuffix": "Only enable this hint with VITE_SHOW_DEV_CREDENTIALS=true in local development."
   },
   "home": {
     "title": "GOSSO Admin Console",
@@ -294,7 +297,8 @@
     "userinfoEndpoint": "Userinfo Endpoint",
     "jwksUri": "JWKS URI",
     "supportedScopes": "Supported Scopes",
-    "grantTypesSupported": "Grant Types Supported"
+    "grantTypesSupported": "Grant Types Supported",
+    "healthTroubleshootingHint": "Readiness is degraded. Check PostgreSQL, Redis, reverse proxy routing, and the GOSSO container logs before retrying."
   },
   "profile": {
     "title": "Profile & Password",

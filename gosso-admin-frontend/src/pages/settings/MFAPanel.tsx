@@ -1,16 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import QRCode from 'qrcode';
-import {
-  Shield,
-  QrCode,
-  Clipboard,
-  AlertTriangle,
-  RefreshCw,
-  Unlock,
-  Check,
-  Copy,
-} from 'lucide-react';
+import { Shield, QrCode, Clipboard, AlertTriangle, RefreshCw, Unlock, Check, Copy } from 'lucide-react';
 import { apiFetch } from '../../auth';
 import {
   ButtonGroup,
@@ -170,8 +161,14 @@ export default function MFAPanel() {
       setConfirmState({
         title: t('mfa.regenerateConfirmTitle'),
         message: t('mfa.regenerateConfirmMessage'),
-        onConfirm: () => { setConfirmState(null); resolve(true); },
-        onCancel: () => { setConfirmState(null); resolve(false); },
+        onConfirm: () => {
+          setConfirmState(null);
+          resolve(true);
+        },
+        onCancel: () => {
+          setConfirmState(null);
+          resolve(false);
+        },
       });
     });
     if (!confirmed) return;
@@ -266,13 +263,18 @@ export default function MFAPanel() {
                   }}
                 >
                   {qrDataUrl ? (
-                    <img
-                      src={qrDataUrl}
-                      alt={t('mfa.qrCodeAlt')}
-                      style={{ width: '180px', height: '180px' }}
-                    />
+                    <img src={qrDataUrl} alt={t('mfa.qrCodeAlt')} style={{ width: '180px', height: '180px' }} />
                   ) : (
-                    <div style={{ width: '180px', height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
+                    <div
+                      style={{
+                        width: '180px',
+                        height: '180px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--color-text-muted)',
+                      }}
+                    >
                       {t('common.loading')}
                     </div>
                   )}
@@ -454,10 +456,7 @@ export default function MFAPanel() {
                 {t('mfa.disableModalDescription')}
               </p>
 
-              <form
-                onSubmit={handleDisableMFA}
-                className="flex-col mt-md" style={{ gap: '14px' }}
-              >
+              <form onSubmit={handleDisableMFA} className="flex-col mt-md" style={{ gap: '14px' }}>
                 <FormField label={t('mfa.accountPasswordLabel')} noMargin>
                   <input
                     type="password"

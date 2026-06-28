@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Key as KeyIcon,
-  User as UserIcon,
-  Shield as ShieldIcon,
-  FileText as AuditIcon,
-} from 'lucide-react';
+import { Key as KeyIcon, User as UserIcon, Shield as ShieldIcon, FileText as AuditIcon } from 'lucide-react';
 import { isLoggedIn, isAdmin, redirectToAuthorize } from '../auth';
 import { Panel } from '../components/ui';
 import ClientsTab from './admin/ClientsTab';
@@ -71,7 +66,9 @@ export default function Admin() {
             display: 'inline-block',
           }}
         />
-        <h3 style={{ color: 'var(--color-text-main)', marginBottom: '12px', fontSize: '20px' }}>{t('admin.accessDeniedTitle')}</h3>
+        <h3 style={{ color: 'var(--color-text-main)', marginBottom: '12px', fontSize: '20px' }}>
+          {t('admin.accessDeniedTitle')}
+        </h3>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', lineHeight: 1.6, marginBottom: '24px' }}>
           {t('admin.accessDeniedDescription')}
         </p>

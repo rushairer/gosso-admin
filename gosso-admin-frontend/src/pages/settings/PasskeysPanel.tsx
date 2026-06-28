@@ -143,8 +143,14 @@ export default function PasskeysPanel() {
       setConfirmState({
         title: t('passkeys.removePasskey'),
         message: t('passkeys.removePasskeyConfirmMessage', { name }),
-        onConfirm: () => { setConfirmState(null); resolve(true); },
-        onCancel: () => { setConfirmState(null); resolve(false); },
+        onConfirm: () => {
+          setConfirmState(null);
+          resolve(true);
+        },
+        onCancel: () => {
+          setConfirmState(null);
+          resolve(false);
+        },
       });
     });
     if (!confirmed) return;
@@ -229,7 +235,9 @@ export default function PasskeysPanel() {
                   meta={
                     <>
                       <Calendar style={{ width: '11px', height: '11px' }} />
-                      {passkey.created_at ? new Date(passkey.created_at).toLocaleString() : t('passkeys.registeredDevice')}
+                      {passkey.created_at
+                        ? new Date(passkey.created_at).toLocaleString()
+                        : t('passkeys.registeredDevice')}
                     </>
                   }
                   action={
@@ -261,10 +269,7 @@ export default function PasskeysPanel() {
                 {t('passkeys.registerModalDescription')}
               </p>
 
-              <form
-                onSubmit={handleRegisterPasskey}
-                className="flex-col mt-md" style={{ gap: '14px' }}
-              >
+              <form onSubmit={handleRegisterPasskey} className="flex-col mt-md" style={{ gap: '14px' }}>
                 <FormField label={t('passkeys.passkeyNameLabel')} noMargin>
                   <input
                     type="text"

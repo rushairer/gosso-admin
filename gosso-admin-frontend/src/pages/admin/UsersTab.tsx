@@ -158,7 +158,15 @@ export default function UsersTab() {
 
   // --- Create User ---
   const handleOpenCreateUserModal = () => {
-    setCreateUserForm({ username: '', display_name: '', email: '', phone: '', password: '', locale: 'en', timezone: 'UTC' });
+    setCreateUserForm({
+      username: '',
+      display_name: '',
+      email: '',
+      phone: '',
+      password: '',
+      locale: 'en',
+      timezone: 'UTC',
+    });
     setCreateUserError(null);
     setCreateUserSuccess(null);
     setShowCreateUserModal(true);
@@ -215,15 +223,22 @@ export default function UsersTab() {
     }
 
     const action = account.status === 'active' ? 'disable' : 'enable';
-    const confirmMsg = action === 'disable'
-      ? t('users.disableConfirmMessage', { username: account.username })
-      : t('users.enableConfirmMessage', { username: account.username });
+    const confirmMsg =
+      action === 'disable'
+        ? t('users.disableConfirmMessage', { username: account.username })
+        : t('users.enableConfirmMessage', { username: account.username });
     const confirmed = await new Promise<boolean>((resolve) => {
       setConfirmState({
         title: action === 'disable' ? t('users.suspendUser') : t('users.activateUser'),
         message: confirmMsg,
-        onConfirm: () => { setConfirmState(null); resolve(true); },
-        onCancel: () => { setConfirmState(null); resolve(false); },
+        onConfirm: () => {
+          setConfirmState(null);
+          resolve(true);
+        },
+        onCancel: () => {
+          setConfirmState(null);
+          resolve(false);
+        },
       });
     });
     if (!confirmed) return;
@@ -251,8 +266,14 @@ export default function UsersTab() {
       setConfirmState({
         title: t('users.deleteUserConfirmTitle'),
         message: t('users.deleteUserConfirmMessage'),
-        onConfirm: () => { setConfirmState(null); resolve(true); },
-        onCancel: () => { setConfirmState(null); resolve(false); },
+        onConfirm: () => {
+          setConfirmState(null);
+          resolve(true);
+        },
+        onCancel: () => {
+          setConfirmState(null);
+          resolve(false);
+        },
       });
     });
     if (!confirmed) return;
@@ -316,8 +337,14 @@ export default function UsersTab() {
       setConfirmState({
         title: t('users.resetMfaButton'),
         message: t('users.resetMfaConfirmMessage', { username: account.username }),
-        onConfirm: () => { setConfirmState(null); resolve(true); },
-        onCancel: () => { setConfirmState(null); resolve(false); },
+        onConfirm: () => {
+          setConfirmState(null);
+          resolve(true);
+        },
+        onCancel: () => {
+          setConfirmState(null);
+          resolve(false);
+        },
       });
     });
     if (!confirmed) return;
@@ -378,8 +405,14 @@ export default function UsersTab() {
       setConfirmState({
         title: t('users.removeRole'),
         message: t('users.removeRoleConfirmMessage'),
-        onConfirm: () => { setConfirmState(null); resolve(true); },
-        onCancel: () => { setConfirmState(null); resolve(false); },
+        onConfirm: () => {
+          setConfirmState(null);
+          resolve(true);
+        },
+        onCancel: () => {
+          setConfirmState(null);
+          resolve(false);
+        },
       });
     });
     if (!confirmed) return;
@@ -416,8 +449,14 @@ export default function UsersTab() {
       setConfirmState({
         title: t('users.clearLockout'),
         message: t('users.clearLockoutConfirmMessage'),
-        onConfirm: () => { setConfirmState(null); resolve(true); },
-        onCancel: () => { setConfirmState(null); resolve(false); },
+        onConfirm: () => {
+          setConfirmState(null);
+          resolve(true);
+        },
+        onCancel: () => {
+          setConfirmState(null);
+          resolve(false);
+        },
       });
     });
     if (!confirmed) return;
@@ -471,8 +510,14 @@ export default function UsersTab() {
       setConfirmState({
         title: t('users.revokeConsent'),
         message: t('users.revokeConsentConfirmMessage'),
-        onConfirm: () => { setConfirmState(null); resolve(true); },
-        onCancel: () => { setConfirmState(null); resolve(false); },
+        onConfirm: () => {
+          setConfirmState(null);
+          resolve(true);
+        },
+        onCancel: () => {
+          setConfirmState(null);
+          resolve(false);
+        },
       });
     });
     if (!confirmed) return;
@@ -540,11 +585,7 @@ export default function UsersTab() {
         }
       />
       {accounts.length === 0 ? (
-        <EmptyState
-          icon={<UserIcon />}
-          title={t('users.noUsersTitle')}
-          description={t('users.noUsersDescription')}
-        />
+        <EmptyState icon={<UserIcon />} title={t('users.noUsersTitle')} description={t('users.noUsersDescription')} />
       ) : (
         <DataTable>
           <thead>
@@ -573,7 +614,9 @@ export default function UsersTab() {
                     )}
                     {acc.locked_out && (
                       <div className="flex-row items-center gap-xs">
-                        <StatusBadge tone="warning">{t('users.statusLocked', { attempts: acc.lockout_attempts })}</StatusBadge>
+                        <StatusBadge tone="warning">
+                          {t('users.statusLocked', { attempts: acc.lockout_attempts })}
+                        </StatusBadge>
                         <button
                           className="btn btn-secondary btn-sm"
                           style={{ padding: '2px 6px', fontSize: '11px', height: '20px' }}
@@ -591,7 +634,9 @@ export default function UsersTab() {
                     {acc.roles && acc.roles.length > 0 ? (
                       acc.roles.map((role) => (
                         <Tag key={role.id} title={role.description}>
-                          <ShieldIcon style={{ width: '10px', height: '10px', marginRight: '4px', display: 'inline' }} />
+                          <ShieldIcon
+                            style={{ width: '10px', height: '10px', marginRight: '4px', display: 'inline' }}
+                          />
                           {role.name}
                         </Tag>
                       ))
@@ -805,7 +850,9 @@ export default function UsersTab() {
         <div className="modal-backdrop">
           <div className="modal-content">
             <div className="modal-header">
-              <h3 className="modal-title">{t('users.rolesModalTitle', { name: selectedAccount.display_name || selectedAccount.username })}</h3>
+              <h3 className="modal-title">
+                {t('users.rolesModalTitle', { name: selectedAccount.display_name || selectedAccount.username })}
+              </h3>
               <button className="modal-close-btn" onClick={() => setShowRoleModal(false)}>
                 <XIcon style={{ width: '18px', height: '18px' }} />
               </button>
@@ -880,9 +927,7 @@ export default function UsersTab() {
                         {t('common.assign')}
                       </button>
                     </ButtonGroup>
-                    <div className="form-hint">
-                      {t('users.assignRoleHint')}
-                    </div>
+                    <div className="form-hint">{t('users.assignRoleHint')}</div>
                   </FormField>
                 </form>
               )}
@@ -909,7 +954,9 @@ export default function UsersTab() {
             <form onSubmit={handlePasswordSubmit}>
               <div className="modal-body">
                 <p className="mb-md text-dark" style={{ fontSize: '14px' }}>
-                  {t('users.changePasswordDescription', { name: selectedAccount.display_name || selectedAccount.username })}
+                  {t('users.changePasswordDescription', {
+                    name: selectedAccount.display_name || selectedAccount.username,
+                  })}
                 </p>
 
                 {passwordError && (
@@ -989,10 +1036,7 @@ export default function UsersTab() {
                   </p>
                 </div>
               ) : consentsList.length === 0 ? (
-                <EmptyState
-                  title={t('users.noConsentsTitle')}
-                  description={t('users.noConsentsDescription')}
-                />
+                <EmptyState title={t('users.noConsentsTitle')} description={t('users.noConsentsDescription')} />
               ) : (
                 <ListStack>
                   {consentsList.map((consent) => (
@@ -1024,7 +1068,8 @@ export default function UsersTab() {
                           ))}
                         </div>
                         <div className="text-xs text-dark mt-sm">
-                          {t('users.authorizedAt')} {consent.granted_at ? new Date(consent.granted_at).toLocaleString() : '-'}
+                          {t('users.authorizedAt')}{' '}
+                          {consent.granted_at ? new Date(consent.granted_at).toLocaleString() : '-'}
                         </div>
                       </div>
                     </ListRow>

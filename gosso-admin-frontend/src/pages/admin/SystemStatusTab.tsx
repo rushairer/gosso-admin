@@ -2,13 +2,9 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Shield as ShieldIcon, RefreshCw } from 'lucide-react';
 import { apiFetch } from '../../auth';
-import { DefinitionList, DefinitionRow, PanelHeader, PlainSection, Tag } from '../../components/ui';
+import { DefinitionList, DefinitionRow, Feedback, PanelHeader, PlainSection, Tag } from '../../components/ui';
 import type { OidcConfiguration, DependencyStatus } from '../../types/api';
-import {
-  dependencyLabel,
-  dependencyIsHealthy,
-  formatHealthTimestamp,
-} from '../../utils/format';
+import { dependencyLabel, dependencyIsHealthy, formatHealthTimestamp } from '../../utils/format';
 import { logger } from '../../utils/logger';
 
 interface SystemHealth {
@@ -30,6 +26,11 @@ export default function SystemStatusTab() {
   const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
   const [oidcConfig, setOidcConfig] = useState<OidcConfiguration | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const hasHealthIssue =
+    !systemHealth?.ready ||
+    !dependencyIsHealthy(systemHealth?.checks?.database) ||
+    !dependencyIsHealthy(systemHealth?.checks?.redis);
 
   useEffect(() => {
     fetchSystemStatus();
@@ -132,7 +133,9 @@ export default function SystemStatusTab() {
           <div className="metric-item">
             <div className="field-label">{t('system.probeDurationLabel')}</div>
             <div className="field-value">
-              {typeof systemHealth?.duration_ms === 'number' ? `${systemHealth.duration_ms} ms` : t('common.notAvailable')}
+              {typeof systemHealth?.duration_ms === 'number'
+                ? `${systemHealth.duration_ms} ms`
+                : t('common.notAvailable')}
             </div>
           </div>
         </div>
@@ -153,6 +156,12 @@ export default function SystemStatusTab() {
           </div>
         )}
 
+        {hasHealthIssue && (
+          <div className="mb-md">
+            <Feedback type="error">{t('system.healthTroubleshootingHint')}</Feedback>
+          </div>
+        )}
+
         <div className="inline-status-list mt-md">
           {/* Database Health */}
           <div className="inline-status-row">
@@ -160,16 +169,16 @@ export default function SystemStatusTab() {
               className="inline-icon"
               style={{
                 background:
-                  systemHealth?.checks?.database === 'ok'
-                    ? 'rgba(16, 185, 129, 0.12)'
-                    : 'rgba(239, 68, 68, 0.12)',
+                  systemHealth?.checks?.database === 'ok' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
                 color: systemHealth?.checks?.database === 'ok' ? 'var(--success-color)' : 'var(--danger-color)',
               }}
             >
               <ShieldIcon style={{ width: '22px', height: '22px' }} />
             </div>
             <div>
-              <div className="text-muted" style={{ fontSize: '14px' }}>{t('system.databaseConnection')}</div>
+              <div className="text-muted" style={{ fontSize: '14px' }}>
+                {t('system.databaseConnection')}
+              </div>
               <div
                 style={{
                   fontSize: '16px',
@@ -198,7 +207,9 @@ export default function SystemStatusTab() {
               <RefreshCw style={{ width: '22px', height: '22px' }} />
             </div>
             <div>
-              <div className="text-muted" style={{ fontSize: '14px' }}>{t('system.redisCacheAndLock')}</div>
+              <div className="text-muted" style={{ fontSize: '14px' }}>
+                {t('system.redisCacheAndLock')}
+              </div>
               <div
                 style={{
                   fontSize: '16px',

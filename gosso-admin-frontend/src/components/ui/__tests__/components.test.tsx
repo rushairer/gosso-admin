@@ -77,7 +77,13 @@ describe('ConfirmDialog', () => {
   it('calls onConfirm when confirm button clicked', () => {
     let confirmed = false;
     render(
-      <ConfirmDialog open={true} title="Test" message="Confirm?" onConfirm={() => (confirmed = true)} onCancel={() => {}} />
+      <ConfirmDialog
+        open={true}
+        title="Test"
+        message="Confirm?"
+        onConfirm={() => (confirmed = true)}
+        onCancel={() => {}}
+      />
     );
     fireEvent.click(screen.getByText('Confirm'));
     expect(confirmed).toBe(true);
@@ -86,7 +92,13 @@ describe('ConfirmDialog', () => {
   it('calls onCancel when cancel button clicked', () => {
     let cancelled = false;
     render(
-      <ConfirmDialog open={true} title="Test" message="Confirm?" onConfirm={() => {}} onCancel={() => (cancelled = true)} />
+      <ConfirmDialog
+        open={true}
+        title="Test"
+        message="Confirm?"
+        onConfirm={() => {}}
+        onCancel={() => (cancelled = true)}
+      />
     );
     fireEvent.click(screen.getByText('Cancel'));
     expect(cancelled).toBe(true);

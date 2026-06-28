@@ -2,15 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText as AuditIcon, X as XIcon } from 'lucide-react';
 import { apiFetch } from '../../auth';
-import {
-  ButtonGroup,
-  DataTable,
-  EmptyState,
-  Feedback,
-  FormField,
-  PanelHeader,
-  Tag,
-} from '../../components/ui';
+import { ButtonGroup, DataTable, EmptyState, Feedback, FormField, PanelHeader, Tag } from '../../components/ui';
 import type { AuditLog } from '../../types/api';
 import { logger } from '../../utils/logger';
 
@@ -57,10 +49,7 @@ export default function AuditLogsTab() {
 
   return (
     <div>
-      <PanelHeader
-        title={t('audit.title')}
-        description={t('audit.description')}
-      />
+      <PanelHeader title={t('audit.title')} description={t('audit.description')} />
       <div className="panel-body" style={{ borderBottom: '1px solid var(--border-color)' }}>
         <div className="flex-row flex-wrap gap-lg" style={{ alignItems: 'flex-end' }}>
           <div className="flex-col gap-xs">
@@ -126,14 +115,12 @@ export default function AuditLogsTab() {
               animation: 'spin 1s linear infinite',
             }}
           />
-          <p className="text-muted" style={{ fontSize: '14px' }}>{t('audit.loadingLogs')}</p>
+          <p className="text-muted" style={{ fontSize: '14px' }}>
+            {t('audit.loadingLogs')}
+          </p>
         </div>
       ) : auditLogs.length === 0 ? (
-        <EmptyState
-          icon={<AuditIcon />}
-          title={t('audit.noLogsTitle')}
-          description={t('audit.noLogsDescription')}
-        />
+        <EmptyState icon={<AuditIcon />} title={t('audit.noLogsTitle')} description={t('audit.noLogsDescription')} />
       ) : (
         <div>
           <DataTable>
@@ -156,9 +143,7 @@ export default function AuditLogsTab() {
                     <Tag>{log.action}</Tag>
                   </td>
                   <td className="text-sm text-mono">{log.actor}</td>
-                  <td className="text-sm text-mono text-muted">
-                    {log.account_id || '-'}
-                  </td>
+                  <td className="text-sm text-mono text-muted">{log.account_id || '-'}</td>
                   <td>
                     <button className="btn btn-secondary btn-sm" onClick={() => setSelectedAuditLog(log)}>
                       {t('common.view')}
@@ -177,7 +162,9 @@ export default function AuditLogsTab() {
               padding: '0 20px 20px 20px',
             }}
           >
-            <div className="text-muted" style={{ fontSize: '14px' }}>{t('audit.totalLogs', { count: auditTotal })}</div>
+            <div className="text-muted" style={{ fontSize: '14px' }}>
+              {t('audit.totalLogs', { count: auditTotal })}
+            </div>
             <ButtonGroup compact>
               <button
                 className="btn btn-secondary btn-sm"
@@ -186,7 +173,9 @@ export default function AuditLogsTab() {
               >
                 {t('common.previous')}
               </button>
-              <span style={{ fontSize: '14px', color: 'var(--color-text-main)' }}>{t('audit.pageLabel', { page: auditPage })}</span>
+              <span style={{ fontSize: '14px', color: 'var(--color-text-main)' }}>
+                {t('audit.pageLabel', { page: auditPage })}
+              </span>
               <button
                 className="btn btn-secondary btn-sm"
                 disabled={auditLogs.length < 20 || auditPage * 20 >= auditTotal}
@@ -210,7 +199,7 @@ export default function AuditLogsTab() {
               </button>
             </div>
             <div className="modal-body">
-                <div className="flex-col" style={{ gap: '14px' }}>
+              <div className="flex-col" style={{ gap: '14px' }}>
                 <div>
                   <strong className="text-sm text-muted">{t('audit.detailLogId')}</strong>
                   <div style={{ fontSize: '14px', marginTop: '2px', fontFamily: 'monospace', wordBreak: 'break-all' }}>

@@ -2,7 +2,17 @@ import { useState, useEffect } from 'react';
 import { Lock, Eye, EyeOff, Edit2 as EditIcon, Mail, X as XIcon, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { apiFetch, getAccessToken, fetchUserProfile } from '../../auth';
-import { Feedback, FormField, Panel, PanelHeader, PlainSection, DefinitionList, DefinitionRow, Tag, ButtonGroup } from '../../components/ui';
+import {
+  Feedback,
+  FormField,
+  Panel,
+  PanelHeader,
+  PlainSection,
+  DefinitionList,
+  DefinitionRow,
+  Tag,
+  ButtonGroup,
+} from '../../components/ui';
 import type { UserProfile } from '../../auth';
 
 export default function ProfilePanel({ profile: initialProfile }: { profile: UserProfile | null }) {
@@ -205,10 +215,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
 
   return (
     <Panel>
-      <PanelHeader
-        title={t('profile.title')}
-        description={t('profile.description')}
-      />
+      <PanelHeader title={t('profile.title')} description={t('profile.description')} />
       <PlainSection title={t('profile.accountProfileSection')}>
         {error && (
           <div className="mb-md">
@@ -235,7 +242,12 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
                   onChange={(e) => setNewName(e.target.value)}
                   style={{ padding: '6px 12px', fontSize: '13px', width: '220px' }}
                 />
-                <button className="btn btn-primary btn-sm" type="submit" disabled={editNameLoading} style={{ padding: '6px 10px' }}>
+                <button
+                  className="btn btn-primary btn-sm"
+                  type="submit"
+                  disabled={editNameLoading}
+                  style={{ padding: '6px 10px' }}
+                >
                   <Check style={{ width: '14px', height: '14px' }} />
                 </button>
                 <button
@@ -288,11 +300,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
       </PlainSection>
 
       <PlainSection title={t('profile.updatePasswordSection')}>
-        <form
-          onSubmit={handleChangePassword}
-          className="flex-col gap-lg"
-          style={{ maxWidth: '500px' }}
-        >
+        <form onSubmit={handleChangePassword} className="flex-col gap-lg" style={{ maxWidth: '500px' }}>
           <FormField label={t('profile.currentPasswordLabel')} noMargin>
             <div style={{ position: 'relative' }}>
               <input
@@ -370,11 +378,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
             />
           </FormField>
 
-          <button
-            className="btn btn-primary self-start mt-sm"
-            type="submit"
-            disabled={loading}
-          >
+          <button className="btn btn-primary self-start mt-sm" type="submit" disabled={loading}>
             <Lock style={{ width: '16px', height: '16px' }} />
             {loading ? t('profile.changePasswordLoading') : t('profile.changePasswordButton')}
           </button>
@@ -502,11 +506,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
                     >
                       {t('common.previous') || 'Back'}
                     </button>
-                    <button
-                      className="btn btn-primary"
-                      type="submit"
-                      disabled={emailLoading || !emailCode.trim()}
-                    >
+                    <button className="btn btn-primary" type="submit" disabled={emailLoading || !emailCode.trim()}>
                       {emailLoading ? t('common.loading') : t('profile.confirmEmailButton')}
                     </button>
                   </ButtonGroup>

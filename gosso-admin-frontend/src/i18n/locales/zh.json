@@ -76,7 +76,10 @@
     "passkeyInvalidOptions": "服务器返回了无效的 WebAuthn 选项",
     "passkeyCancelled": "通行密钥认证已取消或失败",
     "passkeyCompleteFailed": "通行密钥登录失败",
-    "mfaCodeRequired": "请输入验证码。"
+    "mfaCodeRequired": "请输入验证码。",
+    "devCredentialsTitle": "本地开发：",
+    "devCredentialsPrefix": "播种凭据为",
+    "devCredentialsSuffix": "仅在本地开发中通过 VITE_SHOW_DEV_CREDENTIALS=true 显示此提示。"
   },
   "home": {
     "title": "GOSSO 管理控制台",
@@ -294,7 +297,8 @@
     "userinfoEndpoint": "用户信息端点",
     "jwksUri": "JWKS URI",
     "supportedScopes": "支持的范围",
-    "grantTypesSupported": "支持的授权类型"
+    "grantTypesSupported": "支持的授权类型",
+    "healthTroubleshootingHint": "就绪检查异常。请先检查 PostgreSQL、Redis、反向代理路由以及 GOSSO 容器日志，然后重试。"
   },
   "profile": {
     "title": "个人资料与密码",

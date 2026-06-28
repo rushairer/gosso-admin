@@ -56,9 +56,7 @@ export default function Callback() {
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
       <div className="glass-card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center' }}>
         <h2 style={{ marginBottom: '16px' }}>{t('auth.authenticating')}</h2>
-        <p style={{ color: 'var(--color-text-muted)', fontSize: '14.5px' }}>
-          {t('auth.authenticatingDescription')}
-        </p>
+        <p style={{ color: 'var(--color-text-muted)', fontSize: '14.5px' }}>{t('auth.authenticatingDescription')}</p>
         <div
           style={{
             margin: '24px auto 0 auto',

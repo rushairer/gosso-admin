@@ -198,8 +198,14 @@ export default function ClientsTab() {
       setConfirmState({
         title: t('clients.deleteConfirmTitle'),
         message: t('clients.deleteConfirmMessage'),
-        onConfirm: () => { setConfirmState(null); resolve(true); },
-        onCancel: () => { setConfirmState(null); resolve(false); },
+        onConfirm: () => {
+          setConfirmState(null);
+          resolve(true);
+        },
+        onCancel: () => {
+          setConfirmState(null);
+          resolve(false);
+        },
       });
     });
     if (!confirmed) return;
@@ -295,9 +301,7 @@ export default function ClientsTab() {
               <tr key={client.client_id}>
                 <td>
                   <div className="text-sm text-dark">{client.name}</div>
-                  <div className="text-xs text-dark text-mono">
-                    {client.client_id}
-                  </div>
+                  <div className="text-xs text-dark text-mono">{client.client_id}</div>
                   {client.description && (
                     <div className="text-sm text-muted" style={{ marginTop: '4px' }}>
                       {client.description}
@@ -351,7 +355,7 @@ export default function ClientsTab() {
                         </StatusBadge>
                       ) : (
                         <Tag key={s}>{s}</Tag>
-                      ),
+                      )
                     )}
                   </div>
                 </td>
@@ -384,7 +388,9 @@ export default function ClientsTab() {
         <div className="modal-backdrop">
           <div className="modal-content">
             <div className="modal-header">
-              <h3 className="modal-title">{editingClient ? t('clients.editModalTitle') : t('clients.registerModalTitle')}</h3>
+              <h3 className="modal-title">
+                {editingClient ? t('clients.editModalTitle') : t('clients.registerModalTitle')}
+              </h3>
               <button className="modal-close-btn" onClick={() => setShowClientModal(false)}>
                 <XIcon style={{ width: '18px', height: '18px' }} />
               </button>
@@ -409,10 +415,7 @@ export default function ClientsTab() {
                     onChange={(e) => setClientForm((p) => ({ ...p, description: e.target.value }))}
                   />
                 </FormField>
-                <FormField
-                  label={t('clients.redirectUrisLabel')}
-                  hint={t('clients.redirectUrisHint')}
-                >
+                <FormField label={t('clients.redirectUrisLabel')} hint={t('clients.redirectUrisHint')}>
                   <input
                     type="text"
                     className="input-field"
@@ -490,7 +493,9 @@ export default function ClientsTab() {
         <div className="modal-backdrop">
           <div className="modal-content" style={{ border: '1px solid rgba(168, 85, 247, 0.4)' }}>
             <div className="modal-header">
-              <h3 className="modal-title" style={{ color: 'var(--color-secondary)' }}>{t('clients.secretModalTitle')}</h3>
+              <h3 className="modal-title" style={{ color: 'var(--color-secondary)' }}>
+                {t('clients.secretModalTitle')}
+              </h3>
             </div>
             <div className="modal-body">
               <div className="notice-card" style={{ flexDirection: 'row', marginBottom: '20px' }}>

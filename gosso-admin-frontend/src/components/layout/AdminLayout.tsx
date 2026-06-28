@@ -15,20 +15,23 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [session, setSession] = useState<SessionSnapshot>(() => authSession.getSnapshot());
 
-  const pageTitles: Record<string, { title: string; description: string }> = useMemo(() => ({
-    '/': {
-      title: t('pageTitles.overviewTitle'),
-      description: t('pageTitles.overviewDescription'),
-    },
-    '/admin': {
-      title: t('pageTitles.administrationTitle'),
-      description: t('pageTitles.administrationDescription'),
-    },
-    '/settings': {
-      title: t('pageTitles.settingsTitle'),
-      description: t('pageTitles.settingsDescription'),
-    },
-  }), [t]);
+  const pageTitles: Record<string, { title: string; description: string }> = useMemo(
+    () => ({
+      '/': {
+        title: t('pageTitles.overviewTitle'),
+        description: t('pageTitles.overviewDescription'),
+      },
+      '/admin': {
+        title: t('pageTitles.administrationTitle'),
+        description: t('pageTitles.administrationDescription'),
+      },
+      '/settings': {
+        title: t('pageTitles.settingsTitle'),
+        description: t('pageTitles.settingsDescription'),
+      },
+    }),
+    [t]
+  );
 
   useEffect(() => {
     setSession(authSession.getSnapshot());
@@ -75,7 +78,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             <div className="avatar">{session.loggedIn ? initials(session) : <User size={16} />}</div>
             <div className="session-meta">
               <strong>{userName}</strong>
-              <span>{session.loggedIn ? (session.isAdmin ? t('nav.administrator') : t('nav.user')) : t('nav.anonymous')}</span>
+              <span>
+                {session.loggedIn ? (session.isAdmin ? t('nav.administrator') : t('nav.user')) : t('nav.anonymous')}
+              </span>
             </div>
           </div>
           {session.loggedIn ? (
@@ -105,11 +110,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </div>
             {/* Mobile session indicator — hidden on desktop via CSS */}
             {session.loggedIn && (
-              <button
-                className="mobile-signout"
-                onClick={() => authSession.logout('/')}
-                title={t('nav.signOut')}
-              >
+              <button className="mobile-signout" onClick={() => authSession.logout('/')} title={t('nav.signOut')}>
                 <LogOut size={16} />
               </button>
             )}

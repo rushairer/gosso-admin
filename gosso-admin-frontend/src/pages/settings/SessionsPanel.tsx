@@ -63,8 +63,14 @@ export default function SessionsPanel() {
       setConfirmState({
         title: t('sessions.terminateSessionTitle'),
         message: t('sessions.terminateSessionConfirmMessage'),
-        onConfirm: () => { setConfirmState(null); resolve(true); },
-        onCancel: () => { setConfirmState(null); resolve(false); },
+        onConfirm: () => {
+          setConfirmState(null);
+          resolve(true);
+        },
+        onCancel: () => {
+          setConfirmState(null);
+          resolve(false);
+        },
       });
     });
     if (!confirmed) return;
@@ -104,100 +110,101 @@ export default function SessionsPanel() {
 
   return (
     <>
-    <Panel>
-      <PanelHeader
-        title={t('sessions.title')}
-        description={t('sessions.description')}
-      />
+      <Panel>
+        <PanelHeader title={t('sessions.title')} description={t('sessions.description')} />
 
-      {error && (
-        <div style={{ padding: '0 20px 12px' }}>
-          <div className="feedback feedback-error" style={{ fontSize: '13px' }}>{error}</div>
-        </div>
-      )}
-      {success && (
-        <div style={{ padding: '0 20px 12px' }}>
-          <div className="feedback feedback-success" style={{ fontSize: '13px' }}>{success}</div>
-        </div>
-      )}
+        {error && (
+          <div style={{ padding: '0 20px 12px' }}>
+            <div className="feedback feedback-error" style={{ fontSize: '13px' }}>
+              {error}
+            </div>
+          </div>
+        )}
+        {success && (
+          <div style={{ padding: '0 20px 12px' }}>
+            <div className="feedback feedback-success" style={{ fontSize: '13px' }}>
+              {success}
+            </div>
+          </div>
+        )}
 
-      <DataTable>
-        <thead>
-          <tr>
-            <th>{t('sessions.colDeviceBrowser')}</th>
-            <th>{t('sessions.colIpAddress')}</th>
-            <th>{t('sessions.colLastActive')}</th>
-            <th className="text-right">{t('sessions.colActions')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sessions.map((session) => {
-            const isCurrent = session.id === currentSessionId;
-            return (
-              <tr
-                key={session.id}
-                style={{ backgroundColor: isCurrent ? 'rgba(99, 102, 241, 0.03)' : 'transparent' }}
-              >
-                <td>
-                  <div className="flex-row items-center gap-sm">
-                    <Laptop
-                      style={{
-                        width: '16px',
-                        height: '16px',
-                        color: isCurrent ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                      }}
-                    />
+        <DataTable>
+          <thead>
+            <tr>
+              <th>{t('sessions.colDeviceBrowser')}</th>
+              <th>{t('sessions.colIpAddress')}</th>
+              <th>{t('sessions.colLastActive')}</th>
+              <th className="text-right">{t('sessions.colActions')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sessions.map((session) => {
+              const isCurrent = session.id === currentSessionId;
+              return (
+                <tr
+                  key={session.id}
+                  style={{ backgroundColor: isCurrent ? 'rgba(99, 102, 241, 0.03)' : 'transparent' }}
+                >
+                  <td>
                     <div className="flex-row items-center gap-sm">
-                      <span style={{ fontSize: '14px', fontWeight: '600' }}>
-                        {parseUserAgent(session.user_agent)}
-                      </span>
-                      {isCurrent && <Tag>{t('sessions.currentSession')}</Tag>}
+                      <Laptop
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          color: isCurrent ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                        }}
+                      />
+                      <div className="flex-row items-center gap-sm">
+                        <span style={{ fontSize: '14px', fontWeight: '600' }}>
+                          {parseUserAgent(session.user_agent)}
+                        </span>
+                        {isCurrent && <Tag>{t('sessions.currentSession')}</Tag>}
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td style={{ fontSize: '13.5px', color: 'var(--color-text-main)' }}>
-                  <span className="flex-row items-center gap-xs">
-                    <MapPin style={{ width: '12px', height: '12px', color: 'var(--color-text-dark)' }} />
-                    {session.ip}
-                  </span>
-                </td>
-                <td className="text-muted" style={{ fontSize: '13.5px' }}>
-                  {new Date(session.last_active_at).toLocaleString()}
-                </td>
-                <td className="text-right">
-                  {isCurrent ? (
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={logout}
-                      style={{ fontSize: '11px', padding: '4px 10px' }}
-                    >
-                      {t('sessions.signOutButton')}
-                    </button>
-                  ) : (
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleRevokeSession(session.id)}
-                      style={{ fontSize: '11px', padding: '4px 10px' }}
-                    >
-                      {t('sessions.revokeButton')}
-                    </button>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </DataTable>
-    </Panel>
+                  </td>
+                  <td style={{ fontSize: '13.5px', color: 'var(--color-text-main)' }}>
+                    <span className="flex-row items-center gap-xs">
+                      <MapPin style={{ width: '12px', height: '12px', color: 'var(--color-text-dark)' }} />
+                      {session.ip}
+                    </span>
+                  </td>
+                  <td className="text-muted" style={{ fontSize: '13.5px' }}>
+                    {new Date(session.last_active_at).toLocaleString()}
+                  </td>
+                  <td className="text-right">
+                    {isCurrent ? (
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={logout}
+                        style={{ fontSize: '11px', padding: '4px 10px' }}
+                      >
+                        {t('sessions.signOutButton')}
+                      </button>
+                    ) : (
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleRevokeSession(session.id)}
+                        style={{ fontSize: '11px', padding: '4px 10px' }}
+                      >
+                        {t('sessions.revokeButton')}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </DataTable>
+      </Panel>
 
-    <ConfirmDialog
-      open={!!confirmState}
-      title={confirmState?.title || ''}
-      message={confirmState?.message || ''}
-      confirmLabel={t('sessions.terminateButton')}
-      onConfirm={() => confirmState?.onConfirm()}
-      onCancel={() => confirmState?.onCancel()}
-    />
+      <ConfirmDialog
+        open={!!confirmState}
+        title={confirmState?.title || ''}
+        message={confirmState?.message || ''}
+        confirmLabel={t('sessions.terminateButton')}
+        onConfirm={() => confirmState?.onConfirm()}
+        onCancel={() => confirmState?.onCancel()}
+      />
     </>
   );
 }

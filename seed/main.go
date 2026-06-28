@@ -24,6 +24,40 @@ const (
 	Argon2KeyLen  = 32
 )
 
+func deploymentEnv() string {
+	for _, key := range []string{"GOSSO_ADMIN_ENV", "GOUNO_ENV", "APP_ENV", "ENV"} {
+		if value := strings.TrimSpace(os.Getenv(key)); value != "" {
+			return strings.ToLower(value)
+		}
+	}
+	return "development"
+}
+
+func isDevelopmentLike(env string) bool {
+	switch env {
+	case "", "dev", "development", "local", "test", "testing":
+		return true
+	default:
+		return false
+	}
+}
+
+func validateAdminSeedPolicy(env, username, password string) {
+	if isDevelopmentLike(env) {
+		if password == "admin123" {
+			log.Printf("WARNING: using local development default credentials %q / %q. Do not use this outside local development.", username, password)
+		}
+		return
+	}
+
+	if password == "" || password == "admin123" {
+		log.Fatalf("Refusing to seed default admin password in %q environment. Set ADMIN_PASSWORD to a unique password with at least 12 characters.", env)
+	}
+	if len(password) < 12 {
+		log.Fatalf("Refusing to seed weak admin password in %q environment. ADMIN_PASSWORD must be at least 12 characters.", env)
+	}
+}
+
 func hashPassword(password string) (string, error) {
 	salt := make([]byte, Argon2SaltLen)
 	if _, err := rand.Read(salt); err != nil {
@@ -66,6 +100,7 @@ func parseRedirectURIs(envVal string) (string, error) {
 }
 
 func main() {
+	env := deploymentEnv()
 	dsn := os.Getenv("PG_DSN")
 	if dsn == "" {
 		log.Fatal("PG_DSN environment variable is required")
@@ -79,6 +114,7 @@ func main() {
 	if adminPassword == "" {
 		adminPassword = "admin123"
 	}
+	validateAdminSeedPolicy(env, adminUsername, adminPassword)
 	adminDisplayName := os.Getenv("ADMIN_DISPLAY_NAME")
 	if adminDisplayName == "" {
 		adminDisplayName = "System Admin"
@@ -89,6 +125,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to parse OAUTH2_CLIENT_REDIRECT_URIS: %v", err)
 	}
+	log.Printf("Starting GOSSO admin seed for %q environment.", env)
 	log.Println("Connecting to GOSSO database...")
 	var db *sql.DB
 
@@ -164,7 +201,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("Failed to seed admin password credential: %v", err)
 		}
-		log.Println("Admin user seeded successfully.")
+		log.Printf("Admin user %q seeded successfully. Store the initial password securely and rotate it after first sign-in.", adminUsername)
 	} else {
 		err = db.QueryRowContext(ctx, "SELECT id FROM accounts WHERE username = $1", adminUsername).Scan(&adminID)
 		if err != nil {
@@ -246,5 +283,5 @@ func main() {
 		log.Println("OAuth2 client 'gosso-admin-spa' admin policy updated.")
 	}
 
-	log.Println("Database seeding completed successfully.")
+	log.Printf("Database seeding completed successfully. Admin account: %s; Admin console client: gosso-admin-spa.", adminUsername)
 }

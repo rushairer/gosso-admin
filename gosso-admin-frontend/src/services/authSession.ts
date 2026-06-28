@@ -27,11 +27,7 @@ interface RefreshLock {
 }
 
 interface BrowserLockManager {
-  request<T>(
-    name: string,
-    options: { mode: 'exclusive' },
-    callback: () => T | Promise<T>,
-  ): Promise<T>;
+  request<T>(name: string, options: { mode: 'exclusive' }, callback: () => T | Promise<T>): Promise<T>;
 }
 
 type NavigatorWithLocks = Navigator & { locks?: BrowserLockManager };

@@ -151,8 +151,8 @@ describe('authSession', () => {
               expires_in: 900,
             },
           }),
-          { status: 200, headers: { 'Content-Type': 'application/json' } },
-        ),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
       );
 
       const { refreshAccessToken } = await import('../authSession');
@@ -168,10 +168,7 @@ describe('authSession', () => {
     it('waits for another tab to finish refresh and reuses the rotated token set', async () => {
       vi.useFakeTimers();
       localStorage.setItem('refresh_token', 'old-refresh');
-      localStorage.setItem(
-        'auth_refresh_lock',
-        JSON.stringify({ owner: 'other-tab', expiresAt: Date.now() + 15_000 }),
-      );
+      localStorage.setItem('auth_refresh_lock', JSON.stringify({ owner: 'other-tab', expiresAt: Date.now() + 15_000 }));
       const fetchMock = vi.spyOn(window, 'fetch');
 
       const { refreshAccessToken, authSession } = await import('../authSession');
@@ -194,10 +191,7 @@ describe('authSession', () => {
     it('takes over a stale refresh lock and uses the latest refresh token from storage', async () => {
       vi.useFakeTimers();
       localStorage.setItem('refresh_token', 'old-refresh');
-      localStorage.setItem(
-        'auth_refresh_lock',
-        JSON.stringify({ owner: 'other-tab', expiresAt: Date.now() + 15_000 }),
-      );
+      localStorage.setItem('auth_refresh_lock', JSON.stringify({ owner: 'other-tab', expiresAt: Date.now() + 15_000 }));
       const fetchMock = vi.spyOn(window, 'fetch').mockResolvedValue(
         new Response(
           JSON.stringify({
@@ -207,8 +201,8 @@ describe('authSession', () => {
               expires_in: 900,
             },
           }),
-          { status: 200, headers: { 'Content-Type': 'application/json' } },
-        ),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        )
       );
 
       const { refreshAccessToken } = await import('../authSession');
@@ -226,11 +220,13 @@ describe('authSession', () => {
     it('uses the browser Web Lock and rechecks token storage before refreshing', async () => {
       localStorage.setItem('refresh_token', 'old-refresh');
       const fetchMock = vi.spyOn(window, 'fetch');
-      const lockRequest = vi.fn(async (_name: string, _options: { mode: 'exclusive' }, callback: () => Promise<string>) => {
-        localStorage.setItem('access_token', 'peer-access');
-        localStorage.setItem('refresh_token', 'peer-refresh');
-        return callback();
-      });
+      const lockRequest = vi.fn(
+        async (_name: string, _options: { mode: 'exclusive' }, callback: () => Promise<string>) => {
+          localStorage.setItem('access_token', 'peer-access');
+          localStorage.setItem('refresh_token', 'peer-refresh');
+          return callback();
+        }
+      );
       Object.defineProperty(navigator, 'locks', {
         configurable: true,
         value: { request: lockRequest },

@@ -26,7 +26,9 @@ export default function NotFound() {
             display: 'inline-block',
           }}
         />
-        <h2 style={{ color: 'var(--color-text-main)', marginBottom: '8px', fontSize: '24px' }}>{t('notFound.title')}</h2>
+        <h2 style={{ color: 'var(--color-text-main)', marginBottom: '8px', fontSize: '24px' }}>
+          {t('notFound.title')}
+        </h2>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '15px', marginBottom: '24px' }}>
           {t('notFound.description')}
         </p>

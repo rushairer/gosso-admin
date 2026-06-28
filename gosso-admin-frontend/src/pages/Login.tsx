@@ -11,6 +11,7 @@ import type { WebAuthnCredential } from '../types/api';
 export default function Login() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
+  const showDevCredentials = import.meta.env.DEV && import.meta.env.VITE_SHOW_DEV_CREDENTIALS === 'true';
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +61,9 @@ export default function Login() {
           id: base64URLToBuffer(cred.id),
         })),
       };
-      const assertion = (await navigator.credentials.get({ publicKey: publicKeyOptions })) as PublicKeyCredential | null;
+      const assertion = (await navigator.credentials.get({
+        publicKey: publicKeyOptions,
+      })) as PublicKeyCredential | null;
       if (!assertion?.response) throw new Error('Passkey authentication cancelled or failed');
 
       // Step 3: Complete login
@@ -194,7 +197,9 @@ export default function Login() {
       <div className="glass-card" style={{ maxWidth: '440px', width: '100%' }}>
         <div className="text-center" style={{ marginBottom: '32px' }}>
           <h1 style={{ color: 'var(--color-text-main)', fontSize: '32px', marginBottom: '8px' }}>{t('login.title')}</h1>
-          <p className="text-muted" style={{ fontSize: '14.5px' }}>{t('login.subtitle')}</p>
+          <p className="text-muted" style={{ fontSize: '14.5px' }}>
+            {t('login.subtitle')}
+          </p>
         </div>
 
         {error && (
@@ -228,7 +233,7 @@ export default function Login() {
               />
             </FormField>
 
-            {import.meta.env.DEV && !username && !password && (
+            {showDevCredentials && !username && !password && (
               <div
                 style={{
                   marginBottom: '16px',
@@ -241,10 +246,9 @@ export default function Login() {
                   lineHeight: '1.5',
                 }}
               >
-                <strong style={{ color: 'var(--color-primary)' }}>Dev mode:</strong>{' '}
-                Default credentials are <code style={{ color: 'var(--color-secondary)' }}>admin</code> /{' '}
-                <code style={{ color: 'var(--color-secondary)' }}>admin123</code>.
-                Configure via <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code> env vars in docker-compose.yml.
+                <strong style={{ color: 'var(--color-primary)' }}>{t('login.devCredentialsTitle')}</strong>{' '}
+                {t('login.devCredentialsPrefix')} <code style={{ color: 'var(--color-secondary)' }}>admin</code> /{' '}
+                <code style={{ color: 'var(--color-secondary)' }}>admin123</code>. {t('login.devCredentialsSuffix')}
               </div>
             )}
 
