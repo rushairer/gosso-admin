@@ -445,7 +445,8 @@ export async function refreshAccessToken(): Promise<string> {
       }
 
       if ((navigator as NavigatorWithLocks).locks) {
-        return requestBrowserRefreshLock(() => performTokenRefresh(refreshToken));
+        const token = await requestBrowserRefreshLock(() => performTokenRefresh(refreshToken));
+        return token;
       }
 
       lockAcquired = tryAcquireRefreshLock(owner);
@@ -461,7 +462,8 @@ export async function refreshAccessToken(): Promise<string> {
         }
       }
 
-      return performTokenRefresh(refreshToken);
+      const token = await performTokenRefresh(refreshToken);
+      return token;
     } finally {
       if (lockAcquired) {
         releaseRefreshLock(owner);

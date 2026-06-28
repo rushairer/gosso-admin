@@ -257,7 +257,7 @@ func main() {
 			`INSERT INTO oauth2_clients (account_id, client_id, name, description, redirect_uris, grant_types, scopes, is_confidential, metadata)
 			 VALUES ($1, 'gosso-admin-spa', 'GOSSO Admin Console', 'OAuth2 Client for React GOSSO Admin Frontend', 
 			         $2::jsonb, 
-			         '["authorization_code"]'::jsonb, 
+			         '["authorization_code", "refresh_token"]'::jsonb, 
 			         '["openid", "profile", "email", "admin"]'::jsonb, 
 			         false,
 			         '{"capability":"admin"}'::jsonb)`,
@@ -272,6 +272,7 @@ func main() {
 		_, err = db.ExecContext(ctx,
 			`UPDATE oauth2_clients
 			 SET redirect_uris = $1::jsonb,
+			     grant_types = '["authorization_code", "refresh_token"]'::jsonb,
 			     scopes = '["openid", "profile", "email", "admin"]'::jsonb,
 			     metadata = COALESCE(metadata, '{}'::jsonb) || '{"capability":"admin"}'::jsonb
 			 WHERE client_id = 'gosso-admin-spa'`,
