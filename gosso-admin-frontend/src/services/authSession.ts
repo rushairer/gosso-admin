@@ -116,6 +116,24 @@ function clearTokenSet() {
   deleteCookie('access_token');
 }
 
+async function revokeCurrentSession(): Promise<void> {
+  const accessToken = localStorage.getItem(storageKeys.accessToken);
+  if (!accessToken) return;
+
+  try {
+    await fetch(`${SSO_ISSUER}/api/v1/auth/logout`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      credentials: 'same-origin',
+      keepalive: true,
+    });
+  } catch (err) {
+    logger.warn('Failed to revoke session during logout', err);
+  }
+}
+
 function readClaimsFromAccessToken(accessToken: string): Record<string, unknown> | null {
   try {
     const payloadBase64 = accessToken.split('.')[1];
@@ -189,9 +207,13 @@ export const authSession = {
     clearTokenSet();
   },
 
-  logout(redirectTo = '/') {
-    clearTokenSet();
-    window.location.href = redirectTo;
+  async logout(redirectTo = '/') {
+    try {
+      await revokeCurrentSession();
+    } finally {
+      clearTokenSet();
+      window.location.href = redirectTo;
+    }
   },
 
   getPostLoginRedirect(defaultPath = '/admin'): string {
