@@ -11,12 +11,37 @@ export default function Home() {
   const [logged, setLogged] = useState(false);
   const [userAdmin, setUserAdmin] = useState(false);
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    setLogged(isLoggedIn());
+    if (!isLoggedIn()) {
+      redirectToAuthorize('/admin');
+      return;
+    }
+    setLogged(true);
     setUserAdmin(isAdmin());
     setUser(getUserProfile());
+    setAuthChecked(true);
   }, []);
+
+  if (!authChecked) {
+    return (
+      <div style={{ padding: '60px 0', textAlign: 'center' }}>
+        <div
+          style={{
+            margin: '0 auto 16px auto',
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            border: '3px solid rgba(255,255,255,0.06)',
+            borderTopColor: 'var(--color-primary)',
+            animation: 'spin 1s linear infinite',
+          }}
+        />
+        <p style={{ color: 'var(--color-text-muted)' }}>{t('admin.checkingAccess')}</p>
+      </div>
+    );
+  }
 
   const handleAction = () => {
     if (logged) {
