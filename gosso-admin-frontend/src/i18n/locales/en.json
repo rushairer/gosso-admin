@@ -40,7 +40,7 @@
     "administrationTitle": "Administration",
     "administrationDescription": "Manage clients, accounts, audit records, and service status.",
     "settingsTitle": "Account Settings",
-    "settingsDescription": "Manage profile, MFA, passkeys, and active sessions."
+    "settingsDescription": "Manage profile, 2FA, passkeys, and active sessions."
   },
   "auth": {
     "goHome": "Go Home",
@@ -90,7 +90,7 @@
     "clientRegistryDescription": "Register and configure OAuth2 Client credentials, authorized redirect URIs, scopes, and flow models.",
     "userControl": "User Control",
     "userControlDescription": "Audit active accounts, update account status, and assign roles for permission scopes.",
-    "mfaAndPasskeys": "MFA & Passkeys",
+    "mfaAndPasskeys": "2FA & Passkeys",
     "mfaAndPasskeysDescription": "View system audit logs, configure security, and manage global OIDC provider discovery profiles."
   },
   "admin": {
@@ -106,7 +106,7 @@
   "settings": {
     "checkingAccess": "Checking access...",
     "tabProfile": "Profile & Password",
-    "tabMFA": "Multi-Factor (2FA)",
+    "tabMFA": "Two-Factor (2FA)",
     "tabPasskeys": "Passkeys (FIDO2)",
     "tabSessions": "Active Sessions"
   },
@@ -186,7 +186,7 @@
     "manageRoles": "Manage Roles",
     "manageConsents": "Manage Consents",
     "changePassword": "Change Password",
-    "resetMfaButton": "Reset MFA",
+    "resetMfaButton": "Reset 2FA",
     "deleteUser": "Delete User",
     "loadingAccounts": "Loading user accounts...",
     "createModalTitle": "Add User Account",
@@ -224,9 +224,9 @@
     "newPasswordPlaceholder": "Enter new password",
     "updatePasswordButton": "Update Password",
     "passwordUpdatedSuccess": "Password updated successfully. All user sessions have been revoked.",
-    "cannotResetOwnMfa": "You cannot reset MFA on your own admin account. Please use Security Settings page instead.",
-    "resetMfaConfirmMessage": "Are you sure you want to reset MFA for user \"{{username}}\"? This will disable TOTP, Backup Codes, and WebAuthn Passkeys for their account.",
-    "mfaResetSuccess": "MFA successfully reset for user \"{{username}}\".",
+    "cannotResetOwnMfa": "You cannot reset 2FA on your own admin account. Please use Security Settings page instead.",
+    "resetMfaConfirmMessage": "Are you sure you want to reset 2FA for user \"{{username}}\"? This will disable TOTP, Backup Codes, and WebAuthn Passkeys for their account.",
+    "mfaResetSuccess": "2FA successfully reset for user \"{{username}}\".",
     "rolesModalTitle": "Manage Roles - {{name}}",
     "activeRolesSection": "Active Roles",
     "noRolesAssignedDescription": "No roles assigned to this account.",
@@ -331,7 +331,7 @@
     "description": "Protect your account with an authenticator app generating one-time passcode verification.",
     "statusActive": "Active",
     "statusDisabled": "Disabled",
-    "loadingMfa": "Loading MFA status...",
+    "loadingMfa": "Loading 2FA status...",
     "mfaNotEnrolledDescription": "Two-Factor Authentication adds an extra layer of security. Once activated, logging in will require your password and a verification code from your mobile authenticator app.",
     "setupAuthenticatorButton": "Set Up Authenticator App",
     "setupTitle": "Step-up Authenticator Application",
@@ -357,8 +357,8 @@
     "accountPasswordPlaceholder": "Enter current password",
     "confirmDisableButton": "Confirm Disable",
     "disablingLoading": "Disabling...",
-    "mfaActivatedSuccess": "MFA activated successfully!",
-    "mfaDisabled": "MFA has been disabled.",
+    "mfaActivatedSuccess": "2FA activated successfully!",
+    "mfaDisabled": "2FA has been disabled.",
     "regenerateConfirmTitle": "Regenerate Backup Codes",
     "regenerateConfirmMessage": "Generating new backup codes will invalidate any existing recovery codes. Continue?",
     "backupCodesGenerated": "New backup codes generated."

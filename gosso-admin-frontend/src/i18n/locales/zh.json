@@ -40,7 +40,7 @@
     "administrationTitle": "系统管理",
     "administrationDescription": "管理客户端、账户、审计记录及服务状态。",
     "settingsTitle": "账户设置",
-    "settingsDescription": "管理个人资料、MFA、通行密钥及活跃会话。"
+    "settingsDescription": "管理个人资料、2FA、通行密钥及活跃会话。"
   },
   "auth": {
     "goHome": "返回首页",
@@ -90,7 +90,7 @@
     "clientRegistryDescription": "注册和配置 OAuth2 客户端凭据、授权重定向 URI、范围及授权流程模式。",
     "userControl": "用户管理",
     "userControlDescription": "审计活跃账户、更新账户状态、分配权限范围角色。",
-    "mfaAndPasskeys": "MFA 与通行密钥",
+    "mfaAndPasskeys": "2FA 与通行密钥",
     "mfaAndPasskeysDescription": "查看系统审计日志、配置安全设置、管理全局 OIDC 提供者发现配置。"
   },
   "admin": {
@@ -106,7 +106,7 @@
   "settings": {
     "checkingAccess": "正在检查访问权限...",
     "tabProfile": "个人资料与密码",
-    "tabMFA": "多因素认证 (2FA)",
+    "tabMFA": "双因素认证 (2FA)",
     "tabPasskeys": "通行密钥 (FIDO2)",
     "tabSessions": "活跃会话"
   },
@@ -186,7 +186,7 @@
     "manageRoles": "管理角色",
     "manageConsents": "管理授权",
     "changePassword": "修改密码",
-    "resetMfaButton": "重置 MFA",
+    "resetMfaButton": "重置 2FA",
     "deleteUser": "删除用户",
     "loadingAccounts": "正在加载用户账户...",
     "createModalTitle": "添加用户账户",
@@ -224,9 +224,9 @@
     "newPasswordPlaceholder": "请输入新密码",
     "updatePasswordButton": "更新密码",
     "passwordUpdatedSuccess": "密码更新成功。该用户的所有会话已被撤销。",
-    "cannotResetOwnMfa": "您不能重置自己管理员账户的 MFA，请前往安全设置页面操作。",
-    "resetMfaConfirmMessage": "确定要重置用户 \"{{username}}\" 的 MFA 吗？这将禁用其账户的 TOTP、备用码和 WebAuthn 通行密钥。",
-    "mfaResetSuccess": "用户 \"{{username}}\" 的 MFA 已成功重置。",
+    "cannotResetOwnMfa": "您不能重置自己管理员账户的 2FA，请前往安全设置页面操作。",
+    "resetMfaConfirmMessage": "确定要重置用户 \"{{username}}\" 的 2FA 吗？这将禁用其账户的 TOTP、备用码和 WebAuthn 通行密钥。",
+    "mfaResetSuccess": "用户 \"{{username}}\" 的 2FA 已成功重置。",
     "rolesModalTitle": "管理角色 - {{name}}",
     "activeRolesSection": "当前角色",
     "noRolesAssignedDescription": "该账户未分配任何角色。",
@@ -331,7 +331,7 @@
     "description": "使用身份验证器应用生成的一次性验证码来保护您的账户。",
     "statusActive": "已启用",
     "statusDisabled": "已禁用",
-    "loadingMfa": "正在加载 MFA 状态...",
+    "loadingMfa": "正在加载 2FA 状态...",
     "mfaNotEnrolledDescription": "双因素认证可为您的账户增添一道安全防线。启用后，登录时除了密码外，还需要输入手机身份验证器应用中的验证码。",
     "setupAuthenticatorButton": "设置身份验证器应用",
     "setupTitle": "配置身份验证器应用",
@@ -357,8 +357,8 @@
     "accountPasswordPlaceholder": "请输入当前密码",
     "confirmDisableButton": "确认禁用",
     "disablingLoading": "正在禁用...",
-    "mfaActivatedSuccess": "MFA 激活成功！",
-    "mfaDisabled": "MFA 已禁用。",
+    "mfaActivatedSuccess": "2FA 激活成功！",
+    "mfaDisabled": "2FA 已禁用。",
     "regenerateConfirmTitle": "重新生成备用码",
     "regenerateConfirmMessage": "生成新的备用码将使所有现有的恢复码失效。是否继续？",
     "backupCodesGenerated": "新的备用码已生成。"
