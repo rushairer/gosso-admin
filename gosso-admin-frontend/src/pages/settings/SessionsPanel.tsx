@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Laptop, MapPin } from 'lucide-react';
 import { logout, apiFetch } from '../../auth';
-import { ConfirmDialog, DataTable, Panel, PanelHeader, Tag } from '../../components/ui';
+import { ConfirmDialog, DataTable, Feedback, Panel, PanelHeader, Tag } from '../../components/ui';
 import { parseUserAgent } from '../../utils/format';
 
 interface Session {
@@ -114,17 +114,13 @@ export default function SessionsPanel() {
         <PanelHeader title={t('sessions.title')} description={t('sessions.description')} />
 
         {error && (
-          <div style={{ padding: '0 20px 12px' }}>
-            <div className="feedback feedback-error" style={{ fontSize: '13px' }}>
-              {error}
-            </div>
+          <div style={{ padding: '16px 20px 0 20px' }}>
+            <Feedback type="error">{error}</Feedback>
           </div>
         )}
         {success && (
-          <div style={{ padding: '0 20px 12px' }}>
-            <div className="feedback feedback-success" style={{ fontSize: '13px' }}>
-              {success}
-            </div>
+          <div style={{ padding: '16px 20px 0 20px' }}>
+            <Feedback type="success">{success}</Feedback>
           </div>
         )}
 
