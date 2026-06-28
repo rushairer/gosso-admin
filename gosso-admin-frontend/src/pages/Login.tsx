@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Key } from 'lucide-react';
-import { authSession, fetchUserProfile } from '../auth';
+import { authSession, fetchUserProfile, redirectToAuthorize } from '../auth';
 import { Feedback, FormField } from '../components/ui';
 import { bufferToBase64URL, base64URLToBuffer } from '../utils/webauthn';
 import { logger } from '../utils/logger';
@@ -23,6 +23,7 @@ export default function Login() {
   const [mfaCode, setMfaCode] = useState('');
 
   // Capture where we should redirect back to (e.g. GOSSO authorize URL)
+  const hasAuthorizeRedirect = searchParams.has('redirect_uri');
   const redirectUri = searchParams.get('redirect_uri') || '/admin';
 
   const doRedirect = () => {
@@ -103,7 +104,12 @@ export default function Login() {
       logger.warn('Failed to fetch user profile after login', profileErr);
     }
 
-    doRedirect();
+    if (hasAuthorizeRedirect) {
+      doRedirect();
+      return;
+    }
+
+    await redirectToAuthorize('/admin');
   };
 
   const handleLogin = async (e: React.FormEvent) => {

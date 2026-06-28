@@ -13,7 +13,28 @@ const storageKeys = {
   postLoginRedirect: 'post_login_redirect',
   tokenIssuedAt: 'token_issued_at',
   tokenExpiresIn: 'token_expires_in',
+  refreshLock: 'auth_refresh_lock',
 };
+
+const REFRESH_LOCK_TTL_MS = 15_000;
+const REFRESH_WAIT_TIMEOUT_MS = 20_000;
+const REFRESH_WAIT_POLL_MS = 100;
+const REFRESH_WEB_LOCK_NAME = 'gosso-auth-refresh';
+
+interface RefreshLock {
+  owner: string;
+  expiresAt: number;
+}
+
+interface BrowserLockManager {
+  request<T>(
+    name: string,
+    options: { mode: 'exclusive' },
+    callback: () => T | Promise<T>,
+  ): Promise<T>;
+}
+
+type NavigatorWithLocks = Navigator & { locks?: BrowserLockManager };
 
 export interface TokenResponse {
   access_token: string;
@@ -95,6 +116,7 @@ function clearTokenSet() {
   localStorage.removeItem(storageKeys.userProfile);
   localStorage.removeItem(storageKeys.tokenIssuedAt);
   localStorage.removeItem(storageKeys.tokenExpiresIn);
+  localStorage.removeItem(storageKeys.refreshLock);
   deleteCookie('access_token');
 }
 
@@ -274,35 +296,158 @@ export async function fetchUserProfile(accessToken: string): Promise<UserProfile
 
 let refreshPromise: Promise<string> | null = null;
 
+function parseRefreshLock(raw: string | null): RefreshLock | null {
+  if (!raw) return null;
+  try {
+    const lock = JSON.parse(raw) as Partial<RefreshLock>;
+    if (typeof lock.owner !== 'string' || typeof lock.expiresAt !== 'number') {
+      return null;
+    }
+    return { owner: lock.owner, expiresAt: lock.expiresAt };
+  } catch {
+    return null;
+  }
+}
+
+function generateRefreshOwner(): string {
+  if (window.crypto?.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function tryAcquireRefreshLock(owner: string): boolean {
+  const now = Date.now();
+  const current = parseRefreshLock(localStorage.getItem(storageKeys.refreshLock));
+  if (current && current.expiresAt > now && current.owner !== owner) {
+    return false;
+  }
+
+  const nextLock: RefreshLock = { owner, expiresAt: now + REFRESH_LOCK_TTL_MS };
+  localStorage.setItem(storageKeys.refreshLock, JSON.stringify(nextLock));
+  return parseRefreshLock(localStorage.getItem(storageKeys.refreshLock))?.owner === owner;
+}
+
+function releaseRefreshLock(owner: string) {
+  const current = parseRefreshLock(localStorage.getItem(storageKeys.refreshLock));
+  if (!current || current.owner === owner || current.expiresAt <= Date.now()) {
+    localStorage.removeItem(storageKeys.refreshLock);
+  }
+}
+
+async function waitForRefreshFromAnotherContext(previousRefreshToken: string): Promise<string | null> {
+  const startedAt = Date.now();
+
+  return new Promise((resolve) => {
+    let settled = false;
+    let intervalId: number | undefined;
+    let timeoutId: number | undefined;
+
+    const finish = (token: string | null) => {
+      if (settled) return;
+      settled = true;
+      if (intervalId !== undefined) window.clearInterval(intervalId);
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+      window.removeEventListener('storage', check);
+      resolve(token);
+    };
+
+    const check = () => {
+      const accessToken = authSession.getAccessToken();
+      const refreshToken = authSession.getRefreshToken();
+      const issuedAt = Number(localStorage.getItem(storageKeys.tokenIssuedAt));
+      if (accessToken && refreshToken && refreshToken !== previousRefreshToken && issuedAt >= startedAt) {
+        finish(accessToken);
+        return;
+      }
+
+      const lock = parseRefreshLock(localStorage.getItem(storageKeys.refreshLock));
+      if (!lock || lock.expiresAt <= Date.now()) {
+        finish(null);
+      }
+    };
+
+    window.addEventListener('storage', check);
+    intervalId = window.setInterval(check, REFRESH_WAIT_POLL_MS);
+    timeoutId = window.setTimeout(() => finish(null), REFRESH_WAIT_TIMEOUT_MS);
+    check();
+  });
+}
+
+async function requestBrowserRefreshLock(callback: () => Promise<string>): Promise<string> {
+  const locks = (navigator as NavigatorWithLocks).locks;
+  if (!locks) {
+    return callback();
+  }
+  return locks.request(REFRESH_WEB_LOCK_NAME, { mode: 'exclusive' }, callback);
+}
+
+async function performTokenRefresh(previousRefreshToken: string): Promise<string> {
+  const latestRefreshToken = authSession.getRefreshToken();
+  if (!latestRefreshToken) {
+    throw new Error('No refresh token found');
+  }
+  if (latestRefreshToken !== previousRefreshToken) {
+    const latestAccessToken = authSession.getAccessToken();
+    if (latestAccessToken) {
+      return latestAccessToken;
+    }
+  }
+
+  const response = await fetch(`${SSO_ISSUER}/api/v1/auth/refresh`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ refresh_token: latestRefreshToken }),
+  });
+
+  const body = await response.json();
+  if (!response.ok) {
+    throw new Error(body.message || 'Token refresh failed');
+  }
+
+  const data = body.data;
+  authSession.saveTokenSet(data);
+  return data.access_token;
+}
+
 export async function refreshAccessToken(): Promise<string> {
   if (refreshPromise) {
     return refreshPromise;
   }
 
   refreshPromise = (async () => {
+    const owner = generateRefreshOwner();
+    let lockAcquired = false;
     try {
       const refreshToken = authSession.getRefreshToken();
       if (!refreshToken) {
         throw new Error('No refresh token found');
       }
 
-      const response = await fetch(`${SSO_ISSUER}/api/v1/auth/refresh`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ refresh_token: refreshToken }),
-      });
-
-      const body = await response.json();
-      if (!response.ok) {
-        throw new Error(body.message || 'Token refresh failed');
+      if ((navigator as NavigatorWithLocks).locks) {
+        return requestBrowserRefreshLock(() => performTokenRefresh(refreshToken));
       }
 
-      const data = body.data;
-      authSession.saveTokenSet(data);
-      return data.access_token;
+      lockAcquired = tryAcquireRefreshLock(owner);
+      if (!lockAcquired) {
+        const tokenFromPeer = await waitForRefreshFromAnotherContext(refreshToken);
+        if (tokenFromPeer) {
+          return tokenFromPeer;
+        }
+
+        lockAcquired = tryAcquireRefreshLock(owner);
+        if (!lockAcquired) {
+          throw new Error('Token refresh is already in progress');
+        }
+      }
+
+      return performTokenRefresh(refreshToken);
     } finally {
+      if (lockAcquired) {
+        releaseRefreshLock(owner);
+      }
       refreshPromise = null;
     }
   })();

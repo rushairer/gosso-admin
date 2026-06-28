@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // We test the exported functions by importing the module fresh in each test group
 // authSession reads from localStorage, so we clear it in beforeEach
@@ -11,8 +11,15 @@ function accessTokenWithClaims(claims: Record<string, unknown>): string {
 
 describe('authSession', () => {
   beforeEach(() => {
+    vi.resetModules();
+    vi.restoreAllMocks();
     localStorage.clear();
     document.cookie = '';
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    delete (navigator as Navigator & { locks?: unknown }).locks;
   });
 
   describe('isLoggedIn / isAdmin', () => {
@@ -129,6 +136,111 @@ describe('authSession', () => {
       localStorage.setItem('user_profile', 'not-json');
       const { authSession } = await import('../authSession');
       expect(authSession.getUserProfile()).toBeNull();
+    });
+  });
+
+  describe('refreshAccessToken', () => {
+    it('persists rotated refresh token returned by the refresh endpoint', async () => {
+      localStorage.setItem('refresh_token', 'old-refresh');
+      const fetchMock = vi.spyOn(window, 'fetch').mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            data: {
+              access_token: 'new-access',
+              refresh_token: 'new-refresh',
+              expires_in: 900,
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        ),
+      );
+
+      const { refreshAccessToken } = await import('../authSession');
+
+      await expect(refreshAccessToken()).resolves.toBe('new-access');
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toEqual({ refresh_token: 'old-refresh' });
+      expect(localStorage.getItem('access_token')).toBe('new-access');
+      expect(localStorage.getItem('refresh_token')).toBe('new-refresh');
+      expect(localStorage.getItem('auth_refresh_lock')).toBeNull();
+    });
+
+    it('waits for another tab to finish refresh and reuses the rotated token set', async () => {
+      vi.useFakeTimers();
+      localStorage.setItem('refresh_token', 'old-refresh');
+      localStorage.setItem(
+        'auth_refresh_lock',
+        JSON.stringify({ owner: 'other-tab', expiresAt: Date.now() + 15_000 }),
+      );
+      const fetchMock = vi.spyOn(window, 'fetch');
+
+      const { refreshAccessToken, authSession } = await import('../authSession');
+      const refreshPromise = refreshAccessToken();
+
+      await vi.advanceTimersByTimeAsync(100);
+      authSession.saveTokenSet({
+        access_token: 'peer-access',
+        refresh_token: 'peer-refresh',
+        expires_in: 900,
+      });
+      localStorage.removeItem('auth_refresh_lock');
+      window.dispatchEvent(new StorageEvent('storage', { key: 'refresh_token', newValue: 'peer-refresh' }));
+
+      await expect(refreshPromise).resolves.toBe('peer-access');
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(localStorage.getItem('refresh_token')).toBe('peer-refresh');
+    });
+
+    it('takes over a stale refresh lock and uses the latest refresh token from storage', async () => {
+      vi.useFakeTimers();
+      localStorage.setItem('refresh_token', 'old-refresh');
+      localStorage.setItem(
+        'auth_refresh_lock',
+        JSON.stringify({ owner: 'other-tab', expiresAt: Date.now() + 15_000 }),
+      );
+      const fetchMock = vi.spyOn(window, 'fetch').mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            data: {
+              access_token: 'new-access',
+              refresh_token: 'newer-refresh',
+              expires_in: 900,
+            },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        ),
+      );
+
+      const { refreshAccessToken } = await import('../authSession');
+      const refreshPromise = refreshAccessToken();
+
+      localStorage.setItem('refresh_token', 'peer-refresh');
+      await vi.advanceTimersByTimeAsync(15_100);
+
+      await expect(refreshPromise).resolves.toBe('new-access');
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toEqual({ refresh_token: 'peer-refresh' });
+      expect(localStorage.getItem('refresh_token')).toBe('newer-refresh');
+    });
+
+    it('uses the browser Web Lock and rechecks token storage before refreshing', async () => {
+      localStorage.setItem('refresh_token', 'old-refresh');
+      const fetchMock = vi.spyOn(window, 'fetch');
+      const lockRequest = vi.fn(async (_name: string, _options: { mode: 'exclusive' }, callback: () => Promise<string>) => {
+        localStorage.setItem('access_token', 'peer-access');
+        localStorage.setItem('refresh_token', 'peer-refresh');
+        return callback();
+      });
+      Object.defineProperty(navigator, 'locks', {
+        configurable: true,
+        value: { request: lockRequest },
+      });
+
+      const { refreshAccessToken } = await import('../authSession');
+
+      await expect(refreshAccessToken()).resolves.toBe('peer-access');
+      expect(lockRequest).toHaveBeenCalledWith('gosso-auth-refresh', { mode: 'exclusive' }, expect.any(Function));
+      expect(fetchMock).not.toHaveBeenCalled();
     });
   });
 });
