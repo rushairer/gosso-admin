@@ -144,6 +144,8 @@
     "confidentialClientLabel": "机密客户端（需要服务端密钥）",
     "grantTypesLabel": "授权类型",
     "scopesLabel": "授权范围",
+    "adminScopeLabel": "admin（管理 API）",
+    "adminScopeWarning": "admin scope 允许该客户端申请访问 GOSSO 管理 API 的令牌。只应为可信的一方后台管理客户端开启。",
     "saveClient": "保存客户端",
     "nameRedirectRequired": "名称和重定向 URI 为必填项。",
     "failedToRegisterClient": "注册客户端失败",

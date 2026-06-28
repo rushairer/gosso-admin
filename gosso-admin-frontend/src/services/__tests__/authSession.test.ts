@@ -3,6 +3,12 @@ import { describe, it, expect, beforeEach } from 'vitest';
 // We test the exported functions by importing the module fresh in each test group
 // authSession reads from localStorage, so we clear it in beforeEach
 
+function accessTokenWithClaims(claims: Record<string, unknown>): string {
+  const encode = (value: Record<string, unknown>) =>
+    btoa(JSON.stringify(value)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return `${encode({ alg: 'none', typ: 'JWT' })}.${encode(claims)}.signature`;
+}
+
 describe('authSession', () => {
   beforeEach(() => {
     localStorage.clear();
@@ -22,11 +28,18 @@ describe('authSession', () => {
       expect(authSession.isLoggedIn()).toBe(true);
     });
 
-    it('detects admin role from stored profile', async () => {
-      localStorage.setItem('access_token', 'test-token');
+    it('detects admin access from stored profile and token scope', async () => {
+      localStorage.setItem('access_token', accessTokenWithClaims({ scope: 'openid admin' }));
       localStorage.setItem('user_profile', JSON.stringify({ sub: '1', roles: ['admin'] }));
       const { authSession } = await import('../authSession');
       expect(authSession.isAdmin()).toBe(true);
+    });
+
+    it('returns false for admin role without admin token scope', async () => {
+      localStorage.setItem('access_token', accessTokenWithClaims({ scope: 'openid profile' }));
+      localStorage.setItem('user_profile', JSON.stringify({ sub: '1', roles: ['admin'] }));
+      const { authSession } = await import('../authSession');
+      expect(authSession.isAdmin()).toBe(false);
     });
 
     it('returns false for non-admin profile', async () => {
@@ -87,13 +100,14 @@ describe('authSession', () => {
     });
 
     it('returns populated snapshot when logged in as admin', async () => {
-      localStorage.setItem('access_token', 'test-token');
+      const token = accessTokenWithClaims({ scope: 'openid admin' });
+      localStorage.setItem('access_token', token);
       localStorage.setItem('user_profile', JSON.stringify({ sub: '1', name: 'Admin', roles: ['admin'] }));
       const { authSession } = await import('../authSession');
       const snap = authSession.getSnapshot();
       expect(snap.loggedIn).toBe(true);
       expect(snap.isAdmin).toBe(true);
-      expect(snap.accessToken).toBe('test-token');
+      expect(snap.accessToken).toBe(token);
       expect(snap.profile?.name).toBe('Admin');
     });
   });

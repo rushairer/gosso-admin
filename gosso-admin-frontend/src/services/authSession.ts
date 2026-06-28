@@ -28,6 +28,7 @@ export interface UserProfile {
   preferred_username?: string;
   email?: string;
   roles?: string[];
+  scope?: string;
 }
 
 export interface SessionSnapshot {
@@ -97,17 +98,33 @@ function clearTokenSet() {
   deleteCookie('access_token');
 }
 
-function readRolesFromAccessToken(accessToken: string): string[] | undefined {
+function readClaimsFromAccessToken(accessToken: string): Record<string, unknown> | null {
   try {
     const payloadBase64 = accessToken.split('.')[1];
     const base64 = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
     const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
-    const payload = JSON.parse(decodeURIComponent(escape(atob(padded))));
-    return payload.roles;
+    return JSON.parse(decodeURIComponent(escape(atob(padded))));
   } catch (e) {
-    logger.error('Error parsing token roles', e);
-    return undefined;
+    logger.error('Error parsing access token claims', e);
+    return null;
   }
+}
+
+function readRolesFromAccessToken(accessToken: string): string[] | undefined {
+  const payload = readClaimsFromAccessToken(accessToken);
+  return Array.isArray(payload?.roles) ? (payload.roles as string[]) : undefined;
+}
+
+function readScopeFromAccessToken(accessToken: string): string | undefined {
+  const payload = readClaimsFromAccessToken(accessToken);
+  return typeof payload?.scope === 'string' ? payload.scope : undefined;
+}
+
+function hasAdminAccess(profile: UserProfile | null, accessToken: string | null): boolean {
+  const hasAdminRole = profile?.roles?.includes('admin') || false;
+  const scope = accessToken ? readScopeFromAccessToken(accessToken) : profile?.scope;
+  const hasAdminScope = scope?.split(/\s+/).includes('admin') || false;
+  return hasAdminRole && hasAdminScope;
 }
 
 export const authSession = {
@@ -134,7 +151,7 @@ export const authSession = {
       refreshToken,
       profile,
       loggedIn: Boolean(accessToken),
-      isAdmin: profile?.roles?.includes('admin') || false,
+      isAdmin: hasAdminAccess(profile, accessToken),
     };
   },
 
@@ -143,7 +160,7 @@ export const authSession = {
   },
 
   isAdmin(): boolean {
-    return this.getUserProfile()?.roles?.includes('admin') || false;
+    return hasAdminAccess(this.getUserProfile(), this.getAccessToken());
   },
 
   saveTokenSet(data: TokenResponse | { access_token: string; refresh_token?: string; expires_in?: number }) {
@@ -184,7 +201,7 @@ export async function redirectToAuthorize(customRedirectUri?: string) {
   authUrl.searchParams.append('client_id', CLIENT_ID);
   authUrl.searchParams.append('response_type', 'code');
   authUrl.searchParams.append('redirect_uri', REDIRECT_URI);
-  authUrl.searchParams.append('scope', 'openid profile email');
+  authUrl.searchParams.append('scope', 'openid profile email admin');
   authUrl.searchParams.append('code_challenge', challenge);
   authUrl.searchParams.append('code_challenge_method', 'S256');
   authUrl.searchParams.append('state', state);
@@ -245,6 +262,10 @@ export async function fetchUserProfile(accessToken: string): Promise<UserProfile
   const roles = readRolesFromAccessToken(accessToken);
   if (roles) {
     data.roles = roles;
+  }
+  const scope = readScopeFromAccessToken(accessToken);
+  if (scope) {
+    data.scope = scope;
   }
 
   localStorage.setItem(storageKeys.userProfile, JSON.stringify(data));

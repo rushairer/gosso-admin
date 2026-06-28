@@ -36,6 +36,13 @@ interface OAuth2Client {
   grant_types: string[];
   scopes: string[];
   is_confidential: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+const clientScopeOptions = ['openid', 'profile', 'email', 'admin'];
+
+function isAdminScope(scope: string) {
+  return scope === 'admin' || scope.startsWith('admin:');
 }
 
 export default function ClientsTab() {
@@ -337,9 +344,15 @@ export default function ClientsTab() {
                 </td>
                 <td>
                   <div className="flex-row flex-wrap gap-xs">
-                    {client.scopes.map((s) => (
-                      <Tag key={s}>{s}</Tag>
-                    ))}
+                    {client.scopes.map((s) =>
+                      isAdminScope(s) ? (
+                        <StatusBadge key={s} tone="warning" compact>
+                          {s}
+                        </StatusBadge>
+                      ) : (
+                        <Tag key={s}>{s}</Tag>
+                      ),
+                    )}
                   </div>
                 </td>
                 <td>
@@ -442,16 +455,22 @@ export default function ClientsTab() {
                 </CheckboxGroup>
 
                 <CheckboxGroup label={t('clients.scopesLabel')}>
-                  {['openid', 'profile', 'email'].map((sc) => (
+                  {clientScopeOptions.map((sc) => (
                     <CheckboxField
                       key={sc}
                       id={`scope-${sc}`}
-                      label={sc}
+                      label={sc === 'admin' ? t('clients.adminScopeLabel') : sc}
                       checked={clientForm.scopes.includes(sc)}
                       onChange={() => handleCheckboxChange('scopes', sc)}
                     />
                   ))}
                 </CheckboxGroup>
+                {clientForm.scopes.some(isAdminScope) && (
+                  <div className="notice-card" style={{ alignItems: 'flex-start', textAlign: 'left' }}>
+                    <InfoIcon style={{ width: '18px', height: '18px', stroke: 'var(--warning-color)' }} />
+                    <p className="text-sm text-muted">{t('clients.adminScopeWarning')}</p>
+                  </div>
+                )}
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowClientModal(false)}>

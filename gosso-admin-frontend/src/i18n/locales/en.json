@@ -144,6 +144,8 @@
     "confidentialClientLabel": "Confidential Client (Requires Server-Side Secret)",
     "grantTypesLabel": "Grant Types",
     "scopesLabel": "Authorized Scopes",
+    "adminScopeLabel": "admin (management APIs)",
+    "adminScopeWarning": "Admin scope allows this client to request tokens for GOSSO management APIs. Only enable it for trusted first-party admin clients.",
     "saveClient": "Save Client",
     "nameRedirectRequired": "Name and Redirect URIs are required.",
     "failedToRegisterClient": "Failed to register client",

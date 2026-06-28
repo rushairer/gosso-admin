@@ -127,6 +127,59 @@ docker compose up -d --build gosso gosso-admin-frontend gateway
 
 ---
 
+## 📧 邮件发送服务
+
+GOSSO 使用 SMTP 发送邮箱验证码和密码重置邮件。`gosso-admin` 的本地 Docker Compose 已内置 Mailpit，适合开发环境观察邮件内容；生产环境应改为真实 SMTP 服务。
+
+### 开发环境（Mailpit）
+
+默认 `docker-compose.yml` 中的 `gosso` 服务配置如下：
+
+```env
+GOUNO_SMTP_HOST=mailpit
+GOUNO_SMTP_PORT=1025
+GOUNO_SMTP_TLS_POLICY=notls
+```
+
+启动后可通过以下入口验证邮件：
+
+* SMTP 服务：`mailpit:1025`（容器内部）或 `localhost:1025`（宿主机）
+* Mailpit Web UI：[http://localhost:8025](http://localhost:8025)
+
+可通过这些流程触发邮件：
+
+* 用户登录后在 **Settings → Profile & Password** 修改邮箱，会发送邮箱验证码。
+* 调用密码重置接口时会发送重置链接；开发配置中的 `auth.password_reset_base_url` 默认为 `http://localhost:3000/reset-password`，如前端入口不是该地址，需要通过 `GOUNO_AUTH_PASSWORD_RESET_BASE_URL` 覆盖。
+
+### 生产环境（真实 SMTP）
+
+生产环境至少需要配置：
+
+```env
+GOUNO_SMTP_HOST=smtp.example.com
+GOUNO_SMTP_PORT=587
+GOUNO_SMTP_USERNAME=your-smtp-user
+GOUNO_SMTP_PASSWORD=your-smtp-password
+GOUNO_SMTP_FROM=noreply@your-domain.com
+GOUNO_SMTP_TLS_POLICY=mandatory
+GOUNO_AUTH_PASSWORD_RESET_BASE_URL=https://your-domain.com/reset-password
+```
+
+注意事项：
+
+* `GOUNO_SMTP_TLS_POLICY` 支持 `mandatory`、`opportunistic`、`notls`；生产环境禁止 `notls`，推荐使用 `mandatory`。
+* 配置 SMTP 后，`GOUNO_AUTH_PASSWORD_RESET_BASE_URL` 必须设置；生产环境必须使用 HTTPS。
+* `GOUNO_SMTP_FROM` 应使用已在 SMTP 服务商侧验证过的发件域名，避免被退信或进入垃圾箱。
+* 不要把 SMTP 密码提交到 Git；使用部署平台 Secret、Kubernetes Secret 或 `.env.production` 本地注入。
+
+排障时优先检查：
+
+* `/readiness` 仅检查 PostgreSQL/Redis，不代表 SMTP 可用。
+* `gosso` 容器日志会记录脱敏后的发送失败原因。
+* 如果本地看不到邮件，先确认 `mailpit` 容器运行中，并访问 [http://localhost:8025](http://localhost:8025)。
+
+---
+
 ## 🛠️ 可视化后台管理功能特性
 
 * **OAuth2 客户端注册与管理**：
@@ -159,8 +212,9 @@ docker compose up -d --build gosso gosso-admin-frontend gateway
 
 1. **GOSSO 的管理 APIs 定义**：
    * 所有针对用户和应用的管理操作均不单独起后端，而是复用 `gosso` 内部的 `internal/admin/controller/admin_controller.go` 代码。该控制器注册了诸如 `/api/v1/admin/accounts` 等端点。
-   * 前端管理界面通过 Nginx 代理将请求转发给 GOSSO，并由 GOSSO 中的 `AdminRequiredMiddleware` 拦截，确保请求者持有带有 `admin` 角色的合法 Access Token。
-   * 已登录但不具备 `admin` 角色的用户由前端直接显示无权限状态；只有未登录用户才会被重定向到 OIDC 授权流程。
+   * 前端管理界面通过 Nginx 代理将请求转发给 GOSSO，并由 GOSSO 中的 `AdminRequiredMiddleware` 拦截，确保请求者持有同时具备 `admin` scope 和 `admin` 角色的合法 Access Token。
+   * `gosso-admin-spa` 必须作为后台能力 client 预置：`metadata.capability=admin`，且 allowed scopes 包含 `admin`。普通 client 自助注册/更新不得声明 `admin` / `admin:*` scopes；已具备 `admin` role + `admin` scope 的管理员可在后台显式授予或移除该特殊 scope。
+   * 已登录但不具备 `admin` 角色，或 token 不是由后台能力 client 以 `admin` scope 签发的用户，由前端/API 显示无权限状态；只有未登录用户才会被重定向到 OIDC 授权流程。
 2. **本地前端 SPA 开发调试**：
    * 如果你需要本地调试 React 页面：
      ```bash

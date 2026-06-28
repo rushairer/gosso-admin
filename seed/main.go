@@ -217,12 +217,13 @@ func main() {
 	if clientCount == 0 {
 		log.Println("Seeding OAuth2 client 'gosso-admin-spa'...")
 		_, err = db.ExecContext(ctx,
-			`INSERT INTO oauth2_clients (account_id, client_id, name, description, redirect_uris, grant_types, scopes, is_confidential)
+			`INSERT INTO oauth2_clients (account_id, client_id, name, description, redirect_uris, grant_types, scopes, is_confidential, metadata)
 			 VALUES ($1, 'gosso-admin-spa', 'GOSSO Admin Console', 'OAuth2 Client for React GOSSO Admin Frontend', 
 			         $2::jsonb, 
 			         '["authorization_code"]'::jsonb, 
-			         '["openid", "profile", "email"]'::jsonb, 
-			         false)`,
+			         '["openid", "profile", "email", "admin"]'::jsonb, 
+			         false,
+			         '{"capability":"admin"}'::jsonb)`,
 			adminID, redirectURIsJSON,
 		)
 		if err != nil {
@@ -230,15 +231,19 @@ func main() {
 		}
 		log.Println("OAuth2 client seeded successfully.")
 	} else {
-		log.Println("OAuth2 client 'gosso-admin-spa' already exists. Updating redirect URIs...")
+		log.Println("OAuth2 client 'gosso-admin-spa' already exists. Updating admin client policy and redirect URIs...")
 		_, err = db.ExecContext(ctx,
-			`UPDATE oauth2_clients SET redirect_uris = $1::jsonb WHERE client_id = 'gosso-admin-spa'`,
+			`UPDATE oauth2_clients
+			 SET redirect_uris = $1::jsonb,
+			     scopes = '["openid", "profile", "email", "admin"]'::jsonb,
+			     metadata = COALESCE(metadata, '{}'::jsonb) || '{"capability":"admin"}'::jsonb
+			 WHERE client_id = 'gosso-admin-spa'`,
 			redirectURIsJSON,
 		)
 		if err != nil {
-			log.Fatalf("Failed to update OAuth2 client redirect URIs: %v", err)
+			log.Fatalf("Failed to update OAuth2 admin client policy: %v", err)
 		}
-		log.Println("OAuth2 client 'gosso-admin-spa' redirect URIs updated.")
+		log.Println("OAuth2 client 'gosso-admin-spa' admin policy updated.")
 	}
 
 	log.Println("Database seeding completed successfully.")
