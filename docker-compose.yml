@@ -45,6 +45,10 @@ services:
       - GOUNO_AUTH_ISSUER=http://localhost:8080
       - GOUNO_AUTH_PRIVATE_KEY_PATH=/app/keys/private.pem
       - GOUNO_AUTH_TOTP_ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000
+      - GOUNO_AUTH_VERIFY_HASH_PEPPER=0000000000000000000000000000000000000000000000000000000000000000
+      - GOUNO_SMTP_HOST=mailpit
+      - GOUNO_SMTP_PORT=1025
+      - GOUNO_SMTP_TLS_POLICY=notls
       - GOUNO_AUTH_WEBAUTHN_RP_ID=localhost
       - GOUNO_AUTH_WEBAUTHN_RP_NAME=gouno-dev
       - GOUNO_AUTH_WEBAUTHN_RP_ORIGIN=http://localhost:8080
@@ -55,6 +59,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   seed:
     build:
@@ -92,6 +98,15 @@ services:
     depends_on:
       - gosso-admin-frontend
       - gosso
+      - mailpit
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: sso-admin-mailpit
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI port
+    restart: unless-stopped
 
 volumes:
   db_data:

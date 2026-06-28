@@ -1,6 +1,7 @@
 {
   "common": {
     "save": "保存",
+    "edit": "编辑",
     "cancel": "取消",
     "confirm": "确认",
     "close": "关闭",
@@ -312,7 +313,16 @@
     "changePasswordButton": "修改密码",
     "changePasswordLoading": "正在更新...",
     "passwordsDoNotMatch": "两次输入的新密码不一致",
-    "passwordUpdatedSuccess": "密码更新成功。下次登录请使用新密码。"
+    "passwordUpdatedSuccess": "密码更新成功。下次登录请使用新密码。",
+    "editEmailTitle": "修改邮箱地址",
+    "editEmailDescription": "请验证您的身份并确认新邮箱的所有权。",
+    "newEmailLabel": "新邮箱地址",
+    "verificationCodeLabel": "验证码",
+    "sendCodeButton": "发送验证码",
+    "confirmEmailButton": "确认修改",
+    "emailUpdatedSuccess": "邮箱地址已成功更新。",
+    "editDisplayName": "修改显示名称",
+    "displayNameUpdatedSuccess": "显示名称已成功更新。"
   },
   "mfa": {
     "title": "双因素认证 (2FA)",
@@ -372,7 +382,9 @@
     "credentialCreationFailed": "凭据创建已取消或失败",
     "webauthnRegistrationFailed": "WebAuthn 注册失败。",
     "removePasskeyConfirmMessage": "确定要移除通行密钥 \"{{name}}\" 吗？",
-    "passkeyRemovedSuccess": "通行密钥已成功移除。"
+    "passkeyRemovedSuccess": "通行密钥已成功移除。",
+    "credentialNotFound": "找不到该密钥记录。",
+    "credentialOwnershipMismatch": "该密钥记录不属于您的账号。"
   },
   "sessions": {
     "title": "活跃会话",

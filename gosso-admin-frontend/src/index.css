@@ -654,6 +654,7 @@ a {
 }
 
 .setup-title {
+  margin-bottom: 16px;
   color: var(--color-text-main);
   font-size: 15px;
   font-weight: 800;

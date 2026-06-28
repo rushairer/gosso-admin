@@ -1,6 +1,7 @@
 {
   "common": {
     "save": "Save",
+    "edit": "Edit",
     "cancel": "Cancel",
     "confirm": "Confirm",
     "close": "Close",
@@ -312,7 +313,16 @@
     "changePasswordButton": "Change Password",
     "changePasswordLoading": "Updating...",
     "passwordsDoNotMatch": "New passwords do not match",
-    "passwordUpdatedSuccess": "Password updated successfully. Please use your new password next time."
+    "passwordUpdatedSuccess": "Password updated successfully. Please use your new password next time.",
+    "editEmailTitle": "Edit Email Address",
+    "editEmailDescription": "Verify your identity and confirm ownership of the new email address.",
+    "newEmailLabel": "New Email Address",
+    "verificationCodeLabel": "Verification Code",
+    "sendCodeButton": "Send Verification Code",
+    "confirmEmailButton": "Confirm Change",
+    "emailUpdatedSuccess": "Email address updated successfully.",
+    "editDisplayName": "Edit Display Name",
+    "displayNameUpdatedSuccess": "Display name updated successfully."
   },
   "mfa": {
     "title": "Two-Factor Authentication (2FA)",
@@ -372,7 +382,9 @@
     "credentialCreationFailed": "Credential creation cancelled or failed",
     "webauthnRegistrationFailed": "WebAuthn registration failed.",
     "removePasskeyConfirmMessage": "Are you sure you want to remove the passkey \"{{name}}\"?",
-    "passkeyRemovedSuccess": "Passkey removed successfully."
+    "passkeyRemovedSuccess": "Passkey removed successfully.",
+    "credentialNotFound": "Credential not found.",
+    "credentialOwnershipMismatch": "This credential does not belong to your account."
   },
   "sessions": {
     "title": "Active Sessions",

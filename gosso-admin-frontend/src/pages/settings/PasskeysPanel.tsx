@@ -156,7 +156,12 @@ export default function PasskeysPanel() {
       setSuccess(t('passkeys.passkeyRemovedSuccess'));
       await loadPasskeys();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error removing passkey';
+      let message = err instanceof Error ? err.message : 'Error removing passkey';
+      if (message === 'credential not found') {
+        message = t('passkeys.credentialNotFound');
+      } else if (message === 'credential does not belong to account') {
+        message = t('passkeys.credentialOwnershipMismatch');
+      }
       setError(message);
     } finally {
       setLoading(false);
@@ -197,12 +202,12 @@ export default function PasskeysPanel() {
         />
 
         {error && (
-          <div style={{ padding: '0 20px' }}>
+          <div style={{ padding: '16px 20px 0 20px' }}>
             <Feedback type="error">{error}</Feedback>
           </div>
         )}
         {success && (
-          <div style={{ padding: '0 20px' }}>
+          <div style={{ padding: '16px 20px 0 20px' }}>
             <Feedback type="success">{success}</Feedback>
           </div>
         )}

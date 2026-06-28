@@ -174,6 +174,7 @@ export default function AuditLogsTab() {
             className="flex-row items-center justify-between"
             style={{
               marginTop: '20px',
+              padding: '0 20px 20px 20px',
             }}
           >
             <div className="text-muted" style={{ fontSize: '14px' }}>{t('audit.totalLogs', { count: auditTotal })}</div>

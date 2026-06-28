@@ -147,7 +147,7 @@ export default function SessionsPanel() {
                         color: isCurrent ? 'var(--color-primary)' : 'var(--color-text-muted)',
                       }}
                     />
-                    <div>
+                    <div className="flex-row items-center gap-sm">
                       <span style={{ fontSize: '14px', fontWeight: '600' }}>
                         {parseUserAgent(session.user_agent)}
                       </span>
