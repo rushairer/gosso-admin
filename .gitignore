@@ -35,5 +35,4 @@ yarn-error.log*
 
 # Private key files (do not commit keys)
 *.pem
-gosso/keys/*
-!gosso/keys/.gitkeep
+keys/

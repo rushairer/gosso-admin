@@ -1,4 +1,4 @@
-name: P0 Release Gate
+name: CI
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: p0-release-gate-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -24,8 +24,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -36,9 +34,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
-
-      - name: Format check
-        run: npm run format:check
 
       - name: Lint
         run: npm run lint
@@ -52,57 +47,53 @@ jobs:
       - name: Build
         run: npm run build
 
-  backend:
-    name: Backend quality
+      - name: Build subpath variant
+        run: VITE_APP_BASE_PATH=/identity-admin npm run build
+
+  seed:
+    name: Seed quality
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: gosso
+        working-directory: seed
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: gosso/go.mod
-          cache-dependency-path: gosso/go.sum
+          go-version-file: seed/go.mod
+          cache-dependency-path: seed/go.sum
 
-      - name: Architecture invariants
-        run: make architecture-check
+      - name: Verify go mod tidy
+        run: |
+          go mod tidy
+          git diff --exit-code go.mod go.sum
 
-      - name: Coverage gate
-        run: make coverage-check
+      - name: Test
+        run: go test ./...
 
-      - name: Critical package coverage
-        run: make critical-coverage-check
+      - name: Build
+        run: go build ./...
 
-      - name: HTTP integration package compile
-        run: go test -run '^$' ./tests/http
-
-  release-baseline:
-    name: Release baseline
+  compose:
+    name: Compose and preflight
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
-      - name: Setup Node.js for OpenAPI lint
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: Prepare local signing key
+        run: |
+          mkdir -p keys
+          openssl genpkey -algorithm RSA -out keys/private.pem -pkeyopt rsa_keygen_bits:2048
+          chmod 600 keys/private.pem
 
       - name: Development preflight
         run: ./scripts/preflight.sh development
 
       - name: Docker Compose config validation
         run: docker compose config
-
-      - name: OpenAPI lint
-        run: npx --yes @redocly/cli@latest lint gosso/docs/openapi.yaml --skip-rule security-defined

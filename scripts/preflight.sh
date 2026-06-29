@@ -52,9 +52,9 @@ load_env_file() {
 
 load_env_file "$ROOT_DIR/.env"
 case "$ENVIRONMENT" in
-  prod|production) load_env_file "$ROOT_DIR/gosso/.env.production" ;;
-  development|dev|local) load_env_file "$ROOT_DIR/gosso/.env.development" ;;
-  test|testing) load_env_file "$ROOT_DIR/gosso/.env.test" ;;
+  prod|production) load_env_file "$ROOT_DIR/.env.production" ;;
+  development|dev|local) load_env_file "$ROOT_DIR/.env.development" ;;
+  test|testing) load_env_file "$ROOT_DIR/.env.test" ;;
 esac
 
 info "Running GOSSO Admin preflight for environment: $ENVIRONMENT"
@@ -82,7 +82,7 @@ if is_production_like && printf '%s' "$issuer" | grep -Eq '^http://|localhost|12
   fail "GOUNO_AUTH_ISSUER must be an HTTPS public origin in production-like environments"
 fi
 
-private_key="${GOUNO_AUTH_PRIVATE_KEY_PATH:-$ROOT_DIR/gosso/keys/private.pem}"
+private_key="${GOUNO_AUTH_PRIVATE_KEY_PATH:-$ROOT_DIR/keys/private.pem}"
 if [ -f "$private_key" ]; then
   info "RSA signing key exists at $private_key"
   perms="$(stat -f '%Lp' "$private_key" 2>/dev/null || stat -c '%a' "$private_key" 2>/dev/null || true)"
@@ -136,7 +136,7 @@ require_or_warn "${GOUNO_CORS_ALLOWED_ORIGINS:-}" "GOUNO_CORS_ALLOWED_ORIGINS"
 require_or_warn "${GOUNO_WEB_SERVER_TRUSTED_PROXIES:-}" "GOUNO_WEB_SERVER_TRUSTED_PROXIES"
 
 if is_production_like; then
-  if grep -Rqs 'swagger' "$ROOT_DIR/nginx-gateway.conf" "$ROOT_DIR/gosso/config/production.yaml"; then
+  if grep -Rqs 'swagger' "$ROOT_DIR/nginx-gateway.conf"; then
     warn "Swagger route/config references detected; ensure Swagger is disabled or access-controlled in production"
   fi
 fi

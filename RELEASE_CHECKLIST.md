@@ -19,8 +19,8 @@ Use this checklist before tagging a release, publishing an image, or handing the
 
 - [ ] `docker compose config` passes at repository root.
 - [ ] Frontend passes `npm run format:check`, `npm run lint`, `npx tsc -b --noEmit`, `npm run test:run`, and `npm run build`.
-- [ ] Backend passes `make architecture-check`, `make coverage-check`, and `make critical-coverage-check`.
-- [ ] HTTP integration tests pass from `gosso` with the test compose stack.
+- [ ] Seed passes `go test ./...` or `go build ./...`.
+- [ ] The referenced `ghcr.io/rushairer/gosso` image has passed the `gosso` repository release gates.
 - [ ] `./scripts/smoke.sh` passes against the target deployment.
 - [ ] `ADMIN_PASSWORD=<secret> ./scripts/smoke.sh` or `SMOKE_ACCESS_TOKEN=<token> ./scripts/smoke.sh` passes against a disposable admin account or staging environment.
 - [ ] `SMOKE_MUTATE=true` smoke checks pass in staging, including temporary OAuth2 client and user create/cleanup.
@@ -31,7 +31,7 @@ Use this checklist before tagging a release, publishing an image, or handing the
 - [ ] Admin can sign in, create a user, register an OAuth2 client, revoke consent, and view audit logs.
 - [ ] Normal users cannot access `/admin`.
 - [ ] System Status shows readiness and OIDC discovery metadata.
-- [ ] OpenAPI includes all exposed P0 admin endpoints.
+- [ ] Referenced Gosso OpenAPI documentation matches the deployed Gosso image.
 
 ## Operations Gate
 

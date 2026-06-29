@@ -26,8 +26,9 @@ Generate unique values per environment:
 ```bash
 openssl rand -hex 32 # TOTP encryption key
 openssl rand -hex 32 # verification hash pepper
-openssl genpkey -algorithm RSA -out gosso/keys/private.pem -pkeyopt rsa_keygen_bits:2048
-chmod 600 gosso/keys/private.pem
+mkdir -p keys
+openssl genpkey -algorithm RSA -out keys/private.pem -pkeyopt rsa_keygen_bits:2048
+chmod 600 keys/private.pem
 ```
 
 Required production settings:
@@ -91,4 +92,4 @@ SMOKE_ACCESS_TOKEN=<admin-token> SMOKE_MUTATE=true BASE_URL=https://staging-sso.
 
 ## Release Discipline
 
-Use [RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md) for every release. Do not promote a build when preflight, smoke checks, or the frontend/backend quality gates are failing.
+Use [RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md) for every release. Do not promote a build when preflight, smoke checks, or the admin-console quality gates are failing.

@@ -1,15 +1,15 @@
 # GOSSO Admin Console
 
-GOSSO Admin Console is a self-hosted identity administration stack built around the `gosso` OpenID Connect / OAuth 2.0 provider. It packages the identity server, React admin console, PostgreSQL, Redis, a first-run seeder, Mailpit for local email testing, and an Nginx same-origin gateway.
+GOSSO Admin Console is a self-hosted identity administration client for the `gosso` OpenID Connect / OAuth 2.0 provider. This repository owns the React admin console, a first-run seeder, local compose wiring, and an Nginx same-origin gateway. The Gosso server is consumed as a versioned container image instead of a source submodule.
 
 The P0 goal of this repository is a professional, testable release baseline: local users can try it quickly, operators get clear production guardrails, and contributors can verify the critical authentication and administration paths.
 
 ## What Is Included
 
-- OIDC/OAuth2 provider endpoints: discovery, JWKS, authorization code + PKCE, refresh token, client credentials, device code, token revocation/introspection, userinfo, and RP-initiated logout.
-- Authentication: username/password, sessions, password change/reset, email verification, TOTP MFA, backup codes, WebAuthn/passkeys, and social login hooks.
 - Admin console: OAuth2 clients, user accounts, role assignment, account lockout clearing, MFA reset, consent revocation, audit log search, and system status.
-- Operations: Docker Compose local stack, PostgreSQL migrations, Redis-backed sessions/rate limits, health/readiness probes, OpenAPI/Swagger, Prometheus metrics, OpenTelemetry tracing, Helm assets in the `gosso` submodule, preflight and smoke scripts.
+- First-run seeder: local admin user and admin-console OAuth client bootstrap.
+- Local stack wiring: PostgreSQL, Redis, Mailpit, Gosso image, admin frontend, and same-origin gateway.
+- Operations: preflight checks, smoke checks, Dockerfile for the admin frontend, and Dockerfile for the seeder.
 
 ## Architecture
 
@@ -23,7 +23,7 @@ Nginx Gateway :8080
   |-- /oauth2/* /oidc/*         -> gosso
   |-- /.well-known/* /swagger/* -> gosso
 
-gosso -> PostgreSQL + Redis
+gosso image -> PostgreSQL + Redis
 seed  -> PostgreSQL first-run bootstrap
 ```
 
@@ -33,21 +33,15 @@ When embedding this console into a larger same-origin business cluster, build th
 
 ## Local Quick Start
 
-1. Initialize the submodule if needed:
+1. Generate a local RSA signing key:
 
    ```bash
-   git submodule update --init --recursive
+   mkdir -p keys
+   openssl genpkey -algorithm RSA -out keys/private.pem -pkeyopt rsa_keygen_bits:2048
+   chmod 600 keys/private.pem
    ```
 
-2. Generate a local RSA signing key:
-
-   ```bash
-   mkdir -p gosso/keys
-   openssl genpkey -algorithm RSA -out gosso/keys/private.pem -pkeyopt rsa_keygen_bits:2048
-   chmod 600 gosso/keys/private.pem
-   ```
-
-3. Run a local preflight:
+2. Run a local preflight:
 
    ```bash
    ./scripts/preflight.sh development
@@ -55,7 +49,7 @@ When embedding this console into a larger same-origin business cluster, build th
 
    Warnings about local defaults are expected in development.
 
-4. Start the stack:
+3. Start the stack:
 
    ```bash
    docker compose up -d --build
@@ -69,6 +63,8 @@ Local development seeds an administrator account by default:
 - Password: `admin123`
 
 These credentials are for local development only. Change `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `docker-compose.yml` for any shared demo, staging, or production-like environment.
+
+The local stack uses `ghcr.io/rushairer/gosso:${GOSSO_IMAGE_TAG:-main}` by default. Pin `GOSSO_IMAGE_TAG` to an immutable `sha-...` tag or digest for repeatable staging and production deployments.
 
 ## First Verification
 
@@ -125,13 +121,6 @@ npm run dev
 Set `VITE_SHOW_DEV_CREDENTIALS=true` only when you intentionally want the local login screen to show seeded development credentials.
 Set `VITE_APP_BASE_PATH=/identity-admin` when testing the console behind a shared gateway sub-path.
 
-Backend:
-
-```bash
-cd gosso
-make check
-```
-
 Useful root-level checks:
 
 ```bash
@@ -142,7 +131,7 @@ docker compose config
 
 ## API Documentation
 
-Swagger is served in local/debug deployments at [http://localhost:8080/swagger](http://localhost:8080/swagger). The OpenAPI source lives at [gosso/docs/openapi.yaml](gosso/docs/openapi.yaml).
+Swagger is served in local/debug deployments at [http://localhost:8080/swagger](http://localhost:8080/swagger). The OpenAPI source is maintained by the `gosso` server repository and should match the deployed Gosso image tag.
 
 For production, keep Swagger behind administrative network controls or disable it at the gateway.
 

@@ -27,9 +27,7 @@ services:
       retries: 5
 
   gosso:
-    build:
-      context: ./gosso
-      dockerfile: Dockerfile
+    image: ghcr.io/rushairer/gosso:${GOSSO_IMAGE_TAG:-main}
     container_name: sso-identity-provider
     command: ["web", "-e", "development"]
     environment:
@@ -52,7 +50,7 @@ services:
       - GOUNO_AUTH_WEBAUTHN_RP_NAME=gouno-dev
       - GOUNO_AUTH_WEBAUTHN_RP_ORIGIN=http://localhost:8080
     volumes:
-      - ./gosso/keys:/app/keys
+      - ./keys:/app/keys
     depends_on:
       db:
         condition: service_healthy
