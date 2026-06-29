@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Key } from 'lucide-react';
-import { authSession, fetchUserProfile, redirectToAuthorize } from '../auth';
+import { loginWithPasskey, loginWithPassword, redirectToAuthorize, verifyMfa } from '../auth';
 import { Feedback, FormField } from '../components/ui';
-import { bufferToBase64URL, base64URLToBuffer } from '../utils/webauthn';
 import { logger } from '../utils/logger';
-import type { WebAuthnCredential } from '../types/api';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -40,55 +38,8 @@ export default function Login() {
     setError(null);
 
     try {
-      // Step 1: Begin passkey login (discoverable — no account_id)
-      const beginRes = await fetch('/api/v1/passkey/login/begin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      });
-      const beginBody = await beginRes.json();
-      if (!beginRes.ok) throw new Error(beginBody.message || 'Failed to begin passkey login');
-
-      const { options, request_id } = beginBody.data;
-      if (!options?.challenge) throw new Error('Server returned invalid WebAuthn options');
-
-      // Step 2: Browser WebAuthn assertion
-      const publicKeyOptions: PublicKeyCredentialRequestOptions = {
-        ...options,
-        challenge: base64URLToBuffer(options.challenge),
-        allowCredentials: (options.allowCredentials || []).map((cred: WebAuthnCredential) => ({
-          ...cred,
-          id: base64URLToBuffer(cred.id),
-        })),
-      };
-      const assertion = (await navigator.credentials.get({
-        publicKey: publicKeyOptions,
-      })) as PublicKeyCredential | null;
-      if (!assertion?.response) throw new Error('Passkey authentication cancelled or failed');
-
-      // Step 3: Complete login
-      const assertionResponse = assertion.response as AuthenticatorAssertionResponse;
-      const completeBody = {
-        request_id,
-        id: assertion.id,
-        rawId: bufferToBase64URL(assertion.rawId),
-        type: assertion.type,
-        response: {
-          clientDataJSON: bufferToBase64URL(assertionResponse.clientDataJSON),
-          authenticatorData: bufferToBase64URL(assertionResponse.authenticatorData),
-          signature: bufferToBase64URL(assertionResponse.signature),
-          userHandle: assertionResponse.userHandle ? bufferToBase64URL(assertionResponse.userHandle) : null,
-        },
-      };
-      const completeRes = await fetch('/api/v1/passkey/login/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(completeBody),
-      });
-      const completeRespBody = await completeRes.json();
-      if (!completeRes.ok) throw new Error(completeRespBody.message || 'Passkey login failed');
-
-      await storeTokensAndRedirect(completeRespBody.data);
+      await loginWithPasskey();
+      await storeTokensAndRedirect();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error('Passkey login error', err);
@@ -98,15 +49,7 @@ export default function Login() {
     }
   };
 
-  const storeTokensAndRedirect = async (data: { access_token: string; refresh_token: string; expires_in: number }) => {
-    authSession.saveTokenSet(data);
-
-    try {
-      await fetchUserProfile(data.access_token);
-    } catch (profileErr) {
-      logger.warn('Failed to fetch user profile after login', profileErr);
-    }
-
+  const storeTokensAndRedirect = async () => {
     if (hasAuthorizeRedirect) {
       doRedirect();
       return;
@@ -126,27 +69,18 @@ export default function Login() {
     setError(null);
 
     try {
-      const response = await fetch('/api/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const body = await response.json();
-      if (!response.ok) {
-        throw new Error(body.message || t('login.loginFailed'));
-      }
+      const result = await loginWithPassword(username, password);
 
       // Check if MFA is required
-      if (body.data?.requires_mfa) {
+      if (result.requires_mfa) {
         setMfaRequired(true);
-        setMfaToken(body.data.mfa_token);
+        setMfaToken(String(result.mfa_token || ''));
         setMfaCode('');
         setLoading(false);
         return;
       }
 
-      await storeTokensAndRedirect(body.data);
+      await storeTokensAndRedirect();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error('Login error', err);
@@ -167,22 +101,8 @@ export default function Login() {
     setError(null);
 
     try {
-      const response = await fetch('/api/v1/auth/mfa/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mfa_token: mfaToken,
-          code: mfaCode.trim(),
-          type: 'totp',
-        }),
-      });
-
-      const body = await response.json();
-      if (!response.ok) {
-        throw new Error(body.message || t('login.mfaVerificationFailed'));
-      }
-
-      await storeTokensAndRedirect(body.data);
+      await verifyMfa(mfaToken, mfaCode.trim());
+      await storeTokensAndRedirect();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error('MFA verification error', err);

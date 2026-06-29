@@ -9,6 +9,15 @@ function accessTokenWithClaims(claims: Record<string, unknown>): string {
   return `${encode({ alg: 'none', typ: 'JWT' })}.${encode(claims)}.signature`;
 }
 
+const keys = {
+  accessToken: 'gosso-admin:access_token',
+  refreshToken: 'gosso-admin:refresh_token',
+  userProfile: 'gosso-admin:user_profile',
+  tokenIssuedAt: 'gosso-admin:token_issued_at',
+  tokenExpiresIn: 'gosso-admin:token_expires_in',
+  refreshLock: 'gosso-admin:auth_refresh_lock',
+};
+
 describe('authSession', () => {
   beforeEach(() => {
     vi.resetModules();
@@ -30,28 +39,28 @@ describe('authSession', () => {
     });
 
     it('returns true when token exists', async () => {
-      localStorage.setItem('access_token', 'test-token');
+      localStorage.setItem(keys.accessToken, 'test-token');
       const { authSession } = await import('../authSession');
       expect(authSession.isLoggedIn()).toBe(true);
     });
 
     it('detects admin access from stored profile and token scope', async () => {
-      localStorage.setItem('access_token', accessTokenWithClaims({ scope: 'openid admin' }));
-      localStorage.setItem('user_profile', JSON.stringify({ sub: '1', roles: ['admin'] }));
+      localStorage.setItem(keys.accessToken, accessTokenWithClaims({ scope: 'openid admin' }));
+      localStorage.setItem(keys.userProfile, JSON.stringify({ sub: '1', roles: ['admin'] }));
       const { authSession } = await import('../authSession');
       expect(authSession.isAdmin()).toBe(true);
     });
 
     it('returns false for admin role without admin token scope', async () => {
-      localStorage.setItem('access_token', accessTokenWithClaims({ scope: 'openid profile' }));
-      localStorage.setItem('user_profile', JSON.stringify({ sub: '1', roles: ['admin'] }));
+      localStorage.setItem(keys.accessToken, accessTokenWithClaims({ scope: 'openid profile' }));
+      localStorage.setItem(keys.userProfile, JSON.stringify({ sub: '1', roles: ['admin'] }));
       const { authSession } = await import('../authSession');
       expect(authSession.isAdmin()).toBe(false);
     });
 
     it('returns false for non-admin profile', async () => {
-      localStorage.setItem('access_token', 'test-token');
-      localStorage.setItem('user_profile', JSON.stringify({ sub: '1', roles: ['user'] }));
+      localStorage.setItem(keys.accessToken, 'test-token');
+      localStorage.setItem(keys.userProfile, JSON.stringify({ sub: '1', roles: ['user'] }));
       const { authSession } = await import('../authSession');
       expect(authSession.isAdmin()).toBe(false);
     });
@@ -65,10 +74,10 @@ describe('authSession', () => {
         refresh_token: 'rtoken',
         expires_in: 900,
       });
-      expect(localStorage.getItem('access_token')).toBe('atoken');
-      expect(localStorage.getItem('refresh_token')).toBe('rtoken');
-      expect(localStorage.getItem('token_issued_at')).toBeTruthy();
-      expect(localStorage.getItem('token_expires_in')).toBe('900');
+      expect(localStorage.getItem(keys.accessToken)).toBe('atoken');
+      expect(localStorage.getItem(keys.refreshToken)).toBe('rtoken');
+      expect(localStorage.getItem(keys.tokenIssuedAt)).toBeTruthy();
+      expect(localStorage.getItem(keys.tokenExpiresIn)).toBe('900');
     });
 
     it('sets access_token cookie', async () => {
@@ -89,10 +98,10 @@ describe('authSession', () => {
         expires_in: 900,
       });
       authSession.clear();
-      expect(localStorage.getItem('access_token')).toBeNull();
-      expect(localStorage.getItem('refresh_token')).toBeNull();
-      expect(localStorage.getItem('user_profile')).toBeNull();
-      expect(localStorage.getItem('token_issued_at')).toBeNull();
+      expect(localStorage.getItem(keys.accessToken)).toBeNull();
+      expect(localStorage.getItem(keys.refreshToken)).toBeNull();
+      expect(localStorage.getItem(keys.userProfile)).toBeNull();
+      expect(localStorage.getItem(keys.tokenIssuedAt)).toBeNull();
     });
   });
 
@@ -108,8 +117,8 @@ describe('authSession', () => {
 
     it('returns populated snapshot when logged in as admin', async () => {
       const token = accessTokenWithClaims({ scope: 'openid admin' });
-      localStorage.setItem('access_token', token);
-      localStorage.setItem('user_profile', JSON.stringify({ sub: '1', name: 'Admin', roles: ['admin'] }));
+      localStorage.setItem(keys.accessToken, token);
+      localStorage.setItem(keys.userProfile, JSON.stringify({ sub: '1', name: 'Admin', roles: ['admin'] }));
       const { authSession } = await import('../authSession');
       const snap = authSession.getSnapshot();
       expect(snap.loggedIn).toBe(true);
@@ -127,13 +136,13 @@ describe('authSession', () => {
 
     it('parses stored profile JSON', async () => {
       const profile = { sub: '123', name: 'Test User', email: 'test@example.com' };
-      localStorage.setItem('user_profile', JSON.stringify(profile));
+      localStorage.setItem(keys.userProfile, JSON.stringify(profile));
       const { authSession } = await import('../authSession');
       expect(authSession.getUserProfile()).toEqual(profile);
     });
 
     it('returns null for invalid JSON', async () => {
-      localStorage.setItem('user_profile', 'not-json');
+      localStorage.setItem(keys.userProfile, 'not-json');
       const { authSession } = await import('../authSession');
       expect(authSession.getUserProfile()).toBeNull();
     });
@@ -141,7 +150,7 @@ describe('authSession', () => {
 
   describe('refreshAccessToken', () => {
     it('persists rotated refresh token returned by the refresh endpoint', async () => {
-      localStorage.setItem('refresh_token', 'old-refresh');
+      localStorage.setItem(keys.refreshToken, 'old-refresh');
       const fetchMock = vi.spyOn(window, 'fetch').mockResolvedValue(
         new Response(
           JSON.stringify({
@@ -160,15 +169,15 @@ describe('authSession', () => {
       await expect(refreshAccessToken()).resolves.toBe('new-access');
       expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toEqual({ refresh_token: 'old-refresh' });
-      expect(localStorage.getItem('access_token')).toBe('new-access');
-      expect(localStorage.getItem('refresh_token')).toBe('new-refresh');
-      expect(localStorage.getItem('auth_refresh_lock')).toBeNull();
+      expect(localStorage.getItem(keys.accessToken)).toBe('new-access');
+      expect(localStorage.getItem(keys.refreshToken)).toBe('new-refresh');
+      expect(localStorage.getItem(keys.refreshLock)).toBeNull();
     });
 
     it('waits for another tab to finish refresh and reuses the rotated token set', async () => {
       vi.useFakeTimers();
-      localStorage.setItem('refresh_token', 'old-refresh');
-      localStorage.setItem('auth_refresh_lock', JSON.stringify({ owner: 'other-tab', expiresAt: Date.now() + 15_000 }));
+      localStorage.setItem(keys.refreshToken, 'old-refresh');
+      localStorage.setItem(keys.refreshLock, JSON.stringify({ owner: 'other-tab', expiresAt: Date.now() + 15_000 }));
       const fetchMock = vi.spyOn(window, 'fetch');
 
       const { refreshAccessToken, authSession } = await import('../authSession');
@@ -180,18 +189,18 @@ describe('authSession', () => {
         refresh_token: 'peer-refresh',
         expires_in: 900,
       });
-      localStorage.removeItem('auth_refresh_lock');
-      window.dispatchEvent(new StorageEvent('storage', { key: 'refresh_token', newValue: 'peer-refresh' }));
+      localStorage.removeItem(keys.refreshLock);
+      window.dispatchEvent(new StorageEvent('storage', { key: keys.refreshToken, newValue: 'peer-refresh' }));
 
       await expect(refreshPromise).resolves.toBe('peer-access');
       expect(fetchMock).not.toHaveBeenCalled();
-      expect(localStorage.getItem('refresh_token')).toBe('peer-refresh');
+      expect(localStorage.getItem(keys.refreshToken)).toBe('peer-refresh');
     });
 
     it('takes over a stale refresh lock and uses the latest refresh token from storage', async () => {
       vi.useFakeTimers();
-      localStorage.setItem('refresh_token', 'old-refresh');
-      localStorage.setItem('auth_refresh_lock', JSON.stringify({ owner: 'other-tab', expiresAt: Date.now() + 15_000 }));
+      localStorage.setItem(keys.refreshToken, 'old-refresh');
+      localStorage.setItem(keys.refreshLock, JSON.stringify({ owner: 'other-tab', expiresAt: Date.now() + 15_000 }));
       const fetchMock = vi.spyOn(window, 'fetch').mockResolvedValue(
         new Response(
           JSON.stringify({
@@ -208,22 +217,22 @@ describe('authSession', () => {
       const { refreshAccessToken } = await import('../authSession');
       const refreshPromise = refreshAccessToken();
 
-      localStorage.setItem('refresh_token', 'peer-refresh');
+      localStorage.setItem(keys.refreshToken, 'peer-refresh');
       await vi.advanceTimersByTimeAsync(15_100);
 
       await expect(refreshPromise).resolves.toBe('new-access');
       expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toEqual({ refresh_token: 'peer-refresh' });
-      expect(localStorage.getItem('refresh_token')).toBe('newer-refresh');
+      expect(localStorage.getItem(keys.refreshToken)).toBe('newer-refresh');
     });
 
     it('uses the browser Web Lock and rechecks token storage before refreshing', async () => {
-      localStorage.setItem('refresh_token', 'old-refresh');
+      localStorage.setItem(keys.refreshToken, 'old-refresh');
       const fetchMock = vi.spyOn(window, 'fetch');
       const lockRequest = vi.fn(
         async (_name: string, _options: { mode: 'exclusive' }, callback: () => Promise<string>) => {
-          localStorage.setItem('access_token', 'peer-access');
-          localStorage.setItem('refresh_token', 'peer-refresh');
+          localStorage.setItem(keys.accessToken, 'peer-access');
+          localStorage.setItem(keys.refreshToken, 'peer-refresh');
           return callback();
         }
       );
