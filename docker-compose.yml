@@ -41,6 +41,7 @@ services:
       - GOUNO_DATABASE_DRIVERS_POSTGRES_DSN=host=db user=postgres password=password dbname=gosso port=5432 sslmode=disable TimeZone=Asia/Shanghai search_path=public
       - GOUNO_REDIS_DSN=redis://redis:6379/0
       - GOUNO_AUTH_ISSUER=http://localhost:8080
+      - GOUNO_AUTH_PASSWORD_RESET_BASE_URL=http://localhost:8080/reset-password
       - GOUNO_AUTH_PRIVATE_KEY_PATH=/app/keys/private.pem
       - GOUNO_AUTH_TOTP_ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000
       - GOUNO_AUTH_VERIFY_HASH_PEPPER=0000000000000000000000000000000000000000000000000000000000000000

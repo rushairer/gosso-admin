@@ -69,6 +69,26 @@ describe('password reset pages', () => {
     });
   });
 
+  it('trims token whitespace from the URL fragment before submitting', async () => {
+    render(
+      <MemoryRouter initialEntries={['/reset-password#token=%20abc%20']}>
+        <ResetPassword />
+      </MemoryRouter>
+    );
+
+    await userEvent.type(screen.getByLabelText(/^new password$|^新密码$/i), 'NewPassword123');
+    await userEvent.type(screen.getByLabelText(/confirm new password|确认新密码/i), 'NewPassword123');
+    await userEvent.click(screen.getByRole('button', { name: /reset password|重置密码/i }));
+
+    await waitFor(() => {
+      expect(window.fetch).toHaveBeenCalledWith('/api/v1/auth/password/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: 'abc', new_password: 'NewPassword123' }),
+      });
+    });
+  });
+
   it('disables reset submission when the reset link has no token', () => {
     render(
       <MemoryRouter initialEntries={['/reset-password']}>

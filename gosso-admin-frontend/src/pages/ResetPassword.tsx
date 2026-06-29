@@ -7,7 +7,7 @@ import { logger } from '../utils/logger';
 
 function readTokenFromHash(hash: string): string {
   const params = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
-  return params.get('token') || '';
+  return (params.get('token') || '').trim();
 }
 
 export default function ResetPassword() {
