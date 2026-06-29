@@ -29,6 +29,8 @@ seed  -> PostgreSQL first-run bootstrap
 
 The gateway keeps the SPA and identity APIs on the same origin, which avoids local CORS and third-party cookie surprises during OIDC redirects.
 
+When embedding this console into a larger same-origin business cluster, build the frontend with `VITE_APP_BASE_PATH=/identity-admin` and route `/identity-admin/*` to `gosso-admin-frontend`. Standalone deployments can keep the default root path.
+
 ## Local Quick Start
 
 1. Initialize the submodule if needed:
@@ -121,6 +123,7 @@ npm run dev
 ```
 
 Set `VITE_SHOW_DEV_CREDENTIALS=true` only when you intentionally want the local login screen to show seeded development credentials.
+Set `VITE_APP_BASE_PATH=/identity-admin` when testing the console behind a shared gateway sub-path.
 
 Backend:
 

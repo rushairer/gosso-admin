@@ -1,6 +1,8 @@
 # Build stage
 FROM node:20-alpine AS builder
 WORKDIR /app
+ARG VITE_APP_BASE_PATH=/
+ENV VITE_APP_BASE_PATH=${VITE_APP_BASE_PATH}
 COPY package*.json ./
 RUN npm ci --legacy-peer-deps
 COPY . .

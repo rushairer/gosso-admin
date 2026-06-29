@@ -1,17 +1,18 @@
 import { createGossoClient } from '@gosso/client';
 import type { LoginResult, TokenResponse, UserProfile, SessionSnapshot } from '@gosso/client';
+import { appPath } from '../config/appPaths';
 
 const SSO_ISSUER = window.location.origin;
 const CLIENT_ID = 'gosso-admin-spa';
-const REDIRECT_URI = `${window.location.origin}/callback`;
+const REDIRECT_URI = `${window.location.origin}${appPath('/callback')}`;
 
 const gossoClient = createGossoClient({
   issuer: SSO_ISSUER,
   clientId: CLIENT_ID,
   redirectUri: REDIRECT_URI,
   scope: 'openid profile email admin',
-  postLoginDefaultPath: '/admin',
-  loginPath: '/login',
+  postLoginDefaultPath: appPath('/admin'),
+  loginPath: appPath('/login'),
   storagePrefix: 'gosso-admin',
 });
 
@@ -51,7 +52,9 @@ export const authSession = {
   isAdmin: gossoClient.isAdmin,
   saveTokenSet: gossoClient.saveTokenSet,
   clear: gossoClient.clear,
-  logout: gossoClient.logout,
+  logout(redirectTo = '/') {
+    return gossoClient.logout(appPath(redirectTo));
+  },
 
   getPostLoginRedirect(defaultPath = '/admin'): string {
     return localStorage.getItem(gossoClient.storageKeys.postLoginRedirect) || defaultPath;

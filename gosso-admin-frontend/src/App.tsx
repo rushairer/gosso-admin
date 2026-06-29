@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider } from './components/ui';
+import { routerBasename } from './config/appPaths';
 
 const Home = lazy(() => import('./pages/Home'));
 const Callback = lazy(() => import('./pages/Callback'));
@@ -38,7 +39,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ToastProvider>
-        <BrowserRouter>
+        <BrowserRouter basename={routerBasename}>
           <Suspense fallback={<PageLoader />}>
             <Routes>
               {/* OIDC flow callbacks and triggers */}
