@@ -52,4 +52,14 @@ describe('Login', () => {
       expect(redirectToAuthorize).toHaveBeenCalledWith('/admin');
     });
   });
+
+  it('links to the forgot password flow', () => {
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <Login />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole('link', { name: /forgot password|忘记密码/i })).toHaveAttribute('href', '/forgot-password');
+  });
 });

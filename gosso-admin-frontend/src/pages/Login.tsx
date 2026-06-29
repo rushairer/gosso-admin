@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Key } from 'lucide-react';
 import { authSession, fetchUserProfile, redirectToAuthorize } from '../auth';
@@ -232,6 +232,15 @@ export default function Login() {
                 disabled={loading}
               />
             </FormField>
+
+            <div style={{ margin: '-8px 0 18px', textAlign: 'right' }}>
+              <Link
+                to="/forgot-password"
+                style={{ color: 'var(--color-primary)', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}
+              >
+                {t('login.forgotPasswordLink')}
+              </Link>
+            </div>
 
             {showDevCredentials && !username && !password && (
               <div
