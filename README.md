@@ -52,10 +52,10 @@ When embedding this console into a larger same-origin business cluster, build th
 3. Start the stack:
 
    ```bash
-   docker compose up -d --build
+   docker compose up -d
    ```
 
-5. Open [http://localhost:8080](http://localhost:8080).
+4. Open [http://localhost:8080](http://localhost:8080).
 
 Local development seeds an administrator account by default:
 
@@ -64,7 +64,17 @@ Local development seeds an administrator account by default:
 
 These credentials are for local development only. Change `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `docker-compose.yml` for any shared demo, staging, or production-like environment.
 
-The local stack uses `ghcr.io/rushairer/gosso:${GOSSO_IMAGE_TAG:-main}` by default. Pin `GOSSO_IMAGE_TAG` to an immutable `sha-...` tag or digest for repeatable staging and production deployments.
+The local stack uses published images by default:
+
+- `ghcr.io/rushairer/gosso:${GOSSO_IMAGE_TAG:-main}`
+- `ghcr.io/rushairer/gosso-admin-frontend:${GOSSO_ADMIN_FRONTEND_IMAGE_TAG:-main}`
+- `ghcr.io/rushairer/gosso-admin-seed:${GOSSO_ADMIN_SEED_IMAGE_TAG:-main}`
+
+Pin these tags to immutable `sha-...` tags or digests for repeatable staging and production deployments. To build the admin frontend and seed from the current checkout, run:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.source.yml up -d --build
+```
 
 ## First Verification
 

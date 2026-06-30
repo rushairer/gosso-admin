@@ -97,3 +97,6 @@ jobs:
 
       - name: Docker Compose config validation
         run: docker compose config
+
+      - name: Source override Compose config validation
+        run: docker compose -f docker-compose.yml -f docker-compose.source.yml config

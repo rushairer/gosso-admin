@@ -1,0 +1,12 @@
+services:
+  seed:
+    build:
+      context: ./seed
+      dockerfile: Dockerfile
+
+  gosso-admin-frontend:
+    build:
+      context: ./gosso-admin-frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_APP_BASE_PATH: ${VITE_APP_BASE_PATH:-/}
