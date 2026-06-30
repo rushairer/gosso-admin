@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM --platform=$BUILDPLATFORM node:20-alpine AS builder
 WORKDIR /app
 ARG VITE_APP_BASE_PATH=/
 ENV VITE_APP_BASE_PATH=${VITE_APP_BASE_PATH}
