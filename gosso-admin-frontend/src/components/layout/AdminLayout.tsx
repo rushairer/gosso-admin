@@ -35,6 +35,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setSession(authSession.getSnapshot());
+    return authSession.subscribe(setSession);
   }, [location.pathname]);
 
   const page = useMemo(() => pageTitles[location.pathname] || pageTitles['/'], [pageTitles, location.pathname]);

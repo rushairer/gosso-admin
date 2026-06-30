@@ -6,6 +6,14 @@ const SSO_ISSUER = window.location.origin;
 const CLIENT_ID = 'gosso-admin-spa';
 const REDIRECT_URI = `${window.location.origin}${appPath('/callback')}`;
 
+type SessionListener = (snapshot: SessionSnapshot) => void;
+
+const sessionListeners = new Set<SessionListener>();
+
+function notifySessionChanged(snapshot: SessionSnapshot) {
+  sessionListeners.forEach((listener) => listener(snapshot));
+}
+
 const gossoClient = createGossoClient({
   issuer: SSO_ISSUER,
   clientId: CLIENT_ID,
@@ -14,6 +22,7 @@ const gossoClient = createGossoClient({
   postLoginDefaultPath: appPath('/admin'),
   loginPath: appPath('/login'),
   storagePrefix: 'gosso-admin',
+  onSessionChanged: notifySessionChanged,
 });
 
 const legacyStorageKeys = {
@@ -40,6 +49,12 @@ function migrateLegacyStorageKeys() {
 
 migrateLegacyStorageKeys();
 
+window.addEventListener('storage', (event) => {
+  if (Object.values(gossoClient.storageKeys).includes(event.key || '')) {
+    notifySessionChanged(gossoClient.getSnapshot());
+  }
+});
+
 export type { LoginResult, TokenResponse, UserProfile, SessionSnapshot };
 
 export const authSession = {
@@ -52,8 +67,29 @@ export const authSession = {
   isAdmin: gossoClient.isAdmin,
   saveTokenSet: gossoClient.saveTokenSet,
   clear: gossoClient.clear,
-  logout(redirectTo = '/') {
-    return gossoClient.logout(appPath(redirectTo));
+  subscribe(listener: SessionListener) {
+    sessionListeners.add(listener);
+    return () => {
+      sessionListeners.delete(listener);
+    };
+  },
+  async logout(redirectTo = '/') {
+    const accessToken = gossoClient.getAccessToken();
+    const nextPath = appPath(redirectTo);
+    gossoClient.clear();
+
+    try {
+      if (accessToken) {
+        await fetch(`${SSO_ISSUER}/api/v1/auth/logout`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${accessToken}` },
+          credentials: 'same-origin',
+          keepalive: true,
+        });
+      }
+    } finally {
+      window.location.href = nextPath;
+    }
   },
 
   getPostLoginRedirect(defaultPath = '/admin'): string {

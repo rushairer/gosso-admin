@@ -128,6 +128,73 @@ describe('authSession', () => {
     });
   });
 
+  describe('subscribe', () => {
+    it('notifies subscribers when the current tab changes session state', async () => {
+      const { authSession } = await import('../authSession');
+      const listener = vi.fn();
+      const unsubscribe = authSession.subscribe(listener);
+
+      authSession.saveTokenSet({
+        access_token: 'atoken',
+        refresh_token: 'rtoken',
+        expires_in: 900,
+      });
+      authSession.clear();
+
+      expect(listener).toHaveBeenCalledTimes(2);
+      expect(listener.mock.calls[0][0]).toMatchObject({ loggedIn: true, accessToken: 'atoken' });
+      expect(listener.mock.calls[1][0]).toMatchObject({ loggedIn: false, accessToken: null });
+
+      unsubscribe();
+      authSession.saveTokenSet({
+        access_token: 'next-token',
+        expires_in: 900,
+      });
+      expect(listener).toHaveBeenCalledTimes(2);
+    });
+
+    it('notifies subscribers when auth storage changes in another context', async () => {
+      const { authSession } = await import('../authSession');
+      const listener = vi.fn();
+      const unsubscribe = authSession.subscribe(listener);
+
+      localStorage.setItem(keys.accessToken, 'peer-token');
+      window.dispatchEvent(new StorageEvent('storage', { key: keys.accessToken, newValue: 'peer-token' }));
+
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener.mock.calls[0][0]).toMatchObject({ loggedIn: true, accessToken: 'peer-token' });
+
+      unsubscribe();
+    });
+  });
+
+  describe('logout', () => {
+    it('clears local session state before the logout request finishes', async () => {
+      localStorage.setItem(keys.accessToken, 'token-before-logout');
+      localStorage.setItem(keys.refreshToken, 'refresh-before-logout');
+      const fetchMock = vi.spyOn(window, 'fetch').mockReturnValue(new Promise<Response>(() => {}));
+
+      const { authSession } = await import('../authSession');
+      const listener = vi.fn();
+      authSession.subscribe(listener);
+
+      void authSession.logout('/');
+
+      expect(localStorage.getItem(keys.accessToken)).toBeNull();
+      expect(localStorage.getItem(keys.refreshToken)).toBeNull();
+      expect(listener).toHaveBeenCalledWith(expect.objectContaining({ loggedIn: false, accessToken: null }));
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${window.location.origin}/api/v1/auth/logout`,
+        expect.objectContaining({
+          method: 'POST',
+          headers: { Authorization: 'Bearer token-before-logout' },
+          credentials: 'same-origin',
+          keepalive: true,
+        })
+      );
+    });
+  });
+
   describe('getUserProfile', () => {
     it('returns null when no profile stored', async () => {
       const { authSession } = await import('../authSession');

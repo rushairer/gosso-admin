@@ -40,5 +40,5 @@ export function isAdmin(): boolean {
 }
 
 export function logout() {
-  authSession.logout('/');
+  return authSession.logout('/');
 }
