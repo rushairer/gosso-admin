@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -22,7 +23,32 @@ const (
 	Argon2Threads = 4
 	Argon2SaltLen = 16
 	Argon2KeyLen  = 32
+
+	defaultSchemaVersion = 20
+	seedAdvisoryLockID   = 476_677_601
 )
+
+func expectedSchemaVersion() (int, error) {
+	raw := strings.TrimSpace(os.Getenv("GOSSO_SCHEMA_VERSION"))
+	if raw == "" {
+		return defaultSchemaVersion, nil
+	}
+	version, err := strconv.Atoi(raw)
+	if err != nil || version < 1 {
+		return 0, fmt.Errorf("GOSSO_SCHEMA_VERSION must be a positive integer, got %q", raw)
+	}
+	return version, nil
+}
+
+func validateSchemaVersion(actual int, dirty bool, expected int) error {
+	if dirty {
+		return fmt.Errorf("gosso database migration %d is dirty; repair migrations before seeding", actual)
+	}
+	if actual != expected {
+		return fmt.Errorf("unsupported gosso schema version %d; this seeder requires exactly %d", actual, expected)
+	}
+	return nil
+}
 
 func deploymentEnv() string {
 	for _, key := range []string{"GOSSO_ADMIN_ENV", "GOUNO_ENV", "APP_ENV", "ENV"} {
@@ -169,21 +195,50 @@ func main() {
 		log.Fatal("Timeout waiting for 'accounts' table to be created by GOSSO migrations.")
 	}
 	log.Println("Schema detected. Starting database seeding...")
+	expectedVersion, err := expectedSchemaVersion()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tx, err := db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		log.Fatalf("Failed to start seed transaction: %v", err)
+	}
+	committed := false
+	defer func() {
+		if !committed {
+			_ = tx.Rollback()
+		}
+	}()
+
+	if _, err = tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock($1)", seedAdvisoryLockID); err != nil {
+		log.Fatalf("Failed to acquire seed advisory lock: %v", err)
+	}
+
+	var schemaVersion int
+	var schemaDirty bool
+	if err = tx.QueryRowContext(ctx, "SELECT version, dirty FROM schema_migrations LIMIT 1").Scan(&schemaVersion, &schemaDirty); err != nil {
+		log.Fatalf("Failed to read Gosso schema version: %v", err)
+	}
+	if err = validateSchemaVersion(schemaVersion, schemaDirty, expectedVersion); err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Gosso schema version %d is compatible.", schemaVersion)
 
 	// 1. Seed Admin User
 	var adminCount int
-	err = db.QueryRowContext(ctx, "SELECT COUNT(*) FROM accounts WHERE username = $1", adminUsername).Scan(&adminCount)
+	err = tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM accounts WHERE username = $1", adminUsername).Scan(&adminCount)
 	if err != nil {
 		log.Fatalf("Failed to query admin user count: %v", err)
 	}
 
-	adminID := "00000000-0000-0000-0000-000000000001"
+	var adminID string
 	if adminCount == 0 {
 		log.Printf("Seeding default admin user '%s'...\n", adminUsername)
-		_, err = db.ExecContext(ctx,
-			"INSERT INTO accounts (id, username, display_name, status) VALUES ($1, $2, $3, 'active')",
-			adminID, adminUsername, adminDisplayName,
-		)
+		err = tx.QueryRowContext(ctx,
+			"INSERT INTO accounts (username, display_name, status) VALUES ($1, $2, 'active') RETURNING id",
+			adminUsername, adminDisplayName,
+		).Scan(&adminID)
 		if err != nil {
 			log.Fatalf("Failed to seed admin account: %v", err)
 		}
@@ -193,7 +248,7 @@ func main() {
 			log.Fatalf("Failed to hash password: %v", err)
 		}
 
-		_, err = db.ExecContext(ctx,
+		_, err = tx.ExecContext(ctx,
 			`INSERT INTO account_credentials (account_id, credential_type, identifier, credential_value, verified, primary_credential)
 			 VALUES ($1, 'password', $2, $3, true, true)`,
 			adminID, adminUsername, pwHash,
@@ -203,7 +258,7 @@ func main() {
 		}
 		log.Printf("Admin user %q seeded successfully. Store the initial password securely and rotate it after first sign-in.", adminUsername)
 	} else {
-		err = db.QueryRowContext(ctx, "SELECT id FROM accounts WHERE username = $1", adminUsername).Scan(&adminID)
+		err = tx.QueryRowContext(ctx, "SELECT id FROM accounts WHERE username = $1", adminUsername).Scan(&adminID)
 		if err != nil {
 			log.Fatalf("Failed to get admin ID: %v", err)
 		}
@@ -212,11 +267,11 @@ func main() {
 
 	// 2. Seed Admin Role
 	var roleID string
-	err = db.QueryRowContext(ctx, "SELECT id FROM roles WHERE name = 'admin'").Scan(&roleID)
+	err = tx.QueryRowContext(ctx, "SELECT id FROM roles WHERE name = 'admin'").Scan(&roleID)
 	if err == sql.ErrNoRows {
 		log.Println("Seeding admin role...")
-		err = db.QueryRowContext(ctx,
-			"INSERT INTO roles (name, description) VALUES ('admin', 'System Administrator') RETURNING id",
+		err = tx.QueryRowContext(ctx,
+			`INSERT INTO roles (name, description, permissions) VALUES ('admin', 'System Administrator', '["admin:*"]'::jsonb) RETURNING id`,
 		).Scan(&roleID)
 		if err != nil {
 			log.Fatalf("Failed to seed admin role: %v", err)
@@ -224,10 +279,15 @@ func main() {
 	} else if err != nil {
 		log.Fatalf("Failed to query role id: %v", err)
 	}
+	if _, err = tx.ExecContext(ctx,
+		`UPDATE roles SET permissions = COALESCE(permissions, '[]'::jsonb) || '["admin:*"]'::jsonb
+		 WHERE id = $1 AND NOT (COALESCE(permissions, '[]'::jsonb) ? 'admin:*')`, roleID); err != nil {
+		log.Fatalf("Failed to enforce built-in admin permissions: %v", err)
+	}
 
 	// 3. Link Admin User to Admin Role
 	var linkCount int
-	err = db.QueryRowContext(ctx,
+	err = tx.QueryRowContext(ctx,
 		"SELECT COUNT(*) FROM account_roles WHERE account_id = $1 AND role_id = $2",
 		adminID, roleID,
 	).Scan(&linkCount)
@@ -235,7 +295,7 @@ func main() {
 		log.Fatalf("Failed to query account_roles count: %v", err)
 	}
 	if linkCount == 0 {
-		_, err = db.ExecContext(ctx,
+		_, err = tx.ExecContext(ctx,
 			"INSERT INTO account_roles (account_id, role_id) VALUES ($1, $2)",
 			adminID, roleID,
 		)
@@ -247,13 +307,13 @@ func main() {
 
 	// 4. Seed OAuth2 Client for GOSSO Admin Frontend
 	var clientCount int
-	err = db.QueryRowContext(ctx, "SELECT COUNT(*) FROM oauth2_clients WHERE client_id = 'gosso-admin-spa'").Scan(&clientCount)
+	err = tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM oauth2_clients WHERE client_id = 'gosso-admin-spa'").Scan(&clientCount)
 	if err != nil {
 		log.Fatalf("Failed to query oauth2_clients count: %v", err)
 	}
 	if clientCount == 0 {
 		log.Println("Seeding OAuth2 client 'gosso-admin-spa'...")
-		_, err = db.ExecContext(ctx,
+		_, err = tx.ExecContext(ctx,
 			`INSERT INTO oauth2_clients (account_id, client_id, name, description, redirect_uris, grant_types, scopes, is_confidential, metadata)
 			 VALUES ($1, 'gosso-admin-spa', 'GOSSO Admin Console', 'OAuth2 Client for React GOSSO Admin Frontend', 
 			         $2::jsonb, 
@@ -269,7 +329,7 @@ func main() {
 		log.Println("OAuth2 client seeded successfully.")
 	} else {
 		log.Println("OAuth2 client 'gosso-admin-spa' already exists. Updating admin client policy and redirect URIs...")
-		_, err = db.ExecContext(ctx,
+		_, err = tx.ExecContext(ctx,
 			`UPDATE oauth2_clients
 			 SET redirect_uris = $1::jsonb,
 			     grant_types = '["authorization_code", "refresh_token"]'::jsonb,
@@ -284,5 +344,9 @@ func main() {
 		log.Println("OAuth2 client 'gosso-admin-spa' admin policy updated.")
 	}
 
+	if err = tx.Commit(); err != nil {
+		log.Fatalf("Failed to commit database seed transaction: %v", err)
+	}
+	committed = true
 	log.Printf("Database seeding completed successfully. Admin account: %s; Admin console client: gosso-admin-spa.", adminUsername)
 }

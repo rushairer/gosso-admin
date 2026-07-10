@@ -93,13 +93,21 @@ export default function ForgotPassword() {
             </div>
           </FormField>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading || !email.trim()}>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ width: '100%' }}
+            disabled={loading || !email.trim()}
+          >
             {loading ? t('passwordReset.sending') : t('passwordReset.sendLinkButton')}
           </button>
         </form>
 
         <div className="text-center" style={{ marginTop: '18px' }}>
-          <Link to="/login" style={{ color: 'var(--color-primary)', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
+          <Link
+            to="/login"
+            style={{ color: 'var(--color-primary)', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}
+          >
             {t('passwordReset.backToLogin')}
           </Link>
         </div>

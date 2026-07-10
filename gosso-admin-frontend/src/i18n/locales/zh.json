@@ -195,6 +195,7 @@
     "copySecret": "复制密钥"
   },
   "users": {
+    "paginationSummary": "第 {{page}} 页 · 共 {{total}} 位用户",
     "title": "用户账户",
     "description": "创建账户、管理状态、分配角色及查看已授权的应用。",
     "addUser": "添加用户",

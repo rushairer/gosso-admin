@@ -1,0 +1,149 @@
+name: gosso-admin-production
+
+services:
+  db:
+    image: ${POSTGRES_IMAGE:?set POSTGRES_IMAGE to an immutable image digest}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gosso
+      POSTGRES_USER: gosso
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gosso -d gosso"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    tmpfs: [/tmp, /var/run/postgresql]
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+
+  redis:
+    image: ${REDIS_IMAGE:?set REDIS_IMAGE to an immutable image digest}
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?set REDIS_PASSWORD}
+    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$${REDIS_PASSWORD}\""]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    tmpfs: [/tmp]
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+
+  gosso:
+    image: ${GOSSO_IMAGE:?set GOSSO_IMAGE to an immutable image digest}
+    restart: unless-stopped
+    command: ["web", "-e", "production"]
+    environment:
+      GOUNO_ENV: production
+      GOUNO_WEB_SERVER_ADDRESS: 0.0.0.0
+      GOUNO_WEB_SERVER_PORT: 8080
+      GOUNO_WEB_SERVER_DEBUG: "false"
+      GOUNO_DATABASE_DEFAULT: postgres
+      GOUNO_DATABASE_DRIVERS_POSTGRES_DSN: host=db user=gosso password=${POSTGRES_PASSWORD} dbname=gosso port=5432 sslmode=disable search_path=public
+      GOUNO_REDIS_DSN: redis://:${REDIS_PASSWORD}@redis:6379/0
+      GOUNO_AUTH_ISSUER: ${GOUNO_AUTH_ISSUER:?set the public HTTPS issuer}
+      GOUNO_AUTH_PASSWORD_RESET_BASE_URL: ${GOUNO_AUTH_ISSUER}/reset-password
+      GOUNO_AUTH_PRIVATE_KEY_PATH: /run/secrets/gosso_signing_key
+      GOUNO_AUTH_TOTP_ENCRYPTION_KEY: ${GOUNO_AUTH_TOTP_ENCRYPTION_KEY:?set a unique 64-character hex key}
+      GOUNO_AUTH_VERIFY_HASH_PEPPER: ${GOUNO_AUTH_VERIFY_HASH_PEPPER:?set a unique secret}
+      GOUNO_CORS_ALLOWED_ORIGINS: ${GOUNO_CORS_ALLOWED_ORIGINS:?set an explicit JSON origin list}
+      GOUNO_WEB_SERVER_TRUSTED_PROXIES: ${GOUNO_WEB_SERVER_TRUSTED_PROXIES:?set an explicit JSON CIDR list}
+      GOUNO_SMTP_HOST: ${GOUNO_SMTP_HOST:?set SMTP host}
+      GOUNO_SMTP_PORT: ${GOUNO_SMTP_PORT:-587}
+      GOUNO_SMTP_USERNAME: ${GOUNO_SMTP_USERNAME:?set SMTP username}
+      GOUNO_SMTP_PASSWORD: ${GOUNO_SMTP_PASSWORD:?set SMTP password}
+      GOUNO_SMTP_FROM: ${GOUNO_SMTP_FROM:?set verified sender}
+      GOUNO_SMTP_TLS_POLICY: mandatory
+      GOSSO_ADMIN_ALLOW_INTERNAL_PLAINTEXT_DATASTORE: "true"
+    secrets: [gosso_signing_key]
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    tmpfs: [/tmp]
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+
+  seed:
+    image: ${GOSSO_ADMIN_SEED_IMAGE:?set GOSSO_ADMIN_SEED_IMAGE to an immutable image digest}
+    profiles: [bootstrap]
+    environment:
+      GOSSO_ADMIN_ENV: production
+      GOSSO_SCHEMA_VERSION: ${GOSSO_SCHEMA_VERSION:-20}
+      PG_DSN: host=db user=gosso password=${POSTGRES_PASSWORD} dbname=gosso port=5432 sslmode=disable
+      ADMIN_USERNAME: ${ADMIN_USERNAME:?set initial admin username}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set a unique initial admin password}
+      ADMIN_DISPLAY_NAME: ${ADMIN_DISPLAY_NAME:-System Admin}
+      OAUTH2_CLIENT_REDIRECT_URIS: ${GOUNO_AUTH_ISSUER}/callback
+    depends_on:
+      db: {condition: service_healthy}
+      gosso: {condition: service_healthy}
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    tmpfs: [/tmp]
+
+  gosso-admin-frontend:
+    image: ${GOSSO_ADMIN_FRONTEND_IMAGE:?set GOSSO_ADMIN_FRONTEND_IMAGE to an immutable image digest}
+    restart: unless-stopped
+    depends_on:
+      gosso: {condition: service_healthy}
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    tmpfs: [/tmp, /var/cache/nginx, /var/run]
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 256M
+
+  gateway:
+    image: ${NGINX_IMAGE:?set NGINX_IMAGE to an immutable image digest}
+    restart: unless-stopped
+    ports: ["127.0.0.1:8080:8080"]
+    volumes:
+      - ./nginx-gateway.production.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      gosso-admin-frontend: {condition: service_healthy}
+      gosso: {condition: service_healthy}
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    tmpfs: [/tmp, /var/cache/nginx, /var/run]
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 256M
+
+secrets:
+  gosso_signing_key:
+    file: ${GOSSO_SIGNING_KEY_FILE:?set GOSSO_SIGNING_KEY_FILE}
+
+volumes:
+  db_data:
+  redis_data:

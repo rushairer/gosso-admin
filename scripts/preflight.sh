@@ -50,11 +50,11 @@ load_env_file() {
   fi
 }
 
-load_env_file "$ROOT_DIR/.env"
 case "$ENVIRONMENT" in
   prod|production) load_env_file "$ROOT_DIR/.env.production" ;;
-  development|dev|local) load_env_file "$ROOT_DIR/.env.development" ;;
+  development|dev|local) load_env_file "$ROOT_DIR/.env"; load_env_file "$ROOT_DIR/.env.development" ;;
   test|testing) load_env_file "$ROOT_DIR/.env.test" ;;
+  *) load_env_file "$ROOT_DIR/.env" ;;
 esac
 
 info "Running GOSSO Admin preflight for environment: $ENVIRONMENT"
@@ -112,12 +112,25 @@ else
 fi
 
 dsn="${GOUNO_DATABASE_DRIVERS_POSTGRES_DSN:-${PG_DSN:-}}"
+if [ -z "$dsn" ] && [ -n "${POSTGRES_PASSWORD:-}" ]; then
+  dsn="host=db user=gosso password=${POSTGRES_PASSWORD} dbname=gosso sslmode=disable"
+fi
 require_or_warn "$dsn" "PostgreSQL DSN"
-if is_production_like && printf '%s' "$dsn" | grep -Eq 'password=password|sslmode=disable'; then
-  fail "PostgreSQL DSN must not use default password or sslmode=disable in production-like environments"
+if is_production_like && printf '%s' "$dsn" | grep -Eq 'password=password'; then
+  fail "PostgreSQL DSN must not use the default password in production-like environments"
+fi
+if is_production_like && printf '%s' "$dsn" | grep -Eq 'sslmode=disable'; then
+  if [ "${GOSSO_ADMIN_ALLOW_INTERNAL_PLAINTEXT_DATASTORE:-false}" = "true" ]; then
+    warn "PostgreSQL TLS is disabled under the explicit internal-network exception"
+  else
+    fail "PostgreSQL DSN must enable TLS, or explicitly set GOSSO_ADMIN_ALLOW_INTERNAL_PLAINTEXT_DATASTORE=true for an isolated container network"
+  fi
 fi
 
 redis_dsn="${GOUNO_REDIS_DSN:-}"
+if [ -z "$redis_dsn" ] && [ -n "${REDIS_PASSWORD:-}" ]; then
+  redis_dsn="redis://:${REDIS_PASSWORD}@redis:6379/0"
+fi
 require_or_warn "$redis_dsn" "GOUNO_REDIS_DSN"
 if is_production_like && printf '%s' "$redis_dsn" | grep -Eq '^redis://([^:@/]+@)?[^:]+:6379/|^redis://redis:6379/0$'; then
   fail "Redis DSN should include authentication and production-specific host/database"
@@ -136,7 +149,9 @@ require_or_warn "${GOUNO_CORS_ALLOWED_ORIGINS:-}" "GOUNO_CORS_ALLOWED_ORIGINS"
 require_or_warn "${GOUNO_WEB_SERVER_TRUSTED_PROXIES:-}" "GOUNO_WEB_SERVER_TRUSTED_PROXIES"
 
 if is_production_like; then
-  if grep -Rqs 'swagger' "$ROOT_DIR/nginx-gateway.conf"; then
+  gateway_config="$ROOT_DIR/nginx-gateway.production.conf"
+  if [ ! -f "$gateway_config" ]; then gateway_config="$ROOT_DIR/nginx-gateway.conf"; fi
+  if grep -Eqs 'location[[:space:]]+(/|\^~[[:space:]]+/)?swagger' "$gateway_config"; then
     warn "Swagger route/config references detected; ensure Swagger is disabled or access-controlled in production"
   fi
 fi
