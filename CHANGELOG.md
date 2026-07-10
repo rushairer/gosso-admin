@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Hardened browser security headers and legacy database seeding safeguards.
 - Updated the Seeder to Go 1.26.5 and pgx 5.9.2 to remove reachable standard-library and SQL sanitizer vulnerabilities.
+- Upgrade Alpine runtime packages during frontend image builds so published images do not retain fixed high-severity base-image vulnerabilities.
 
 [Unreleased]: https://github.com/rushairer/gosso-admin/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/rushairer/gosso-admin/releases/tag/v0.1.0
