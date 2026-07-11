@@ -20,7 +20,7 @@
     "@gosso/client": "^0.1.1",
     "i18next": "^26.3.3",
     "i18next-browser-languagedetector": "^8.2.1",
-    "lucide-react": "^0.21.0",
+    "lucide-react": "^1.24.0",
     "prop-types": "^15.8.1",
     "qrcode": "^1.5.4",
     "react": "^19.2.7",
