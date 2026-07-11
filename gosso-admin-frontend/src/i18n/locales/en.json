@@ -195,6 +195,7 @@
     "copySecret": "Copy Secret"
   },
   "users": {
+    "paginationSummary": "Page {{page}} · {{total}} users",
     "title": "User Accounts",
     "description": "Create accounts, manage status, assign roles, and inspect authorized applications.",
     "addUser": "Add User",

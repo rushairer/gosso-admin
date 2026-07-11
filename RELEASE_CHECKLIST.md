@@ -19,7 +19,9 @@ Use this checklist before tagging a release, publishing an image, or handing the
 
 - [ ] `docker compose config` passes at repository root.
 - [ ] Frontend passes `npm run format:check`, `npm run lint`, `npx tsc -b --noEmit`, `npm run test:run`, and `npm run build`.
+- [ ] Frontend passes `npm run test:coverage` without lowering the committed coverage ratchet.
 - [ ] Seed passes `go test ./...` or `go build ./...`.
+- [ ] `go vet ./...`, `govulncheck`, CodeQL, dependency review, and container vulnerability scans pass.
 - [ ] The referenced `ghcr.io/rushairer/gosso` image has passed the `gosso` repository release gates.
 - [ ] `./scripts/smoke.sh` passes against the target deployment.
 - [ ] `ADMIN_PASSWORD=<secret> ./scripts/smoke.sh` or `SMOKE_ACCESS_TOKEN=<token> ./scripts/smoke.sh` passes against a disposable admin account or staging environment.
@@ -40,3 +42,5 @@ Use this checklist before tagging a release, publishing an image, or handing the
 - [ ] Upgrade notes mention migrations, rollback limits, and expected downtime/rolling behavior.
 - [ ] Monitoring includes `/health`, `/readiness`, application logs, and metrics.
 - [ ] Rollback image/tag and database restore point are available.
+- [ ] Every promoted image is referenced by digest, has SPDX and CycloneDX SBOMs, build provenance, and a verifiable keyless Cosign signature.
+- [ ] Release tag matches `gosso-admin-frontend/package.json`, and the compatibility matrix names the exact Gosso API/schema line.

@@ -118,6 +118,8 @@ Before using this stack outside your laptop:
 
 See [docs/PRODUCTION_BASELINE.md](docs/PRODUCTION_BASELINE.md) and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) for the release gate.
 
+For a hardened deployment, start from `docker-compose.production.yml` and `.env.production.example`. Every image is required to use an immutable digest; databases are not published to the host, and the legacy Seeder is available only through the one-time `bootstrap` profile. See [production operations](docs/OPERATIONS.md), [compatibility](docs/COMPATIBILITY.md), and [bootstrap](docs/BOOTSTRAP.md).
+
 ## Development
 
 Frontend:
@@ -155,3 +157,7 @@ For production, keep Swagger behind administrative network controls or disable i
 ## Release Status
 
 This repository is ready to be hardened toward a mature self-hosted identity platform. P0 intentionally does not include SAML, SCIM, LDAP/AD, multi-tenancy, or conditional access; those belong in later product milestones.
+
+## Community and license
+
+GOSSO Admin is licensed under Apache-2.0. Please read [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [SUPPORT.md](SUPPORT.md), and [ROADMAP.md](ROADMAP.md) before contributing or reporting a problem.

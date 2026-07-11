@@ -117,7 +117,11 @@ export default function ResetPassword() {
                     cursor: 'pointer',
                   }}
                 >
-                  {showPassword ? <EyeOff style={{ width: '16px', height: '16px' }} /> : <Eye style={{ width: '16px', height: '16px' }} />}
+                  {showPassword ? (
+                    <EyeOff style={{ width: '16px', height: '16px' }} />
+                  ) : (
+                    <Eye style={{ width: '16px', height: '16px' }} />
+                  )}
                 </button>
               </div>
             </FormField>
@@ -143,7 +147,10 @@ export default function ResetPassword() {
         )}
 
         <div className="text-center" style={{ marginTop: '18px' }}>
-          <Link to="/login" style={{ color: 'var(--color-primary)', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
+          <Link
+            to="/login"
+            style={{ color: 'var(--color-primary)', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}
+          >
             {t('passwordReset.backToLogin')}
           </Link>
         </div>

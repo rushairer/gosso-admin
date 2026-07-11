@@ -23,10 +23,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20
           cache: npm
@@ -35,17 +35,8 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Type check
-        run: npx tsc -b --noEmit
-
-      - name: Unit tests
-        run: npm run test:run
-
-      - name: Build
-        run: npm run build
+      - name: Quality gate
+        run: npm run quality
 
       - name: Build subpath variant
         run: VITE_APP_BASE_PATH=/identity-admin npm run build
@@ -59,10 +50,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version-file: seed/go.mod
           cache-dependency-path: seed/go.sum
@@ -75,6 +66,9 @@ jobs:
       - name: Test
         run: go test ./...
 
+      - name: Vet
+        run: go vet ./...
+
       - name: Build
         run: go build ./...
 
@@ -84,7 +78,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Prepare local signing key
         run: |
@@ -100,3 +94,27 @@ jobs:
 
       - name: Source override Compose config validation
         run: docker compose -f docker-compose.yml -f docker-compose.source.yml config
+
+      - name: Production Compose config validation
+        env:
+          GOSSO_IMAGE: ghcr.io/rushairer/gosso@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          GOSSO_ADMIN_FRONTEND_IMAGE: ghcr.io/rushairer/gosso-admin-frontend@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+          GOSSO_ADMIN_SEED_IMAGE: ghcr.io/rushairer/gosso-admin-seed@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+          POSTGRES_IMAGE: postgres:15-alpine@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+          REDIS_IMAGE: redis:7-alpine@sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+          NGINX_IMAGE: nginx:stable-alpine@sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+          GOSSO_SIGNING_KEY_FILE: ./keys/private.pem
+          POSTGRES_PASSWORD: ci-production-password
+          REDIS_PASSWORD: ci-redis-password
+          ADMIN_USERNAME: ci-admin
+          ADMIN_PASSWORD: ci-admin-password-123
+          GOUNO_AUTH_ISSUER: https://sso.example.test
+          GOUNO_AUTH_TOTP_ENCRYPTION_KEY: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          GOUNO_AUTH_VERIFY_HASH_PEPPER: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+          GOUNO_CORS_ALLOWED_ORIGINS: '["https://sso.example.test"]'
+          GOUNO_WEB_SERVER_TRUSTED_PROXIES: '["10.0.0.0/8"]'
+          GOUNO_SMTP_HOST: smtp.example.test
+          GOUNO_SMTP_USERNAME: ci
+          GOUNO_SMTP_PASSWORD: ci-password
+          GOUNO_SMTP_FROM: noreply@example.test
+        run: docker compose -f docker-compose.production.yml config

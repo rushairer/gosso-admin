@@ -6,6 +6,7 @@ gosso-admin-frontend/node_modules/
 dist/
 gosso-admin-frontend/dist/
 gosso-admin-frontend/dist-ssr/
+gosso-admin-frontend/coverage/
 
 # Local binaries and scripts
 seed/seed

@@ -19,6 +19,8 @@ Run the preflight before deploying:
 
 The script is intentionally strict for `production`, `staging`, `preview`, and `uat`.
 
+Use `docker-compose.production.yml` rather than the development Compose file. Copy `.env.production.example`, replace every placeholder, pin every image digest, and keep the gateway behind an HTTPS reverse proxy.
+
 ## Required Secrets
 
 Generate unique values per environment:
@@ -93,3 +95,5 @@ SMOKE_ACCESS_TOKEN=<admin-token> SMOKE_MUTATE=true BASE_URL=https://staging-sso.
 ## Release Discipline
 
 Use [RELEASE_CHECKLIST.md](../RELEASE_CHECKLIST.md) for every release. Do not promote a build when preflight, smoke checks, or the admin-console quality gates are failing.
+
+Also review [COMPATIBILITY.md](COMPATIBILITY.md), [BOOTSTRAP.md](BOOTSTRAP.md), [SESSION_SECURITY.md](SESSION_SECURITY.md), and [OPERATIONS.md](OPERATIONS.md).

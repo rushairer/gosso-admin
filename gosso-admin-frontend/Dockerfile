@@ -12,7 +12,8 @@ RUN npm run build
 FROM nginx:stable-alpine
 
 # Run nginx as non-root
-RUN chown -R nginx:nginx /var/cache/nginx /var/log/nginx /etc/nginx/conf.d \
+RUN apk upgrade --no-cache \
+    && chown -R nginx:nginx /var/cache/nginx /var/log/nginx /etc/nginx/conf.d \
     && touch /var/run/nginx.pid \
     && chown nginx:nginx /var/run/nginx.pid
 
