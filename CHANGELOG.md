@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-07-10
+## [0.1.0] - 2026-07-11
 
 ### Added
 
@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 
 - Release quality gates now include formatting, coverage, Go vet, vulnerability checks, and production configuration validation.
+- The supported server baseline is Gosso `1.1.x` with OpenAPI `1.2.x` and database schema `20`.
 
 ### Security
 
