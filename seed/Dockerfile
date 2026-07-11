@@ -7,7 +7,7 @@ RUN go mod download && go mod verify
 COPY . .
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -trimpath -buildvcs=false -ldflags="-w -s" -o seed main.go
 
-FROM alpine:3.23
+FROM alpine:3.24
 RUN apk --no-cache add ca-certificates
 WORKDIR /app
 RUN addgroup -S seed && adduser -S seed -G seed
