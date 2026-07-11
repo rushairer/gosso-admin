@@ -536,7 +536,7 @@ export default function UsersTab() {
 
   if (error) {
     return (
-      <div>
+      <div className="panel-body">
         <Feedback type="error">{error}</Feedback>
         <button className="btn btn-secondary btn-sm mt-md" onClick={fetchAccounts}>
           {t('common.retry')}

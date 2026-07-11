@@ -97,7 +97,7 @@ export default function AuditLogsTab() {
       </div>
 
       {error && (
-        <div className="mt-md">
+        <div style={{ padding: '0 20px', marginTop: '16px' }}>
           <Feedback type="error">{error}</Feedback>
         </div>
       )}
