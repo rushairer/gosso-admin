@@ -5,6 +5,7 @@ import { Key } from 'lucide-react';
 import { loginWithPasskey, loginWithPassword, redirectToAuthorize, verifyMfa } from '../auth';
 import { Feedback, FormField } from '../components/ui';
 import { logger } from '../utils/logger';
+import { appPath } from '../config/appPaths';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -26,11 +27,13 @@ export default function Login() {
   const redirectUri = searchParams.get('redirect_uri') || '/admin';
 
   const doRedirect = () => {
-    if (redirectUri.startsWith('/')) {
-      window.location.href = `${window.location.origin}${redirectUri}`;
-    } else {
-      window.location.href = redirectUri;
+    // The backend only supplies a relative OAuth authorize URL. Do not turn
+    // this login page into an open redirect when it is reached directly.
+    if (!redirectUri.startsWith('/') || redirectUri.startsWith('//')) {
+      window.location.href = appPath('/admin');
+      return;
     }
+    window.location.href = `${window.location.origin}${redirectUri}`;
   };
 
   const handlePasskeyLogin = async () => {
