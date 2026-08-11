@@ -21,8 +21,8 @@ export default function Callback() {
 
     async function handleCallback() {
       try {
-        const tokenSet = await exchangeCodeForToken(code!, state!);
-        await fetchUserProfile(tokenSet.access_token);
+        await exchangeCodeForToken(code!, state!);
+        await fetchUserProfile();
 
         // Redirect back to the post-login destination or default to admin panel
         const postLoginRedirect = authSession.getPostLoginRedirect('/admin');

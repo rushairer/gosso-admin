@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Lock, Eye, EyeOff, Edit2 as EditIcon, Mail, X as XIcon, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { apiFetch, getAccessToken, fetchUserProfile } from '../../auth';
+import { apiFetch, fetchUserProfile } from '../../auth';
 import {
   Feedback,
   FormField,
@@ -51,11 +51,8 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
 
   const reloadProfile = async () => {
     try {
-      const token = getAccessToken();
-      if (token) {
-        const updated = await fetchUserProfile(token);
-        setLocalProfile(updated);
-      }
+      const updated = await fetchUserProfile();
+      setLocalProfile(updated);
     } catch (err) {
       console.error('Failed to reload profile:', err);
     }
