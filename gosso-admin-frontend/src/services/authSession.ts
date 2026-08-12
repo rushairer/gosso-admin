@@ -5,6 +5,7 @@ const SSO_ISSUER = window.location.origin;
 const CLIENT_ID = 'gosso-admin-spa';
 const REDIRECT_URI = `${window.location.origin}${appPath('/callback')}`;
 const storagePrefix = 'gosso-admin';
+const cookieSessionHeaders = { 'X-Gosso-Cookie-Session': '1' };
 
 export interface TokenResponse {
   access_token?: string;
@@ -97,10 +98,11 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
     return fetch(url, { ...options, headers, credentials: 'same-origin' });
   };
   let response = await request();
-  if (response.status === 401) {
+  if (response.status === 401 && !url.endsWith('/api/v1/auth/refresh')) {
+    const token = csrfToken();
     const refreshed = await fetch(`${SSO_ISSUER}/api/v1/auth/refresh`, {
       method: 'POST',
-      headers: csrfToken() ? { 'X-CSRF-Token': csrfToken()! } : {},
+      headers: { ...cookieSessionHeaders, ...(token ? { 'X-CSRF-Token': token } : {}) },
       credentials: 'same-origin',
     });
     if (refreshed.ok) response = await request();
@@ -149,7 +151,7 @@ export async function exchangeCodeForToken(code: string, state: string): Promise
   });
   const response = await fetch(`${SSO_ISSUER}/oauth2/token`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...cookieSessionHeaders },
     body,
     credentials: 'same-origin',
   });
@@ -163,7 +165,7 @@ export async function exchangeCodeForToken(code: string, state: string): Promise
 export async function loginWithPassword(username: string, password: string): Promise<LoginResult> {
   const response = await fetch(`${SSO_ISSUER}/api/v1/auth/login`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...cookieSessionHeaders },
     body: JSON.stringify({ username, password }),
     credentials: 'same-origin',
   });
@@ -175,7 +177,7 @@ export async function loginWithPassword(username: string, password: string): Pro
 export async function verifyMfa(mfaToken: string, code: string): Promise<TokenResponse> {
   const response = await fetch(`${SSO_ISSUER}/api/v1/auth/mfa/verify`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...cookieSessionHeaders },
     body: JSON.stringify({ mfa_token: mfaToken, code }),
     credentials: 'same-origin',
   });
@@ -207,7 +209,7 @@ export async function loginWithPasskey(): Promise<TokenResponse> {
   const response = assertion.response as AuthenticatorAssertionResponse;
   const complete = await fetch(`${SSO_ISSUER}/api/v1/passkey/login/complete`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...cookieSessionHeaders },
     credentials: 'same-origin',
     body: JSON.stringify({
       request_id: begin.request_id,
@@ -238,7 +240,7 @@ export const authSession = {
   saveTokenSet: (_: TokenResponse) => undefined,
   clear: () => {
     profile = null;
-    sessionStorage.clear();
+    Object.values(storageKeys).forEach((key) => sessionStorage.removeItem(key));
     notify();
   },
   subscribe(listener: SessionListener) {
@@ -250,7 +252,7 @@ export const authSession = {
   async logout(redirectTo = '/') {
     await apiFetch(`${SSO_ISSUER}/api/v1/auth/logout`, { method: 'POST', keepalive: true });
     profile = null;
-    sessionStorage.clear();
+    Object.values(storageKeys).forEach((key) => sessionStorage.removeItem(key));
     notify();
     window.location.assign(appPath(redirectTo));
   },
@@ -263,7 +265,7 @@ export const authSession = {
 };
 
 export async function refreshAccessToken(): Promise<string> {
-  const response = await apiFetch(`${SSO_ISSUER}/api/v1/auth/refresh`, { method: 'POST' });
+  const response = await apiFetch(`${SSO_ISSUER}/api/v1/auth/refresh`, { method: 'POST', headers: cookieSessionHeaders });
   if (!response.ok) throw new Error('Token refresh failed');
   return '';
 }
