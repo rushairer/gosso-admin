@@ -1,4 +1,4 @@
-import { appPath } from '../config/appPaths';
+import { appPath, routerPath } from '../config/appPaths';
 import { base64URLToBuffer, bufferToBase64URL } from '../utils/webauthn';
 
 const SSO_ISSUER = window.location.origin;
@@ -42,9 +42,20 @@ const storageKeys = {
   pkceVerifier: `${storagePrefix}:pkce_verifier`,
   authState: `${storagePrefix}:auth_state`,
   postLoginRedirect: `${storagePrefix}:post_login_redirect`,
+  refreshGeneration: `${storagePrefix}:auth_refresh_generation`,
+  authRedirectGuard: `${storagePrefix}:auth_redirect_guard`,
 };
 const listeners = new Set<SessionListener>();
 let profile: UserProfile | null = null;
+let cookieRefreshPromise: Promise<boolean> | null = null;
+const REFRESH_LOCK_NAME = 'gosso-auth-refresh';
+const AUTH_REDIRECT_GUARD_MS = 30_000;
+
+interface BrowserLockManager {
+  request<T>(name: string, options: { mode: 'exclusive' }, callback: () => T | Promise<T>): Promise<T>;
+}
+
+type NavigatorWithLocks = Navigator & { locks?: BrowserLockManager };
 
 function snapshot(): SessionSnapshot {
   const isAdmin = Boolean(profile?.roles?.includes('admin') && profile?.scope?.split(/\s+/).includes('admin'));
@@ -57,16 +68,45 @@ function notify() {
 }
 
 function csrfToken(): string | null {
-  const names = ['__Host-csrf_token', 'csrf_token'];
+  const expectedName = window.location.protocol === 'https:' ? '__Host-csrf_token' : 'csrf_token';
   for (const cookie of document.cookie.split(';')) {
     const [name, ...value] = cookie.trim().split('=');
-    if (names.includes(name)) return decodeURIComponent(value.join('='));
+    if (name === expectedName) return decodeURIComponent(value.join('='));
   }
   return null;
 }
 
 function isUnsafe(method?: string): boolean {
   return !['GET', 'HEAD', 'OPTIONS'].includes((method || 'GET').toUpperCase());
+}
+
+async function refreshCookieSession(): Promise<boolean> {
+  if (cookieRefreshPromise) return cookieRefreshPromise;
+  cookieRefreshPromise = (async () => {
+    const observedGeneration = localStorage.getItem(storageKeys.refreshGeneration);
+    const perform = async () => {
+      if (localStorage.getItem(storageKeys.refreshGeneration) !== observedGeneration) return true;
+      let token = csrfToken();
+      if (!token) {
+        await fetch(`${SSO_ISSUER}/api/v1/auth/session`, { credentials: 'same-origin' });
+        token = csrfToken();
+      }
+      if (!token) return false;
+      const response = await fetch(`${SSO_ISSUER}/api/v1/auth/refresh`, {
+        method: 'POST',
+        headers: { ...cookieSessionHeaders, 'X-CSRF-Token': token },
+        credentials: 'same-origin',
+      });
+      if (!response.ok) return false;
+      localStorage.setItem(storageKeys.refreshGeneration, `${Date.now()}:${crypto.randomUUID()}`);
+      return true;
+    };
+    const locks = (navigator as NavigatorWithLocks).locks;
+    return locks ? locks.request(REFRESH_LOCK_NAME, { mode: 'exclusive' }, perform) : perform();
+  })().finally(() => {
+    cookieRefreshPromise = null;
+  });
+  return cookieRefreshPromise;
 }
 
 async function parseEnvelope<T>(response: Response, fallback: string): Promise<T> {
@@ -99,13 +139,27 @@ export async function apiFetch(url: string, options: RequestInit = {}): Promise<
   };
   let response = await request();
   if (response.status === 401 && !url.endsWith('/api/v1/auth/refresh')) {
-    const token = csrfToken();
-    const refreshed = await fetch(`${SSO_ISSUER}/api/v1/auth/refresh`, {
-      method: 'POST',
-      headers: { ...cookieSessionHeaders, ...(token ? { 'X-CSRF-Token': token } : {}) },
-      credentials: 'same-origin',
-    });
-    if (refreshed.ok) response = await request();
+    if (await refreshCookieSession()) {
+      response = await request();
+    }
+    if (response.status === 401) {
+      profile = null;
+      notify();
+      const returnTo = routerPath(`${window.location.pathname}${window.location.search}${window.location.hash}`);
+      const now = Date.now();
+      const previous = sessionStorage.getItem(storageKeys.authRedirectGuard);
+      let recentlyRedirected = false;
+      try {
+        const guard = previous ? JSON.parse(previous) as { at?: number; returnTo?: string } : null;
+        recentlyRedirected = guard?.returnTo === returnTo && typeof guard.at === 'number' && now - guard.at < AUTH_REDIRECT_GUARD_MS;
+      } catch {
+        recentlyRedirected = false;
+      }
+      if (!recentlyRedirected) {
+        sessionStorage.setItem(storageKeys.authRedirectGuard, JSON.stringify({ at: now, returnTo }));
+        await redirectToAuthorize(returnTo);
+      }
+    }
   }
   return response;
 }
@@ -115,6 +169,7 @@ export async function fetchUserProfile(): Promise<UserProfile> {
   if (!response.ok) throw new Error('Failed to fetch user profile');
   const next = (await response.json()) as UserProfile;
   profile = next;
+  sessionStorage.removeItem(storageKeys.authRedirectGuard);
   notify();
   return next;
 }
@@ -159,6 +214,7 @@ export async function exchangeCodeForToken(code: string, state: string): Promise
   if (!response.ok) throw new Error(result.error_description || 'Token exchange failed');
   sessionStorage.removeItem(storageKeys.pkceVerifier);
   sessionStorage.removeItem(storageKeys.authState);
+  sessionStorage.removeItem(storageKeys.authRedirectGuard);
   return {};
 }
 
@@ -241,6 +297,7 @@ export const authSession = {
   clear: () => {
     profile = null;
     Object.values(storageKeys).forEach((key) => sessionStorage.removeItem(key));
+    localStorage.removeItem(storageKeys.refreshGeneration);
     notify();
   },
   subscribe(listener: SessionListener) {
@@ -250,9 +307,22 @@ export const authSession = {
     };
   },
   async logout(redirectTo = '/') {
-    await apiFetch(`${SSO_ISSUER}/api/v1/auth/logout`, { method: 'POST', keepalive: true });
+    let token = csrfToken();
+    if (!token) {
+      await fetch(`${SSO_ISSUER}/api/v1/auth/session`, { credentials: 'same-origin' });
+      token = csrfToken();
+    }
+    if (!token) throw new Error('GOSSO CSRF recovery failed');
+    const response = await fetch(`${SSO_ISSUER}/api/v1/auth/logout`, {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': token },
+      credentials: 'same-origin',
+      keepalive: true,
+    });
+    if (!response.ok) throw new Error(`Logout failed (${response.status})`);
     profile = null;
     Object.values(storageKeys).forEach((key) => sessionStorage.removeItem(key));
+    localStorage.removeItem(storageKeys.refreshGeneration);
     notify();
     window.location.assign(appPath(redirectTo));
   },
@@ -265,7 +335,6 @@ export const authSession = {
 };
 
 export async function refreshAccessToken(): Promise<string> {
-  const response = await apiFetch(`${SSO_ISSUER}/api/v1/auth/refresh`, { method: 'POST', headers: cookieSessionHeaders });
-  if (!response.ok) throw new Error('Token refresh failed');
+  if (!(await refreshCookieSession())) throw new Error('Token refresh failed');
   return '';
 }

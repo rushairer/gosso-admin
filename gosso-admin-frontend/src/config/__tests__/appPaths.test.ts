@@ -7,11 +7,14 @@ describe('app paths', () => {
 
   it('builds paths under the configured base path', async () => {
     vi.stubEnv('VITE_APP_BASE_PATH', '/identity-admin');
-    const { appBasePath, appPath, routerBasename } = await import('../appPaths');
+    const { appBasePath, appPath, routerBasename, routerPath } = await import('../appPaths');
 
     expect(appBasePath).toBe('/identity-admin');
     expect(routerBasename).toBe('/identity-admin');
     expect(appPath('/callback')).toBe('/identity-admin/callback');
     expect(appPath('/')).toBe('/identity-admin/');
+    expect(routerPath('/identity-admin/admin')).toBe('/admin');
+    expect(routerPath('/identity-admin/')).toBe('/');
+    expect(routerPath('/admin')).toBe('/admin');
   });
 });

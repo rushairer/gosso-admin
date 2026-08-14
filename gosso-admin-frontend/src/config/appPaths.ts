@@ -14,3 +14,11 @@ export function appPath(path = '/'): string {
   if (normalizedPath === '/') return `${appBasePath}/`;
   return `${appBasePath}${normalizedPath}`;
 }
+
+export function routerPath(path = '/'): string {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  if (!appBasePath) return normalizedPath;
+  if (normalizedPath === appBasePath || normalizedPath === `${appBasePath}/`) return '/';
+  if (normalizedPath.startsWith(`${appBasePath}/`)) return normalizedPath.slice(appBasePath.length);
+  return normalizedPath;
+}

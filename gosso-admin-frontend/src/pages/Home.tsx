@@ -15,7 +15,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!isLoggedIn()) {
-      redirectToAuthorize('/admin');
+      redirectToAuthorize('/');
       return;
     }
     setLogged(true);
@@ -51,7 +51,7 @@ export default function Home() {
         // Non-admin users already see "Access Denied" in the UI
       }
     } else {
-      redirectToAuthorize('/admin');
+      redirectToAuthorize('/');
     }
   };
 

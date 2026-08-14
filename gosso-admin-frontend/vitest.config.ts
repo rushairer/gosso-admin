@@ -12,6 +12,9 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    environmentOptions: {
+      jsdom: { url: 'https://localhost:8443/identity-admin/' },
+    },
     setupFiles: ['./src/test/setup.ts'],
     css: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authSession, exchangeCodeForToken, fetchUserProfile } from '../auth';
+import { routerPath } from '../config/appPaths';
 import { logger } from '../utils/logger';
 
 export default function Callback() {
@@ -27,7 +28,7 @@ export default function Callback() {
         // Redirect back to the post-login destination or default to admin panel
         const postLoginRedirect = authSession.getPostLoginRedirect('/admin');
         authSession.clearPostLoginRedirect();
-        navigate(postLoginRedirect);
+        navigate(routerPath(postLoginRedirect));
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         logger.error('Auth callback error', err);
