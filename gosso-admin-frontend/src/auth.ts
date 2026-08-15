@@ -2,7 +2,7 @@ import { createGossoClient } from '@gosso/client';
 import type { SessionSnapshot } from '@gosso/client';
 import { appPath } from './config/appPaths';
 
-export type { SessionSnapshot, TokenResponse, UserProfile } from '@gosso/client';
+export type { SessionSnapshot, TokenResponse, UserProfile, PasskeyInfo } from '@gosso/client';
 
 const listeners = new Set<(snapshot: SessionSnapshot) => void>();
 
@@ -28,6 +28,9 @@ export const loginWithPassword = gossoClient.loginWithPassword;
 export const loginWithPasskey = gossoClient.loginWithPasskey;
 export const refreshAccessToken = gossoClient.refreshAccessToken;
 export const verifyMfa = gossoClient.verifyMfa;
+export const listPasskeys = gossoClient.listPasskeys;
+export const registerPasskey = gossoClient.registerPasskey;
+export const deletePasskey = gossoClient.deletePasskey;
 
 export async function redirectToAuthorize(destination = '/admin') {
   return gossoClient.redirectToAuthorize(appPath(destination));
