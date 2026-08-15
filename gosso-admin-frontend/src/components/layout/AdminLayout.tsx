@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Home, Key, LayoutDashboard, LogIn, LogOut, Settings, ShieldCheck, User } from 'lucide-react';
-import { authSession, redirectToAuthorize } from '../../services/authSession';
-import type { SessionSnapshot } from '../../services/authSession';
+import { authSession, redirectToAuthorize } from '../../auth';
+import type { SessionSnapshot } from '../../auth';
 
 function initials(snapshot: SessionSnapshot) {
   const name = snapshot.profile?.preferred_username || snapshot.profile?.name || 'Guest';

@@ -23,7 +23,7 @@ describe('cookie-backed authSession', () => {
   });
 
   it('does not persist credentials in web storage', async () => {
-    const { authSession } = await import('../authSession');
+    const { authSession } = await import('../../auth');
     authSession.saveTokenSet({ access_token: 'access', refresh_token: 'refresh' });
     expect(localStorage.getItem('gosso-admin:access_token')).toBeNull();
     expect(localStorage.getItem('gosso-admin:refresh_token')).toBeNull();
@@ -38,7 +38,7 @@ describe('cookie-backed authSession', () => {
         headers: { 'Content-Type': 'application/json' },
       })
     );
-    const { authSession, fetchUserProfile } = await import('../authSession');
+    const { authSession, fetchUserProfile } = await import('../../auth');
     await expect(fetchUserProfile()).resolves.toMatchObject({ sub: '1' });
     expect(fetchMock.mock.calls[0][1]).toMatchObject({ credentials: 'same-origin' });
     expect(authSession.isLoggedIn()).toBe(true);
@@ -47,7 +47,7 @@ describe('cookie-backed authSession', () => {
 
   it('adds the CSRF header to unsafe cookie-authenticated API calls', async () => {
     fetchMock.mockResolvedValueOnce(envelope('ok'));
-    const { apiFetch } = await import('../authSession');
+    const { apiFetch } = await import('../../auth');
     await apiFetch('/api/v1/auth/profile', { method: 'PUT' });
     expect(new Headers(fetchMock.mock.calls[0][1].headers).get('X-CSRF-Token')).toBe('csrf-value');
   });
@@ -56,7 +56,7 @@ describe('cookie-backed authSession', () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }));
     fetchMock.mockResolvedValueOnce(envelope({}));
     fetchMock.mockResolvedValueOnce(envelope('ok'));
-    const { apiFetch } = await import('../authSession');
+    const { apiFetch } = await import('../../auth');
     await expect(apiFetch('/api/v1/admin/accounts')).resolves.toMatchObject({ status: 200 });
     expect(fetchMock.mock.calls[1][0]).toContain('/api/v1/auth/refresh');
   });
@@ -70,7 +70,7 @@ describe('cookie-backed authSession', () => {
     });
     fetchMock.mockResolvedValueOnce(envelope({}));
     fetchMock.mockResolvedValueOnce(envelope('ok'));
-    const { apiFetch } = await import('../authSession');
+    const { apiFetch } = await import('../../auth');
 
     await expect(apiFetch('/api/v1/admin/accounts')).resolves.toMatchObject({ status: 200 });
     expect(fetchMock.mock.calls[1][0]).toContain('/api/v1/auth/session');
@@ -85,7 +85,7 @@ describe('cookie-backed authSession', () => {
         headers: { 'Content-Type': 'application/json' },
       })
     );
-    const { authSession, loginWithPassword } = await import('../authSession');
+    const { authSession, loginWithPassword } = await import('../../auth');
     await expect(loginWithPassword('admin', 'correct horse battery staple')).resolves.toMatchObject({
       expires_in: 900,
     });
@@ -95,10 +95,12 @@ describe('cookie-backed authSession', () => {
   it('uses only the GOSSO CSRF token and clears state only after server logout succeeds', async () => {
     document.cookie = 'blog_csrf_token=blog-value; path=/; Secure';
     fetchMock
-      .mockResolvedValueOnce(new Response(JSON.stringify({ sub: '1', roles: ['admin'], scope: 'openid admin' }), { status: 200 }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ sub: '1', roles: ['admin'], scope: 'openid admin' }), { status: 200 })
+      )
       .mockResolvedValueOnce(new Response(null, { status: 403 }))
       .mockResolvedValueOnce(new Response(null, { status: 204 }));
-    const { authSession, fetchUserProfile } = await import('../authSession');
+    const { authSession, fetchUserProfile } = await import('../../auth');
     await fetchUserProfile();
 
     await expect(authSession.logout('/')).rejects.toThrow('Logout failed (403)');
@@ -112,7 +114,9 @@ describe('cookie-backed authSession', () => {
     let protectedCalls = 0;
     let refreshCalls = 0;
     let releaseRefresh!: () => void;
-    const gate = new Promise<void>((resolve) => { releaseRefresh = resolve; });
+    const gate = new Promise<void>((resolve) => {
+      releaseRefresh = resolve;
+    });
     fetchMock.mockImplementation(async (url: string) => {
       if (url === '/api/v1/admin/accounts') {
         protectedCalls += 1;
@@ -122,7 +126,7 @@ describe('cookie-backed authSession', () => {
       await gate;
       return envelope({});
     });
-    const { apiFetch } = await import('../authSession');
+    const { apiFetch } = await import('../../auth');
 
     const first = apiFetch('/api/v1/admin/accounts');
     const second = apiFetch('/api/v1/admin/accounts');
@@ -141,7 +145,10 @@ describe('cookie-backed authSession', () => {
       value: {
         request: <T>(_name: string, _options: { mode: 'exclusive' }, callback: () => T | Promise<T>): Promise<T> => {
           const result = queue.then(callback);
-          queue = result.then(() => undefined, () => undefined);
+          queue = result.then(
+            () => undefined,
+            () => undefined
+          );
           return result;
         },
       },
@@ -156,9 +163,9 @@ describe('cookie-backed authSession', () => {
       refreshCalls += 1;
       return envelope({});
     });
-    const firstTab = await import('../authSession');
+    const firstTab = await import('../../auth');
     vi.resetModules();
-    const secondTab = await import('../authSession');
+    const secondTab = await import('../../auth');
 
     const responses = await Promise.all([
       firstTab.apiFetch('/api/v1/admin/accounts'),

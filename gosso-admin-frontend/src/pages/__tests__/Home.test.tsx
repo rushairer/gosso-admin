@@ -18,7 +18,11 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => k
 
 describe('management overview authentication', () => {
   it('returns root-entry authentication to the overview, not /admin', async () => {
-    render(<MemoryRouter><Home /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <Home />
+      </MemoryRouter>
+    );
 
     await waitFor(() => expect(redirectToAuthorize).toHaveBeenCalledWith('/'));
     expect(redirectToAuthorize).not.toHaveBeenCalledWith('/admin');

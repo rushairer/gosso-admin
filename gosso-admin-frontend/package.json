@@ -17,6 +17,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@gosso/client": "https://github.com/rushairer/gosso-client/releases/download/v0.3.0/gosso-client-0.3.0.tgz",
     "i18next": "^26.3.3",
     "i18next-browser-languagedetector": "^8.2.1",
     "lucide-react": "^1.31.0",
