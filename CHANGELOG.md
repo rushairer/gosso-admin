@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-15
+
+### Changed
+- Passkey registration, listing, and deletion now delegate to `@gosso/client`
+  instead of the hand-rolled WebAuthn ceremony and base64 helpers.
+- MFA enrollment QR now renders declaratively with `qrcode.react` instead of
+  the imperative `qrcode.toDataURL` flow.
+
 ### Security
 - Update transitive development dependencies `nanoid`, `postcss`, and `undici`
   to versions that resolve the open Dependabot advisories.
