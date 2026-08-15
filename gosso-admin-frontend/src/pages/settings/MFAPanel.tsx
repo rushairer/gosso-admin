@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import QRCode from 'qrcode';
+import { QRCodeSVG } from 'qrcode.react';
 import { Shield, QrCode, Clipboard, AlertTriangle, RefreshCw, Unlock, Check, Copy } from 'lucide-react';
 import { apiFetch } from '../../auth';
 import {
@@ -14,7 +14,6 @@ import {
   StatusBadge,
   useToast,
 } from '../../components/ui';
-import { logger } from '../../utils/logger';
 
 interface MFAStatus {
   enabled: boolean;
@@ -26,7 +25,6 @@ export default function MFAPanel() {
   const { showSuccess } = useToast();
   const [mfaStatus, setMfaStatus] = useState<MFAStatus>({ enabled: false, types: [] });
   const [mfaEnrollment, setMfaEnrollment] = useState<{ secret: string; otpauth_url: string } | null>(null);
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [totpCode, setTotpCode] = useState('');
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [showDisableModal, setShowDisableModal] = useState(false);
@@ -44,23 +42,6 @@ export default function MFAPanel() {
   useEffect(() => {
     loadMFAStatus();
   }, []);
-
-  useEffect(() => {
-    if (mfaEnrollment?.otpauth_url) {
-      QRCode.toDataURL(mfaEnrollment.otpauth_url, {
-        width: 180,
-        margin: 1,
-        color: { dark: '#000000', light: '#ffffff' },
-      })
-        .then(setQrDataUrl)
-        .catch((err) => {
-          logger.error('Failed to generate QR code', err);
-          setQrDataUrl(null);
-        });
-    } else {
-      setQrDataUrl(null);
-    }
-  }, [mfaEnrollment]);
 
   const loadMFAStatus = async () => {
     try {
@@ -262,22 +243,14 @@ export default function MFAPanel() {
                     boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
                   }}
                 >
-                  {qrDataUrl ? (
-                    <img src={qrDataUrl} alt={t('mfa.qrCodeAlt')} style={{ width: '180px', height: '180px' }} />
-                  ) : (
-                    <div
-                      style={{
-                        width: '180px',
-                        height: '180px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'var(--color-text-muted)',
-                      }}
-                    >
-                      {t('common.loading')}
-                    </div>
-                  )}
+                  <QRCodeSVG
+                    value={mfaEnrollment.otpauth_url}
+                    size={180}
+                    marginSize={1}
+                    fgColor="#000000"
+                    bgColor="#ffffff"
+                    title={t('mfa.qrCodeAlt')}
+                  />
                 </div>
 
                 <div className="flex-1 flex-col gap-md" style={{ minWidth: '260px' }}>
