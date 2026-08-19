@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText as AuditIcon, X as XIcon } from 'lucide-react';
+import { FileText as AuditIcon } from 'lucide-react';
 import { ButtonGroup, DataTable, EmptyState, Feedback, FormField, PanelHeader, Tag } from '../../components/ui';
 import { auditService } from '../../services';
+import { AuditLogDetailModal } from './audit/AuditLogDetailModal';
 import type { AuditLog } from '../../types/api';
 import { logger } from '../../utils/logger';
 
@@ -184,102 +185,11 @@ export default function AuditLogsTab() {
         </div>
       )}
 
-      {/* Audit Log Detail Modal */}
-      {selectedAuditLog && (
-        <div className="modal-backdrop" onClick={() => setSelectedAuditLog(null)}>
-          <div className="modal-content" style={{ maxWidth: '720px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">{t('audit.detailModalTitle')}</h3>
-              <button className="modal-close-btn" onClick={() => setSelectedAuditLog(null)}>
-                <XIcon style={{ width: '18px', height: '18px' }} />
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="flex-col" style={{ gap: '14px' }}>
-                <div>
-                  <strong className="text-sm text-muted">{t('audit.detailLogId')}</strong>
-                  <div style={{ fontSize: '14px', marginTop: '2px', fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                    {selectedAuditLog.id}
-                  </div>
-                </div>
-                <div>
-                  <strong className="text-sm text-muted">{t('audit.detailAction')}</strong>
-                  <div style={{ fontSize: '14px', marginTop: '2px', fontFamily: 'monospace' }}>
-                    {selectedAuditLog.action}
-                  </div>
-                </div>
-                <div>
-                  <strong className="text-sm text-muted">{t('audit.detailActor')}</strong>
-                  <div style={{ fontSize: '14px', marginTop: '2px', fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                    {selectedAuditLog.actor}
-                  </div>
-                </div>
-                <div>
-                  <strong className="text-sm text-muted">{t('audit.detailTargetUser')}</strong>
-                  <div style={{ fontSize: '14px', marginTop: '2px', fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                    {selectedAuditLog.account_id || '-'}
-                  </div>
-                </div>
-                <div>
-                  <strong className="text-sm text-muted">{t('audit.detailCreatedAt')}</strong>
-                  <div style={{ fontSize: '14px', marginTop: '2px' }}>
-                    {selectedAuditLog.created_at ? new Date(selectedAuditLog.created_at).toLocaleString() : '-'}
-                  </div>
-                </div>
-                {selectedAuditLog.resource && (
-                  <div>
-                    <strong className="text-sm text-muted">{t('audit.detailResourceData')}</strong>
-                    <pre
-                      style={{
-                        margin: '6px 0 0 0',
-                        padding: '12px',
-                        background: 'rgba(0,0,0,0.2)',
-                        border: '1px solid rgba(255,255,255,0.04)',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        color: '#818cf8',
-                        overflowX: 'auto',
-                        fontFamily: 'monospace',
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-all',
-                      }}
-                    >
-                      {JSON.stringify(selectedAuditLog.resource, null, 2)}
-                    </pre>
-                  </div>
-                )}
-                {selectedAuditLog.meta && (
-                  <div>
-                    <strong className="text-sm text-muted">{t('audit.detailMetaContext')}</strong>
-                    <pre
-                      style={{
-                        margin: '6px 0 0 0',
-                        padding: '12px',
-                        background: 'rgba(0,0,0,0.2)',
-                        border: '1px solid rgba(255,255,255,0.04)',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        color: '#c084fc',
-                        overflowX: 'auto',
-                        fontFamily: 'monospace',
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-all',
-                      }}
-                    >
-                      {JSON.stringify(selectedAuditLog.meta, null, 2)}
-                    </pre>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-secondary" onClick={() => setSelectedAuditLog(null)}>
-                {t('common.close')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AuditLogDetailModal
+        isOpen={Boolean(selectedAuditLog)}
+        auditLog={selectedAuditLog}
+        onClose={() => setSelectedAuditLog(null)}
+      />
     </div>
   );
 }

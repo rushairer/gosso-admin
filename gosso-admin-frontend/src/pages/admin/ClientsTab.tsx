@@ -5,26 +5,21 @@ import {
   Edit2 as EditIcon,
   Trash2 as TrashIcon,
   Key as KeyIcon,
-  X as XIcon,
-  Copy as CopyIcon,
-  Check as CheckIcon,
-  Info as InfoIcon,
 } from 'lucide-react';
 import { clientService } from '../../services';
 import {
   ButtonGroup,
-  CheckboxField,
-  CheckboxGroup,
   ConfirmDialog,
   DataTable,
   EmptyState,
   Feedback,
-  FormField,
   PanelHeader,
   StatusBadge,
   Tag,
   useToast,
 } from '../../components/ui';
+import { ClientEditorModal } from './clients/ClientEditorModal';
+import { ClientSecretModal } from './clients/ClientSecretModal';
 import { logger } from '../../utils/logger';
 
 interface OAuth2Client {
@@ -365,191 +360,28 @@ export default function ClientsTab() {
         </DataTable>
       )}
 
-      {/* Client Register/Edit Modal */}
-      {showClientModal && (
-        <div className="modal-backdrop">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3 className="modal-title">
-                {editingClient ? t('clients.editModalTitle') : t('clients.registerModalTitle')}
-              </h3>
-              <button className="modal-close-btn" onClick={() => setShowClientModal(false)}>
-                <XIcon style={{ width: '18px', height: '18px' }} />
-              </button>
-            </div>
-            <form onSubmit={handleClientFormSubmit}>
-              <div className="modal-body">
-                <FormField label={t('clients.clientNameLabel')}>
-                  <input
-                    type="text"
-                    className="input-field"
-                    placeholder={t('clients.clientNamePlaceholder')}
-                    value={clientForm.name}
-                    onChange={(e) => setClientForm((p) => ({ ...p, name: e.target.value }))}
-                  />
-                </FormField>
-                <FormField label={t('clients.descriptionLabel')}>
-                  <input
-                    type="text"
-                    className="input-field"
-                    placeholder={t('clients.descriptionPlaceholder')}
-                    value={clientForm.description}
-                    onChange={(e) => setClientForm((p) => ({ ...p, description: e.target.value }))}
-                  />
-                </FormField>
-                <FormField label={t('clients.redirectUrisLabel')} hint={t('clients.redirectUrisHint')}>
-                  <input
-                    type="text"
-                    className="input-field"
-                    placeholder={t('clients.redirectUrisPlaceholder')}
-                    value={clientForm.redirect_uris}
-                    onChange={(e) => setClientForm((p) => ({ ...p, redirect_uris: e.target.value }))}
-                  />
-                </FormField>
+      <ClientEditorModal
+        isOpen={showClientModal}
+        editingClient={editingClient}
+        clientForm={clientForm}
+        setClientForm={setClientForm}
+        clientScopeOptions={clientScopeOptions}
+        isAdminScope={isAdminScope}
+        onClose={() => setShowClientModal(false)}
+        onSubmit={handleClientFormSubmit}
+        onCheckboxChange={handleCheckboxChange}
+      />
 
-                <FormField label={t('clients.postLogoutRedirectUrisLabel')}>
-                  <input
-                    type="text"
-                    className="input-field"
-                    placeholder={t('clients.postLogoutRedirectUrisPlaceholder')}
-                    value={clientForm.post_logout_redirect_uris}
-                    onChange={(e) => setClientForm((p) => ({ ...p, post_logout_redirect_uris: e.target.value }))}
-                  />
-                </FormField>
-
-                <FormField label={t('clients.clientTypeLabel')}>
-                  <CheckboxField
-                    id="is_confidential"
-                    label={t('clients.confidentialClientLabel')}
-                    checked={clientForm.is_confidential}
-                    onChange={(checked) => setClientForm((p) => ({ ...p, is_confidential: checked }))}
-                    disabled={!!editingClient}
-                  />
-                </FormField>
-
-                <CheckboxGroup label={t('clients.grantTypesLabel')}>
-                  {['authorization_code', 'client_credentials', 'refresh_token', 'device_code'].map((gt) => (
-                    <CheckboxField
-                      key={gt}
-                      id={`grant-type-${gt}`}
-                      label={gt.replace('_', ' ')}
-                      checked={clientForm.grant_types.includes(gt)}
-                      onChange={() => handleCheckboxChange('grant_types', gt)}
-                    />
-                  ))}
-                </CheckboxGroup>
-
-                <CheckboxGroup label={t('clients.scopesLabel')}>
-                  {clientScopeOptions.map((sc) => (
-                    <CheckboxField
-                      key={sc}
-                      id={`scope-${sc}`}
-                      label={sc === 'admin' ? t('clients.adminScopeLabel') : sc}
-                      checked={clientForm.scopes.includes(sc)}
-                      onChange={() => handleCheckboxChange('scopes', sc)}
-                    />
-                  ))}
-                </CheckboxGroup>
-                {clientForm.scopes.some(isAdminScope) && (
-                  <div className="notice-card" style={{ alignItems: 'flex-start', textAlign: 'left' }}>
-                    <InfoIcon style={{ width: '18px', height: '18px', stroke: 'var(--warning-color)' }} />
-                    <p className="text-sm text-muted">{t('clients.adminScopeWarning')}</p>
-                  </div>
-                )}
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowClientModal(false)}>
-                  {t('common.cancel')}
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  {t('clients.saveClient')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Confidential Client Secret Display Modal */}
-      {showSecretModal && newClientDetails && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ border: '1px solid rgba(168, 85, 247, 0.4)' }}>
-            <div className="modal-header">
-              <h3 className="modal-title" style={{ color: 'var(--color-secondary)' }}>
-                {t('clients.secretModalTitle')}
-              </h3>
-            </div>
-            <div className="modal-body">
-              <div className="notice-card" style={{ flexDirection: 'row', marginBottom: '20px' }}>
-                <InfoIcon style={{ width: '20px', height: '20px', stroke: 'var(--color-secondary)', flexShrink: 0 }} />
-                <p
-                  style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', textAlign: 'left', lineHeight: '1.5' }}
-                >
-                  {t('clients.secretWarning')}
-                </p>
-              </div>
-
-              <FormField label={t('clients.clientIdLabel')}>
-                <div
-                  style={{
-                    background: 'rgba(255,255,255,0.03)',
-                    padding: '10px 14px',
-                    borderRadius: '6px',
-                    fontFamily: 'monospace',
-                    fontSize: '14px',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                  }}
-                >
-                  {newClientDetails.client_id}
-                </div>
-              </FormField>
-
-              <FormField label={t('clients.clientSecretLabel')}>
-                <ButtonGroup compact>
-                  <div
-                    style={{
-                      flex: 1,
-                      background: 'rgba(255,255,255,0.03)',
-                      padding: '10px 14px',
-                      borderRadius: '6px',
-                      fontFamily: 'monospace',
-                      fontSize: '14px',
-                      border: '1px solid rgba(255,255,255,0.05)',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {newClientDetails.client_secret}
-                  </div>
-                  <button
-                    className="btn btn-secondary"
-                    onClick={copySecret}
-                    style={{ padding: '0 16px' }}
-                    title={t('clients.copySecret')}
-                  >
-                    {copied ? (
-                      <CheckIcon style={{ width: '16px', height: '16px', stroke: 'var(--success-color)' }} />
-                    ) : (
-                      <CopyIcon style={{ width: '16px', height: '16px' }} />
-                    )}
-                  </button>
-                </ButtonGroup>
-              </FormField>
-            </div>
-            <div className="modal-footer">
-              <button
-                className="btn btn-primary"
-                onClick={() => {
-                  setShowSecretModal(false);
-                  setNewClientDetails(null);
-                }}
-              >
-                {t('common.done')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ClientSecretModal
+        isOpen={showSecretModal}
+        details={newClientDetails}
+        copied={copied}
+        onCopySecret={copySecret}
+        onClose={() => {
+          setShowSecretModal(false);
+          setNewClientDetails(null);
+        }}
+      />
 
       <ConfirmDialog
         open={!!confirmState}
