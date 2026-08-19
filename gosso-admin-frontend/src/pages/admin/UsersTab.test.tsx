@@ -2,12 +2,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ToastProvider } from '../../components/ui';
-import { apiFetch, getUserProfile } from '../../auth';
+import { apiFetch, gossoClient } from '../../auth';
 import UsersTab from './UsersTab';
 
 vi.mock('../../auth', () => ({
   apiFetch: vi.fn(),
-  getUserProfile: vi.fn(),
+  gossoClient: { getUserProfile: vi.fn() },
 }));
 
 function accountResponse(page: number): Response {
@@ -35,7 +35,7 @@ function accountResponse(page: number): Response {
 describe('UsersTab pagination', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getUserProfile).mockReturnValue({ sub: 'current-admin', roles: ['admin'] });
+    vi.mocked(gossoClient.getUserProfile).mockReturnValue({ sub: 'current-admin', roles: ['admin'] });
     vi.mocked(apiFetch).mockImplementation(async (input) => {
       const url = String(input);
       return accountResponse(url.includes('page=2') ? 2 : 1);

@@ -5,12 +5,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ForgotPassword from '../ForgotPassword';
 import ResetPassword from '../ResetPassword';
 
+const passwordResetMethods = vi.hoisted(() => ({
+  requestPasswordReset: vi.fn(),
+  resetPassword: vi.fn(),
+}));
+
+vi.mock('../../auth', () => ({ gossoClient: passwordResetMethods }));
+
 describe('password reset pages', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(window, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ message: 'ok' }), { status: 200, headers: { 'Content-Type': 'application/json' } })
-    );
+    passwordResetMethods.requestPasswordReset.mockResolvedValue(undefined);
+    passwordResetMethods.resetPassword.mockResolvedValue(undefined);
   });
 
   it('submits the forgot password request to the relative API and shows neutral success', async () => {
@@ -24,11 +30,7 @@ describe('password reset pages', () => {
     await userEvent.click(screen.getByRole('button', { name: /send reset link|发送重置链接/i }));
 
     await waitFor(() => {
-      expect(window.fetch).toHaveBeenCalledWith('/api/v1/auth/password/forgot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'user@example.com' }),
-      });
+      expect(passwordResetMethods.requestPasswordReset).toHaveBeenCalledWith('user@example.com');
       expect(screen.getByText(/reset link has been sent|重置链接已经发送/i)).toBeInTheDocument();
     });
   });
@@ -45,7 +47,7 @@ describe('password reset pages', () => {
     await userEvent.click(screen.getByRole('button', { name: /reset password|重置密码/i }));
 
     expect(await screen.findByText(/passwords do not match|不一致/i)).toBeInTheDocument();
-    expect(window.fetch).not.toHaveBeenCalled();
+    expect(passwordResetMethods.resetPassword).not.toHaveBeenCalled();
   });
 
   it('submits token from the URL fragment when resetting password', async () => {
@@ -60,11 +62,7 @@ describe('password reset pages', () => {
     await userEvent.click(screen.getByRole('button', { name: /reset password|重置密码/i }));
 
     await waitFor(() => {
-      expect(window.fetch).toHaveBeenCalledWith('/api/v1/auth/password/reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: 'abc', new_password: 'NewPassword123' }),
-      });
+      expect(passwordResetMethods.resetPassword).toHaveBeenCalledWith('abc', 'NewPassword123');
       expect(screen.getByText(/password has been reset|密码已重置/i)).toBeInTheDocument();
     });
   });
@@ -81,11 +79,7 @@ describe('password reset pages', () => {
     await userEvent.click(screen.getByRole('button', { name: /reset password|重置密码/i }));
 
     await waitFor(() => {
-      expect(window.fetch).toHaveBeenCalledWith('/api/v1/auth/password/reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: 'abc', new_password: 'NewPassword123' }),
-      });
+      expect(passwordResetMethods.resetPassword).toHaveBeenCalledWith('abc', 'NewPassword123');
     });
   });
 

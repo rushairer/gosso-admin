@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ShieldCheck, ArrowRight, UserCheck, Key, Settings } from 'lucide-react';
-import { isLoggedIn, isAdmin, redirectToAuthorize, getUserProfile } from '../auth';
+import { gossoClient, redirectToAuthorize } from '../auth';
 import type { UserProfile } from '../auth';
 
 export default function Home() {
@@ -14,13 +14,13 @@ export default function Home() {
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    if (!isLoggedIn()) {
+    if (!gossoClient.isLoggedIn()) {
       redirectToAuthorize('/');
       return;
     }
     setLogged(true);
-    setUserAdmin(isAdmin());
-    setUser(getUserProfile());
+    setUserAdmin(gossoClient.isAdmin());
+    setUser(gossoClient.getUserProfile());
     setAuthChecked(true);
   }, []);
 

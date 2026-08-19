@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Lock, Eye, EyeOff, Edit2 as EditIcon, Mail, X as XIcon, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { apiFetch, fetchUserProfile } from '../../auth';
+import { gossoClient } from '../../auth';
 import {
   Feedback,
   FormField,
@@ -49,15 +49,6 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
     setLocalProfile(initialProfile);
   }, [initialProfile]);
 
-  const reloadProfile = async () => {
-    try {
-      const updated = await fetchUserProfile();
-      setLocalProfile(updated);
-    } catch (err) {
-      console.error('Failed to reload profile:', err);
-    }
-  };
-
   const handleStartEditName = () => {
     setNewName(localProfile?.name || '');
     setIsEditingName(true);
@@ -74,18 +65,11 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
       setError(null);
       setSuccess(null);
 
-      const response = await apiFetch('/api/v1/auth/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ display_name: newName.trim() }),
-      });
-
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.message || 'Failed to update display name');
+      const updated = await gossoClient.updateProfile(newName.trim());
 
       setSuccess(t('profile.displayNameUpdatedSuccess'));
       setIsEditingName(false);
-      await reloadProfile();
+      setLocalProfile(updated);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error updating display name';
       setError(message);
@@ -122,17 +106,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
       setEmailLoading(true);
       setEmailError(null);
 
-      const response = await apiFetch('/api/v1/auth/profile/email/change/request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          new_email: newEmail.trim(),
-          password: emailPassword,
-        }),
-      });
-
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.message || 'Failed to request email verification code');
+      await gossoClient.requestEmailChange(newEmail.trim(), emailPassword);
 
       setEmailStep('verify');
     } catch (err: unknown) {
@@ -151,21 +125,11 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
       setEmailLoading(true);
       setEmailError(null);
 
-      const response = await apiFetch('/api/v1/auth/profile/email/change/confirm', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          new_email: newEmail.trim(),
-          code: emailCode.trim(),
-        }),
-      });
-
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.message || 'Failed to verify code and update email');
+      const updated = await gossoClient.confirmEmailChange(newEmail.trim(), emailCode.trim());
 
       setSuccess(t('profile.emailUpdatedSuccess'));
       handleCloseEmailModal();
-      await reloadProfile();
+      setLocalProfile(updated);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error verifying email code';
       setEmailError(message);
@@ -186,17 +150,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
 
     try {
       setLoading(true);
-      const response = await apiFetch('/api/v1/auth/password/change', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          current_password: currentPassword,
-          new_password: newPassword,
-        }),
-      });
-
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.message || 'Failed to change password');
+      await gossoClient.changePassword(currentPassword, newPassword);
 
       setSuccess(t('profile.passwordUpdatedSuccess'));
       setCurrentPassword('');

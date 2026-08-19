@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Key } from 'lucide-react';
-import { loginWithPasskey, loginWithPassword, redirectToAuthorize, verifyMfa } from '../auth';
+import { gossoClient, redirectToAuthorize } from '../auth';
 import { Feedback, FormField } from '../components/ui';
 import { logger } from '../utils/logger';
 import { appPath } from '../config/appPaths';
@@ -41,7 +41,7 @@ export default function Login() {
     setError(null);
 
     try {
-      await loginWithPasskey();
+      await gossoClient.loginWithPasskey();
       await storeTokensAndRedirect();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
@@ -72,7 +72,7 @@ export default function Login() {
     setError(null);
 
     try {
-      const result = await loginWithPassword(username, password);
+      const result = await gossoClient.loginWithPassword(username, password);
 
       // Check if MFA is required
       if (result.requires_mfa) {
@@ -104,7 +104,7 @@ export default function Login() {
     setError(null);
 
     try {
-      await verifyMfa(mfaToken, mfaCode.trim());
+      await gossoClient.verifyMfa(mfaToken, mfaCode.trim());
       await storeTokensAndRedirect();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);

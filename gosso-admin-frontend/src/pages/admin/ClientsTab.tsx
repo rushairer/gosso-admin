@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Plus as PlusIcon,
-  Edit2 as EditIcon,
-  Trash2 as TrashIcon,
-  Key as KeyIcon,
-} from 'lucide-react';
+import { Plus as PlusIcon, Edit2 as EditIcon, Trash2 as TrashIcon, Key as KeyIcon } from 'lucide-react';
 import { clientService } from '../../services';
 import {
   ButtonGroup,

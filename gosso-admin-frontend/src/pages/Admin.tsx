@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Key as KeyIcon, User as UserIcon, Shield as ShieldIcon, FileText as AuditIcon } from 'lucide-react';
-import { isLoggedIn, isAdmin, redirectToAuthorize } from '../auth';
+import { gossoClient, redirectToAuthorize } from '../auth';
 import { Panel } from '../components/ui';
 import ClientsTab from './admin/ClientsTab';
 import UsersTab from './admin/UsersTab';
@@ -15,12 +15,12 @@ export default function Admin() {
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    if (!isLoggedIn()) {
+    if (!gossoClient.isLoggedIn()) {
       redirectToAuthorize('/admin');
       return;
     }
 
-    if (!isAdmin()) {
+    if (!gossoClient.isAdmin()) {
       setAccessDenied(true);
     }
     setAuthChecked(true);

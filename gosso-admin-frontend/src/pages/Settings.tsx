@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Shield, Key, Laptop, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { getUserProfile, isLoggedIn, redirectToAuthorize } from '../auth';
+import { gossoClient, redirectToAuthorize } from '../auth';
 import ProfilePanel from './settings/ProfilePanel';
 import MFAPanel from './settings/MFAPanel';
 import PasskeysPanel from './settings/PasskeysPanel';
@@ -11,10 +11,10 @@ export default function Settings() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'profile' | 'mfa' | 'passkeys' | 'sessions'>('profile');
   const [authChecked, setAuthChecked] = useState(false);
-  const profile = getUserProfile();
+  const profile = gossoClient.getUserProfile();
 
   useEffect(() => {
-    if (!isLoggedIn()) {
+    if (!gossoClient.isLoggedIn()) {
       redirectToAuthorize('/settings');
       return;
     }

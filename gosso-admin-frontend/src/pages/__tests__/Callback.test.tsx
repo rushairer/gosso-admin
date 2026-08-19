@@ -9,12 +9,12 @@ const { clearPostLoginRedirect, exchangeCodeForToken, fetchUserProfile } = vi.ho
 }));
 
 vi.mock('../../auth', () => ({
-  authSession: {
-    getPostLoginRedirect: () => '/identity-admin/',
-    clearPostLoginRedirect,
+  gossoClient: {
+    exchangeCodeForToken,
+    fetchUserProfile,
   },
-  exchangeCodeForToken,
-  fetchUserProfile,
+  getPostLoginRedirect: () => '/identity-admin/',
+  clearPostLoginRedirect,
 }));
 
 vi.mock('../../utils/logger', () => ({ logger: { error: vi.fn() } }));

@@ -82,19 +82,10 @@ export function ResetPasswordModal({ isOpen, onClose, account, onSubmit }: Reset
             </FormField>
           </div>
           <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={onClose}
-              disabled={submitting || !!success}
-            >
+            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={submitting || !!success}>
               {t('common.cancel')}
             </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={!newPassword || submitting || !!success}
-            >
+            <button type="submit" className="btn btn-primary" disabled={!newPassword || submitting || !!success}>
               {t('users.updatePasswordButton')}
             </button>
           </div>

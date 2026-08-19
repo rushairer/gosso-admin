@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QRCodeSVG } from 'qrcode.react';
 import { Shield, QrCode, Clipboard, AlertTriangle, RefreshCw, Unlock, Check, Copy } from 'lucide-react';
-import { apiFetch } from '../../auth';
+import { gossoClient } from '../../auth';
 import {
   ButtonGroup,
   ConfirmDialog,
@@ -15,16 +15,13 @@ import {
   useToast,
 } from '../../components/ui';
 
-interface MFAStatus {
-  enabled: boolean;
-  types: string[];
-}
+import type { MfaEnrollment, MfaStatus } from '../../auth';
 
 export default function MFAPanel() {
   const { t } = useTranslation();
   const { showSuccess } = useToast();
-  const [mfaStatus, setMfaStatus] = useState<MFAStatus>({ enabled: false, types: [] });
-  const [mfaEnrollment, setMfaEnrollment] = useState<{ secret: string; otpauth_url: string } | null>(null);
+  const [mfaStatus, setMfaStatus] = useState<MfaStatus>({ enabled: false, types: [] });
+  const [mfaEnrollment, setMfaEnrollment] = useState<MfaEnrollment | null>(null);
   const [totpCode, setTotpCode] = useState('');
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [showDisableModal, setShowDisableModal] = useState(false);
@@ -47,10 +44,7 @@ export default function MFAPanel() {
     try {
       setLoading(true);
       setError(null);
-      const response = await apiFetch('/api/v1/auth/mfa');
-      if (!response.ok) throw new Error('Failed to load multi-factor authentication status');
-      const body = await response.json();
-      setMfaStatus(body.data || { enabled: false, types: [] });
+      setMfaStatus(await gossoClient.getMfaStatus());
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error loading MFA status';
       setError(message);
@@ -64,10 +58,7 @@ export default function MFAPanel() {
     setSuccess(null);
     try {
       setLoading(true);
-      const response = await apiFetch('/api/v1/auth/mfa/enroll', { method: 'POST' });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.message || 'Failed to enroll MFA');
-      setMfaEnrollment(body.data);
+      setMfaEnrollment(await gossoClient.enrollMfa());
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error enrolling MFA';
       setError(message);
@@ -82,24 +73,14 @@ export default function MFAPanel() {
     setSuccess(null);
     try {
       setLoading(true);
-      const response = await apiFetch('/api/v1/auth/mfa/activate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: totpCode }),
-      });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.message || 'Failed to activate TOTP');
+      const codes = await gossoClient.activateMfa(totpCode);
 
       setSuccess(t('mfa.mfaActivatedSuccess'));
       setMfaEnrollment(null);
       setTotpCode('');
       await loadMFAStatus();
 
-      const codesRes = await apiFetch('/api/v1/auth/mfa/backup-codes', { method: 'POST' });
-      const codesBody = await codesRes.json();
-      if (codesRes.ok && codesBody.data?.backup_codes) {
-        setBackupCodes(codesBody.data.backup_codes);
-      }
+      setBackupCodes(codes);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error activating MFA';
       setError(message);
@@ -114,13 +95,7 @@ export default function MFAPanel() {
     setSuccess(null);
     try {
       setLoading(true);
-      const response = await apiFetch('/api/v1/auth/mfa', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ current_password: confirmPasswordForMFA }),
-      });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.message || 'Failed to disable MFA');
+      await gossoClient.disableMfa(confirmPasswordForMFA);
 
       setSuccess(t('mfa.mfaDisabled'));
       setShowDisableModal(false);
@@ -155,10 +130,7 @@ export default function MFAPanel() {
     if (!confirmed) return;
     try {
       setLoading(true);
-      const response = await apiFetch('/api/v1/auth/mfa/backup-codes', { method: 'POST' });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.message || 'Failed to generate backup codes');
-      setBackupCodes(body.data.backup_codes || []);
+      setBackupCodes(await gossoClient.generateBackupCodes());
       setSuccess(t('mfa.backupCodesGenerated'));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error generating backup codes';

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Key, Calendar, Trash2, Plus } from 'lucide-react';
-import { deletePasskey, listPasskeys, registerPasskey } from '../../auth';
+import { gossoClient } from '../../auth';
 import type { PasskeyInfo } from '../../auth';
 import {
   ButtonGroup,
@@ -40,7 +40,7 @@ export default function PasskeysPanel() {
     try {
       setLoading(true);
       setError(null);
-      setPasskeys(await listPasskeys());
+      setPasskeys(await gossoClient.listPasskeys());
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error loading passkeys';
       setError(message);
@@ -60,7 +60,7 @@ export default function PasskeysPanel() {
 
     try {
       setLoading(true);
-      await registerPasskey(newPasskeyName.trim());
+      await gossoClient.registerPasskey(newPasskeyName.trim());
       setSuccess(t('passkeys.passkeyRegisteredSuccess', { name: newPasskeyName }));
       setShowPasskeyModal(false);
       setNewPasskeyName('');
@@ -94,7 +94,7 @@ export default function PasskeysPanel() {
     if (!confirmed) return;
     try {
       setLoading(true);
-      await deletePasskey(id);
+      await gossoClient.deletePasskey(id);
       setSuccess(t('passkeys.passkeyRemovedSuccess'));
       await loadPasskeys();
     } catch (err: unknown) {

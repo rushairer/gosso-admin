@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Home, Key, LayoutDashboard, LogIn, LogOut, Settings, ShieldCheck, User } from 'lucide-react';
-import { authSession, redirectToAuthorize } from '../../auth';
+import { gossoClient, logout, redirectToAuthorize } from '../../auth';
 import type { SessionSnapshot } from '../../auth';
 
 function initials(snapshot: SessionSnapshot) {
@@ -13,7 +13,7 @@ function initials(snapshot: SessionSnapshot) {
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const location = useLocation();
-  const [session, setSession] = useState<SessionSnapshot>(() => authSession.getSnapshot());
+  const [session, setSession] = useState<SessionSnapshot>(() => gossoClient.getSnapshot());
 
   const pageTitles: Record<string, { title: string; description: string }> = useMemo(
     () => ({
@@ -34,8 +34,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    setSession(authSession.getSnapshot());
-    return authSession.subscribe(setSession);
+    setSession(gossoClient.getSnapshot());
+    return gossoClient.subscribe(setSession);
   }, [location.pathname]);
 
   const page = useMemo(() => pageTitles[location.pathname] || pageTitles['/'], [pageTitles, location.pathname]);
@@ -85,7 +85,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           {session.loggedIn ? (
-            <button className="sidebar-action" onClick={() => authSession.logout('/')}>
+            <button className="sidebar-action" onClick={() => logout('/')}>
               <LogOut size={16} />
               {t('nav.signOut')}
             </button>
@@ -111,7 +111,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </div>
             {/* Mobile session indicator — hidden on desktop via CSS */}
             {session.loggedIn && (
-              <button className="mobile-signout" onClick={() => authSession.logout('/')} title={t('nav.signOut')}>
+              <button className="mobile-signout" onClick={() => logout('/')} title={t('nav.signOut')}>
                 <LogOut size={16} />
               </button>
             )}

@@ -8,9 +8,11 @@ const { redirectToAuthorize } = vi.hoisted(() => ({
 }));
 
 vi.mock('../../auth', () => ({
-  getUserProfile: vi.fn(),
-  isAdmin: vi.fn(() => false),
-  isLoggedIn: vi.fn(() => false),
+  gossoClient: {
+    getUserProfile: vi.fn(),
+    isAdmin: vi.fn(() => false),
+    isLoggedIn: vi.fn(() => false),
+  },
   redirectToAuthorize,
 }));
 

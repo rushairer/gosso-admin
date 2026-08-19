@@ -1,10 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Info as InfoIcon,
-  Copy as CopyIcon,
-  Check as CheckIcon,
-} from 'lucide-react';
+import { Info as InfoIcon, Copy as CopyIcon, Check as CheckIcon } from 'lucide-react';
 import { ButtonGroup, FormField } from '../../../components/ui';
 
 interface ClientSecretModalProps {
@@ -41,9 +37,7 @@ export const ClientSecretModal: React.FC<ClientSecretModalProps> = ({
         <div className="modal-body">
           <div className="notice-card" style={{ flexDirection: 'row', marginBottom: '20px' }}>
             <InfoIcon style={{ width: '20px', height: '20px', stroke: 'var(--color-secondary)', flexShrink: 0 }} />
-            <p
-              style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', textAlign: 'left', lineHeight: '1.5' }}
-            >
+            <p style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', textAlign: 'left', lineHeight: '1.5' }}>
               {t('clients.secretWarning')}
             </p>
           </div>
@@ -97,11 +91,7 @@ export const ClientSecretModal: React.FC<ClientSecretModalProps> = ({
           </FormField>
         </div>
         <div className="modal-footer">
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={onClose}
-          >
+          <button type="button" className="btn btn-primary" onClick={onClose}>
             {t('common.done')}
           </button>
         </div>

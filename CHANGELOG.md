@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+- Delegate profile, password, email, MFA, passkey, session, and password-reset flows to `@gosso/client#main` instead of maintaining endpoint and response logic in React pages.
+- Validate the commit-pinned SDK lock entry in CI while retaining the fast-moving `main` development channel.
+
 ## [0.2.0] - 2026-08-15
 
 ### Changed

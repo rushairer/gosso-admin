@@ -158,12 +158,7 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
             </div>
           </div>
           <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={onClose}
-              disabled={submitting || !!success}
-            >
+            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={submitting || !!success}>
               {t('common.cancel')}
             </button>
             <button type="submit" className="btn btn-primary" disabled={submitting || !!success}>

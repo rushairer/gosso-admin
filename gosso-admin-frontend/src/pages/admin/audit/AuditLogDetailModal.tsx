@@ -9,11 +9,7 @@ interface AuditLogDetailModalProps {
   onClose: () => void;
 }
 
-export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
-  isOpen,
-  auditLog,
-  onClose,
-}) => {
+export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({ isOpen, auditLog, onClose }) => {
   const { t } = useTranslation();
 
   if (!isOpen || !auditLog) return null;
@@ -40,9 +36,7 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
             </div>
             <div>
               <strong className="text-sm text-muted">{t('audit.detailAction')}</strong>
-              <div style={{ fontSize: '14px', marginTop: '2px', fontFamily: 'monospace' }}>
-                {auditLog.action}
-              </div>
+              <div style={{ fontSize: '14px', marginTop: '2px', fontFamily: 'monospace' }}>{auditLog.action}</div>
             </div>
             <div>
               <strong className="text-sm text-muted">{t('audit.detailActor')}</strong>

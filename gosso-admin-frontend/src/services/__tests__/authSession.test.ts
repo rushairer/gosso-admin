@@ -10,7 +10,7 @@ function envelope(data: unknown, ok = true) {
   });
 }
 
-describe('cookie-backed authSession', () => {
+describe('cookie-backed gossoClient', () => {
   beforeEach(async () => {
     vi.resetModules();
     fetchMock.mockReset();
@@ -23,12 +23,12 @@ describe('cookie-backed authSession', () => {
   });
 
   it('does not persist credentials in web storage', async () => {
-    const { authSession } = await import('../../auth');
-    authSession.saveTokenSet({ access_token: 'access', refresh_token: 'refresh' });
+    const { gossoClient } = await import('../../auth');
+    gossoClient.saveTokenSet({ access_token: 'access', refresh_token: 'refresh' });
     expect(localStorage.getItem('gosso-admin:access_token')).toBeNull();
     expect(localStorage.getItem('gosso-admin:refresh_token')).toBeNull();
-    expect(authSession.getAccessToken()).toBeNull();
-    expect(authSession.getRefreshToken()).toBeNull();
+    expect(gossoClient.getAccessToken()).toBeNull();
+    expect(gossoClient.getRefreshToken()).toBeNull();
   });
 
   it('uses HttpOnly cookie authentication to load the profile', async () => {
@@ -38,11 +38,11 @@ describe('cookie-backed authSession', () => {
         headers: { 'Content-Type': 'application/json' },
       })
     );
-    const { authSession, fetchUserProfile } = await import('../../auth');
-    await expect(fetchUserProfile()).resolves.toMatchObject({ sub: '1' });
+    const { gossoClient } = await import('../../auth');
+    await expect(gossoClient.fetchUserProfile()).resolves.toMatchObject({ sub: '1' });
     expect(fetchMock.mock.calls[0][1]).toMatchObject({ credentials: 'same-origin' });
-    expect(authSession.isLoggedIn()).toBe(true);
-    expect(authSession.isAdmin()).toBe(true);
+    expect(gossoClient.isLoggedIn()).toBe(true);
+    expect(gossoClient.isAdmin()).toBe(true);
   });
 
   it('adds the CSRF header to unsafe cookie-authenticated API calls', async () => {
@@ -85,11 +85,11 @@ describe('cookie-backed authSession', () => {
         headers: { 'Content-Type': 'application/json' },
       })
     );
-    const { authSession, loginWithPassword } = await import('../../auth');
-    await expect(loginWithPassword('admin', 'correct horse battery staple')).resolves.toMatchObject({
+    const { gossoClient } = await import('../../auth');
+    await expect(gossoClient.loginWithPassword('admin', 'correct horse battery staple')).resolves.toMatchObject({
       expires_in: 900,
     });
-    expect(authSession.getSnapshot()).toMatchObject({ loggedIn: true, accessToken: null, refreshToken: null });
+    expect(gossoClient.getSnapshot()).toMatchObject({ loggedIn: true, accessToken: null, refreshToken: null });
   });
 
   it('uses only the GOSSO CSRF token and clears state only after server logout succeeds', async () => {
@@ -100,13 +100,13 @@ describe('cookie-backed authSession', () => {
       )
       .mockResolvedValueOnce(new Response(null, { status: 403 }))
       .mockResolvedValueOnce(new Response(null, { status: 204 }));
-    const { authSession, fetchUserProfile } = await import('../../auth');
-    await fetchUserProfile();
+    const { gossoClient } = await import('../../auth');
+    await gossoClient.fetchUserProfile();
 
-    await expect(authSession.logout('/')).rejects.toThrow('Logout failed (403)');
-    expect(authSession.isLoggedIn()).toBe(true);
-    await expect(authSession.logout('/')).resolves.toBeUndefined();
-    expect(authSession.isLoggedIn()).toBe(false);
+    await expect(gossoClient.logout('/')).rejects.toThrow('Logout failed (403)');
+    expect(gossoClient.isLoggedIn()).toBe(true);
+    await expect(gossoClient.logout('/')).resolves.toBeUndefined();
+    expect(gossoClient.isLoggedIn()).toBe(false);
     expect(new Headers(fetchMock.mock.calls[1][1].headers).get('X-CSRF-Token')).toBe('csrf-value');
   });
 

@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, Lock } from 'lucide-react';
 import { Feedback, FormField } from '../components/ui';
+import { gossoClient } from '../auth';
 import { logger } from '../utils/logger';
 
 function readTokenFromHash(hash: string): string {
@@ -41,15 +42,7 @@ export default function ResetPassword() {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/v1/auth/password/reset', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, new_password: newPassword }),
-      });
-
-      if (!response.ok) {
-        throw new Error(t('passwordReset.resetFailed'));
-      }
+      await gossoClient.resetPassword(token, newPassword);
 
       setSuccess(true);
       setNewPassword('');

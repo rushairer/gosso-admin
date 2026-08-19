@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Mail } from 'lucide-react';
 import { Feedback, FormField } from '../components/ui';
+import { gossoClient } from '../auth';
 import { logger } from '../utils/logger';
 
 export default function ForgotPassword() {
@@ -21,15 +22,7 @@ export default function ForgotPassword() {
     setSuccess(false);
 
     try {
-      const response = await fetch('/api/v1/auth/password/forgot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
-      });
-
-      if (!response.ok) {
-        throw new Error(t('passwordReset.requestFailed'));
-      }
+      await gossoClient.requestPasswordReset(email.trim());
 
       setSuccess(true);
     } catch (err: unknown) {

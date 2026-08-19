@@ -126,9 +126,15 @@ Frontend:
 
 ```bash
 cd gosso-admin-frontend
-npm ci --legacy-peer-deps
+npm ci
 npm run dev
 ```
+
+The frontend tracks `@gosso/client#main` during rapid development. The committed
+lockfile pins the exact SDK commit, and CI installs it with `npm ci`. OAuth/OIDC,
+PKCE, session refresh, identity CSRF, MFA, passkey, profile, session, and
+password-reset protocol logic belongs to the SDK; React pages only manage UI
+state and call SDK methods.
 
 Set `VITE_SHOW_DEV_CREDENTIALS=true` only when you intentionally want the local login screen to show seeded development credentials.
 Set `VITE_APP_BASE_PATH=/identity-admin` when testing the console behind a shared gateway sub-path.

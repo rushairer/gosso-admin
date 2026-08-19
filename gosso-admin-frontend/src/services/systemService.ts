@@ -21,7 +21,9 @@ export const systemService = {
     const contentType = res.headers.get('content-type') || '';
     if (!contentType.includes('application/json')) {
       const text = await res.text();
-      throw new Error(`Readiness returned ${res.status} ${contentType || 'unknown content-type'}: ${text.slice(0, 120)}`);
+      throw new Error(
+        `Readiness returned ${res.status} ${contentType || 'unknown content-type'}: ${text.slice(0, 120)}`
+      );
     }
     const body = (await res.json()) as SystemHealth;
     return {

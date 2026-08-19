@@ -1,21 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Laptop, MapPin } from 'lucide-react';
-import { logout, apiFetch } from '../../auth';
+import { gossoClient, logout } from '../../auth';
+import type { SessionInfo } from '../../auth';
 import { ConfirmDialog, DataTable, Feedback, Panel, PanelHeader, Tag } from '../../components/ui';
 import { parseUserAgent } from '../../utils/format';
 
-interface Session {
-  id: string;
-  ip: string;
-  user_agent: string;
-  created_at: string;
-  last_active_at: string;
-}
-
 export default function SessionsPanel() {
   const { t } = useTranslation();
-  const [sessions, setSessions] = useState<Session[]>([]);
+  const [sessions, setSessions] = useState<SessionInfo[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,18 +29,12 @@ export default function SessionsPanel() {
       setLoading(true);
       setError(null);
 
-      const response = await apiFetch('/api/v1/auth/sessions');
-      if (!response.ok) throw new Error('Failed to load active sessions');
-      const body = await response.json();
-      const sorted = (body.data || []).sort(
-        (a: Session, b: Session) => new Date(b.last_active_at).getTime() - new Date(a.last_active_at).getTime()
-      );
-      setSessions(sorted);
-
-      const curResponse = await apiFetch('/api/v1/auth/session');
-      if (!curResponse.ok) throw new Error('Failed to validate current session');
-      const curBody = await curResponse.json();
-      setCurrentSessionId(curBody.data?.id || null);
+      const [activeSessions, currentSession] = await Promise.all([
+        gossoClient.listSessions(),
+        gossoClient.getCurrentSession(),
+      ]);
+      setSessions(activeSessions);
+      setCurrentSessionId(currentSession.id || null);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error loading sessions';
       setError(message);
@@ -76,9 +63,7 @@ export default function SessionsPanel() {
     if (!confirmed) return;
     try {
       setLoading(true);
-      const response = await apiFetch(`/api/v1/auth/sessions/${sessionId}`, { method: 'DELETE' });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.message || 'Failed to revoke session');
+      await gossoClient.revokeSession(sessionId);
       setSuccess(t('sessions.sessionRevoked'));
       await loadSessions();
     } catch (err: unknown) {
@@ -171,7 +156,7 @@ export default function SessionsPanel() {
                     {isCurrent ? (
                       <button
                         className="btn btn-secondary btn-sm"
-                        onClick={logout}
+                        onClick={() => void logout()}
                         style={{ fontSize: '11px', padding: '4px 10px' }}
                       >
                         {t('sessions.signOutButton')}
