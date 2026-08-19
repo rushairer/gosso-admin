@@ -6,48 +6,30 @@ import {
   Key as KeyIcon,
   User as UserIcon,
   Shield as ShieldIcon,
-  X as XIcon,
   Lock as LockIcon,
   Unlock as UnlockIcon,
   CheckSquare as ConsentIcon,
 } from 'lucide-react';
-import { getUserProfile, apiFetch } from '../../auth';
+import { getUserProfile } from '../../auth';
 import {
   ButtonGroup,
   ConfirmDialog,
   DataTable,
   EmptyState,
   Feedback,
-  FormField,
-  ListRow,
-  ListStack,
   PanelHeader,
   StatusBadge,
   Tag,
   useToast,
 } from '../../components/ui';
+import { accountService } from '../../services';
+import type { Account, Role, Consent } from '../../types/api';
+import type { CreateAccountPayload } from '../../services';
 import { logger } from '../../utils/logger';
-
-interface Role {
-  id: string;
-  name: string;
-  description?: string;
-}
-
-interface Account {
-  id: string;
-  username: string;
-  display_name: string;
-  status: string;
-  created_at?: string;
-  roles?: Role[];
-}
-
-interface Consent {
-  client_id: string;
-  scopes?: string[];
-  granted_at?: string;
-}
+import { CreateUserModal } from './users/CreateUserModal';
+import { AssignRolesModal } from './users/AssignRolesModal';
+import { ResetPasswordModal } from './users/ResetPasswordModal';
+import { UserConsentsModal } from './users/UserConsentsModal';
 
 export default function UsersTab() {
   const { t } = useTranslation();
@@ -68,33 +50,12 @@ export default function UsersTab() {
 
   const currentAdmin = getUserProfile();
 
-  // Create User Modal
+  // Modals state
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
-  const [createUserForm, setCreateUserForm] = useState({
-    username: '',
-    display_name: '',
-    email: '',
-    phone: '',
-    password: '',
-    locale: 'en',
-    timezone: 'UTC',
-  });
-  const [createUserError, setCreateUserError] = useState<string | null>(null);
-  const [createUserSuccess, setCreateUserSuccess] = useState<string | null>(null);
-
-  // Role Modal
   const [showRoleModal, setShowRoleModal] = useState(false);
-  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
-  const [newRoleInput, setNewRoleInput] = useState('');
-
-  // Password Modal
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
-
-  // Consent Modal
   const [showConsentModal, setShowConsentModal] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [consentsList, setConsentsList] = useState<Consent[]>([]);
   const [consentsLoading, setConsentsLoading] = useState(false);
 
@@ -102,416 +63,193 @@ export default function UsersTab() {
     try {
       setLoading(true);
       setError(null);
-      const response = await apiFetch(`/api/v1/admin/accounts?page=${page}&page_size=${pageSize}&include=roles`);
-      if (!response.ok) throw new Error('Failed to load accounts');
-      const body = await response.json();
-      const fetchedAccounts: Account[] = body.data?.items || [];
-      setAccounts(fetchedAccounts);
-      setTotalAccounts(body.data?.total || 0);
+      const data = await accountService.fetchAccounts(page, pageSize, true);
+      setAccounts(data.accounts);
+      setTotalAccounts(data.total);
 
-      const roleBank: { [id: string]: Role } = {};
-      fetchedAccounts.forEach((acc) => {
-        acc.roles?.forEach((role) => {
-          roleBank[role.id] = role;
-        });
+      // Collect all unique roles
+      const allRoles: Role[] = [];
+      data.accounts.forEach((acc) => {
+        if (acc.roles) {
+          acc.roles.forEach((r) => {
+            if (!allRoles.some((existing) => existing.id === r.id)) {
+              allRoles.push(r);
+            }
+          });
+        }
       });
-      setDiscoveredRoles(Object.values(roleBank));
+      setDiscoveredRoles(allRoles);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error loading user accounts';
+      const message = err instanceof Error ? err.message : 'Error loading accounts';
       logger.error('Failed to load accounts', err);
       setError(message);
     } finally {
       setLoading(false);
     }
-  }, [page]);
+  }, [page, pageSize]);
 
   useEffect(() => {
-    void fetchAccounts();
+    fetchAccounts();
   }, [fetchAccounts]);
 
-  // --- Create User ---
-  const handleOpenCreateUserModal = () => {
-    setCreateUserForm({
-      username: '',
-      display_name: '',
-      email: '',
-      phone: '',
-      password: '',
-      locale: 'en',
-      timezone: 'UTC',
+  const handleCreateUser = async (formData: CreateAccountPayload) => {
+    await accountService.createAccount(formData);
+    showSuccess(t('users.userCreatedSuccess'));
+    fetchAccounts();
+  };
+
+  const handleToggleUserStatus = (acc: Account) => {
+    const isActivating = acc.status !== 'active';
+    const newStatus = isActivating ? 'active' : 'suspended';
+    setConfirmState({
+      title: isActivating ? t('users.activateUser') : t('users.suspendUser'),
+      message: isActivating
+        ? t('users.confirmActivate', { name: acc.display_name || acc.username })
+        : t('users.confirmSuspend', { name: acc.display_name || acc.username }),
+      onConfirm: async () => {
+        try {
+          await accountService.updateAccountStatus(acc.id, newStatus);
+          showSuccess(isActivating ? t('users.userActivatedSuccess') : t('users.userSuspendedSuccess'));
+          fetchAccounts();
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : 'Error updating user status';
+          showError(message);
+        } finally {
+          setConfirmState(null);
+        }
+      },
+      onCancel: () => setConfirmState(null),
     });
-    setCreateUserError(null);
-    setCreateUserSuccess(null);
-    setShowCreateUserModal(true);
   };
 
-  const handleCreateUserSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!createUserForm.username || !createUserForm.display_name || !createUserForm.password) {
-      setCreateUserError(t('users.createUserValidation'));
-      return;
-    }
-    if (!createUserForm.email && !createUserForm.phone) {
-      setCreateUserError(t('users.emailOrPhoneRequired'));
-      return;
-    }
-    if (createUserForm.password.length < 12) {
-      setCreateUserError(t('users.passwordTooShort'));
-      return;
-    }
-
-    try {
-      const response = await apiFetch('/api/v1/admin/accounts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: createUserForm.username.trim(),
-          display_name: createUserForm.display_name.trim(),
-          email: createUserForm.email.trim() || undefined,
-          phone: createUserForm.phone.trim() || undefined,
-          password: createUserForm.password,
-          locale: createUserForm.locale.trim() || undefined,
-          timezone: createUserForm.timezone.trim() || undefined,
-        }),
-      });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.message || 'Failed to create user');
-
-      setCreateUserSuccess(t('users.userCreatedSuccess'));
-      setCreateUserError(null);
-      await fetchAccounts();
-      setTimeout(() => setShowCreateUserModal(false), 1200);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error creating user';
-      setCreateUserError(message);
-      setCreateUserSuccess(null);
-    }
-  };
-
-  // --- Toggle User Status ---
-  const handleToggleUserStatus = async (account: Account) => {
-    if (account.id === currentAdmin?.sub) {
-      showError(t('users.cannotToggleOwnAccount'));
-      return;
-    }
-
-    const action = account.status === 'active' ? 'disable' : 'enable';
-    const confirmMsg =
-      action === 'disable'
-        ? t('users.disableConfirmMessage', { username: account.username })
-        : t('users.enableConfirmMessage', { username: account.username });
-    const confirmed = await new Promise<boolean>((resolve) => {
-      setConfirmState({
-        title: action === 'disable' ? t('users.suspendUser') : t('users.activateUser'),
-        message: confirmMsg,
-        onConfirm: () => {
+  const handleDeleteUser = (accountId: string) => {
+    const targetUser = accounts.find((a) => a.id === accountId);
+    setConfirmState({
+      title: t('users.deleteUserTitle'),
+      message: t('users.deleteUserConfirm', { name: targetUser?.display_name || targetUser?.username || accountId }),
+      onConfirm: async () => {
+        try {
+          await accountService.deleteAccount(accountId);
+          showSuccess(t('users.userDeletedSuccess'));
+          fetchAccounts();
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : 'Error deleting user';
+          showError(message);
+        } finally {
           setConfirmState(null);
-          resolve(true);
-        },
-        onCancel: () => {
-          setConfirmState(null);
-          resolve(false);
-        },
-      });
+        }
+      },
+      onCancel: () => setConfirmState(null),
     });
-    if (!confirmed) return;
-
-    try {
-      const response = await apiFetch(`/api/v1/admin/accounts/${account.id}/${action}`, { method: 'POST' });
-      if (!response.ok) {
-        const body = await response.json();
-        throw new Error(body.message || `Failed to ${action} user`);
-      }
-      fetchAccounts();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error updating user status';
-      showError(message);
-    }
   };
 
-  // --- Delete User ---
-  const handleDeleteUser = async (userId: string) => {
-    if (userId === currentAdmin?.sub) {
-      showError(t('users.cannotDeleteOwnAccount'));
-      return;
-    }
-    const confirmed = await new Promise<boolean>((resolve) => {
-      setConfirmState({
-        title: t('users.deleteUserConfirmTitle'),
-        message: t('users.deleteUserConfirmMessage'),
-        onConfirm: () => {
+  const handleClearLockout = (accountId: string) => {
+    const targetUser = accounts.find((a) => a.id === accountId);
+    setConfirmState({
+      title: t('users.unlockAccount'),
+      message: t('users.confirmUnlock', { name: targetUser?.display_name || targetUser?.username || accountId }),
+      onConfirm: async () => {
+        try {
+          await accountService.clearLockout(accountId);
+          showSuccess(t('users.accountUnlockedSuccess'));
+          fetchAccounts();
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : 'Error unlocking user';
+          showError(message);
+        } finally {
           setConfirmState(null);
-          resolve(true);
-        },
-        onCancel: () => {
-          setConfirmState(null);
-          resolve(false);
-        },
-      });
+        }
+      },
+      onCancel: () => setConfirmState(null),
     });
-    if (!confirmed) return;
-    try {
-      const response = await apiFetch(`/api/v1/admin/accounts/${userId}`, { method: 'DELETE' });
-      if (!response.ok) {
-        const body = await response.json();
-        throw new Error(body.message || 'Failed to delete user');
-      }
-      fetchAccounts();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error deleting user';
-      showError(message);
-    }
   };
 
-  // --- Password ---
-  const handleOpenPasswordModal = (account: Account) => {
-    setSelectedAccount(account);
-    setNewPassword('');
-    setPasswordError(null);
-    setPasswordSuccess(null);
-    setShowPasswordModal(true);
-  };
-
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedAccount || !newPassword) return;
-    if (newPassword.length < 12) {
-      setPasswordError(t('users.passwordTooShort'));
-      return;
-    }
-
-    try {
-      const response = await apiFetch(`/api/v1/admin/accounts/${selectedAccount.id}/password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ new_password: newPassword }),
-      });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.message || 'Failed to change password');
-
-      setPasswordSuccess(t('users.passwordUpdatedSuccess'));
-      setPasswordError(null);
-      setNewPassword('');
-      setTimeout(() => setShowPasswordModal(false), 2500);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error updating password';
-      setPasswordError(message);
-      setPasswordSuccess(null);
-    }
-  };
-
-  // --- MFA Reset ---
-  const handleResetUserMFA = async (account: Account) => {
-    if (account.id === currentAdmin?.sub) {
-      showError(t('users.cannotResetOwnMfa'));
-      return;
-    }
-    const confirmed = await new Promise<boolean>((resolve) => {
-      setConfirmState({
-        title: t('users.resetMfaButton'),
-        message: t('users.resetMfaConfirmMessage', { username: account.username }),
-        onConfirm: () => {
+  const handleResetUserMFA = (acc: Account) => {
+    setConfirmState({
+      title: t('users.resetMfaTitle'),
+      message: t('users.resetMfaConfirm', { name: acc.display_name || acc.username }),
+      onConfirm: async () => {
+        try {
+          await accountService.resetMfa(acc.id);
+          showSuccess(t('users.mfaResetSuccess'));
+          fetchAccounts();
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : 'Error resetting MFA';
+          showError(message);
+        } finally {
           setConfirmState(null);
-          resolve(true);
-        },
-        onCancel: () => {
-          setConfirmState(null);
-          resolve(false);
-        },
-      });
+        }
+      },
+      onCancel: () => setConfirmState(null),
     });
-    if (!confirmed) return;
-
-    try {
-      const response = await apiFetch(`/api/v1/admin/accounts/${account.id}/mfa/reset`, { method: 'POST' });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.message || 'Failed to reset MFA');
-      showSuccess(t('users.mfaResetSuccess', { username: account.username }));
-      fetchAccounts();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error resetting MFA';
-      showError(message);
-    }
   };
 
-  // --- Roles ---
-  const handleOpenRoleModal = (account: Account) => {
-    setSelectedAccount(account);
-    setNewRoleInput('');
+  const handleOpenRoleModal = (acc: Account) => {
+    setSelectedAccount(acc);
     setShowRoleModal(true);
   };
 
-  const handleAddRoleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedAccount || !newRoleInput) return;
-
+  const handleAssignRole = async (roleId: string) => {
+    if (!selectedAccount) return;
     try {
-      const response = await apiFetch(`/api/v1/admin/accounts/${selectedAccount.id}/roles`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role_id: newRoleInput }),
-      });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.message || 'Failed to assign role');
-
-      const rolesRes = await apiFetch(`/api/v1/admin/accounts/${selectedAccount.id}/roles`);
-      if (rolesRes.ok) {
-        const rolesBody = await rolesRes.json();
-        const updatedRoles = rolesBody.data || [];
-        setAccounts((prev) => prev.map((a) => (a.id === selectedAccount.id ? { ...a, roles: updatedRoles } : a)));
-        setSelectedAccount((prev) => (prev ? { ...prev, roles: updatedRoles } : null));
-      }
-      setNewRoleInput('');
+      await accountService.assignRole(selectedAccount.id, roleId);
+      showSuccess(t('users.roleAssignedSuccess'));
+      const updatedRoles = await accountService.fetchAccountRoles(selectedAccount.id);
+      setSelectedAccount((prev) => (prev ? { ...prev, roles: updatedRoles } : null));
+      fetchAccounts();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error assigning role';
-      showError(message);
+      showError(err instanceof Error ? err.message : 'Error assigning role');
+      throw err;
     }
   };
 
   const handleRemoveRole = async (roleId: string) => {
     if (!selectedAccount) return;
-    if (selectedAccount.id === currentAdmin?.sub) {
-      showError(t('users.cannotRemoveOwnRoles'));
-      return;
-    }
-    const confirmed = await new Promise<boolean>((resolve) => {
-      setConfirmState({
-        title: t('users.removeRole'),
-        message: t('users.removeRoleConfirmMessage'),
-        onConfirm: () => {
-          setConfirmState(null);
-          resolve(true);
-        },
-        onCancel: () => {
-          setConfirmState(null);
-          resolve(false);
-        },
-      });
-    });
-    if (!confirmed) return;
-
     try {
-      const response = await apiFetch(`/api/v1/admin/accounts/${selectedAccount.id}/roles/${roleId}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        const body = await response.json();
-        throw new Error(body.message || 'Failed to remove role');
-      }
-
-      const rolesRes = await apiFetch(`/api/v1/admin/accounts/${selectedAccount.id}/roles`);
-      if (rolesRes.ok) {
-        const rolesBody = await rolesRes.json();
-        const updatedRoles = rolesBody.data || [];
-        setAccounts((prev) => prev.map((a) => (a.id === selectedAccount.id ? { ...a, roles: updatedRoles } : a)));
-        setSelectedAccount((prev) => (prev ? { ...prev, roles: updatedRoles } : null));
-      }
+      await accountService.removeRole(selectedAccount.id, roleId);
+      showSuccess(t('users.roleRemovedSuccess'));
+      const updatedRoles = await accountService.fetchAccountRoles(selectedAccount.id);
+      setSelectedAccount((prev) => (prev ? { ...prev, roles: updatedRoles } : null));
+      fetchAccounts();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error removing role';
-      showError(message);
+      showError(err instanceof Error ? err.message : 'Error removing role');
     }
   };
 
-  // --- Lockout ---
-  const handleClearLockout = async (accountID: string) => {
-    if (accountID === currentAdmin?.sub) {
-      showError(t('users.cannotClearOwnLockout'));
-      return;
-    }
-    const confirmed = await new Promise<boolean>((resolve) => {
-      setConfirmState({
-        title: t('users.clearLockout'),
-        message: t('users.clearLockoutConfirmMessage'),
-        onConfirm: () => {
-          setConfirmState(null);
-          resolve(true);
-        },
-        onCancel: () => {
-          setConfirmState(null);
-          resolve(false);
-        },
-      });
-    });
-    if (!confirmed) return;
-
-    try {
-      const response = await apiFetch(`/api/v1/admin/accounts/${accountID}/lockout/clear`, { method: 'POST' });
-      if (!response.ok) {
-        const body = await response.json();
-        throw new Error(body.message || 'Failed to clear lockout');
-      }
-      showSuccess(t('users.lockoutClearedSuccess'));
-      await fetchAccounts();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error clearing lockout';
-      showError(message);
-    }
+  const handleOpenPasswordModal = (acc: Account) => {
+    setSelectedAccount(acc);
+    setShowPasswordModal(true);
   };
 
-  // --- Consents ---
-  const handleOpenConsentModal = async (account: Account) => {
-    setSelectedAccount(account);
-    setConsentsList([]);
+  const handleResetPassword = async (password: string) => {
+    if (!selectedAccount) return;
+    await accountService.resetPassword(selectedAccount.id, password);
+    showSuccess(t('users.passwordUpdatedSuccess'));
+  };
+
+  const handleOpenConsentModal = async (acc: Account) => {
+    setSelectedAccount(acc);
     setShowConsentModal(true);
     setConsentsLoading(true);
-
     try {
-      const response = await apiFetch(`/api/v1/admin/accounts/${account.id}/consents`);
-      if (response.ok) {
-        const body = await response.json();
-        setConsentsList(body.data || []);
-      } else {
-        const body = await response.json();
-        throw new Error(body.message || 'Failed to load user consents');
-      }
+      const list = await accountService.fetchAccountConsents(acc.id);
+      setConsentsList(list);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error loading consents';
-      logger.error('Failed to load consents', err);
-      showError(message);
+      showError(err instanceof Error ? err.message : 'Error loading consents');
     } finally {
       setConsentsLoading(false);
     }
   };
 
-  const handleRevokeConsent = async (clientID: string) => {
+  const handleRevokeConsent = async (clientId: string) => {
     if (!selectedAccount) return;
-    if (selectedAccount.id === currentAdmin?.sub) {
-      showError(t('users.cannotRevokeOwnConsent'));
-      return;
-    }
-    const confirmed = await new Promise<boolean>((resolve) => {
-      setConfirmState({
-        title: t('users.revokeConsent'),
-        message: t('users.revokeConsentConfirmMessage'),
-        onConfirm: () => {
-          setConfirmState(null);
-          resolve(true);
-        },
-        onCancel: () => {
-          setConfirmState(null);
-          resolve(false);
-        },
-      });
-    });
-    if (!confirmed) return;
-
     try {
-      const response = await apiFetch(`/api/v1/admin/accounts/${selectedAccount.id}/consents/${clientID}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        const body = await response.json();
-        throw new Error(body.message || 'Failed to revoke consent');
-      }
+      await accountService.revokeConsent(selectedAccount.id, clientId);
       showSuccess(t('users.consentRevokedSuccess'));
-      const consentsRes = await apiFetch(`/api/v1/admin/accounts/${selectedAccount.id}/consents`);
-      if (consentsRes.ok) {
-        const consentsBody = await consentsRes.json();
-        setConsentsList(consentsBody.data || []);
-      }
+      const updated = await accountService.fetchAccountConsents(selectedAccount.id);
+      setConsentsList(updated);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error revoking consent';
-      showError(message);
+      showError(err instanceof Error ? err.message : 'Error revoking consent');
     }
   };
 
@@ -551,7 +289,7 @@ export default function UsersTab() {
         title={t('users.title')}
         description={t('users.description')}
         action={
-          <button className="btn btn-primary content-action" onClick={handleOpenCreateUserModal}>
+          <button className="btn btn-primary content-action" onClick={() => setShowCreateUserModal(true)}>
             <PlusIcon />
             {t('users.addUser')}
           </button>
@@ -635,7 +373,7 @@ export default function UsersTab() {
                         {t('users.passwordButton')}
                       </button>
                       <button
-                        className={`btn btn-secondary btn-sm`}
+                        className="btn btn-secondary btn-sm"
                         style={{ opacity: acc.id === currentAdmin?.sub ? 0.4 : 1 }}
                         onClick={() => handleToggleUserStatus(acc)}
                         title={acc.status === 'active' ? t('users.suspendUser') : t('users.activateUser')}
@@ -697,376 +435,39 @@ export default function UsersTab() {
         </>
       )}
 
-      {/* User Create Modal */}
-      {showCreateUserModal && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '520px' }}>
-            <div className="modal-header">
-              <h3 className="modal-title">{t('users.createModalTitle')}</h3>
-              <button className="modal-close-btn" onClick={() => setShowCreateUserModal(false)}>
-                <XIcon style={{ width: '18px', height: '18px' }} />
-              </button>
-            </div>
-            <form onSubmit={handleCreateUserSubmit}>
-              <div className="modal-body">
-                <p className="mb-md text-dark" style={{ fontSize: '14px' }}>
-                  {t('users.createModalDescription')}
-                </p>
+      {/* Modals */}
+      <CreateUserModal
+        isOpen={showCreateUserModal}
+        onClose={() => setShowCreateUserModal(false)}
+        onSubmit={handleCreateUser}
+      />
 
-                {createUserError && (
-                  <div className="mb-md">
-                    <Feedback type="error">{createUserError}</Feedback>
-                  </div>
-                )}
-                {createUserSuccess && (
-                  <div className="mb-md">
-                    <Feedback type="success">{createUserSuccess}</Feedback>
-                  </div>
-                )}
+      <AssignRolesModal
+        isOpen={showRoleModal}
+        onClose={() => setShowRoleModal(false)}
+        account={selectedAccount}
+        discoveredRoles={discoveredRoles}
+        currentAdminId={currentAdmin?.sub}
+        onAssignRole={handleAssignRole}
+        onRemoveRole={handleRemoveRole}
+      />
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <FormField label={t('users.usernameLabel')}>
-                    <input
-                      type="text"
-                      className="input-field"
-                      placeholder={t('users.usernamePlaceholder')}
-                      value={createUserForm.username}
-                      onChange={(e) => setCreateUserForm((p) => ({ ...p, username: e.target.value }))}
-                      required
-                      disabled={!!createUserSuccess}
-                      autoFocus
-                    />
-                  </FormField>
-                  <FormField label={t('users.displayNameLabel')}>
-                    <input
-                      type="text"
-                      className="input-field"
-                      placeholder={t('users.displayNamePlaceholder')}
-                      value={createUserForm.display_name}
-                      onChange={(e) => setCreateUserForm((p) => ({ ...p, display_name: e.target.value }))}
-                      required
-                      disabled={!!createUserSuccess}
-                    />
-                  </FormField>
-                </div>
+      <ResetPasswordModal
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+        account={selectedAccount}
+        onSubmit={handleResetPassword}
+      />
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <FormField label={t('users.emailLabel')}>
-                    <input
-                      type="email"
-                      className="input-field"
-                      placeholder={t('users.emailPlaceholder')}
-                      value={createUserForm.email}
-                      onChange={(e) => setCreateUserForm((p) => ({ ...p, email: e.target.value }))}
-                      disabled={!!createUserSuccess}
-                    />
-                  </FormField>
-                  <FormField label={t('users.phoneLabel')}>
-                    <input
-                      type="text"
-                      className="input-field"
-                      placeholder={t('users.phonePlaceholder')}
-                      value={createUserForm.phone}
-                      onChange={(e) => setCreateUserForm((p) => ({ ...p, phone: e.target.value }))}
-                      disabled={!!createUserSuccess}
-                    />
-                  </FormField>
-                </div>
-                <div className="form-hint mb-md" style={{ marginTop: '-10px' }}>
-                  {t('users.contactHint')}
-                </div>
-
-                <FormField label={t('users.initialPasswordLabel')}>
-                  <input
-                    type="password"
-                    className="input-field"
-                    placeholder={t('users.initialPasswordPlaceholder')}
-                    value={createUserForm.password}
-                    onChange={(e) => setCreateUserForm((p) => ({ ...p, password: e.target.value }))}
-                    required
-                    disabled={!!createUserSuccess}
-                  />
-                </FormField>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                  <FormField label={t('users.localeLabel')} noMargin>
-                    <input
-                      type="text"
-                      className="input-field"
-                      value={createUserForm.locale}
-                      onChange={(e) => setCreateUserForm((p) => ({ ...p, locale: e.target.value }))}
-                      disabled={!!createUserSuccess}
-                    />
-                  </FormField>
-                  <FormField label={t('users.timezoneLabel')} noMargin>
-                    <input
-                      type="text"
-                      className="input-field"
-                      value={createUserForm.timezone}
-                      onChange={(e) => setCreateUserForm((p) => ({ ...p, timezone: e.target.value }))}
-                      disabled={!!createUserSuccess}
-                    />
-                  </FormField>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowCreateUserModal(false)}
-                  disabled={!!createUserSuccess}
-                >
-                  {t('common.cancel')}
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={!!createUserSuccess}>
-                  {t('users.createUserButton')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* User Manage Roles Modal */}
-      {showRoleModal && selectedAccount && (
-        <div className="modal-backdrop">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3 className="modal-title">
-                {t('users.rolesModalTitle', { name: selectedAccount.display_name || selectedAccount.username })}
-              </h3>
-              <button className="modal-close-btn" onClick={() => setShowRoleModal(false)}>
-                <XIcon style={{ width: '18px', height: '18px' }} />
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="plain-section-title">{t('users.activeRolesSection')}</div>
-              <div style={{ margin: '8px 0 24px 0' }}>
-                {selectedAccount.roles && selectedAccount.roles.length > 0 ? (
-                  <ListStack>
-                    {selectedAccount.roles.map((role) => (
-                      <ListRow
-                        key={role.id}
-                        icon={<ShieldIcon style={{ width: '16px', height: '16px' }} />}
-                        title={role.name}
-                        meta={role.description}
-                        action={
-                          <button
-                            className="btn btn-danger btn-sm"
-                            style={{
-                              padding: '4px 8px',
-                              fontSize: '11px',
-                              opacity: selectedAccount.id === currentAdmin?.sub ? 0.4 : 1,
-                            }}
-                            onClick={() => handleRemoveRole(role.id)}
-                            disabled={selectedAccount.id === currentAdmin?.sub}
-                          >
-                            {t('common.remove')}
-                          </button>
-                        }
-                      />
-                    ))}
-                  </ListStack>
-                ) : (
-                  <EmptyState title={t('users.noRolesAssigned')} description={t('users.noRolesAssignedDescription')} />
-                )}
-              </div>
-
-              {selectedAccount.id !== currentAdmin?.sub && (
-                <form
-                  onSubmit={handleAddRoleSubmit}
-                  style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '20px' }}
-                >
-                  <FormField label={t('users.assignNewRoleLabel')} noMargin>
-                    <ButtonGroup>
-                      <div className="flex-1">
-                        {discoveredRoles.length > 0 ? (
-                          <select
-                            className="input-field"
-                            value={newRoleInput}
-                            onChange={(e) => setNewRoleInput(e.target.value)}
-                          >
-                            <option value="">{t('users.selectDiscoveredRole')}</option>
-                            {discoveredRoles
-                              .filter((role) => !selectedAccount.roles?.some((ur) => ur.id === role.id))
-                              .map((role) => (
-                                <option key={role.id} value={role.id}>
-                                  {role.name} ({role.id.substring(0, 8)})
-                                </option>
-                              ))}
-                          </select>
-                        ) : (
-                          <input
-                            type="text"
-                            className="input-field"
-                            placeholder={t('users.enterRoleUuid')}
-                            value={newRoleInput}
-                            onChange={(e) => setNewRoleInput(e.target.value)}
-                          />
-                        )}
-                      </div>
-                      <button type="submit" className="btn btn-primary" disabled={!newRoleInput}>
-                        {t('common.assign')}
-                      </button>
-                    </ButtonGroup>
-                    <div className="form-hint">{t('users.assignRoleHint')}</div>
-                  </FormField>
-                </form>
-              )}
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-secondary" onClick={() => setShowRoleModal(false)}>
-                {t('common.close')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* User Change Password Modal */}
-      {showPasswordModal && selectedAccount && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '400px' }}>
-            <div className="modal-header">
-              <h3 className="modal-title">{t('users.changePasswordModalTitle')}</h3>
-              <button className="modal-close-btn" onClick={() => setShowPasswordModal(false)}>
-                <XIcon style={{ width: '18px', height: '18px' }} />
-              </button>
-            </div>
-            <form onSubmit={handlePasswordSubmit}>
-              <div className="modal-body">
-                <p className="mb-md text-dark" style={{ fontSize: '14px' }}>
-                  {t('users.changePasswordDescription', {
-                    name: selectedAccount.display_name || selectedAccount.username,
-                  })}
-                </p>
-
-                {passwordError && (
-                  <div className="mb-md">
-                    <Feedback type="error">{passwordError}</Feedback>
-                  </div>
-                )}
-                {passwordSuccess && (
-                  <div className="mb-md">
-                    <Feedback type="success">{passwordSuccess}</Feedback>
-                  </div>
-                )}
-
-                <FormField label={t('users.newPasswordLabel')} noMargin>
-                  <input
-                    type="password"
-                    className="input-field"
-                    placeholder={t('users.newPasswordPlaceholder')}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                    disabled={!!passwordSuccess}
-                    autoFocus
-                  />
-                </FormField>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowPasswordModal(false)}
-                  disabled={!!passwordSuccess}
-                >
-                  {t('common.cancel')}
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={!newPassword || !!passwordSuccess}>
-                  {t('users.updatePasswordButton')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* User Consents Modal */}
-      {showConsentModal && selectedAccount && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '600px' }}>
-            <div className="modal-header">
-              <h3 className="modal-title">
-                {t('users.consentsModalTitle', { name: selectedAccount.display_name || selectedAccount.username })}
-              </h3>
-              <button className="modal-close-btn" onClick={() => setShowConsentModal(false)}>
-                <XIcon style={{ width: '18px', height: '18px' }} />
-              </button>
-            </div>
-            <div className="modal-body">
-              <p className="mb-md text-dark" style={{ fontSize: '14px' }}>
-                {t('users.consentsDescription')}
-              </p>
-
-              {consentsLoading ? (
-                <div className="text-center" style={{ padding: '30px 0' }}>
-                  <div
-                    style={{
-                      margin: '0 auto 12px auto',
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
-                      border: '2px solid rgba(255,255,255,0.06)',
-                      borderTopColor: 'var(--color-primary)',
-                      animation: 'spin 1s linear infinite',
-                    }}
-                  />
-                  <p className="text-muted" style={{ fontSize: '14px' }}>
-                    {t('users.loadingConsents')}
-                  </p>
-                </div>
-              ) : consentsList.length === 0 ? (
-                <EmptyState title={t('users.noConsentsTitle')} description={t('users.noConsentsDescription')} />
-              ) : (
-                <ListStack>
-                  {consentsList.map((consent) => (
-                    <ListRow
-                      key={consent.client_id}
-                      action={
-                        <button
-                          className="btn btn-danger btn-sm"
-                          style={{ padding: '6px 12px', opacity: selectedAccount.id === currentAdmin?.sub ? 0.4 : 1 }}
-                          onClick={() => handleRevokeConsent(consent.client_id)}
-                          disabled={selectedAccount.id === currentAdmin?.sub}
-                        >
-                          {t('users.revokeAccess')}
-                        </button>
-                      }
-                    >
-                      <div className="flex-1" style={{ marginRight: '16px' }}>
-                        <div className="flex-row items-center gap-sm">
-                          <span className="list-icon">
-                            <ConsentIcon style={{ width: '16px', height: '16px' }} />
-                          </span>
-                          <div className="list-title">Client ID: {consent.client_id}</div>
-                        </div>
-                        <div className="flex-row flex-wrap gap-xs mt-sm">
-                          {consent.scopes?.map((scope: string) => (
-                            <Tag key={scope} tone="secondary">
-                              {scope}
-                            </Tag>
-                          ))}
-                        </div>
-                        <div className="text-xs text-dark mt-sm">
-                          {t('users.authorizedAt')}{' '}
-                          {consent.granted_at ? new Date(consent.granted_at).toLocaleString() : '-'}
-                        </div>
-                      </div>
-                    </ListRow>
-                  ))}
-                </ListStack>
-              )}
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-secondary" onClick={() => setShowConsentModal(false)}>
-                {t('common.close')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <UserConsentsModal
+        isOpen={showConsentModal}
+        onClose={() => setShowConsentModal(false)}
+        account={selectedAccount}
+        consents={consentsList}
+        loading={consentsLoading}
+        currentAdminId={currentAdmin?.sub}
+        onRevokeConsent={handleRevokeConsent}
+      />
 
       <ConfirmDialog
         open={!!confirmState}

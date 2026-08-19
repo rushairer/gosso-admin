@@ -1,5 +1,32 @@
 export type DependencyStatus = 'ok' | 'unavailable' | 'error' | 'unknown';
 
+export interface Role {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface Account {
+  id: string;
+  username: string;
+  display_name: string;
+  status: string;
+  created_at?: string;
+  roles?: Role[];
+}
+
+export interface OAuth2Client {
+  client_id: string;
+  name: string;
+  description: string;
+  redirect_uris: string[];
+  post_logout_redirect_uris?: string[];
+  grant_types: string[];
+  scopes: string[];
+  is_confidential: boolean;
+  metadata?: Record<string, unknown>;
+}
+
 export interface AuditLog {
   id: string;
   action: string;

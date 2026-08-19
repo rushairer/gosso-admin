@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText as AuditIcon, X as XIcon } from 'lucide-react';
-import { apiFetch } from '../../auth';
 import { ButtonGroup, DataTable, EmptyState, Feedback, FormField, PanelHeader, Tag } from '../../components/ui';
+import { auditService } from '../../services';
 import type { AuditLog } from '../../types/api';
 import { logger } from '../../utils/logger';
 
@@ -25,18 +25,14 @@ export default function AuditLogsTab() {
     try {
       setAuditLoading(true);
       setError(null);
-      let url = `/api/v1/admin/audit-logs?page=${page}&page_size=20`;
-      if (filterEventType) {
-        url += `&event_type=${encodeURIComponent(filterEventType)}`;
-      }
-      if (filterAccountID) {
-        url += `&account_id=${encodeURIComponent(filterAccountID)}`;
-      }
-      const response = await apiFetch(url);
-      if (!response.ok) throw new Error('Failed to load audit logs');
-      const body = await response.json();
-      setAuditLogs(body.data?.items || []);
-      setAuditTotal(body.data?.total || 0);
+      const data = await auditService.fetchAuditLogs({
+        page,
+        pageSize: 20,
+        eventType: filterEventType || undefined,
+        accountId: filterAccountID || undefined,
+      });
+      setAuditLogs(data.logs);
+      setAuditTotal(data.total);
       setAuditPage(page);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error loading audit logs';

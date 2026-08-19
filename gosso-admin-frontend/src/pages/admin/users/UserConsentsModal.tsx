@@ -1,0 +1,114 @@
+import { useTranslation } from 'react-i18next';
+import { CheckSquare as ConsentIcon, X as XIcon } from 'lucide-react';
+import { EmptyState, ListRow, ListStack, Tag } from '../../../components/ui';
+import type { Account, Consent } from '../../../types/api';
+
+interface UserConsentsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  account: Account | null;
+  consents: Consent[];
+  loading: boolean;
+  currentAdminId?: string;
+  onRevokeConsent: (clientId: string) => Promise<void>;
+}
+
+export function UserConsentsModal({
+  isOpen,
+  onClose,
+  account,
+  consents,
+  loading,
+  currentAdminId,
+  onRevokeConsent,
+}: UserConsentsModalProps) {
+  const { t } = useTranslation();
+
+  if (!isOpen || !account) return null;
+
+  const isSelf = account.id === currentAdminId;
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal-content" style={{ maxWidth: '600px' }}>
+        <div className="modal-header">
+          <h3 className="modal-title">
+            {t('users.consentsModalTitle', { name: account.display_name || account.username })}
+          </h3>
+          <button className="modal-close-btn" onClick={onClose}>
+            <XIcon style={{ width: '18px', height: '18px' }} />
+          </button>
+        </div>
+        <div className="modal-body">
+          <p className="mb-md text-dark" style={{ fontSize: '14px' }}>
+            {t('users.consentsDescription')}
+          </p>
+
+          {loading ? (
+            <div className="text-center" style={{ padding: '30px 0' }}>
+              <div
+                style={{
+                  margin: '0 auto 12px auto',
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  border: '2px solid rgba(255,255,255,0.06)',
+                  borderTopColor: 'var(--color-primary)',
+                  animation: 'spin 1s linear infinite',
+                }}
+              />
+              <p className="text-muted" style={{ fontSize: '14px' }}>
+                {t('users.loadingConsents')}
+              </p>
+            </div>
+          ) : consents.length === 0 ? (
+            <EmptyState title={t('users.noConsentsTitle')} description={t('users.noConsentsDescription')} />
+          ) : (
+            <ListStack>
+              {consents.map((consent) => (
+                <ListRow
+                  key={consent.client_id}
+                  action={
+                    <button
+                      className="btn btn-danger btn-sm"
+                      style={{ padding: '6px 12px', opacity: isSelf ? 0.4 : 1 }}
+                      onClick={() => onRevokeConsent(consent.client_id)}
+                      disabled={isSelf}
+                    >
+                      {t('users.revokeAccess')}
+                    </button>
+                  }
+                >
+                  <div className="flex-1" style={{ marginRight: '16px' }}>
+                    <div className="flex-row items-center gap-sm">
+                      <span className="list-icon">
+                        <ConsentIcon style={{ width: '16px', height: '16px' }} />
+                      </span>
+                      <div className="list-title">Client ID: {consent.client_id}</div>
+                    </div>
+                    <div className="flex-row flex-wrap gap-xs mt-sm">
+                      {consent.scopes?.map((scope: string) => (
+                        <Tag key={scope} tone="secondary">
+                          {scope}
+                        </Tag>
+                      ))}
+                    </div>
+                    <div className="text-xs text-dark mt-sm">
+                      {t('users.authorizedAt')}{' '}
+                      {consent.granted_at ? new Date(consent.granted_at).toLocaleString() : '-'}
+                    </div>
+                  </div>
+                </ListRow>
+              ))}
+            </ListStack>
+          )}
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onClose}>
+            {t('common.close')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

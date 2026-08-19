@@ -10,7 +10,7 @@ import {
   Check as CheckIcon,
   Info as InfoIcon,
 } from 'lucide-react';
-import { apiFetch } from '../../auth';
+import { clientService } from '../../services';
 import {
   ButtonGroup,
   CheckboxField,
@@ -88,10 +88,8 @@ export default function ClientsTab() {
     try {
       setLoading(true);
       setError(null);
-      const response = await apiFetch('/api/v1/oauth2/clients');
-      if (!response.ok) throw new Error(t('clients.failedToLoadClients'));
-      const body = await response.json();
-      setClients(body.data || []);
+      const data = await clientService.fetchClients();
+      setClients(data);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t('clients.errorLoadingClients');
       logger.error('Failed to load clients', err);
@@ -155,32 +153,19 @@ export default function ClientsTab() {
 
     try {
       if (editingClient) {
-        const response = await apiFetch(`/api/v1/oauth2/clients/${editingClient.client_id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        if (!response.ok) {
-          const errBody = await response.json();
-          throw new Error(errBody.message || t('clients.failedToUpdateClient'));
-        }
+        await clientService.updateClient(editingClient.client_id, payload);
         setShowClientModal(false);
         fetchClients();
       } else {
-        const response = await apiFetch('/api/v1/oauth2/clients', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        const body = await response.json();
-        if (!response.ok) {
-          throw new Error(body.message || t('clients.failedToRegisterClient'));
-        }
-
+        const result = await clientService.createClient(payload);
         setShowClientModal(false);
 
-        if (clientForm.is_confidential && body.data?.client_secret) {
-          setNewClientDetails(body.data);
+        if (clientForm.is_confidential && result.client_secret) {
+          setNewClientDetails({
+            client_id: result.client.client_id,
+            client_secret: result.client_secret,
+            name: result.client.name,
+          });
           setShowSecretModal(true);
         } else {
           showSuccess(t('clients.clientRegisteredSuccess'));
@@ -210,10 +195,7 @@ export default function ClientsTab() {
     });
     if (!confirmed) return;
     try {
-      const response = await apiFetch(`/api/v1/oauth2/clients/${clientId}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) throw new Error(t('clients.failedToDeleteClient'));
+      await clientService.deleteClient(clientId);
       fetchClients();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t('clients.errorDeletingClient');

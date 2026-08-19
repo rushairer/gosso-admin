@@ -1,0 +1,105 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { X as XIcon } from 'lucide-react';
+import { Feedback, FormField } from '../../../components/ui';
+import type { Account } from '../../../types/api';
+
+interface ResetPasswordModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  account: Account | null;
+  onSubmit: (password: string) => Promise<void>;
+}
+
+export function ResetPasswordModal({ isOpen, onClose, account, onSubmit }: ResetPasswordModalProps) {
+  const { t } = useTranslation();
+  const [newPassword, setNewPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  if (!isOpen || !account) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+    setSubmitting(true);
+    try {
+      await onSubmit(newPassword);
+      setSuccess(t('users.passwordUpdatedSuccess'));
+      setTimeout(() => {
+        onClose();
+        setNewPassword('');
+        setSuccess(null);
+      }, 1000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t('users.passwordUpdateFailed'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal-content" style={{ maxWidth: '400px' }}>
+        <div className="modal-header">
+          <h3 className="modal-title">{t('users.changePasswordModalTitle')}</h3>
+          <button className="modal-close-btn" onClick={onClose}>
+            <XIcon style={{ width: '18px', height: '18px' }} />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="modal-body">
+            <p className="mb-md text-dark" style={{ fontSize: '14px' }}>
+              {t('users.changePasswordDescription', {
+                name: account.display_name || account.username,
+              })}
+            </p>
+
+            {error && (
+              <div className="mb-md">
+                <Feedback type="error">{error}</Feedback>
+              </div>
+            )}
+            {success && (
+              <div className="mb-md">
+                <Feedback type="success">{success}</Feedback>
+              </div>
+            )}
+
+            <FormField label={t('users.newPasswordLabel')} noMargin>
+              <input
+                type="password"
+                className="input-field"
+                placeholder={t('users.newPasswordPlaceholder')}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                disabled={submitting || !!success}
+                autoFocus
+              />
+            </FormField>
+          </div>
+          <div className="modal-footer">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onClose}
+              disabled={submitting || !!success}
+            >
+              {t('common.cancel')}
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={!newPassword || submitting || !!success}
+            >
+              {t('users.updatePasswordButton')}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

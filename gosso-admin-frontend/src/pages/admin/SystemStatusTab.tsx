@@ -1,25 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Shield as ShieldIcon, RefreshCw } from 'lucide-react';
-import { apiFetch } from '../../auth';
 import { DefinitionList, DefinitionRow, Feedback, PanelHeader, PlainSection, Tag } from '../../components/ui';
-import type { OidcConfiguration, DependencyStatus } from '../../types/api';
+import { systemService } from '../../services';
+import type { SystemHealth } from '../../services';
+import type { OidcConfiguration } from '../../types/api';
 import { dependencyLabel, dependencyIsHealthy, formatHealthTimestamp } from '../../utils/format';
 import { logger } from '../../utils/logger';
-
-interface SystemHealth {
-  status: string;
-  ready: boolean;
-  checks: {
-    database?: DependencyStatus;
-    redis?: DependencyStatus;
-  };
-  checked_at?: string;
-  duration_ms?: number;
-  http_status?: number;
-  fetched_at?: string;
-  fetch_error?: string;
-}
 
 export default function SystemStatusTab() {
   const { t } = useTranslation();
@@ -41,20 +28,8 @@ export default function SystemStatusTab() {
       setLoading(true);
 
       try {
-        const readRes = await apiFetch('/readiness');
-        const contentType = readRes.headers.get('content-type') || '';
-        if (!contentType.includes('application/json')) {
-          const text = await readRes.text();
-          throw new Error(
-            `Readiness returned ${readRes.status} ${contentType || 'unknown content-type'}: ${text.slice(0, 120)}`
-          );
-        }
-        const readBody = (await readRes.json()) as SystemHealth;
-        setSystemHealth({
-          ...readBody,
-          http_status: readBody.http_status ?? readRes.status,
-          fetched_at: new Date().toISOString(),
-        });
+        const health = await systemService.fetchReadiness();
+        setSystemHealth(health);
       } catch (e: unknown) {
         const message = e instanceof Error ? e.message : 'Failed to reach readiness endpoint';
         logger.error('Error fetching readiness health status', e);
@@ -69,9 +44,8 @@ export default function SystemStatusTab() {
       }
 
       try {
-        const oidcRes = await apiFetch('/.well-known/openid-configuration');
-        const oidcBody = await oidcRes.json();
-        setOidcConfig(oidcBody);
+        const config = await systemService.fetchOidcConfiguration();
+        setOidcConfig(config);
       } catch (e) {
         logger.error('Error fetching OIDC configuration metadata', e);
       }
