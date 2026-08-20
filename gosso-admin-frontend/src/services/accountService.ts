@@ -1,5 +1,6 @@
 import { apiFetch } from '../auth';
 import type { Account, Role, Consent } from '../types/api';
+import { extractErrorMessage } from './helper';
 
 export interface CreateAccountPayload {
   username: string;
@@ -33,7 +34,7 @@ export const accountService = {
     const rolesQuery = includeRoles ? '&include=roles' : '';
     const res = await apiFetch(`/api/v1/admin/accounts?page=${page}&page_size=${pageSize}${rolesQuery}`);
     if (!res.ok) {
-      throw new Error(`Failed to load accounts: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to load accounts'));
     }
     const body = await res.json();
     return {
@@ -49,8 +50,7 @@ export const accountService = {
       body: JSON.stringify(payload),
     });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || `Failed to create account: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to create account'));
     }
     const body = await res.json();
     return body.data;
@@ -61,8 +61,7 @@ export const accountService = {
       method: 'DELETE',
     });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || `Failed to delete account: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to delete account'));
     }
   },
 
@@ -73,8 +72,7 @@ export const accountService = {
       body: JSON.stringify({ status }),
     });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || `Failed to update status: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to update status'));
     }
   },
 
@@ -85,8 +83,7 @@ export const accountService = {
       body: JSON.stringify(profile),
     });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || `Failed to update profile: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to update profile'));
     }
   },
 
@@ -97,8 +94,7 @@ export const accountService = {
       body: JSON.stringify({ password }),
     });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || `Failed to reset password: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to reset password'));
     }
   },
 
@@ -107,8 +103,7 @@ export const accountService = {
       method: 'DELETE',
     });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || `Failed to clear lockout: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to clear lockout'));
     }
   },
 
@@ -117,15 +112,14 @@ export const accountService = {
       method: 'DELETE',
     });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || `Failed to reset MFA: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to reset MFA'));
     }
   },
 
   async fetchAccountRoles(accountId: string): Promise<Role[]> {
     const res = await apiFetch(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/roles`);
     if (!res.ok) {
-      throw new Error(`Failed to load roles: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to load roles'));
     }
     const body = await res.json();
     return body.data?.items || [];
@@ -138,8 +132,7 @@ export const accountService = {
       body: JSON.stringify({ role_id: roleId }),
     });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || `Failed to assign role: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to assign role'));
     }
   },
 
@@ -149,15 +142,14 @@ export const accountService = {
       { method: 'DELETE' }
     );
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || `Failed to remove role: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to remove role'));
     }
   },
 
   async fetchAccountConsents(accountId: string): Promise<Consent[]> {
     const res = await apiFetch(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/consents`);
     if (!res.ok) {
-      throw new Error(`Failed to load consents: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to load consents'));
     }
     const body = await res.json();
     return body.data?.items || body.data || [];
@@ -169,15 +161,14 @@ export const accountService = {
       { method: 'DELETE' }
     );
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || `Failed to revoke consent: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to revoke consent'));
     }
   },
 
   async fetchAccountSessions(accountId: string): Promise<SessionInfo[]> {
     const res = await apiFetch(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/sessions`);
     if (!res.ok) {
-      throw new Error(`Failed to load sessions: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to load sessions'));
     }
     const body = await res.json();
     return body.data?.items || [];
@@ -189,8 +180,7 @@ export const accountService = {
       { method: 'DELETE' }
     );
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || `Failed to revoke session: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to revoke session'));
     }
   },
 };

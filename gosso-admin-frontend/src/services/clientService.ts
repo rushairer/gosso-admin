@@ -1,5 +1,6 @@
 import { apiFetch } from '../auth';
 import type { OAuth2Client } from '../types/api';
+import { extractErrorMessage } from './helper';
 
 export interface CreateClientPayload {
   name: string;
@@ -35,7 +36,7 @@ export const clientService = {
   async fetchClients(): Promise<OAuth2Client[]> {
     const res = await apiFetch('/api/v1/oauth2/clients');
     if (!res.ok) {
-      throw new Error(`Failed to load clients: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to load clients'));
     }
     const body = await res.json();
     return body.data || [];
@@ -48,8 +49,7 @@ export const clientService = {
       body: JSON.stringify(payload),
     });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || body.message || `Failed to create client: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to create client'));
     }
     const body = await res.json();
     return body.data;
@@ -62,8 +62,7 @@ export const clientService = {
       body: JSON.stringify(payload),
     });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || body.message || `Failed to update client: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to update client'));
     }
     const body = await res.json();
     return body.data;
@@ -74,8 +73,7 @@ export const clientService = {
       method: 'DELETE',
     });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || body.message || `Failed to delete client: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to delete client'));
     }
   },
 
@@ -84,8 +82,7 @@ export const clientService = {
       method: 'POST',
     });
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.error?.message || body.message || `Failed to rotate secret: ${res.statusText}`);
+      throw new Error(await extractErrorMessage(res, 'Failed to rotate secret'));
     }
     const body = await res.json();
     return body.data;
