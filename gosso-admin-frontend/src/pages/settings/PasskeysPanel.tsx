@@ -5,16 +5,18 @@ import { gossoClient } from '../../auth';
 import type { PasskeyInfo } from '../../auth';
 import {
   ButtonGroup,
+  ConfirmDialog,
   EmptyState,
   Feedback,
   FormField,
   ListRow,
   ListStack,
+  PageLoader,
   Panel,
   PanelBody,
   PanelHeader,
-  ConfirmDialog,
 } from '../../components/ui';
+
 import { logger } from '../../utils/logger';
 
 export default function PasskeysPanel() {
@@ -110,23 +112,8 @@ export default function PasskeysPanel() {
     }
   };
 
-  if (loading && passkeys.length === 0) {
-    return (
-      <div className="text-center" style={{ padding: '60px 0' }}>
-        <div
-          style={{
-            margin: '0 auto 16px auto',
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            border: '3px solid rgba(255,255,255,0.06)',
-            borderTopColor: 'var(--color-primary)',
-            animation: 'spin 1s linear infinite',
-          }}
-        />
-        <p className="text-muted">{t('passkeys.loadingPasskeys')}</p>
-      </div>
-    );
+  if (loading) {
+    return <PageLoader message={t('passkeys.loadingPasskeys')} />;
   }
 
   return (

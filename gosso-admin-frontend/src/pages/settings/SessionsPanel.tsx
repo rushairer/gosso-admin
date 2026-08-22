@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Laptop, MapPin } from 'lucide-react';
 import { gossoClient, logout } from '../../auth';
 import type { SessionInfo } from '../../auth';
-import { ConfirmDialog, DataTable, Feedback, Panel, PanelHeader, Tag } from '../../components/ui';
+import { ConfirmDialog, DataTable, Feedback, PageLoader, Panel, PanelHeader, Tag } from '../../components/ui';
 import { parseUserAgent } from '../../utils/format';
+
 
 export default function SessionsPanel() {
   const { t } = useTranslation();
@@ -74,23 +75,8 @@ export default function SessionsPanel() {
     }
   };
 
-  if (loading && sessions.length === 0) {
-    return (
-      <div className="text-center" style={{ padding: '60px 0' }}>
-        <div
-          style={{
-            margin: '0 auto 16px auto',
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            border: '3px solid rgba(255,255,255,0.06)',
-            borderTopColor: 'var(--color-primary)',
-            animation: 'spin 1s linear infinite',
-          }}
-        />
-        <p className="text-muted">{t('sessions.loadingSessions')}</p>
-      </div>
-    );
+  if (loading) {
+    return <PageLoader message={t('sessions.loadingSessions')} />;
   }
 
   return (

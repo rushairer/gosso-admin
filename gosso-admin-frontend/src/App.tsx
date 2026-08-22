@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { ToastProvider } from './components/ui';
+import { ToastProvider, PageLoader } from './components/ui';
 import { routerBasename } from './config/appPaths';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -14,28 +14,8 @@ const Admin = lazy(() => import('./pages/Admin'));
 const Settings = lazy(() => import('./pages/Settings'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
-function PageLoader() {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-      <div style={{ textAlign: 'center' }}>
-        <div
-          style={{
-            margin: '0 auto 16px auto',
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            border: '3px solid rgba(255,255,255,0.06)',
-            borderTopColor: 'var(--color-primary)',
-            animation: 'spin 1s linear infinite',
-          }}
-        />
-        <p style={{ color: 'var(--color-text-muted)', fontSize: '14px' }}>Loading...</p>
-      </div>
-    </div>
-  );
-}
-
 export default function App() {
+
   return (
     <ErrorBoundary>
       <ToastProvider>

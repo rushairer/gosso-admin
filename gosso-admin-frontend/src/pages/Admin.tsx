@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Key as KeyIcon, User as UserIcon, Shield as ShieldIcon, FileText as AuditIcon } from 'lucide-react';
 import { gossoClient, redirectToAuthorize } from '../auth';
-import { Panel } from '../components/ui';
+import { Panel, PageLoader } from '../components/ui';
 import ClientsTab from './admin/ClientsTab';
 import UsersTab from './admin/UsersTab';
 import AuditLogsTab from './admin/AuditLogsTab';
@@ -27,23 +27,9 @@ export default function Admin() {
   }, []);
 
   if (!authChecked) {
-    return (
-      <div style={{ padding: '60px 0', textAlign: 'center' }}>
-        <div
-          style={{
-            margin: '0 auto 16px auto',
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            border: '3px solid rgba(255,255,255,0.06)',
-            borderTopColor: 'var(--color-primary)',
-            animation: 'spin 1s linear infinite',
-          }}
-        />
-        <p style={{ color: 'var(--color-text-muted)' }}>{t('admin.checkingAccess')}</p>
-      </div>
-    );
+    return <PageLoader message={t('admin.checkingAccess')} />;
   }
+
 
   if (accessDenied) {
     return (

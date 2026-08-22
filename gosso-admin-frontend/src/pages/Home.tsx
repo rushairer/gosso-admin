@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ShieldCheck, ArrowRight, UserCheck, Key, Settings } from 'lucide-react';
 import { gossoClient, redirectToAuthorize } from '../auth';
 import type { UserProfile } from '../auth';
+import { PageLoader } from '../components/ui';
 
 export default function Home() {
   const { t } = useTranslation();
@@ -25,23 +26,9 @@ export default function Home() {
   }, []);
 
   if (!authChecked) {
-    return (
-      <div style={{ padding: '60px 0', textAlign: 'center' }}>
-        <div
-          style={{
-            margin: '0 auto 16px auto',
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            border: '3px solid rgba(255,255,255,0.06)',
-            borderTopColor: 'var(--color-primary)',
-            animation: 'spin 1s linear infinite',
-          }}
-        />
-        <p style={{ color: 'var(--color-text-muted)' }}>{t('admin.checkingAccess')}</p>
-      </div>
-    );
+    return <PageLoader message={t('admin.checkingAccess')} />;
   }
+
 
   const handleAction = () => {
     if (logged) {

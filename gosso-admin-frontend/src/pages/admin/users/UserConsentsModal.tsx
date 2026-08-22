@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { CheckSquare as ConsentIcon, X as XIcon } from 'lucide-react';
-import { EmptyState, ListRow, ListStack, Tag } from '../../../components/ui';
+import { EmptyState, ListRow, ListStack, LoadingSpinner, Tag } from '../../../components/ui';
 import type { Account, Consent } from '../../../types/api';
+
+
 
 interface UserConsentsModalProps {
   isOpen: boolean;
@@ -46,22 +48,13 @@ export function UserConsentsModal({
 
           {loading ? (
             <div className="text-center" style={{ padding: '30px 0' }}>
-              <div
-                style={{
-                  margin: '0 auto 12px auto',
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '50%',
-                  border: '2px solid rgba(255,255,255,0.06)',
-                  borderTopColor: 'var(--color-primary)',
-                  animation: 'spin 1s linear infinite',
-                }}
-              />
+              <LoadingSpinner size="sm" style={{ margin: '0 auto 12px auto' }} />
               <p className="text-muted" style={{ fontSize: '14px' }}>
                 {t('users.loadingConsents')}
               </p>
             </div>
           ) : consents.length === 0 ? (
+
             <EmptyState title={t('users.noConsentsTitle')} description={t('users.noConsentsDescription')} />
           ) : (
             <ListStack>

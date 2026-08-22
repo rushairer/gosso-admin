@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText as AuditIcon } from 'lucide-react';
-import { ButtonGroup, DataTable, EmptyState, Feedback, FormField, PanelHeader, Tag } from '../../components/ui';
+import { ButtonGroup, DataTable, EmptyState, Feedback, FormField, PageLoader, PanelHeader, Tag } from '../../components/ui';
 import { auditService } from '../../services';
 import { AuditLogDetailModal } from './audit/AuditLogDetailModal';
 import type { AuditLog } from '../../types/api';
@@ -100,25 +100,11 @@ export default function AuditLogsTab() {
       )}
 
       {auditLoading ? (
-        <div className="text-center" style={{ padding: '40px 0' }}>
-          <div
-            style={{
-              margin: '0 auto 12px auto',
-              width: '24px',
-              height: '24px',
-              borderRadius: '50%',
-              border: '2px solid rgba(255,255,255,0.06)',
-              borderTopColor: 'var(--color-primary)',
-              animation: 'spin 1s linear infinite',
-            }}
-          />
-          <p className="text-muted" style={{ fontSize: '14px' }}>
-            {t('audit.loadingLogs')}
-          </p>
-        </div>
+        <PageLoader message={t('audit.loadingLogs')} padding="40px 0" size="sm" />
       ) : auditLogs.length === 0 ? (
         <EmptyState icon={<AuditIcon />} title={t('audit.noLogsTitle')} description={t('audit.noLogsDescription')} />
       ) : (
+
         <div>
           <DataTable>
             <thead>

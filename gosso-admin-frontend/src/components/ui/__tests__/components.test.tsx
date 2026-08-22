@@ -5,7 +5,10 @@ import { StatusBadge } from '../Badge';
 import { EmptyState } from '../EmptyState';
 import { ConfirmDialog } from '../ConfirmDialog';
 import { ToastProvider, useToast } from '../Toast';
+import { LoadingSpinner, PageLoader } from '../LoadingSpinner';
+import { Modal } from '../Modal';
 import { fireEvent } from '@testing-library/react';
+
 
 describe('Feedback', () => {
   it('renders error type with message', () => {
@@ -160,3 +163,65 @@ describe('ToastProvider', () => {
     expect(screen.getByText('Error!')).toBeInTheDocument();
   });
 });
+
+describe('LoadingSpinner & PageLoader', () => {
+  it('renders LoadingSpinner with default size', () => {
+    render(<LoadingSpinner />);
+    const spinner = screen.getByRole('status', { name: 'Loading' });
+    expect(spinner).toBeInTheDocument();
+    expect(spinner).toHaveStyle({ width: '32px', height: '32px' });
+  });
+
+  it('renders LoadingSpinner with sm and lg sizes', () => {
+    const { rerender } = render(<LoadingSpinner size="sm" />);
+    expect(screen.getByRole('status')).toHaveStyle({ width: '20px', height: '20px' });
+
+    rerender(<LoadingSpinner size="lg" />);
+    expect(screen.getByRole('status')).toHaveStyle({ width: '48px', height: '48px' });
+  });
+
+  it('renders PageLoader with message', () => {
+    render(<PageLoader message="Loading accounts..." />);
+    expect(screen.getByText('Loading accounts...')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toBeInTheDocument();
+  });
+});
+
+describe('Modal', () => {
+  it('does not render when isOpen is false', () => {
+    const { container } = render(
+      <Modal isOpen={false} onClose={() => {}}>
+        Modal Content
+      </Modal>
+    );
+    expect(container.innerHTML).toBe('');
+  });
+
+  it('renders title, content, and footer when isOpen is true', () => {
+    render(
+      <Modal
+        isOpen={true}
+        onClose={() => {}}
+        title="Test Modal"
+        footer={<button>Confirm</button>}
+      >
+        <p>Modal Body Text</p>
+      </Modal>
+    );
+    expect(screen.getByText('Test Modal')).toBeInTheDocument();
+    expect(screen.getByText('Modal Body Text')).toBeInTheDocument();
+    expect(screen.getByText('Confirm')).toBeInTheDocument();
+  });
+
+  it('triggers onClose when close button clicked', () => {
+    let closed = false;
+    render(
+      <Modal isOpen={true} onClose={() => (closed = true)} title="Test">
+        Content
+      </Modal>
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(closed).toBe(true);
+  });
+});
+

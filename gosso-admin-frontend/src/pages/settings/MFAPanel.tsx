@@ -8,12 +8,14 @@ import {
   ConfirmDialog,
   Feedback,
   FormField,
+  PageLoader,
   Panel,
   PanelBody,
   PanelHeader,
   StatusBadge,
   useToast,
 } from '../../components/ui';
+
 
 import type { MfaEnrollment, MfaStatus } from '../../auth';
 
@@ -141,22 +143,7 @@ export default function MFAPanel() {
   };
 
   if (loading && !mfaStatus.enabled && !mfaEnrollment) {
-    return (
-      <div className="text-center" style={{ padding: '60px 0' }}>
-        <div
-          style={{
-            margin: '0 auto 16px auto',
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            border: '3px solid rgba(255,255,255,0.06)',
-            borderTopColor: 'var(--color-primary)',
-            animation: 'spin 1s linear infinite',
-          }}
-        />
-        <p className="text-muted">{t('mfa.loadingMfa')}</p>
-      </div>
-    );
+    return <PageLoader message={t('mfa.loadingMfa')} />;
   }
 
   return (

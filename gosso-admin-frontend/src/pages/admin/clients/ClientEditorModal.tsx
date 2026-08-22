@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { X as XIcon, Info as InfoIcon } from 'lucide-react';
-import { CheckboxField, CheckboxGroup, FormField } from '../../../components/ui';
+import { Info as InfoIcon } from 'lucide-react';
+import { CheckboxField, CheckboxGroup, FormField, Modal } from '../../../components/ui';
 import type { OAuth2Client } from '../../../types/api';
 
 export interface ClientFormData {
@@ -39,22 +39,15 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  if (!isOpen) return null;
-
   return (
-    <div className="modal-backdrop">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h3 className="modal-title">
-            {editingClient ? t('clients.editModalTitle') : t('clients.registerModalTitle')}
-          </h3>
-          <button className="modal-close-btn" onClick={onClose} type="button">
-            <XIcon style={{ width: '18px', height: '18px' }} />
-          </button>
-        </div>
-        <form onSubmit={onSubmit}>
-          <div className="modal-body">
-            <FormField label={t('clients.clientNameLabel')}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={editingClient ? t('clients.editModalTitle') : t('clients.registerModalTitle')}
+    >
+      <form onSubmit={onSubmit}>
+        <FormField label={t('clients.clientNameLabel')}>
+
               <input
                 type="text"
                 className="input-field"
@@ -131,17 +124,15 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
                 <p className="text-sm text-muted">{t('clients.adminScopeWarning')}</p>
               </div>
             )}
-          </div>
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
-              {t('common.cancel')}
-            </button>
-            <button type="submit" className="btn btn-primary">
-              {t('clients.saveClient')}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="modal-footer" style={{ margin: '20px -20px -20px -20px' }}>
+          <button type="button" className="btn btn-secondary" onClick={onClose}>
+            {t('common.cancel')}
+          </button>
+          <button type="submit" className="btn btn-primary">
+            {editingClient ? t('clients.saveChangesButton') : t('clients.registerClientButton')}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 };

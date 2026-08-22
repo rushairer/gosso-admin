@@ -17,11 +17,13 @@ import {
   DataTable,
   EmptyState,
   Feedback,
+  PageLoader,
   PanelHeader,
   StatusBadge,
   Tag,
   useToast,
 } from '../../components/ui';
+
 import { accountService } from '../../services';
 import type { Account, Role, Consent } from '../../types/api';
 import type { CreateAccountPayload } from '../../services';
@@ -254,27 +256,13 @@ export default function UsersTab() {
   };
 
   if (loading) {
-    return (
-      <div className="text-center" style={{ padding: '60px 0' }}>
-        <div
-          style={{
-            margin: '0 auto 16px auto',
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            border: '3px solid rgba(255,255,255,0.06)',
-            borderTopColor: 'var(--color-primary)',
-            animation: 'spin 1s linear infinite',
-          }}
-        />
-        <p className="text-muted">{t('users.loadingAccounts')}</p>
-      </div>
-    );
+    return <PageLoader message={t('users.loadingAccounts')} />;
   }
 
   if (error) {
     return (
       <div className="panel-body">
+
         <Feedback type="error">{error}</Feedback>
         <button className="btn btn-secondary btn-sm mt-md" onClick={fetchAccounts}>
           {t('common.retry')}

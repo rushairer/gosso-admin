@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Shield, Key, Laptop, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { gossoClient, redirectToAuthorize } from '../auth';
+import { PageLoader } from '../components/ui';
 import ProfilePanel from './settings/ProfilePanel';
 import MFAPanel from './settings/MFAPanel';
 import PasskeysPanel from './settings/PasskeysPanel';
@@ -22,23 +23,9 @@ export default function Settings() {
   }, []);
 
   if (!authChecked) {
-    return (
-      <div style={{ padding: '60px 0', textAlign: 'center' }}>
-        <div
-          style={{
-            margin: '0 auto 16px auto',
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            border: '3px solid rgba(255,255,255,0.06)',
-            borderTopColor: 'var(--color-primary)',
-            animation: 'spin 1s linear infinite',
-          }}
-        />
-        <p style={{ color: 'var(--color-text-muted)' }}>{t('settings.checkingAccess')}</p>
-      </div>
-    );
+    return <PageLoader message={t('settings.checkingAccess')} />;
   }
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>

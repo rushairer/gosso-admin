@@ -7,5 +7,8 @@ export * from './EmptyState';
 export * from './Feedback';
 export * from './Form';
 export * from './List';
+export * from './LoadingSpinner';
+export * from './Modal';
 export * from './Panel';
 export * from './Toast';
+

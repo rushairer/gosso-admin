@@ -8,11 +8,13 @@ import {
   DataTable,
   EmptyState,
   Feedback,
+  PageLoader,
   PanelHeader,
   StatusBadge,
   Tag,
   useToast,
 } from '../../components/ui';
+
 import { ClientEditorModal } from './clients/ClientEditorModal';
 import { ClientSecretModal } from './clients/ClientSecretModal';
 import { logger } from '../../utils/logger';
@@ -209,26 +211,12 @@ export default function ClientsTab() {
   };
 
   if (loading) {
-    return (
-      <div className="text-center" style={{ padding: '60px 0' }}>
-        <div
-          style={{
-            margin: '0 auto 16px auto',
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            border: '3px solid rgba(255,255,255,0.06)',
-            borderTopColor: 'var(--color-primary)',
-            animation: 'spin 1s linear infinite',
-          }}
-        />
-        <p className="text-muted">{t('clients.loadingClients')}</p>
-      </div>
-    );
+    return <PageLoader message={t('clients.loadingClients')} />;
   }
 
   if (error) {
     return (
+
       <div className="panel-body">
         <Feedback type="error">{error}</Feedback>
         <button className="btn btn-secondary btn-sm mt-md" onClick={fetchClients}>

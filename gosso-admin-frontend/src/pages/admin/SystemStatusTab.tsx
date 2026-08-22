@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Shield as ShieldIcon, RefreshCw } from 'lucide-react';
-import { DefinitionList, DefinitionRow, Feedback, PanelHeader, PlainSection, Tag } from '../../components/ui';
+import { DefinitionList, DefinitionRow, Feedback, PageLoader, PanelHeader, PlainSection, Tag } from '../../components/ui';
 import { systemService } from '../../services';
+
+
 import type { SystemHealth } from '../../services';
 import type { OidcConfiguration } from '../../types/api';
 import { dependencyLabel, dependencyIsHealthy, formatHealthTimestamp } from '../../utils/format';
@@ -55,25 +57,11 @@ export default function SystemStatusTab() {
   };
 
   if (loading) {
-    return (
-      <div className="text-center" style={{ padding: '60px 0' }}>
-        <div
-          style={{
-            margin: '0 auto 16px auto',
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            border: '3px solid rgba(255,255,255,0.06)',
-            borderTopColor: 'var(--color-primary)',
-            animation: 'spin 1s linear infinite',
-          }}
-        />
-        <p className="text-muted">{t('system.loadingStatus')}</p>
-      </div>
-    );
+    return <PageLoader message={t('system.loadingStatus')} />;
   }
 
   return (
+
     <div>
       <PanelHeader
         title={t('system.title')}

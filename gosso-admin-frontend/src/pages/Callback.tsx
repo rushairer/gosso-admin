@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { clearPostLoginRedirect, getPostLoginRedirect, gossoClient } from '../auth';
 import { routerPath } from '../config/appPaths';
 import { logger } from '../utils/logger';
+import { LoadingSpinner } from '../components/ui';
 
 export default function Callback() {
   const { t } = useTranslation();
@@ -37,7 +38,7 @@ export default function Callback() {
     }
 
     handleCallback();
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, t]);
 
   if (error) {
     return (
@@ -58,22 +59,7 @@ export default function Callback() {
       <div className="glass-card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center' }}>
         <h2 style={{ marginBottom: '16px' }}>{t('auth.authenticating')}</h2>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '14.5px' }}>{t('auth.authenticatingDescription')}</p>
-        <div
-          style={{
-            margin: '24px auto 0 auto',
-            width: '30px',
-            height: '30px',
-            borderRadius: '50%',
-            border: '3px solid rgba(255,255,255,0.1)',
-            borderTopColor: 'var(--color-primary)',
-            animation: 'spin 1s linear infinite',
-          }}
-        ></div>
-        <style>{`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
+        <LoadingSpinner size="md" style={{ margin: '24px auto 0 auto' }} />
       </div>
     </div>
   );

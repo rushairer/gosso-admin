@@ -12,15 +12,8 @@ export interface CreateClientPayload {
   is_confidential: boolean;
 }
 
-export interface UpdateClientPayload {
-  name: string;
-  description?: string;
-  redirect_uris: string[];
-  post_logout_redirect_uris?: string[];
-  grant_types: string[];
-  scopes: string[];
-  is_confidential: boolean;
-}
+export type UpdateClientPayload = CreateClientPayload;
+
 
 export interface CreateClientResponse {
   client: OAuth2Client;
