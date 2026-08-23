@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { clearPostLoginRedirect, getPostLoginRedirect, gossoClient } from '../auth';
+import { gossoClient } from '../auth';
 import { routerPath } from '../config/appPaths';
 import { logger } from '../utils/logger';
 import { LoadingSpinner } from '../components/ui';
@@ -23,13 +23,8 @@ export default function Callback() {
 
     async function handleCallback() {
       try {
-        await gossoClient.exchangeCodeForToken(code!, state!);
-        await gossoClient.fetchUserProfile();
-
-        // Redirect back to the post-login destination or default to admin panel
-        const postLoginRedirect = getPostLoginRedirect('/admin');
-        clearPostLoginRedirect();
-        navigate(routerPath(postLoginRedirect));
+        const { redirectTo } = await gossoClient.handleRedirectCallback(code!, state!);
+        navigate(routerPath(redirectTo));
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         logger.error('Auth callback error', err);

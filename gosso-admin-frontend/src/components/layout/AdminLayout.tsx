@@ -46,7 +46,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       .then((branding) => {
         const name = branding.product_name || 'GOSSO';
         setProductName(name);
-        document.title = name;
       })
       .catch(() => undefined);
   }, []);
@@ -56,6 +55,33 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     if (location.pathname.startsWith('/settings')) return pageTitles['/settings'];
     return pageTitles[location.pathname] || pageTitles['/'];
   }, [pageTitles, location.pathname]);
+
+  const pageLabel = useMemo(() => {
+    const adminTab = location.pathname.match(/^\/admin\/([^/]+)/)?.[1];
+    const adminLabels: Record<string, string> = {
+      clients: t('admin.tabClients'),
+      users: t('admin.tabUsers'),
+      'audit-logs': t('admin.tabAuditLogs'),
+      'site-settings': t('site.tabLabel'),
+      system: t('admin.tabSystemStatus'),
+    };
+    if (adminTab) return adminLabels[adminTab] || pageTitles['/admin'].title;
+
+    const settingsTab = location.pathname.match(/^\/settings\/([^/]+)/)?.[1];
+    const settingsLabels: Record<string, string> = {
+      profile: t('settings.tabProfile'),
+      mfa: t('settings.tabMFA'),
+      passkeys: t('settings.tabPasskeys'),
+      sessions: t('settings.tabSessions'),
+    };
+    if (settingsTab) return settingsLabels[settingsTab] || pageTitles['/settings'].title;
+    return page.title;
+  }, [location.pathname, page.title, pageTitles, t]);
+
+  useEffect(() => {
+    document.title = `${pageLabel} - ${productName} ${t('nav.brandSubtitle')}`;
+  }, [pageLabel, productName, t]);
+
   const userName = session.profile?.preferred_username || session.profile?.name || t('nav.notSignedIn');
 
   return (

@@ -29,14 +29,6 @@ export async function redirectToAuthorize(destination = '/admin') {
   return gossoClient.redirectToAuthorize(appPath(destination));
 }
 
-export function getPostLoginRedirect(defaultPath = '/admin') {
-  return sessionStorage.getItem(gossoClient.storageKeys.postLoginRedirect) || appPath(defaultPath);
-}
-
-export function clearPostLoginRedirect() {
-  sessionStorage.removeItem(gossoClient.storageKeys.postLoginRedirect);
-}
-
 export function logout(redirectTo = '/') {
   return gossoClient.logout(appPath(redirectTo));
 }

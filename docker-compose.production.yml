@@ -59,6 +59,7 @@ services:
       GOUNO_DATABASE_DRIVERS_POSTGRES_DSN: host=db user=gosso password=${POSTGRES_PASSWORD} dbname=gosso port=5432 sslmode=disable search_path=public
       GOUNO_REDIS_DSN: redis://:${REDIS_PASSWORD}@redis:6379/0
       GOUNO_AUTH_ISSUER: ${GOUNO_AUTH_ISSUER:?set the public HTTPS issuer}
+      GOUNO_AUTH_LOGIN_URL: ${GOUNO_AUTH_LOGIN_URL:-/login}
       GOUNO_AUTH_PASSWORD_RESET_BASE_URL: ${GOUNO_AUTH_ISSUER}/reset-password
       GOUNO_AUTH_PRIVATE_KEY_PATH: /run/secrets/gosso_signing_key
       GOUNO_AUTH_TOTP_ENCRYPTION_KEY: ${GOUNO_AUTH_TOTP_ENCRYPTION_KEY:?set a unique 64-character hex key}

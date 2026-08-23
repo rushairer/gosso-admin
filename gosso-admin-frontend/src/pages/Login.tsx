@@ -26,6 +26,13 @@ export default function Login() {
   const [mfaToken, setMfaToken] = useState('');
   const [mfaCode, setMfaCode] = useState('');
 
+  const loginErrorMessage = (reason: unknown, fallback: string) => {
+    if (reason instanceof Error && reason.message === 'Failed to fetch user profile') {
+      return t('login.failedLoadProfile');
+    }
+    return reason instanceof Error ? reason.message : fallback;
+  };
+
   useEffect(() => {
     let active = true;
     void siteSettingsService
@@ -34,7 +41,7 @@ export default function Login() {
         if (!active) return;
         const resolved = mergeSiteSettings(next);
         setBranding(resolved);
-        document.title = resolved.product_name;
+        document.title = `${t('login.signInButton')} - ${resolved.product_name}`;
         if (resolved.favicon_url) {
           const icon =
             document.querySelector<HTMLLinkElement>('link[rel="icon"]') ||
@@ -43,11 +50,13 @@ export default function Login() {
           icon.href = resolved.favicon_url;
         }
       })
-      .catch(() => undefined);
+      .catch(() => {
+        document.title = `${t('login.signInButton')} - ${DEFAULT_SITE_SETTINGS.product_name}`;
+      });
     return () => {
       active = false;
     };
-  }, []);
+  }, [t]);
 
   // Capture where we should redirect back to (e.g. GOSSO authorize URL)
   const hasAuthorizeRedirect = searchParams.has('redirect_uri');
@@ -71,9 +80,8 @@ export default function Login() {
       await gossoClient.loginWithPasskey();
       await storeTokensAndRedirect();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
       logger.error('Passkey login error', err);
-      setError(message || t('login.passkeyLoginFailed'));
+      setError(loginErrorMessage(err, t('login.passkeyLoginFailed')));
     } finally {
       setPasskeyLoading(false);
     }
@@ -112,9 +120,8 @@ export default function Login() {
 
       await storeTokensAndRedirect();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
       logger.error('Login error', err);
-      setError(message || t('login.networkError'));
+      setError(loginErrorMessage(err, t('login.networkError')));
     } finally {
       setLoading(false);
     }
@@ -134,9 +141,8 @@ export default function Login() {
       await gossoClient.verifyMfa(mfaToken, mfaCode.trim());
       await storeTokensAndRedirect();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
       logger.error('MFA verification error', err);
-      setError(message || t('login.mfaVerificationFailed'));
+      setError(loginErrorMessage(err, t('login.mfaVerificationFailed')));
     } finally {
       setLoading(false);
     }
@@ -162,7 +168,7 @@ export default function Login() {
           {branding.logo_url ? (
             <img
               src={branding.logo_url}
-              alt=""
+              alt={branding.product_name}
               style={{ maxWidth: '160px', maxHeight: '56px', objectFit: 'contain', marginBottom: '16px' }}
             />
           ) : null}

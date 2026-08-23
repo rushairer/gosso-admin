@@ -2,19 +2,14 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
-const { clearPostLoginRedirect, exchangeCodeForToken, fetchUserProfile } = vi.hoisted(() => ({
-  clearPostLoginRedirect: vi.fn(),
-  exchangeCodeForToken: vi.fn().mockResolvedValue({}),
-  fetchUserProfile: vi.fn().mockResolvedValue({ sub: 'admin' }),
+const { handleRedirectCallback } = vi.hoisted(() => ({
+  handleRedirectCallback: vi.fn().mockResolvedValue({ tokenSet: {}, redirectTo: '/identity-admin/' }),
 }));
 
 vi.mock('../../auth', () => ({
   gossoClient: {
-    exchangeCodeForToken,
-    fetchUserProfile,
+    handleRedirectCallback,
   },
-  getPostLoginRedirect: () => '/identity-admin/',
-  clearPostLoginRedirect,
 }));
 
 vi.mock('../../utils/logger', () => ({ logger: { error: vi.fn() } }));
@@ -40,6 +35,6 @@ describe('OAuth callback routing', () => {
 
     expect(await screen.findByRole('heading', { name: 'Management overview' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Not found' })).not.toBeInTheDocument();
-    expect(clearPostLoginRedirect).toHaveBeenCalledOnce();
+    expect(handleRedirectCallback).toHaveBeenCalledWith('oauth-code', 'oauth-state');
   });
 });

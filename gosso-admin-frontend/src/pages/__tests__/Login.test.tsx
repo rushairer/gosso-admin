@@ -90,6 +90,21 @@ describe('Login', () => {
 
     expect(await screen.findByRole('heading', { name: 'Welcome to Acme' })).toBeInTheDocument();
     expect(screen.getByText('Sign in securely')).toBeInTheDocument();
-    expect(document.title).toBe('Acme Identity');
+    expect(document.title).toMatch(/^(Sign In|登录) - Acme Identity$/);
+  });
+
+  it('uses the verified profile-load error message from the hosted flow', async () => {
+    vi.mocked(gossoClient.loginWithPassword).mockRejectedValueOnce(new Error('Failed to fetch user profile'));
+    render(
+      <MemoryRouter initialEntries={['/login']}>
+        <Login />
+      </MemoryRouter>
+    );
+
+    await userEvent.type(screen.getByPlaceholderText(/username|用户名/i), 'admin');
+    await userEvent.type(screen.getByPlaceholderText(/password|密码/i), 'admin123');
+    await userEvent.click(screen.getByRole('button', { name: /^(sign in|登录)$/i }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/unable to load your user profile|无法加载用户资料/i);
   });
 });

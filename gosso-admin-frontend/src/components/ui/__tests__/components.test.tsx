@@ -18,11 +18,13 @@ describe('Feedback', () => {
   it('renders error type with message', () => {
     render(<Feedback type="error">Something failed</Feedback>);
     expect(screen.getByText('Something failed')).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toBeInTheDocument();
   });
 
   it('renders success type with message', () => {
     render(<Feedback type="success">Operation completed</Feedback>);
     expect(screen.getByText('Operation completed')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
   it('applies error class', () => {

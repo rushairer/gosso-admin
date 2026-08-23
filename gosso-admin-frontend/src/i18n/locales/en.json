@@ -71,6 +71,7 @@
     "enterBothFields": "Please enter both username and password.",
     "loginFailed": "Login failed. Please check your credentials.",
     "networkError": "Network error occurred. Please try again.",
+    "failedLoadProfile": "Unable to load your user profile. Please try again.",
     "mfaVerificationFailed": "Verification failed. Please try again.",
     "passkeyLoginFailed": "Passkey login failed. Please try again.",
     "passkeyBeginFailed": "Failed to begin passkey login",

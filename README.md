@@ -136,6 +136,12 @@ PKCE, session refresh, identity CSRF, MFA, passkey, profile, session, and
 password-reset protocol logic belongs to the SDK; React pages only manage UI
 state and call SDK methods.
 
+The login screen is the GOSSO-hosted authentication UI. Standalone deployments
+serve it at `/login`; shared-gateway deployments set `GOUNO_AUTH_LOGIN_URL` to
+the console base path (for example `/identity-admin/login`). Business SPAs must
+redirect to the issuer's authorization endpoint and must not duplicate the
+username/password, MFA, or passkey forms.
+
 Set `VITE_SHOW_DEV_CREDENTIALS=true` only when you intentionally want the local login screen to show seeded development credentials.
 Set `VITE_APP_BASE_PATH=/identity-admin` when testing the console behind a shared gateway sub-path.
 
