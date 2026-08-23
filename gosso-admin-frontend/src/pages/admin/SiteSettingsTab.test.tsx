@@ -2,13 +2,13 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ToastProvider } from '../../components/ui';
-import { instanceSettingsService } from '../../services';
-import InstanceSettingsTab from './InstanceSettingsTab';
+import { siteSettingsService } from '../../services';
+import SiteSettingsTab from './SiteSettingsTab';
 
 vi.mock('../../services', () => ({
-  instanceSettingsService: {
-    getSettings: vi.fn(),
-    updateSettings: vi.fn(),
+  siteSettingsService: {
+    getSiteSettings: vi.fn(),
+    updateSiteSettings: vi.fn(),
   },
 }));
 
@@ -21,17 +21,17 @@ const settings = {
   login_background_url: '',
 };
 
-describe('InstanceSettingsTab', () => {
+describe('SiteSettingsTab', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(instanceSettingsService.getSettings).mockResolvedValue(settings);
-    vi.mocked(instanceSettingsService.updateSettings).mockImplementation(async (next) => next);
+    vi.mocked(siteSettingsService.getSiteSettings).mockResolvedValue(settings);
+    vi.mocked(siteSettingsService.updateSiteSettings).mockImplementation(async (next) => next);
   });
 
   it('loads settings and saves the updated brand form', async () => {
     render(
       <ToastProvider>
-        <InstanceSettingsTab />
+        <SiteSettingsTab />
       </ToastProvider>
     );
     expect(await screen.findByDisplayValue('Acme Identity')).toBeInTheDocument();
@@ -42,7 +42,7 @@ describe('InstanceSettingsTab', () => {
     await userEvent.click(screen.getByRole('button', { name: /save settings/i }));
 
     await waitFor(() =>
-      expect(instanceSettingsService.updateSettings).toHaveBeenCalledWith(
+      expect(siteSettingsService.updateSiteSettings).toHaveBeenCalledWith(
         expect.objectContaining({ product_name: 'Acme SSO' })
       )
     );

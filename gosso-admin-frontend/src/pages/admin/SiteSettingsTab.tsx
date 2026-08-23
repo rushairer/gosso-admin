@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import { Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AsyncState, FormField, PanelBody, PanelHeader, PlainSection, useToast } from '../../components/ui';
-import { instanceSettingsService } from '../../services';
-import { DEFAULT_INSTANCE_SETTINGS, mergeInstanceSettings } from '../../config/instance-defaults';
-import type { InstanceSettings } from '../../types/api';
+import { siteSettingsService } from '../../services';
+import { DEFAULT_SITE_SETTINGS, mergeSiteSettings } from '../../config/site-defaults';
+import type { SiteSettings } from '../../types/api';
 
-export default function InstanceSettingsTab() {
+export default function SiteSettingsTab() {
   const { t } = useTranslation();
   const { showSuccess, showError } = useToast();
-  const [settings, setSettings] = useState<InstanceSettings>(DEFAULT_INSTANCE_SETTINGS);
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,10 +18,10 @@ export default function InstanceSettingsTab() {
     try {
       setLoading(true);
       setError(null);
-      const nextSettings = await instanceSettingsService.getSettings();
-      setSettings(mergeInstanceSettings(nextSettings));
+      const nextSettings = await siteSettingsService.getSiteSettings();
+      setSettings(mergeSiteSettings(nextSettings));
     } catch (reason: unknown) {
-      setError(reason instanceof Error ? reason.message : t('instance.loadFailed'));
+      setError(reason instanceof Error ? reason.message : t('site.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -31,7 +31,7 @@ export default function InstanceSettingsTab() {
     void load();
   }, []);
 
-  const update = <K extends keyof InstanceSettings>(key: K, value: InstanceSettings[K]) => {
+  const update = <K extends keyof SiteSettings>(key: K, value: SiteSettings[K]) => {
     setSettings((current) => ({ ...current, [key]: value }));
   };
 
@@ -39,11 +39,11 @@ export default function InstanceSettingsTab() {
     event.preventDefault();
     try {
       setSaving(true);
-      const updated = await instanceSettingsService.updateSettings(settings);
-      setSettings(mergeInstanceSettings(updated));
-      showSuccess(t('instance.saved'));
+      const updated = await siteSettingsService.updateSiteSettings(settings);
+      setSettings(mergeSiteSettings(updated));
+      showSuccess(t('site.saved'));
     } catch (reason: unknown) {
-      showError(reason instanceof Error ? reason.message : t('instance.saveFailed'));
+      showError(reason instanceof Error ? reason.message : t('site.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -52,16 +52,16 @@ export default function InstanceSettingsTab() {
   return (
     <AsyncState
       loading={loading}
-      loadingMessage={t('instance.loading')}
+      loadingMessage={t('site.loading')}
       error={error}
       retryLabel={t('common.retry')}
       onRetry={() => void load()}
     >
       <>
-        <PanelHeader title={t('instance.title')} description={t('instance.description')} />
+        <PanelHeader title={t('site.title')} description={t('site.description')} />
         <form onSubmit={save}>
           <PanelBody stack>
-            <FormField label={t('instance.productName')} required>
+            <FormField label={t('site.productName')} required>
               <input
                 className="input-field"
                 required
@@ -72,9 +72,9 @@ export default function InstanceSettingsTab() {
             </FormField>
           </PanelBody>
 
-          <PlainSection title={t('instance.loginAppearance')}>
+          <PlainSection title={t('site.loginAppearance')}>
             <div className="flex-col gap-lg">
-              <FormField label={t('instance.logoUrl')}>
+              <FormField label={t('site.logoUrl')}>
                 <input
                   className="input-field"
                   type="text"
@@ -83,7 +83,7 @@ export default function InstanceSettingsTab() {
                   onChange={(event) => update('logo_url', event.target.value)}
                 />
               </FormField>
-              <FormField label={t('instance.faviconUrl')}>
+              <FormField label={t('site.faviconUrl')}>
                 <input
                   className="input-field"
                   type="text"
@@ -92,7 +92,7 @@ export default function InstanceSettingsTab() {
                   onChange={(event) => update('favicon_url', event.target.value)}
                 />
               </FormField>
-              <FormField label={t('instance.loginTitle')}>
+              <FormField label={t('site.loginTitle')}>
                 <input
                   className="input-field"
                   maxLength={160}
@@ -101,7 +101,7 @@ export default function InstanceSettingsTab() {
                   onChange={(event) => update('login_title', event.target.value)}
                 />
               </FormField>
-              <FormField label={t('instance.loginDescription')}>
+              <FormField label={t('site.loginDescription')}>
                 <textarea
                   className="input-field"
                   rows={3}
@@ -111,7 +111,7 @@ export default function InstanceSettingsTab() {
                   onChange={(event) => update('login_description', event.target.value)}
                 />
               </FormField>
-              <FormField label={t('instance.loginBackgroundUrl')}>
+              <FormField label={t('site.loginBackgroundUrl')}>
                 <input
                   className="input-field"
                   type="text"
@@ -122,7 +122,7 @@ export default function InstanceSettingsTab() {
               </FormField>
             </div>
             <div className="notice-card">
-              <strong>登录页预览</strong>
+              <strong>{t('site.preview')}</strong>
               <div style={{ marginTop: '8px' }}>{settings.login_title || settings.product_name || 'GOSSO'}</div>
               <div className="text-muted">{settings.login_description || t('login.subtitle')}</div>
             </div>
@@ -131,7 +131,7 @@ export default function InstanceSettingsTab() {
           <PanelBody>
             <button className="btn btn-primary self-start" type="submit" disabled={saving}>
               <Save size={16} />
-              {saving ? t('common.loading') : t('instance.save')}
+              {saving ? t('common.loading') : t('site.save')}
             </button>
           </PanelBody>
         </form>

@@ -6,9 +6,9 @@ import { gossoClient, redirectToAuthorize } from '../auth';
 import { Feedback, FormField } from '../components/ui';
 import { logger } from '../utils/logger';
 import { appPath } from '../config/appPaths';
-import { DEFAULT_INSTANCE_SETTINGS, mergeInstanceSettings } from '../config/instance-defaults';
-import { instanceSettingsService } from '../services';
-import type { PublicInstanceBranding } from '../types/api';
+import { DEFAULT_SITE_SETTINGS, mergeSiteSettings } from '../config/site-defaults';
+import { siteSettingsService } from '../services';
+import type { PublicSiteBranding } from '../types/api';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -19,7 +19,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [passkeyLoading, setPasskeyLoading] = useState(false);
-  const [branding, setBranding] = useState<PublicInstanceBranding>(DEFAULT_INSTANCE_SETTINGS);
+  const [branding, setBranding] = useState<PublicSiteBranding>(DEFAULT_SITE_SETTINGS);
 
   // MFA state
   const [mfaRequired, setMfaRequired] = useState(false);
@@ -28,11 +28,11 @@ export default function Login() {
 
   useEffect(() => {
     let active = true;
-    void instanceSettingsService
-      .getPublicBranding()
+    void siteSettingsService
+      .getPublicSiteBranding()
       .then((next) => {
         if (!active) return;
-        const resolved = mergeInstanceSettings(next);
+        const resolved = mergeSiteSettings(next);
         setBranding(resolved);
         document.title = resolved.product_name;
         if (resolved.favicon_url) {

@@ -57,7 +57,7 @@ export interface OidcConfiguration {
   id_token_signing_alg_values_supported?: string[];
 }
 
-export interface InstanceSettings {
+export interface SiteSettings {
   product_name: string;
   logo_url: string;
   favicon_url: string;
@@ -66,7 +66,7 @@ export interface InstanceSettings {
   login_background_url: string;
 }
 
-export type PublicInstanceBranding = InstanceSettings;
+export type PublicSiteBranding = SiteSettings;
 
 export interface SecurityPolicy {
   session_ttl: string;

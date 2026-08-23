@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Login from '../Login';
 import { gossoClient, redirectToAuthorize } from '../../auth';
-import { instanceSettingsService } from '../../services';
+import { siteSettingsService } from '../../services';
 
 const authMethods = vi.hoisted(() => ({
   loginWithPassword: vi.fn(),
@@ -18,8 +18,8 @@ vi.mock('../../auth', () => ({
 }));
 
 vi.mock('../../services', () => ({
-  instanceSettingsService: {
-    getPublicBranding: vi.fn(),
+  siteSettingsService: {
+    getPublicSiteBranding: vi.fn(),
   },
 }));
 
@@ -32,7 +32,7 @@ describe('Login', () => {
       expires_in: 900,
     });
     vi.mocked(redirectToAuthorize).mockResolvedValue(undefined);
-    vi.mocked(instanceSettingsService.getPublicBranding).mockResolvedValue({
+    vi.mocked(siteSettingsService.getPublicSiteBranding).mockResolvedValue({
       product_name: 'GOSSO',
       logo_url: '',
       favicon_url: '',
@@ -73,7 +73,7 @@ describe('Login', () => {
   });
 
   it('applies public branding while retaining the login flow', async () => {
-    vi.mocked(instanceSettingsService.getPublicBranding).mockResolvedValueOnce({
+    vi.mocked(siteSettingsService.getPublicSiteBranding).mockResolvedValueOnce({
       product_name: 'Acme Identity',
       logo_url: '',
       favicon_url: '',

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { instanceSettingsService, systemService } from '../../services';
+import { siteSettingsService, systemService } from '../../services';
 import SystemStatusTab from './SystemStatusTab';
 
 vi.mock('../../services', () => ({
@@ -8,7 +8,7 @@ vi.mock('../../services', () => ({
     fetchReadiness: vi.fn(),
     fetchOidcConfiguration: vi.fn(),
   },
-  instanceSettingsService: { getSecurityPolicy: vi.fn() },
+  siteSettingsService: { getSecurityPolicy: vi.fn() },
 }));
 
 describe('SystemStatusTab', () => {
@@ -29,7 +29,7 @@ describe('SystemStatusTab', () => {
       userinfo_endpoint: 'https://sso.example.test/userinfo',
       jwks_uri: 'https://sso.example.test/jwks',
     });
-    vi.mocked(instanceSettingsService.getSecurityPolicy).mockResolvedValue({
+    vi.mocked(siteSettingsService.getSecurityPolicy).mockResolvedValue({
       session_ttl: '24h',
       max_sessions: 5,
       max_session_age: '0s',

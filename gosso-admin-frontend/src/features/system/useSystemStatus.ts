@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { instanceSettingsService, systemService } from '../../services';
+import { siteSettingsService, systemService } from '../../services';
 import type { SystemHealth } from '../../services';
 import type { OidcConfiguration, SecurityPolicy } from '../../types/api';
 import { logger } from '../../utils/logger';
@@ -27,7 +27,7 @@ export function useSystemStatus() {
     const [healthResult, oidcResult, securityResult] = await Promise.allSettled([
       systemService.fetchReadiness(),
       systemService.fetchOidcConfiguration(),
-      instanceSettingsService.getSecurityPolicy(),
+      siteSettingsService.getSecurityPolicy(),
     ]);
 
     if (healthResult.status === 'fulfilled') {

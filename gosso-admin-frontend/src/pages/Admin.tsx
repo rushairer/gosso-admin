@@ -14,9 +14,9 @@ import ClientsTab from './admin/ClientsTab';
 import UsersTab from './admin/UsersTab';
 import AuditLogsTab from './admin/AuditLogsTab';
 import SystemStatusTab from './admin/SystemStatusTab';
-import InstanceSettingsTab from './admin/InstanceSettingsTab';
+import SiteSettingsTab from './admin/SiteSettingsTab';
 
-const adminTabs = ['clients', 'users', 'audit-logs', 'instance-settings', 'system'] as const;
+const adminTabs = ['clients', 'users', 'audit-logs', 'site-settings', 'system'] as const;
 type AdminTab = (typeof adminTabs)[number];
 
 function isAdminTab(value: string | undefined): value is AdminTab {
@@ -96,8 +96,8 @@ export default function Admin() {
       icon: <AuditIcon aria-hidden="true" size={16} />,
     },
     {
-      value: 'instance-settings' as const,
-      label: t('instance.tabLabel'),
+      value: 'site-settings' as const,
+      label: t('site.tabLabel'),
       icon: <SlidersHorizontal aria-hidden="true" size={16} />,
     },
     { value: 'system' as const, label: t('admin.tabSystemStatus'), icon: <ShieldIcon aria-hidden="true" size={16} /> },
@@ -116,7 +116,7 @@ export default function Admin() {
         {activeTab === 'clients' && <ClientsTab />}
         {activeTab === 'users' && <UsersTab />}
         {activeTab === 'audit-logs' && <AuditLogsTab />}
-        {activeTab === 'instance-settings' && <InstanceSettingsTab />}
+        {activeTab === 'site-settings' && <SiteSettingsTab />}
         {activeTab === 'system' && <SystemStatusTab />}
       </Panel>
     </div>

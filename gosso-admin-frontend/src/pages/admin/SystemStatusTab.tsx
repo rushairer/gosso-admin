@@ -208,18 +208,18 @@ export default function SystemStatusTab() {
       )}
 
       {securityPolicy && (
-        <PlainSection title={t('instance.securityPolicy')}>
-          <p className="text-muted mb-md">{t('instance.securityPolicyDescription')}</p>
+        <PlainSection title={t('system.securityPolicy')}>
+          <p className="text-muted mb-md">{t('system.securityPolicyDescription')}</p>
           <DefinitionList>
-            <DefinitionRow label={t('instance.sessionTtl')}>{securityPolicy.session_ttl}</DefinitionRow>
-            <DefinitionRow label={t('instance.maxSessions')}>{securityPolicy.max_sessions}</DefinitionRow>
-            <DefinitionRow label={t('instance.tokenExpiry')}>
+            <DefinitionRow label={t('system.sessionTtl')}>{securityPolicy.session_ttl}</DefinitionRow>
+            <DefinitionRow label={t('system.maxSessions')}>{securityPolicy.max_sessions}</DefinitionRow>
+            <DefinitionRow label={t('system.tokenExpiry')}>
               {securityPolicy.access_token_expiry} / {securityPolicy.refresh_token_expiry}
             </DefinitionRow>
-            <DefinitionRow label={t('instance.loginRateLimit')}>
+            <DefinitionRow label={t('system.loginRateLimit')}>
               {securityPolicy.login_max_attempts} / {securityPolicy.login_rate_limit_window}
             </DefinitionRow>
-            <DefinitionRow label={t('instance.mfaRateLimit')}>
+            <DefinitionRow label={t('system.mfaRateLimit')}>
               {securityPolicy.mfa_account_max_attempts} / {securityPolicy.mfa_account_rate_limit_window}
             </DefinitionRow>
           </DefinitionList>

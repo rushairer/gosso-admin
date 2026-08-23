@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Home, Key, LayoutDashboard, LogIn, LogOut, Settings, ShieldCheck, User } from 'lucide-react';
 import { gossoClient, logout, redirectToAuthorize } from '../../auth';
-import { instanceSettingsService } from '../../services';
+import { siteSettingsService } from '../../services';
 import type { SessionSnapshot } from '../../auth';
 
 function initials(snapshot: SessionSnapshot) {
@@ -41,8 +41,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }, [location.pathname]);
 
   useEffect(() => {
-    void instanceSettingsService
-      .getPublicBranding()
+    void siteSettingsService
+      .getPublicSiteBranding()
       .then((branding) => {
         const name = branding.product_name || 'GOSSO';
         setProductName(name);
