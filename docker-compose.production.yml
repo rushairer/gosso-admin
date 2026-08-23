@@ -95,7 +95,6 @@ services:
     profiles: [bootstrap]
     environment:
       GOSSO_ADMIN_ENV: production
-      GOSSO_SCHEMA_VERSION: ${GOSSO_SCHEMA_VERSION:-20}
       PG_DSN: host=db user=gosso password=${POSTGRES_PASSWORD} dbname=gosso port=5432 sslmode=disable
       ADMIN_USERNAME: ${ADMIN_USERNAME:?set initial admin username}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set a unique initial admin password}

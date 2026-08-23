@@ -4,7 +4,7 @@ The current `gosso-admin-seed` image is a compatibility bridge. It writes the Go
 
 - one serializable transaction;
 - a transaction-scoped PostgreSQL advisory lock;
-- exact, clean `schema_migrations` validation;
+- required table-and-column capability validation;
 - idempotent account, role, assignment, and client creation;
 - production password policy enforcement;
 - random database-generated account identifiers.
@@ -28,4 +28,4 @@ The Gosso service should replace direct database access with `POST /api/v1/boots
 - emits an audit event containing no token or password material;
 - returns `409` after bootstrap is complete and uses the standard error envelope.
 
-Until this endpoint exists in a released Gosso version, the legacy Seeder remains deprecated but supported for the exact schema listed in `COMPATIBILITY.md`.
+Until this endpoint exists in a released Gosso version, the legacy Seeder remains deprecated but supported when its required database capabilities are present.

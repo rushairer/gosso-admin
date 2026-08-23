@@ -2,38 +2,22 @@ package main
 
 import "testing"
 
-func TestExpectedSchemaVersion(t *testing.T) {
-	t.Setenv("GOSSO_SCHEMA_VERSION", "")
-	version, err := expectedSchemaVersion()
-	if err != nil || version != defaultSchemaVersion {
-		t.Fatalf("default version = %d, %v; want %d, nil", version, err, defaultSchemaVersion)
+func TestMissingSchemaCapabilities(t *testing.T) {
+	available := make(map[string]map[string]bool)
+	for table, columns := range requiredSchemaCapabilities {
+		available[table] = make(map[string]bool)
+		for _, column := range columns {
+			available[table][column] = true
+		}
+	}
+	if missing := missingSchemaCapabilities(available); len(missing) != 0 {
+		t.Fatalf("complete schema reported missing capabilities: %v", missing)
 	}
 
-	t.Setenv("GOSSO_SCHEMA_VERSION", "21")
-	version, err = expectedSchemaVersion()
-	if err != nil || version != 21 {
-		t.Fatalf("configured version = %d, %v; want 21, nil", version, err)
-	}
-
-	for _, value := range []string{"zero", "0", "-1"} {
-		t.Run(value, func(t *testing.T) {
-			t.Setenv("GOSSO_SCHEMA_VERSION", value)
-			if _, err := expectedSchemaVersion(); err == nil {
-				t.Fatalf("expected error for %q", value)
-			}
-		})
-	}
-}
-
-func TestValidateSchemaVersion(t *testing.T) {
-	if err := validateSchemaVersion(20, false, 20); err != nil {
-		t.Fatalf("matching clean schema rejected: %v", err)
-	}
-	if err := validateSchemaVersion(20, true, 20); err == nil {
-		t.Fatal("dirty schema accepted")
-	}
-	if err := validateSchemaVersion(21, false, 20); err == nil {
-		t.Fatal("unknown schema accepted")
+	delete(available["oauth2_clients"], "metadata")
+	missing := missingSchemaCapabilities(available)
+	if len(missing) != 1 || missing[0] != "oauth2_clients.metadata" {
+		t.Fatalf("missing capabilities = %v; want oauth2_clients.metadata", missing)
 	}
 }
 

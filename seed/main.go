@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
+	"sort"
 	"strings"
 	"time"
 
@@ -24,28 +24,53 @@ const (
 	Argon2SaltLen = 16
 	Argon2KeyLen  = 32
 
-	defaultSchemaVersion = 20
-	seedAdvisoryLockID   = 476_677_601
+	seedAdvisoryLockID = 476_677_601
 )
 
-func expectedSchemaVersion() (int, error) {
-	raw := strings.TrimSpace(os.Getenv("GOSSO_SCHEMA_VERSION"))
-	if raw == "" {
-		return defaultSchemaVersion, nil
-	}
-	version, err := strconv.Atoi(raw)
-	if err != nil || version < 1 {
-		return 0, fmt.Errorf("GOSSO_SCHEMA_VERSION must be a positive integer, got %q", raw)
-	}
-	return version, nil
+var requiredSchemaCapabilities = map[string][]string{
+	"accounts":            {"id", "username", "display_name", "status"},
+	"account_credentials": {"account_id", "credential_type", "identifier", "credential_value", "verified", "primary_credential"},
+	"roles":               {"id", "name", "description", "permissions"},
+	"account_roles":       {"account_id", "role_id"},
+	"oauth2_clients":      {"account_id", "client_id", "name", "description", "redirect_uris", "grant_types", "scopes", "is_confidential", "metadata"},
 }
 
-func validateSchemaVersion(actual int, dirty bool, expected int) error {
-	if dirty {
-		return fmt.Errorf("gosso database migration %d is dirty; repair migrations before seeding", actual)
+func missingSchemaCapabilities(available map[string]map[string]bool) []string {
+	missing := make([]string, 0)
+	for table, columns := range requiredSchemaCapabilities {
+		for _, column := range columns {
+			if !available[table][column] {
+				missing = append(missing, table+"."+column)
+			}
+		}
 	}
-	if actual != expected {
-		return fmt.Errorf("unsupported gosso schema version %d; this seeder requires exactly %d", actual, expected)
+	sort.Strings(missing)
+	return missing
+}
+
+func validateSchemaCapabilities(ctx context.Context, db *sql.DB) error {
+	rows, err := db.QueryContext(ctx, `SELECT table_name, column_name FROM information_schema.columns
+		WHERE table_schema = 'public' AND table_name IN ('accounts', 'account_credentials', 'roles', 'account_roles', 'oauth2_clients')`)
+	if err != nil {
+		return fmt.Errorf("inspect GOSSO schema capabilities: %w", err)
+	}
+	defer rows.Close()
+	available := make(map[string]map[string]bool)
+	for rows.Next() {
+		var table, column string
+		if err := rows.Scan(&table, &column); err != nil {
+			return fmt.Errorf("read GOSSO schema capabilities: %w", err)
+		}
+		if available[table] == nil {
+			available[table] = make(map[string]bool)
+		}
+		available[table][column] = true
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("iterate GOSSO schema capabilities: %w", err)
+	}
+	if missing := missingSchemaCapabilities(available); len(missing) > 0 {
+		return fmt.Errorf("required GOSSO schema capabilities are unavailable: %s", strings.Join(missing, ", "))
 	}
 	return nil
 }
@@ -172,33 +197,24 @@ func main() {
 	}
 	defer db.Close()
 
-	log.Println("Waiting for schema migrations to complete (checking for 'accounts' table)...")
+	log.Println("Waiting for required GOSSO schema capabilities...")
 	ctx := context.Background()
 
-	// Wait until GOSSO migrations have run and created the accounts table
-	tableExists := false
+	// Wait until the exact tables and columns this seed writes are available.
+	schemaReady := false
 	for i := 0; i < 30; i++ {
-		var exists bool
-		query := `SELECT EXISTS (
-			SELECT FROM information_schema.tables 
-			WHERE table_schema = 'public' AND table_name = 'accounts'
-		)`
-		err = db.QueryRowContext(ctx, query).Scan(&exists)
-		if err == nil && exists {
-			tableExists = true
+		err = validateSchemaCapabilities(ctx, db)
+		if err == nil {
+			schemaReady = true
 			break
 		}
-		log.Printf("Table 'accounts' does not exist yet. GOSSO migrations might be running. Retrying in 1s...")
+		log.Printf("Required GOSSO schema capabilities are not ready yet. Retrying in 1s: %v", err)
 		time.Sleep(1 * time.Second)
 	}
-	if !tableExists {
-		log.Fatal("Timeout waiting for 'accounts' table to be created by GOSSO migrations.")
+	if !schemaReady {
+		log.Fatalf("Timeout waiting for required GOSSO schema capabilities: %v", err)
 	}
-	log.Println("Schema detected. Starting database seeding...")
-	expectedVersion, err := expectedSchemaVersion()
-	if err != nil {
-		log.Fatal(err)
-	}
+	log.Println("Required schema capabilities detected. Starting database seeding...")
 
 	tx, err := db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
@@ -214,16 +230,6 @@ func main() {
 	if _, err = tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock($1)", seedAdvisoryLockID); err != nil {
 		log.Fatalf("Failed to acquire seed advisory lock: %v", err)
 	}
-
-	var schemaVersion int
-	var schemaDirty bool
-	if err = tx.QueryRowContext(ctx, "SELECT version, dirty FROM schema_migrations LIMIT 1").Scan(&schemaVersion, &schemaDirty); err != nil {
-		log.Fatalf("Failed to read Gosso schema version: %v", err)
-	}
-	if err = validateSchemaVersion(schemaVersion, schemaDirty, expectedVersion); err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("Gosso schema version %d is compatible.", schemaVersion)
 
 	// 1. Seed Admin User
 	var adminCount int
