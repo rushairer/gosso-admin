@@ -1,15 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Key as KeyIcon, User as UserIcon, Shield as ShieldIcon, FileText as AuditIcon } from 'lucide-react';
+import {
+  Key as KeyIcon,
+  User as UserIcon,
+  Shield as ShieldIcon,
+  FileText as AuditIcon,
+  SlidersHorizontal,
+} from 'lucide-react';
 import { gossoClient, redirectToAuthorize } from '../auth';
 import { Panel, PageLoader, Tabs } from '../components/ui';
 import ClientsTab from './admin/ClientsTab';
 import UsersTab from './admin/UsersTab';
 import AuditLogsTab from './admin/AuditLogsTab';
 import SystemStatusTab from './admin/SystemStatusTab';
+import InstanceSettingsTab from './admin/InstanceSettingsTab';
 
-const adminTabs = ['clients', 'users', 'audit-logs', 'system'] as const;
+const adminTabs = ['clients', 'users', 'audit-logs', 'instance-settings', 'system'] as const;
 type AdminTab = (typeof adminTabs)[number];
 
 function isAdminTab(value: string | undefined): value is AdminTab {
@@ -88,6 +95,11 @@ export default function Admin() {
       label: t('admin.tabAuditLogs'),
       icon: <AuditIcon aria-hidden="true" size={16} />,
     },
+    {
+      value: 'instance-settings' as const,
+      label: t('instance.tabLabel'),
+      icon: <SlidersHorizontal aria-hidden="true" size={16} />,
+    },
     { value: 'system' as const, label: t('admin.tabSystemStatus'), icon: <ShieldIcon aria-hidden="true" size={16} /> },
   ];
 
@@ -104,6 +116,7 @@ export default function Admin() {
         {activeTab === 'clients' && <ClientsTab />}
         {activeTab === 'users' && <UsersTab />}
         {activeTab === 'audit-logs' && <AuditLogsTab />}
+        {activeTab === 'instance-settings' && <InstanceSettingsTab />}
         {activeTab === 'system' && <SystemStatusTab />}
       </Panel>
     </div>

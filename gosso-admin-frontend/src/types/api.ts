@@ -57,6 +57,40 @@ export interface OidcConfiguration {
   id_token_signing_alg_values_supported?: string[];
 }
 
+export interface InstanceSettings {
+  product_name: string;
+  logo_url: string;
+  favicon_url: string;
+  primary_color: string;
+  login_title: string;
+  login_description: string;
+  login_background_url: string;
+  support_email: string;
+  support_url: string;
+  privacy_policy_url: string;
+  terms_of_service_url: string;
+  default_locale: 'en' | 'zh';
+}
+
+export type PublicInstanceBranding = InstanceSettings;
+
+export interface SecurityPolicy {
+  session_ttl: string;
+  max_sessions: number;
+  max_session_age: string;
+  access_token_expiry: string;
+  refresh_token_expiry: string;
+  id_token_expiry: string;
+  enforce_ip_binding: boolean;
+  enforce_pkce_for_confidential: boolean;
+  login_max_attempts: number;
+  login_rate_limit_window: string;
+  mfa_account_max_attempts: number;
+  mfa_account_rate_limit_window: string;
+  password_reset_token_ttl: string;
+  webauthn_enabled: boolean;
+}
+
 export interface LockoutCounter {
   attempts: number;
   window_seconds: number;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Key } from 'lucide-react';
@@ -6,6 +6,24 @@ import { gossoClient, redirectToAuthorize } from '../auth';
 import { Feedback, FormField } from '../components/ui';
 import { logger } from '../utils/logger';
 import { appPath } from '../config/appPaths';
+import i18n from '../i18n';
+import { instanceSettingsService } from '../services';
+import type { PublicInstanceBranding } from '../types/api';
+
+const defaultBranding: PublicInstanceBranding = {
+  product_name: 'GOSSO',
+  logo_url: '',
+  favicon_url: '',
+  primary_color: '#3b82f6',
+  login_title: '',
+  login_description: '',
+  login_background_url: '',
+  support_email: '',
+  support_url: '',
+  privacy_policy_url: '',
+  terms_of_service_url: '',
+  default_locale: 'en',
+};
 
 export default function Login() {
   const { t } = useTranslation();
@@ -16,11 +34,37 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [passkeyLoading, setPasskeyLoading] = useState(false);
+  const [branding, setBranding] = useState(defaultBranding);
 
   // MFA state
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaToken, setMfaToken] = useState('');
   const [mfaCode, setMfaCode] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    void instanceSettingsService
+      .getPublicBranding()
+      .then((next) => {
+        if (!active) return;
+        setBranding(next);
+        document.title = next.product_name;
+        if (next.favicon_url) {
+          const icon =
+            document.querySelector<HTMLLinkElement>('link[rel="icon"]') ||
+            document.head.appendChild(document.createElement('link'));
+          icon.rel = 'icon';
+          icon.href = next.favicon_url;
+        }
+        if (!window.localStorage.getItem('gosso_lang')) {
+          void i18n.changeLanguage(next.default_locale);
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Capture where we should redirect back to (e.g. GOSSO authorize URL)
   const hasAuthorizeRedirect = searchParams.has('redirect_uri');
@@ -116,12 +160,36 @@ export default function Login() {
   };
 
   return (
-    <div className="flex-row items-center justify-center" style={{ height: '100vh' }}>
+    <div
+      className="flex-row items-center justify-center"
+      style={
+        {
+          height: '100vh',
+          padding: '24px',
+          backgroundImage: branding.login_background_url
+            ? `linear-gradient(rgba(15,18,23,.72), rgba(15,18,23,.88)), url(${branding.login_background_url})`
+            : undefined,
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+          '--color-primary': branding.primary_color,
+          '--action-primary': branding.primary_color,
+        } as React.CSSProperties
+      }
+    >
       <div className="glass-card" style={{ maxWidth: '440px', width: '100%' }}>
         <div className="text-center" style={{ marginBottom: '32px' }}>
-          <h1 style={{ color: 'var(--color-text-main)', fontSize: '32px', marginBottom: '8px' }}>{t('login.title')}</h1>
+          {branding.logo_url ? (
+            <img
+              src={branding.logo_url}
+              alt=""
+              style={{ maxWidth: '160px', maxHeight: '56px', objectFit: 'contain', marginBottom: '16px' }}
+            />
+          ) : null}
+          <h1 style={{ color: 'var(--color-text-main)', fontSize: '32px', marginBottom: '8px' }}>
+            {branding.login_title || branding.product_name || t('login.title')}
+          </h1>
           <p className="text-muted" style={{ fontSize: '14.5px' }}>
-            {t('login.subtitle')}
+            {branding.login_description || t('login.subtitle')}
           </p>
         </div>
 
@@ -246,6 +314,38 @@ export default function Login() {
               {t('login.backToLogin')}
             </button>
           </form>
+        )}
+        {(branding.support_email ||
+          branding.support_url ||
+          branding.privacy_policy_url ||
+          branding.terms_of_service_url) && (
+          <div className="text-center text-sm text-muted" style={{ marginTop: '20px', lineHeight: 1.6 }}>
+            {branding.support_email && <a href={`mailto:${branding.support_email}`}>{branding.support_email}</a>}
+            {branding.support_url && (
+              <>
+                <span> · </span>
+                <a href={branding.support_url} target="_blank" rel="noreferrer">
+                  {t('login.supportLink')}
+                </a>
+              </>
+            )}
+            {branding.privacy_policy_url && (
+              <>
+                <span> · </span>
+                <a href={branding.privacy_policy_url} target="_blank" rel="noreferrer">
+                  {t('login.privacyLink')}
+                </a>
+              </>
+            )}
+            {branding.terms_of_service_url && (
+              <>
+                <span> · </span>
+                <a href={branding.terms_of_service_url} target="_blank" rel="noreferrer">
+                  {t('login.termsLink')}
+                </a>
+              </>
+            )}
+          </div>
         )}
       </div>
     </div>
