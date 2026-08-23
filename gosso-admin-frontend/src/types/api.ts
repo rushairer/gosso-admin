@@ -61,15 +61,9 @@ export interface InstanceSettings {
   product_name: string;
   logo_url: string;
   favicon_url: string;
-  primary_color: string;
   login_title: string;
   login_description: string;
   login_background_url: string;
-  support_email: string;
-  support_url: string;
-  privacy_policy_url: string;
-  terms_of_service_url: string;
-  default_locale: 'en' | 'zh';
 }
 
 export type PublicInstanceBranding = InstanceSettings;

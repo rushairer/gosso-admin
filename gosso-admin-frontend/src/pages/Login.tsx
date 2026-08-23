@@ -6,7 +6,6 @@ import { gossoClient, redirectToAuthorize } from '../auth';
 import { Feedback, FormField } from '../components/ui';
 import { logger } from '../utils/logger';
 import { appPath } from '../config/appPaths';
-import i18n from '../i18n';
 import { instanceSettingsService } from '../services';
 import type { PublicInstanceBranding } from '../types/api';
 
@@ -14,15 +13,9 @@ const defaultBranding: PublicInstanceBranding = {
   product_name: 'GOSSO',
   logo_url: '',
   favicon_url: '',
-  primary_color: '#3b82f6',
   login_title: '',
   login_description: '',
   login_background_url: '',
-  support_email: '',
-  support_url: '',
-  privacy_policy_url: '',
-  terms_of_service_url: '',
-  default_locale: 'en',
 };
 
 export default function Login() {
@@ -55,9 +48,6 @@ export default function Login() {
             document.head.appendChild(document.createElement('link'));
           icon.rel = 'icon';
           icon.href = next.favicon_url;
-        }
-        if (!window.localStorage.getItem('gosso_lang')) {
-          void i18n.changeLanguage(next.default_locale);
         }
       })
       .catch(() => undefined);
@@ -171,8 +161,6 @@ export default function Login() {
             : undefined,
           backgroundPosition: 'center',
           backgroundSize: 'cover',
-          '--color-primary': branding.primary_color,
-          '--action-primary': branding.primary_color,
         } as React.CSSProperties
       }
     >
@@ -314,38 +302,6 @@ export default function Login() {
               {t('login.backToLogin')}
             </button>
           </form>
-        )}
-        {(branding.support_email ||
-          branding.support_url ||
-          branding.privacy_policy_url ||
-          branding.terms_of_service_url) && (
-          <div className="text-center text-sm text-muted" style={{ marginTop: '20px', lineHeight: 1.6 }}>
-            {branding.support_email && <a href={`mailto:${branding.support_email}`}>{branding.support_email}</a>}
-            {branding.support_url && (
-              <>
-                <span> · </span>
-                <a href={branding.support_url} target="_blank" rel="noreferrer">
-                  {t('login.supportLink')}
-                </a>
-              </>
-            )}
-            {branding.privacy_policy_url && (
-              <>
-                <span> · </span>
-                <a href={branding.privacy_policy_url} target="_blank" rel="noreferrer">
-                  {t('login.privacyLink')}
-                </a>
-              </>
-            )}
-            {branding.terms_of_service_url && (
-              <>
-                <span> · </span>
-                <a href={branding.terms_of_service_url} target="_blank" rel="noreferrer">
-                  {t('login.termsLink')}
-                </a>
-              </>
-            )}
-          </div>
         )}
       </div>
     </div>

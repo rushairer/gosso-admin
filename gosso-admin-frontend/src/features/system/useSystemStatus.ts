@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { systemService } from '../../services';
+import { instanceSettingsService, systemService } from '../../services';
 import type { SystemHealth } from '../../services';
-import type { OidcConfiguration } from '../../types/api';
+import type { OidcConfiguration, SecurityPolicy } from '../../types/api';
 import { logger } from '../../utils/logger';
 
 function unavailableHealth(reason: unknown): SystemHealth {
@@ -19,13 +19,15 @@ function unavailableHealth(reason: unknown): SystemHealth {
 export function useSystemStatus() {
   const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
   const [oidcConfig, setOidcConfig] = useState<OidcConfiguration | null>(null);
+  const [securityPolicy, setSecurityPolicy] = useState<SecurityPolicy | null>(null);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const [healthResult, oidcResult] = await Promise.allSettled([
+    const [healthResult, oidcResult, securityResult] = await Promise.allSettled([
       systemService.fetchReadiness(),
       systemService.fetchOidcConfiguration(),
+      instanceSettingsService.getSecurityPolicy(),
     ]);
 
     if (healthResult.status === 'fulfilled') {
@@ -41,6 +43,7 @@ export function useSystemStatus() {
       logger.error('Error fetching OIDC configuration metadata', oidcResult.reason);
       setOidcConfig(null);
     }
+    setSecurityPolicy(securityResult.status === 'fulfilled' ? securityResult.value : null);
     setLoading(false);
   }, []);
 
@@ -48,5 +51,5 @@ export function useSystemStatus() {
     void refresh();
   }, [refresh]);
 
-  return { systemHealth, oidcConfig, loading, refresh };
+  return { systemHealth, oidcConfig, securityPolicy, loading, refresh };
 }

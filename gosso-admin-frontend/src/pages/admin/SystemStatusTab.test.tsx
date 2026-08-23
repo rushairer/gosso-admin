@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { systemService } from '../../services';
+import { instanceSettingsService, systemService } from '../../services';
 import SystemStatusTab from './SystemStatusTab';
 
 vi.mock('../../services', () => ({
@@ -8,6 +8,7 @@ vi.mock('../../services', () => ({
     fetchReadiness: vi.fn(),
     fetchOidcConfiguration: vi.fn(),
   },
+  instanceSettingsService: { getSecurityPolicy: vi.fn() },
 }));
 
 describe('SystemStatusTab', () => {
@@ -27,6 +28,22 @@ describe('SystemStatusTab', () => {
       token_endpoint: 'https://sso.example.test/token',
       userinfo_endpoint: 'https://sso.example.test/userinfo',
       jwks_uri: 'https://sso.example.test/jwks',
+    });
+    vi.mocked(instanceSettingsService.getSecurityPolicy).mockResolvedValue({
+      session_ttl: '24h',
+      max_sessions: 5,
+      max_session_age: '0s',
+      access_token_expiry: '15m',
+      refresh_token_expiry: '168h',
+      id_token_expiry: '15m',
+      enforce_ip_binding: false,
+      enforce_pkce_for_confidential: true,
+      login_max_attempts: 10,
+      login_rate_limit_window: '15m',
+      mfa_account_max_attempts: 10,
+      mfa_account_rate_limit_window: '5m',
+      password_reset_token_ttl: '1h',
+      webauthn_enabled: true,
     });
   });
 

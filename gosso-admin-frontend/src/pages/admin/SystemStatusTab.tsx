@@ -14,7 +14,7 @@ import { dependencyLabel, dependencyIsHealthy, formatHealthTimestamp } from '../
 
 export default function SystemStatusTab() {
   const { t } = useTranslation();
-  const { systemHealth, oidcConfig, loading, refresh } = useSystemStatus();
+  const { systemHealth, oidcConfig, securityPolicy, loading, refresh } = useSystemStatus();
 
   const hasHealthIssue =
     !systemHealth?.ready ||
@@ -202,6 +202,25 @@ export default function SystemStatusTab() {
                   </Tag>
                 ))}
               </div>
+            </DefinitionRow>
+          </DefinitionList>
+        </PlainSection>
+      )}
+
+      {securityPolicy && (
+        <PlainSection title={t('instance.securityPolicy')}>
+          <p className="text-muted mb-md">{t('instance.securityPolicyDescription')}</p>
+          <DefinitionList>
+            <DefinitionRow label={t('instance.sessionTtl')}>{securityPolicy.session_ttl}</DefinitionRow>
+            <DefinitionRow label={t('instance.maxSessions')}>{securityPolicy.max_sessions}</DefinitionRow>
+            <DefinitionRow label={t('instance.tokenExpiry')}>
+              {securityPolicy.access_token_expiry} / {securityPolicy.refresh_token_expiry}
+            </DefinitionRow>
+            <DefinitionRow label={t('instance.loginRateLimit')}>
+              {securityPolicy.login_max_attempts} / {securityPolicy.login_rate_limit_window}
+            </DefinitionRow>
+            <DefinitionRow label={t('instance.mfaRateLimit')}>
+              {securityPolicy.mfa_account_max_attempts} / {securityPolicy.mfa_account_rate_limit_window}
             </DefinitionRow>
           </DefinitionList>
         </PlainSection>
