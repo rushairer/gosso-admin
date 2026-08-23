@@ -44,7 +44,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     void instanceSettingsService
       .getPublicBranding()
       .then((branding) => {
-        setProductName(branding.product_name || 'GOSSO');
+        const name = branding.product_name || 'GOSSO';
+        setProductName(name);
+        document.title = name;
       })
       .catch(() => undefined);
   }, []);
