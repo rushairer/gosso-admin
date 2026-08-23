@@ -3,16 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Info as InfoIcon } from 'lucide-react';
 import { CheckboxField, CheckboxGroup, FormField, Modal } from '../../../components/ui';
 import type { OAuth2Client } from '../../../types/api';
-
-export interface ClientFormData {
-  name: string;
-  description: string;
-  redirect_uris: string;
-  post_logout_redirect_uris: string;
-  is_confidential: boolean;
-  grant_types: string[];
-  scopes: string[];
-}
+import type { ClientFormData } from '../../../features/clients/clientForm';
 
 interface ClientEditorModalProps {
   isOpen: boolean;
@@ -47,83 +38,82 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
     >
       <form onSubmit={onSubmit}>
         <FormField label={t('clients.clientNameLabel')}>
+          <input
+            type="text"
+            className="input-field"
+            placeholder={t('clients.clientNamePlaceholder')}
+            value={clientForm.name}
+            onChange={(e) => setClientForm((p) => ({ ...p, name: e.target.value }))}
+          />
+        </FormField>
+        <FormField label={t('clients.descriptionLabel')}>
+          <input
+            type="text"
+            className="input-field"
+            placeholder={t('clients.descriptionPlaceholder')}
+            value={clientForm.description}
+            onChange={(e) => setClientForm((p) => ({ ...p, description: e.target.value }))}
+          />
+        </FormField>
+        <FormField label={t('clients.redirectUrisLabel')} hint={t('clients.redirectUrisHint')}>
+          <input
+            type="text"
+            className="input-field"
+            placeholder={t('clients.redirectUrisPlaceholder')}
+            value={clientForm.redirect_uris}
+            onChange={(e) => setClientForm((p) => ({ ...p, redirect_uris: e.target.value }))}
+          />
+        </FormField>
 
-              <input
-                type="text"
-                className="input-field"
-                placeholder={t('clients.clientNamePlaceholder')}
-                value={clientForm.name}
-                onChange={(e) => setClientForm((p) => ({ ...p, name: e.target.value }))}
-              />
-            </FormField>
-            <FormField label={t('clients.descriptionLabel')}>
-              <input
-                type="text"
-                className="input-field"
-                placeholder={t('clients.descriptionPlaceholder')}
-                value={clientForm.description}
-                onChange={(e) => setClientForm((p) => ({ ...p, description: e.target.value }))}
-              />
-            </FormField>
-            <FormField label={t('clients.redirectUrisLabel')} hint={t('clients.redirectUrisHint')}>
-              <input
-                type="text"
-                className="input-field"
-                placeholder={t('clients.redirectUrisPlaceholder')}
-                value={clientForm.redirect_uris}
-                onChange={(e) => setClientForm((p) => ({ ...p, redirect_uris: e.target.value }))}
-              />
-            </FormField>
+        <FormField label={t('clients.postLogoutRedirectUrisLabel')}>
+          <input
+            type="text"
+            className="input-field"
+            placeholder={t('clients.postLogoutRedirectUrisPlaceholder')}
+            value={clientForm.post_logout_redirect_uris}
+            onChange={(e) => setClientForm((p) => ({ ...p, post_logout_redirect_uris: e.target.value }))}
+          />
+        </FormField>
 
-            <FormField label={t('clients.postLogoutRedirectUrisLabel')}>
-              <input
-                type="text"
-                className="input-field"
-                placeholder={t('clients.postLogoutRedirectUrisPlaceholder')}
-                value={clientForm.post_logout_redirect_uris}
-                onChange={(e) => setClientForm((p) => ({ ...p, post_logout_redirect_uris: e.target.value }))}
-              />
-            </FormField>
+        <FormField label={t('clients.clientTypeLabel')}>
+          <CheckboxField
+            id="is_confidential"
+            label={t('clients.confidentialClientLabel')}
+            checked={clientForm.is_confidential}
+            onChange={(checked) => setClientForm((p) => ({ ...p, is_confidential: checked }))}
+            disabled={!!editingClient}
+          />
+        </FormField>
 
-            <FormField label={t('clients.clientTypeLabel')}>
-              <CheckboxField
-                id="is_confidential"
-                label={t('clients.confidentialClientLabel')}
-                checked={clientForm.is_confidential}
-                onChange={(checked) => setClientForm((p) => ({ ...p, is_confidential: checked }))}
-                disabled={!!editingClient}
-              />
-            </FormField>
+        <CheckboxGroup label={t('clients.grantTypesLabel')}>
+          {['authorization_code', 'client_credentials', 'refresh_token', 'device_code'].map((gt) => (
+            <CheckboxField
+              key={gt}
+              id={`grant-type-${gt}`}
+              label={gt.replace('_', ' ')}
+              checked={clientForm.grant_types.includes(gt)}
+              onChange={() => onCheckboxChange('grant_types', gt)}
+            />
+          ))}
+        </CheckboxGroup>
 
-            <CheckboxGroup label={t('clients.grantTypesLabel')}>
-              {['authorization_code', 'client_credentials', 'refresh_token', 'device_code'].map((gt) => (
-                <CheckboxField
-                  key={gt}
-                  id={`grant-type-${gt}`}
-                  label={gt.replace('_', ' ')}
-                  checked={clientForm.grant_types.includes(gt)}
-                  onChange={() => onCheckboxChange('grant_types', gt)}
-                />
-              ))}
-            </CheckboxGroup>
-
-            <CheckboxGroup label={t('clients.scopesLabel')}>
-              {clientScopeOptions.map((sc) => (
-                <CheckboxField
-                  key={sc}
-                  id={`scope-${sc}`}
-                  label={sc === 'admin' ? t('clients.adminScopeLabel') : sc}
-                  checked={clientForm.scopes.includes(sc)}
-                  onChange={() => onCheckboxChange('scopes', sc)}
-                />
-              ))}
-            </CheckboxGroup>
-            {clientForm.scopes.some(isAdminScope) && (
-              <div className="notice-card" style={{ alignItems: 'flex-start', textAlign: 'left' }}>
-                <InfoIcon style={{ width: '18px', height: '18px', stroke: 'var(--warning-color)' }} />
-                <p className="text-sm text-muted">{t('clients.adminScopeWarning')}</p>
-              </div>
-            )}
+        <CheckboxGroup label={t('clients.scopesLabel')}>
+          {clientScopeOptions.map((sc) => (
+            <CheckboxField
+              key={sc}
+              id={`scope-${sc}`}
+              label={sc === 'admin' ? t('clients.adminScopeLabel') : sc}
+              checked={clientForm.scopes.includes(sc)}
+              onChange={() => onCheckboxChange('scopes', sc)}
+            />
+          ))}
+        </CheckboxGroup>
+        {clientForm.scopes.some(isAdminScope) && (
+          <div className="notice-card" style={{ alignItems: 'flex-start', textAlign: 'left' }}>
+            <InfoIcon style={{ width: '18px', height: '18px', stroke: 'var(--warning-color)' }} />
+            <p className="text-sm text-muted">{t('clients.adminScopeWarning')}</p>
+          </div>
+        )}
         <div className="modal-footer" style={{ margin: '20px -20px -20px -20px' }}>
           <button type="button" className="btn btn-secondary" onClick={onClose}>
             {t('common.cancel')}

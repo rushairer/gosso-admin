@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider, PageLoader } from './components/ui';
@@ -15,7 +15,6 @@ const Settings = lazy(() => import('./pages/Settings'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 export default function App() {
-
   return (
     <ErrorBoundary>
       <ToastProvider>
@@ -37,16 +36,18 @@ export default function App() {
                   </AdminLayout>
                 }
               />
+              <Route path="/settings" element={<Navigate replace to="/settings/profile" />} />
               <Route
-                path="/settings"
+                path="/settings/:tab"
                 element={
                   <AdminLayout>
                     <Settings />
                   </AdminLayout>
                 }
               />
+              <Route path="/admin" element={<Navigate replace to="/admin/clients" />} />
               <Route
-                path="/admin"
+                path="/admin/:tab"
                 element={
                   <AdminLayout>
                     <Admin />

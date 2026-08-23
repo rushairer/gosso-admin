@@ -1,22 +1,32 @@
 import { useEffect, useState } from 'react';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Key as KeyIcon, User as UserIcon, Shield as ShieldIcon, FileText as AuditIcon } from 'lucide-react';
 import { gossoClient, redirectToAuthorize } from '../auth';
-import { Panel, PageLoader } from '../components/ui';
+import { Panel, PageLoader, Tabs } from '../components/ui';
 import ClientsTab from './admin/ClientsTab';
 import UsersTab from './admin/UsersTab';
 import AuditLogsTab from './admin/AuditLogsTab';
 import SystemStatusTab from './admin/SystemStatusTab';
 
+const adminTabs = ['clients', 'users', 'audit-logs', 'system'] as const;
+type AdminTab = (typeof adminTabs)[number];
+
+function isAdminTab(value: string | undefined): value is AdminTab {
+  return Boolean(value && adminTabs.includes(value as AdminTab));
+}
+
 export default function Admin() {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'clients' | 'users' | 'audit-logs' | 'system'>('clients');
+  const { tab } = useParams();
+  const navigate = useNavigate();
+  const activeTab = isAdminTab(tab) ? tab : 'clients';
   const [accessDenied, setAccessDenied] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     if (!gossoClient.isLoggedIn()) {
-      redirectToAuthorize('/admin');
+      redirectToAuthorize(`/admin/${activeTab}`);
       return;
     }
 
@@ -30,6 +40,9 @@ export default function Admin() {
     return <PageLoader message={t('admin.checkingAccess')} />;
   }
 
+  if (!isAdminTab(tab)) {
+    return <Navigate replace to="/admin/clients" />;
+  }
 
   if (accessDenied) {
     return (
@@ -67,41 +80,25 @@ export default function Admin() {
     );
   }
 
+  const tabs = [
+    { value: 'clients' as const, label: t('admin.tabClients'), icon: <KeyIcon aria-hidden="true" size={16} /> },
+    { value: 'users' as const, label: t('admin.tabUsers'), icon: <UserIcon aria-hidden="true" size={16} /> },
+    {
+      value: 'audit-logs' as const,
+      label: t('admin.tabAuditLogs'),
+      icon: <AuditIcon aria-hidden="true" size={16} />,
+    },
+    { value: 'system' as const, label: t('admin.tabSystemStatus'), icon: <ShieldIcon aria-hidden="true" size={16} /> },
+  ];
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {/* Tabs */}
-      <div className="tabs-header">
-        <button
-          className={`tab-btn ${activeTab === 'clients' ? 'active' : ''}`}
-          onClick={() => setActiveTab('clients')}
-        >
-          <KeyIcon
-            style={{ width: '16px', height: '16px', marginRight: '8px', display: 'inline', verticalAlign: 'middle' }}
-          />
-          {t('admin.tabClients')}
-        </button>
-        <button className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>
-          <UserIcon
-            style={{ width: '16px', height: '16px', marginRight: '8px', display: 'inline', verticalAlign: 'middle' }}
-          />
-          {t('admin.tabUsers')}
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'audit-logs' ? 'active' : ''}`}
-          onClick={() => setActiveTab('audit-logs')}
-        >
-          <AuditIcon
-            style={{ width: '16px', height: '16px', marginRight: '8px', display: 'inline', verticalAlign: 'middle' }}
-          />
-          {t('admin.tabAuditLogs')}
-        </button>
-        <button className={`tab-btn ${activeTab === 'system' ? 'active' : ''}`} onClick={() => setActiveTab('system')}>
-          <ShieldIcon
-            style={{ width: '16px', height: '16px', marginRight: '8px', display: 'inline', verticalAlign: 'middle' }}
-          />
-          {t('admin.tabSystemStatus')}
-        </button>
-      </div>
+      <Tabs
+        value={activeTab}
+        items={tabs}
+        onValueChange={(next) => navigate(`/admin/${next}`)}
+        ariaLabel="Administration sections"
+      />
 
       <Panel>
         {activeTab === 'clients' && <ClientsTab />}

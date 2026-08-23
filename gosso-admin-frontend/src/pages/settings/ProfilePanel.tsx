@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Lock, Eye, EyeOff, Edit2 as EditIcon, Mail, X as XIcon, Check } from 'lucide-react';
+import { Lock, Eye, EyeOff, Edit2 as EditIcon, X as XIcon, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { gossoClient } from '../../auth';
 import {
@@ -11,9 +11,9 @@ import {
   DefinitionList,
   DefinitionRow,
   Tag,
-  ButtonGroup,
 } from '../../components/ui';
 import type { UserProfile } from '../../auth';
+import { EmailChangeModal } from './EmailChangeModal';
 
 export default function ProfilePanel({ profile: initialProfile }: { profile: UserProfile | null }) {
   const { t } = useTranslation();
@@ -36,13 +36,6 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
 
   // Email Edit States
   const [showEmailModal, setShowEmailModal] = useState(false);
-  const [newEmail, setNewEmail] = useState('');
-  const [emailPassword, setEmailPassword] = useState('');
-  const [showEmailPassword, setShowEmailPassword] = useState(false);
-  const [emailCode, setEmailCode] = useState('');
-  const [emailStep, setEmailStep] = useState<'input' | 'verify'>('input');
-  const [emailLoading, setEmailLoading] = useState(false);
-  const [emailError, setEmailError] = useState<string | null>(null);
 
   // Keep localProfile in sync if initialProfile changes from props
   useEffect(() => {
@@ -79,11 +72,6 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
   };
 
   const handleStartEditEmail = () => {
-    setNewEmail(localProfile?.email || '');
-    setEmailPassword('');
-    setEmailCode('');
-    setEmailStep('input');
-    setEmailError(null);
     setShowEmailModal(true);
     setError(null);
     setSuccess(null);
@@ -91,51 +79,6 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
 
   const handleCloseEmailModal = () => {
     setShowEmailModal(false);
-    setNewEmail('');
-    setEmailPassword('');
-    setEmailCode('');
-    setEmailStep('input');
-    setEmailError(null);
-  };
-
-  const handleRequestEmailCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newEmail.trim() || !emailPassword) return;
-
-    try {
-      setEmailLoading(true);
-      setEmailError(null);
-
-      await gossoClient.requestEmailChange(newEmail.trim(), emailPassword);
-
-      setEmailStep('verify');
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error requesting email verification code';
-      setEmailError(message);
-    } finally {
-      setEmailLoading(false);
-    }
-  };
-
-  const handleConfirmEmailChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!emailCode.trim()) return;
-
-    try {
-      setEmailLoading(true);
-      setEmailError(null);
-
-      const updated = await gossoClient.confirmEmailChange(newEmail.trim(), emailCode.trim());
-
-      setSuccess(t('profile.emailUpdatedSuccess'));
-      handleCloseEmailModal();
-      setLocalProfile(updated);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error verifying email code';
-      setEmailError(message);
-    } finally {
-      setEmailLoading(false);
-    }
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -337,136 +280,15 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
       </PlainSection>
 
       {/* Edit Email Modal */}
-      {showEmailModal && (
-        <div className="modal-backdrop" onClick={handleCloseEmailModal}>
-          <div className="modal-content" style={{ maxWidth: '460px' }} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">{t('profile.editEmailTitle')}</h3>
-              <button className="modal-close-btn" onClick={handleCloseEmailModal}>
-                <XIcon style={{ width: '18px', height: '18px' }} />
-              </button>
-            </div>
-            <div className="modal-body">
-              <p className="text-muted mb-md" style={{ fontSize: '13.5px', lineHeight: '1.5' }}>
-                {t('profile.editEmailDescription')}
-              </p>
-
-              {emailError && (
-                <div className="mb-md">
-                  <Feedback type="error">{emailError}</Feedback>
-                </div>
-              )}
-
-              {emailStep === 'input' ? (
-                <form onSubmit={handleRequestEmailCode} className="flex-col gap-lg">
-                  <FormField label={t('profile.newEmailLabel')} noMargin>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        type="email"
-                        className="input-field"
-                        required
-                        value={newEmail}
-                        onChange={(e) => setNewEmail(e.target.value)}
-                        placeholder="user@example.com"
-                        style={{ paddingLeft: '38px' }}
-                      />
-                      <Mail
-                        style={{
-                          position: 'absolute',
-                          left: '12px',
-                          top: '50%',
-                          transform: 'translateY(-50%)',
-                          width: '16px',
-                          height: '16px',
-                          color: 'var(--color-text-muted)',
-                        }}
-                      />
-                    </div>
-                  </FormField>
-
-                  <FormField label={t('profile.currentPasswordLabel')} noMargin>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        type={showEmailPassword ? 'text' : 'password'}
-                        className="input-field"
-                        required
-                        value={emailPassword}
-                        onChange={(e) => setEmailPassword(e.target.value)}
-                        placeholder="••••••••••••"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowEmailPassword(!showEmailPassword)}
-                        style={{
-                          position: 'absolute',
-                          right: '12px',
-                          top: '50%',
-                          transform: 'translateY(-50%)',
-                          background: 'none',
-                          border: 'none',
-                          color: 'var(--color-text-muted)',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {showEmailPassword ? (
-                          <EyeOff style={{ width: '16px', height: '16px' }} />
-                        ) : (
-                          <Eye style={{ width: '16px', height: '16px' }} />
-                        )}
-                      </button>
-                    </div>
-                  </FormField>
-
-                  <ButtonGroup align="right">
-                    <button
-                      className="btn btn-secondary"
-                      type="button"
-                      onClick={handleCloseEmailModal}
-                      disabled={emailLoading}
-                    >
-                      {t('common.cancel')}
-                    </button>
-                    <button
-                      className="btn btn-primary"
-                      type="submit"
-                      disabled={emailLoading || !newEmail.trim() || !emailPassword}
-                    >
-                      {emailLoading ? t('common.loading') : t('profile.sendCodeButton')}
-                    </button>
-                  </ButtonGroup>
-                </form>
-              ) : (
-                <form onSubmit={handleConfirmEmailChange} className="flex-col gap-lg">
-                  <FormField label={t('profile.verificationCodeLabel')} noMargin>
-                    <input
-                      type="text"
-                      className="input-field"
-                      required
-                      value={emailCode}
-                      onChange={(e) => setEmailCode(e.target.value)}
-                      placeholder="123456"
-                    />
-                  </FormField>
-
-                  <ButtonGroup align="right">
-                    <button
-                      className="btn btn-secondary"
-                      type="button"
-                      onClick={() => setEmailStep('input')}
-                      disabled={emailLoading}
-                    >
-                      {t('common.previous') || 'Back'}
-                    </button>
-                    <button className="btn btn-primary" type="submit" disabled={emailLoading || !emailCode.trim()}>
-                      {emailLoading ? t('common.loading') : t('profile.confirmEmailButton')}
-                    </button>
-                  </ButtonGroup>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <EmailChangeModal
+        isOpen={showEmailModal}
+        initialEmail={localProfile?.email || ''}
+        onClose={handleCloseEmailModal}
+        onProfileUpdated={(updatedProfile) => {
+          setLocalProfile(updatedProfile);
+          setSuccess(t('profile.emailUpdatedSuccess'));
+        }}
+      />
     </Panel>
   );
 }

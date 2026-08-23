@@ -35,7 +35,6 @@ export function LoadingSpinner({ size = 'md', className = '', style }: LoadingSp
   );
 }
 
-
 export interface PageLoaderProps {
   message?: string;
   minHeight?: string;
@@ -43,12 +42,7 @@ export interface PageLoaderProps {
   padding?: string;
 }
 
-export function PageLoader({
-  message,
-  minHeight,
-  size = 'md',
-  padding = '60px 0',
-}: PageLoaderProps) {
+export function PageLoader({ message, minHeight, size = 'md', padding = '60px 0' }: PageLoaderProps) {
   return (
     <div
       style={{

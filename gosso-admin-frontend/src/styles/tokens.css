@@ -1,0 +1,26 @@
+/* Semantic tokens sit above the legacy palette in index.css. Feature code
+ * should use these names so the visual theme can change without API churn. */
+:root {
+  --surface-canvas: var(--bg-main);
+  --surface-navigation: var(--bg-sidebar);
+  --surface-panel: var(--bg-panel);
+  --surface-elevated: var(--bg-elevated);
+  --border-default: var(--border-color);
+  --border-focus-ring: var(--border-focus);
+  --text-primary: var(--color-text-main);
+  --text-secondary: var(--color-text-muted);
+  --text-tertiary: var(--color-text-dark);
+  --action-primary: var(--color-primary);
+  --action-primary-hover: var(--color-primary-hover);
+  --status-danger: var(--danger-color);
+  --status-success: var(--success-color);
+  --status-warning: var(--warning-color);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --radius-control: 8px;
+  --radius-panel: 10px;
+}

@@ -38,7 +38,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     return gossoClient.subscribe(setSession);
   }, [location.pathname]);
 
-  const page = useMemo(() => pageTitles[location.pathname] || pageTitles['/'], [pageTitles, location.pathname]);
+  const page = useMemo(() => {
+    if (location.pathname.startsWith('/admin')) return pageTitles['/admin'];
+    if (location.pathname.startsWith('/settings')) return pageTitles['/settings'];
+    return pageTitles[location.pathname] || pageTitles['/'];
+  }, [pageTitles, location.pathname]);
   const userName = session.profile?.preferred_username || session.profile?.name || t('nav.notSignedIn');
 
   return (
@@ -60,13 +64,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             <span>{t('nav.overview')}</span>
           </NavLink>
           {session.loggedIn && session.isAdmin && (
-            <NavLink to="/admin" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+            <NavLink to="/admin/clients" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
               <LayoutDashboard size={17} />
               <span>{t('nav.administration')}</span>
             </NavLink>
           )}
           {session.loggedIn && (
-            <NavLink to="/settings" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+            <NavLink to="/settings/profile" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
               <Settings size={17} />
               <span>{t('nav.settings')}</span>
             </NavLink>
@@ -90,7 +94,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               {t('nav.signOut')}
             </button>
           ) : (
-            <button className="sidebar-action primary" onClick={() => redirectToAuthorize('/admin')}>
+            <button className="sidebar-action primary" onClick={() => redirectToAuthorize('/admin/clients')}>
               <LogIn size={16} />
               {t('nav.signIn')}
             </button>

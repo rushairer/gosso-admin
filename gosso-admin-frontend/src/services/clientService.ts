@@ -14,7 +14,6 @@ export interface CreateClientPayload {
 
 export type UpdateClientPayload = CreateClientPayload;
 
-
 export interface CreateClientResponse {
   client: OAuth2Client;
   client_secret?: string;

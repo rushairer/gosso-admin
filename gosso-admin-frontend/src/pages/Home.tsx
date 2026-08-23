@@ -29,7 +29,6 @@ export default function Home() {
     return <PageLoader message={t('admin.checkingAccess')} />;
   }
 
-
   const handleAction = () => {
     if (logged) {
       if (userAdmin) {

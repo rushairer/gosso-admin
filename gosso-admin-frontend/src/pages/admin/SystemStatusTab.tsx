@@ -1,67 +1,31 @@
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Shield as ShieldIcon, RefreshCw } from 'lucide-react';
-import { DefinitionList, DefinitionRow, Feedback, PageLoader, PanelHeader, PlainSection, Tag } from '../../components/ui';
-import { systemService } from '../../services';
-
-
-import type { SystemHealth } from '../../services';
-import type { OidcConfiguration } from '../../types/api';
+import {
+  DefinitionList,
+  DefinitionRow,
+  Feedback,
+  PageLoader,
+  PanelHeader,
+  PlainSection,
+  Tag,
+} from '../../components/ui';
+import { useSystemStatus } from '../../features/system/useSystemStatus';
 import { dependencyLabel, dependencyIsHealthy, formatHealthTimestamp } from '../../utils/format';
-import { logger } from '../../utils/logger';
 
 export default function SystemStatusTab() {
   const { t } = useTranslation();
-  const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
-  const [oidcConfig, setOidcConfig] = useState<OidcConfiguration | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { systemHealth, oidcConfig, loading, refresh } = useSystemStatus();
 
   const hasHealthIssue =
     !systemHealth?.ready ||
     !dependencyIsHealthy(systemHealth?.checks?.database) ||
     !dependencyIsHealthy(systemHealth?.checks?.redis);
 
-  useEffect(() => {
-    fetchSystemStatus();
-  }, []);
-
-  const fetchSystemStatus = async () => {
-    try {
-      setLoading(true);
-
-      try {
-        const health = await systemService.fetchReadiness();
-        setSystemHealth(health);
-      } catch (e: unknown) {
-        const message = e instanceof Error ? e.message : 'Failed to reach readiness endpoint';
-        logger.error('Error fetching readiness health status', e);
-        setSystemHealth({
-          status: 'unavailable',
-          ready: false,
-          checks: { database: 'error', redis: 'error' },
-          http_status: 0,
-          fetched_at: new Date().toISOString(),
-          fetch_error: message,
-        });
-      }
-
-      try {
-        const config = await systemService.fetchOidcConfiguration();
-        setOidcConfig(config);
-      } catch (e) {
-        logger.error('Error fetching OIDC configuration metadata', e);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (loading) {
     return <PageLoader message={t('system.loadingStatus')} />;
   }
 
   return (
-
     <div>
       <PanelHeader
         title={t('system.title')}
@@ -70,7 +34,7 @@ export default function SystemStatusTab() {
           <button
             className="btn btn-secondary content-action"
             type="button"
-            onClick={fetchSystemStatus}
+            onClick={() => void refresh()}
             disabled={loading}
             title={t('system.refreshButton')}
           >

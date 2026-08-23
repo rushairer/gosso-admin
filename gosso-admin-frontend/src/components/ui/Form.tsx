@@ -4,18 +4,38 @@ export function FormField({
   label,
   children,
   hint,
+  error,
+  id,
+  required = false,
   noMargin = false,
 }: {
   label: string;
   children: React.ReactNode;
   hint?: React.ReactNode;
+  error?: React.ReactNode;
+  id?: string;
+  required?: boolean;
   noMargin?: boolean;
 }) {
+  const descriptionId = id && (hint || error) ? `${id}-description` : undefined;
   return (
     <div className="form-group" style={noMargin ? { margin: 0 } : undefined}>
-      <label className="form-label">{label}</label>
+      <label className="form-label" htmlFor={id}>
+        {label}
+        {required && <span aria-hidden="true"> *</span>}
+      </label>
       {children}
-      {hint && <div className="form-hint">{hint}</div>}
+      {error ? (
+        <div className="form-error" id={descriptionId} role="alert">
+          {error}
+        </div>
+      ) : (
+        hint && (
+          <div className="form-hint" id={descriptionId}>
+            {hint}
+          </div>
+        )
+      )}
     </div>
   );
 }

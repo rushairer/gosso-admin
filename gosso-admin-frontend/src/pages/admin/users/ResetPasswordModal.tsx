@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X as XIcon } from 'lucide-react';
-import { Feedback, FormField } from '../../../components/ui';
+import { Feedback, FormField, Modal } from '../../../components/ui';
 import type { Account } from '../../../types/api';
 
 interface ResetPasswordModalProps {
@@ -41,56 +40,59 @@ export function ResetPasswordModal({ isOpen, onClose, account, onSubmit }: Reset
   };
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal-content" style={{ maxWidth: '400px' }}>
-        <div className="modal-header">
-          <h3 className="modal-title">{t('users.changePasswordModalTitle')}</h3>
-          <button className="modal-close-btn" onClick={onClose}>
-            <XIcon style={{ width: '18px', height: '18px' }} />
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t('users.changePasswordModalTitle')}
+      maxWidth="400px"
+      footer={
+        <>
+          <button type="button" className="btn btn-secondary" onClick={onClose} disabled={submitting || !!success}>
+            {t('common.cancel')}
           </button>
-        </div>
-        <form onSubmit={handleSubmit}>
-          <div className="modal-body">
-            <p className="mb-md text-dark" style={{ fontSize: '14px' }}>
-              {t('users.changePasswordDescription', {
-                name: account.display_name || account.username,
-              })}
-            </p>
+          <button
+            form="reset-password-form"
+            type="submit"
+            className="btn btn-primary"
+            disabled={!newPassword || submitting || !!success}
+          >
+            {t('users.updatePasswordButton')}
+          </button>
+        </>
+      }
+    >
+      <form id="reset-password-form" onSubmit={handleSubmit}>
+        <p className="mb-md text-dark" style={{ fontSize: '14px' }}>
+          {t('users.changePasswordDescription', {
+            name: account.display_name || account.username,
+          })}
+        </p>
 
-            {error && (
-              <div className="mb-md">
-                <Feedback type="error">{error}</Feedback>
-              </div>
-            )}
-            {success && (
-              <div className="mb-md">
-                <Feedback type="success">{success}</Feedback>
-              </div>
-            )}
+        {error && (
+          <div className="mb-md">
+            <Feedback type="error">{error}</Feedback>
+          </div>
+        )}
+        {success && (
+          <div className="mb-md">
+            <Feedback type="success">{success}</Feedback>
+          </div>
+        )}
 
-            <FormField label={t('users.newPasswordLabel')} noMargin>
-              <input
-                type="password"
-                className="input-field"
-                placeholder={t('users.newPasswordPlaceholder')}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-                disabled={submitting || !!success}
-                autoFocus
-              />
-            </FormField>
-          </div>
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={submitting || !!success}>
-              {t('common.cancel')}
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={!newPassword || submitting || !!success}>
-              {t('users.updatePasswordButton')}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <FormField id="new-password" label={t('users.newPasswordLabel')} noMargin required>
+          <input
+            id="new-password"
+            type="password"
+            className="input-field"
+            placeholder={t('users.newPasswordPlaceholder')}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            required
+            disabled={submitting || !!success}
+            autoFocus
+          />
+        </FormField>
+      </form>
+    </Modal>
   );
 }

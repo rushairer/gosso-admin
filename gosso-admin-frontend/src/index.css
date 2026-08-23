@@ -37,8 +37,8 @@ body,
 body {
   min-height: 100vh;
   overflow-x: hidden;
-  background: var(--bg-main);
-  color: var(--color-text-main);
+  background: var(--surface-canvas);
+  color: var(--text-primary);
   font-family:
     'Inter',
     -apple-system,
@@ -91,8 +91,8 @@ a {
   flex-direction: column;
   height: 100vh;
   padding: 20px 16px;
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border-color);
+  background: var(--surface-navigation);
+  border-right: 1px solid var(--border-default);
 }
 
 .sidebar-brand {
@@ -100,7 +100,7 @@ a {
   align-items: center;
   gap: 12px;
   padding: 4px 6px 22px;
-  color: var(--color-text-main);
+  color: var(--text-primary);
   text-decoration: none;
 }
 
@@ -125,7 +125,7 @@ a {
 .sidebar-brand small {
   display: block;
   margin-top: 3px;
-  color: var(--color-text-muted);
+  color: var(--text-secondary);
   font-size: 12px;
   font-weight: 500;
 }
@@ -136,7 +136,7 @@ a {
   flex-direction: column;
   gap: 4px;
   padding-top: 10px;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-default);
 }
 
 .sidebar-link {
@@ -146,7 +146,7 @@ a {
   min-height: 40px;
   padding: 0 12px;
   border-radius: 8px;
-  color: var(--color-text-muted);
+  color: var(--text-secondary);
   text-decoration: none;
   font-weight: 600;
   white-space: nowrap;
@@ -154,7 +154,7 @@ a {
 
 .sidebar-link:hover {
   background: #18202a;
-  color: var(--color-text-main);
+  color: var(--text-primary);
 }
 
 .sidebar-link.active {
@@ -167,12 +167,12 @@ a {
   flex-direction: column;
   gap: 10px;
   padding-top: 16px;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-default);
 }
 
 .sidebar-section-title {
   padding: 0 4px;
-  color: var(--color-text-dark);
+  color: var(--text-tertiary);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -184,7 +184,7 @@ a {
   align-items: center;
   gap: 10px;
   padding: 10px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   background: #151b24;
 }
@@ -221,7 +221,7 @@ a {
 
 .session-meta span {
   margin-top: 2px;
-  color: var(--color-text-muted);
+  color: var(--text-secondary);
   font-size: 12px;
 }
 
@@ -231,10 +231,10 @@ a {
   justify-content: center;
   gap: 8px;
   min-height: 36px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   background: #151b24;
-  color: var(--color-text-main);
+  color: var(--text-primary);
   cursor: pointer;
   font-weight: 700;
 }
@@ -251,7 +251,7 @@ a {
 
 .workbench {
   min-width: 0;
-  background: var(--bg-main);
+  background: var(--surface-canvas);
 }
 
 .topbar {
@@ -260,7 +260,7 @@ a {
   justify-content: space-between;
   min-height: 132px;
   padding: 28px 36px 24px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-default);
   background: #121720;
 }
 
@@ -273,7 +273,7 @@ a {
 
 .topbar p {
   margin-top: 8px;
-  color: var(--color-text-muted);
+  color: var(--text-secondary);
 }
 
 .eyebrow {
@@ -301,8 +301,8 @@ a {
 }
 
 .glass-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-card);
+  background: var(--surface-panel);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   padding: 22px;
   box-shadow: var(--shadow-panel);
@@ -317,17 +317,17 @@ a {
   width: 100%;
   min-height: 40px;
   padding: 9px 12px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   outline: none;
   background: #10151d;
-  color: var(--color-text-main);
+  color: var(--text-primary);
   font-size: 14px;
 }
 
 .input-field:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--border-focus);
+  border-color: var(--action-primary);
+  box-shadow: 0 0 0 3px var(--border-focus-ring);
 }
 
 .input-field::placeholder {
@@ -341,7 +341,7 @@ a {
 .form-label {
   display: block;
   margin-bottom: 6px;
-  color: var(--color-text-muted);
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 700;
 }
@@ -353,11 +353,30 @@ a {
   line-height: 1.4;
 }
 
+.form-error {
+  margin-top: 6px;
+  color: var(--status-danger);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.input-icon-button {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
 .checkbox-field {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  color: var(--color-text-main);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 13.5px;
 }
@@ -395,16 +414,16 @@ a {
 }
 
 .btn-primary {
-  background: var(--color-primary);
+  background: var(--action-primary);
   color: white;
 }
 
 .btn-primary:hover {
-  background: var(--color-primary-hover);
+  background: var(--action-primary-hover);
 }
 
 .btn-secondary {
-  border-color: var(--border-color);
+  border-color: var(--border-default);
   background: #1b2330;
 }
 
@@ -457,7 +476,7 @@ a {
   flex-wrap: wrap;
   gap: 6px;
   padding: 4px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   background: #121720;
 }
@@ -470,7 +489,7 @@ a {
   border: 0;
   border-radius: 7px;
   background: transparent;
-  color: var(--color-text-muted);
+  color: var(--text-secondary);
   cursor: pointer;
   font-size: 14px;
   font-weight: 700;
@@ -478,19 +497,19 @@ a {
 
 .tab-btn:hover {
   background: #1b2330;
-  color: var(--color-text-main);
+  color: var(--text-primary);
 }
 
 .tab-btn.active {
-  background: var(--bg-elevated);
+  background: var(--surface-elevated);
   color: #bfdbfe;
 }
 
 .table-wrapper {
   overflow-x: auto;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-control);
+  background: var(--surface-panel);
 }
 
 .data-table-wrap {
@@ -535,11 +554,11 @@ a {
   justify-content: space-between;
   gap: 16px;
   padding: 18px 20px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .panel-header h3 {
-  color: var(--color-text-main);
+  color: var(--text-primary);
   font-size: 18px;
   font-weight: 800;
   letter-spacing: 0;
@@ -547,7 +566,7 @@ a {
 
 .panel-header p {
   margin-top: 4px;
-  color: var(--color-text-muted);
+  color: var(--text-secondary);
   font-size: 13.5px;
   line-height: 1.45;
 }
@@ -562,7 +581,7 @@ a {
 
 .plain-section {
   padding: 20px;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-default);
 }
 
 .plain-section:first-child {
@@ -571,7 +590,7 @@ a {
 
 .plain-section-title {
   margin-bottom: 14px;
-  color: var(--color-text-main);
+  color: var(--text-primary);
   font-size: 15px;
   font-weight: 800;
 }
@@ -579,14 +598,14 @@ a {
 .metric-strip {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   overflow: hidden;
 }
 
 .metric-item {
   padding: 14px 16px;
-  border-right: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-default);
   background: rgba(255, 255, 255, 0.015);
 }
 

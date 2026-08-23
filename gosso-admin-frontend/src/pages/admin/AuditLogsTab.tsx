@@ -1,48 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText as AuditIcon } from 'lucide-react';
-import { ButtonGroup, DataTable, EmptyState, Feedback, FormField, PageLoader, PanelHeader, Tag } from '../../components/ui';
-import { auditService } from '../../services';
+import {
+  ButtonGroup,
+  DataTable,
+  EmptyState,
+  Feedback,
+  FormField,
+  PageLoader,
+  PanelHeader,
+  Tag,
+} from '../../components/ui';
 import { AuditLogDetailModal } from './audit/AuditLogDetailModal';
 import type { AuditLog } from '../../types/api';
-import { logger } from '../../utils/logger';
+import { useAuditLogs } from '../../features/audit/useAuditLogs';
 
 export default function AuditLogsTab() {
   const { t } = useTranslation();
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-  const [auditTotal, setAuditTotal] = useState(0);
-  const [auditPage, setAuditPage] = useState(1);
-  const [auditLoading, setAuditLoading] = useState(true);
-  const [filterEventType, setFilterEventType] = useState('');
-  const [filterAccountID, setFilterAccountID] = useState('');
   const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchAuditLogs(1);
-  }, []);
-
-  const fetchAuditLogs = async (page: number) => {
-    try {
-      setAuditLoading(true);
-      setError(null);
-      const data = await auditService.fetchAuditLogs({
-        page,
-        pageSize: 20,
-        eventType: filterEventType || undefined,
-        accountId: filterAccountID || undefined,
-      });
-      setAuditLogs(data.logs);
-      setAuditTotal(data.total);
-      setAuditPage(page);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error loading audit logs';
-      logger.error('Failed to load audit logs', err);
-      setError(message);
-    } finally {
-      setAuditLoading(false);
-    }
-  };
+  const {
+    logs: auditLogs,
+    total: auditTotal,
+    page: auditPage,
+    pageSize,
+    loading: auditLoading,
+    error,
+    eventType: filterEventType,
+    setEventType: setFilterEventType,
+    accountId: filterAccountID,
+    setAccountId: setFilterAccountID,
+    search,
+    clearFilters,
+    goToPage,
+  } = useAuditLogs();
 
   return (
     <div>
@@ -74,19 +64,10 @@ export default function AuditLogsTab() {
             </FormField>
           </div>
           <ButtonGroup compact>
-            <button className="btn btn-primary" onClick={() => fetchAuditLogs(1)}>
+            <button className="btn btn-primary" onClick={search}>
               {t('common.search')}
             </button>
-            <button
-              className="btn btn-secondary"
-              onClick={() => {
-                setFilterEventType('');
-                setFilterAccountID('');
-                setTimeout(() => {
-                  fetchAuditLogs(1);
-                }, 0);
-              }}
-            >
+            <button className="btn btn-secondary" onClick={clearFilters}>
               {t('common.clear')}
             </button>
           </ButtonGroup>
@@ -104,7 +85,6 @@ export default function AuditLogsTab() {
       ) : auditLogs.length === 0 ? (
         <EmptyState icon={<AuditIcon />} title={t('audit.noLogsTitle')} description={t('audit.noLogsDescription')} />
       ) : (
-
         <div>
           <DataTable>
             <thead>
@@ -152,7 +132,7 @@ export default function AuditLogsTab() {
               <button
                 className="btn btn-secondary btn-sm"
                 disabled={auditPage <= 1}
-                onClick={() => fetchAuditLogs(auditPage - 1)}
+                onClick={() => goToPage(auditPage - 1)}
               >
                 {t('common.previous')}
               </button>
@@ -161,8 +141,8 @@ export default function AuditLogsTab() {
               </span>
               <button
                 className="btn btn-secondary btn-sm"
-                disabled={auditLogs.length < 20 || auditPage * 20 >= auditTotal}
-                onClick={() => fetchAuditLogs(auditPage + 1)}
+                disabled={auditLogs.length < pageSize || auditPage * pageSize >= auditTotal}
+                onClick={() => goToPage(auditPage + 1)}
               >
                 {t('common.next')}
               </button>

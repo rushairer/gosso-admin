@@ -5,17 +5,17 @@ import { Shield, QrCode, Clipboard, AlertTriangle, RefreshCw, Unlock, Check, Cop
 import { gossoClient } from '../../auth';
 import {
   ButtonGroup,
-  ConfirmDialog,
   Feedback,
   FormField,
+  Modal,
   PageLoader,
   Panel,
   PanelBody,
   PanelHeader,
   StatusBadge,
+  useConfirm,
   useToast,
 } from '../../components/ui';
-
 
 import type { MfaEnrollment, MfaStatus } from '../../auth';
 
@@ -31,12 +31,7 @@ export default function MFAPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [confirmState, setConfirmState] = useState<{
-    title: string;
-    message: string;
-    onConfirm: () => void;
-    onCancel: () => void;
-  } | null>(null);
+  const { confirm, confirmDialog } = useConfirm();
 
   useEffect(() => {
     loadMFAStatus();
@@ -115,19 +110,11 @@ export default function MFAPanel() {
   const handleGenerateBackupCodes = async () => {
     setError(null);
     setSuccess(null);
-    const confirmed = await new Promise<boolean>((resolve) => {
-      setConfirmState({
-        title: t('mfa.regenerateConfirmTitle'),
-        message: t('mfa.regenerateConfirmMessage'),
-        onConfirm: () => {
-          setConfirmState(null);
-          resolve(true);
-        },
-        onCancel: () => {
-          setConfirmState(null);
-          resolve(false);
-        },
-      });
+    const confirmed = await confirm({
+      title: t('mfa.regenerateConfirmTitle'),
+      message: t('mfa.regenerateConfirmMessage'),
+      confirmLabel: t('common.continue'),
+      confirmVariant: 'primary',
     });
     if (!confirmed) return;
     try {
@@ -377,59 +364,50 @@ export default function MFAPanel() {
       </Panel>
 
       {/* Disable MFA Modal */}
-      {showDisableModal && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '400px' }}>
-            <div className="modal-header">
-              <h3 className="modal-title">{t('mfa.disableModalTitle')}</h3>
-            </div>
-            <div className="modal-body">
-              <p className="text-muted" style={{ fontSize: '13.5px', lineHeight: '1.5' }}>
-                {t('mfa.disableModalDescription')}
-              </p>
+      <Modal
+        isOpen={showDisableModal}
+        title={t('mfa.disableModalTitle')}
+        maxWidth="400px"
+        onClose={() => {
+          setShowDisableModal(false);
+          setConfirmPasswordForMFA('');
+        }}
+      >
+        <p className="text-muted" style={{ fontSize: '13.5px', lineHeight: '1.5' }}>
+          {t('mfa.disableModalDescription')}
+        </p>
 
-              <form onSubmit={handleDisableMFA} className="flex-col mt-md" style={{ gap: '14px' }}>
-                <FormField label={t('mfa.accountPasswordLabel')} noMargin>
-                  <input
-                    type="password"
-                    className="input-field"
-                    required
-                    value={confirmPasswordForMFA}
-                    onChange={(e) => setConfirmPasswordForMFA(e.target.value)}
-                    placeholder={t('mfa.accountPasswordPlaceholder')}
-                  />
-                </FormField>
+        <form onSubmit={handleDisableMFA} className="flex-col mt-md" style={{ gap: '14px' }}>
+          <FormField label={t('mfa.accountPasswordLabel')} noMargin>
+            <input
+              type="password"
+              className="input-field"
+              required
+              value={confirmPasswordForMFA}
+              onChange={(e) => setConfirmPasswordForMFA(e.target.value)}
+              placeholder={t('mfa.accountPasswordPlaceholder')}
+            />
+          </FormField>
 
-                <ButtonGroup align="right">
-                  <button className="btn btn-danger" type="submit" disabled={loading}>
-                    {loading ? t('mfa.disablingLoading') : t('mfa.confirmDisableButton')}
-                  </button>
-                  <button
-                    className="btn btn-secondary"
-                    type="button"
-                    onClick={() => {
-                      setShowDisableModal(false);
-                      setConfirmPasswordForMFA('');
-                    }}
-                  >
-                    {t('common.cancel')}
-                  </button>
-                </ButtonGroup>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+          <ButtonGroup align="right">
+            <button className="btn btn-danger" type="submit" disabled={loading}>
+              {loading ? t('mfa.disablingLoading') : t('mfa.confirmDisableButton')}
+            </button>
+            <button
+              className="btn btn-secondary"
+              type="button"
+              onClick={() => {
+                setShowDisableModal(false);
+                setConfirmPasswordForMFA('');
+              }}
+            >
+              {t('common.cancel')}
+            </button>
+          </ButtonGroup>
+        </form>
+      </Modal>
 
-      <ConfirmDialog
-        open={!!confirmState}
-        title={confirmState?.title || ''}
-        message={confirmState?.message || ''}
-        confirmLabel={t('common.continue')}
-        confirmVariant="primary"
-        onConfirm={() => confirmState?.onConfirm()}
-        onCancel={() => confirmState?.onCancel()}
-      />
+      {confirmDialog}
     </>
   );
 }

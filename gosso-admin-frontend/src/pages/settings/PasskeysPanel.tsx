@@ -5,16 +5,17 @@ import { gossoClient } from '../../auth';
 import type { PasskeyInfo } from '../../auth';
 import {
   ButtonGroup,
-  ConfirmDialog,
   EmptyState,
   Feedback,
   FormField,
   ListRow,
   ListStack,
+  Modal,
   PageLoader,
   Panel,
   PanelBody,
   PanelHeader,
+  useConfirm,
 } from '../../components/ui';
 
 import { logger } from '../../utils/logger';
@@ -27,12 +28,7 @@ export default function PasskeysPanel() {
   const [success, setSuccess] = useState<string | null>(null);
   const [showPasskeyModal, setShowPasskeyModal] = useState(false);
   const [newPasskeyName, setNewPasskeyName] = useState('');
-  const [confirmState, setConfirmState] = useState<{
-    title: string;
-    message: string;
-    onConfirm: () => void;
-    onCancel: () => void;
-  } | null>(null);
+  const { confirm, confirmDialog } = useConfirm();
 
   useEffect(() => {
     loadPasskeys();
@@ -79,19 +75,10 @@ export default function PasskeysPanel() {
   const handleDeletePasskey = async (id: string, name: string) => {
     setError(null);
     setSuccess(null);
-    const confirmed = await new Promise<boolean>((resolve) => {
-      setConfirmState({
-        title: t('passkeys.removePasskey'),
-        message: t('passkeys.removePasskeyConfirmMessage', { name }),
-        onConfirm: () => {
-          setConfirmState(null);
-          resolve(true);
-        },
-        onCancel: () => {
-          setConfirmState(null);
-          resolve(false);
-        },
-      });
+    const confirmed = await confirm({
+      title: t('passkeys.removePasskey'),
+      message: t('passkeys.removePasskeyConfirmMessage', { name }),
+      confirmLabel: t('common.remove'),
     });
     if (!confirmed) return;
     try {
@@ -181,58 +168,50 @@ export default function PasskeysPanel() {
       </Panel>
 
       {/* Register Passkey Modal */}
-      {showPasskeyModal && (
-        <div className="modal-backdrop">
-          <div className="modal-content" style={{ maxWidth: '400px' }}>
-            <div className="modal-header">
-              <h3 className="modal-title">{t('passkeys.registerModalTitle')}</h3>
-            </div>
-            <div className="modal-body">
-              <p className="text-muted" style={{ fontSize: '13.5px', lineHeight: '1.5' }}>
-                {t('passkeys.registerModalDescription')}
-              </p>
+      <Modal
+        isOpen={showPasskeyModal}
+        title={t('passkeys.registerModalTitle')}
+        maxWidth="400px"
+        onClose={() => {
+          setShowPasskeyModal(false);
+          setNewPasskeyName('');
+        }}
+      >
+        <p className="text-muted" style={{ fontSize: '13.5px', lineHeight: '1.5' }}>
+          {t('passkeys.registerModalDescription')}
+        </p>
 
-              <form onSubmit={handleRegisterPasskey} className="flex-col mt-md" style={{ gap: '14px' }}>
-                <FormField label={t('passkeys.passkeyNameLabel')} noMargin>
-                  <input
-                    type="text"
-                    className="input-field"
-                    required
-                    value={newPasskeyName}
-                    onChange={(e) => setNewPasskeyName(e.target.value)}
-                    placeholder={t('passkeys.passkeyNamePlaceholder')}
-                  />
-                </FormField>
+        <form onSubmit={handleRegisterPasskey} className="flex-col mt-md" style={{ gap: '14px' }}>
+          <FormField label={t('passkeys.passkeyNameLabel')} noMargin>
+            <input
+              type="text"
+              className="input-field"
+              required
+              value={newPasskeyName}
+              onChange={(e) => setNewPasskeyName(e.target.value)}
+              placeholder={t('passkeys.passkeyNamePlaceholder')}
+            />
+          </FormField>
 
-                <ButtonGroup align="right">
-                  <button className="btn btn-primary" type="submit" disabled={loading}>
-                    {loading ? t('passkeys.registeringLoading') : t('passkeys.registerDeviceButton')}
-                  </button>
-                  <button
-                    className="btn btn-secondary"
-                    type="button"
-                    onClick={() => {
-                      setShowPasskeyModal(false);
-                      setNewPasskeyName('');
-                    }}
-                  >
-                    {t('common.cancel')}
-                  </button>
-                </ButtonGroup>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+          <ButtonGroup align="right">
+            <button className="btn btn-primary" type="submit" disabled={loading}>
+              {loading ? t('passkeys.registeringLoading') : t('passkeys.registerDeviceButton')}
+            </button>
+            <button
+              className="btn btn-secondary"
+              type="button"
+              onClick={() => {
+                setShowPasskeyModal(false);
+                setNewPasskeyName('');
+              }}
+            >
+              {t('common.cancel')}
+            </button>
+          </ButtonGroup>
+        </form>
+      </Modal>
 
-      <ConfirmDialog
-        open={!!confirmState}
-        title={confirmState?.title || ''}
-        message={confirmState?.message || ''}
-        confirmLabel={t('common.remove')}
-        onConfirm={() => confirmState?.onConfirm()}
-        onCancel={() => confirmState?.onCancel()}
-      />
+      {confirmDialog}
     </>
   );
 }

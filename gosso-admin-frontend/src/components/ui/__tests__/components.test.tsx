@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { useState } from 'react';
 import { Feedback } from '../Feedback';
 import { StatusBadge } from '../Badge';
 import { EmptyState } from '../EmptyState';
@@ -7,8 +8,11 @@ import { ConfirmDialog } from '../ConfirmDialog';
 import { ToastProvider, useToast } from '../Toast';
 import { LoadingSpinner, PageLoader } from '../LoadingSpinner';
 import { Modal } from '../Modal';
+import { FormField } from '../Form';
+import { Tabs } from '../Tabs';
+import { useConfirm } from '../useConfirm';
+import { AsyncState } from '../AsyncState';
 import { fireEvent } from '@testing-library/react';
-
 
 describe('Feedback', () => {
   it('renders error type with message', () => {
@@ -107,6 +111,21 @@ describe('ConfirmDialog', () => {
     expect(cancelled).toBe(true);
   });
 
+  it('calls onCancel when the backdrop is clicked', () => {
+    let cancelled = false;
+    render(
+      <ConfirmDialog
+        open={true}
+        title="Test"
+        message="Confirm?"
+        onConfirm={() => {}}
+        onCancel={() => (cancelled = true)}
+      />
+    );
+    fireEvent.click(screen.getByRole('dialog').parentElement!);
+    expect(cancelled).toBe(true);
+  });
+
   it('uses custom confirm label', () => {
     render(
       <ConfirmDialog
@@ -199,12 +218,7 @@ describe('Modal', () => {
 
   it('renders title, content, and footer when isOpen is true', () => {
     render(
-      <Modal
-        isOpen={true}
-        onClose={() => {}}
-        title="Test Modal"
-        footer={<button>Confirm</button>}
-      >
+      <Modal isOpen={true} onClose={() => {}} title="Test Modal" footer={<button>Confirm</button>}>
         <p>Modal Body Text</p>
       </Modal>
     );
@@ -223,5 +237,178 @@ describe('Modal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(closed).toBe(true);
   });
+
+  it('focuses the autofocus control and restores focus after closing', () => {
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+    trigger.focus();
+    const { unmount } = render(
+      <Modal isOpen={true} onClose={() => {}} title="Test">
+        <input autoFocus aria-label="Modal input" />
+      </Modal>
+    );
+    expect(screen.getByLabelText('Modal input')).toHaveFocus();
+    unmount();
+    expect(trigger).toHaveFocus();
+    trigger.remove();
+  });
+
+  it('closes on Escape by default', () => {
+    let closed = false;
+    render(
+      <Modal isOpen={true} onClose={() => (closed = true)}>
+        Content
+      </Modal>
+    );
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(closed).toBe(true);
+  });
+
+  it('can hide the title close button', () => {
+    render(
+      <Modal isOpen={true} onClose={() => {}} title="No close" showCloseButton={false}>
+        Content
+      </Modal>
+    );
+    expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument();
+  });
 });
 
+describe('FormField', () => {
+  it('associates a supplied control id with its label and exposes errors', () => {
+    render(
+      <FormField id="account-name" label="Account name" error="Required" required>
+        <input id="account-name" />
+      </FormField>
+    );
+    expect(screen.getByLabelText(/Account name/)).toBe(screen.getByRole('textbox'));
+    expect(screen.getByRole('alert')).toHaveTextContent('Required');
+  });
+});
+
+describe('Tabs', () => {
+  it('reports and changes the selected tab', () => {
+    let value = 'accounts';
+    const onValueChange = (next: 'accounts' | 'security') => {
+      value = next;
+    };
+    const { rerender } = render(
+      <Tabs
+        value={value}
+        onValueChange={onValueChange}
+        ariaLabel="Settings sections"
+        items={[
+          { value: 'accounts', label: 'Accounts' },
+          { value: 'security', label: 'Security' },
+        ]}
+      />
+    );
+    expect(screen.getByRole('tab', { name: 'Accounts' })).toHaveAttribute('aria-selected', 'true');
+    fireEvent.click(screen.getByRole('tab', { name: 'Security' }));
+    expect(value).toBe('security');
+
+    rerender(
+      <Tabs
+        value={value}
+        onValueChange={onValueChange}
+        ariaLabel="Settings sections"
+        items={[
+          { value: 'accounts', label: 'Accounts' },
+          { value: 'security', label: 'Security' },
+        ]}
+      />
+    );
+    expect(screen.getByRole('tab', { name: 'Security' })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('moves selection and focus with arrow keys', () => {
+    let value: 'accounts' | 'security' = 'accounts';
+    const onValueChange = (next: 'accounts' | 'security') => {
+      value = next;
+    };
+    const { rerender } = render(
+      <Tabs
+        value={value}
+        onValueChange={onValueChange}
+        ariaLabel="Settings sections"
+        items={[
+          { value: 'accounts', label: 'Accounts' },
+          { value: 'security', label: 'Security' },
+        ]}
+      />
+    );
+    const accounts = screen.getByRole('tab', { name: 'Accounts' });
+    accounts.focus();
+    fireEvent.keyDown(accounts, { key: 'ArrowRight' });
+    expect(value).toBe('security');
+    expect(screen.getByRole('tab', { name: 'Security' })).toHaveFocus();
+
+    rerender(
+      <Tabs
+        value={value}
+        onValueChange={onValueChange}
+        ariaLabel="Settings sections"
+        items={[
+          { value: 'accounts', label: 'Accounts' },
+          { value: 'security', label: 'Security' },
+        ]}
+      />
+    );
+    expect(screen.getByRole('tab', { name: 'Security' })).toHaveAttribute('tabindex', '0');
+  });
+});
+
+describe('useConfirm', () => {
+  function ConfirmHarness() {
+    const { confirm, confirmDialog } = useConfirm();
+    const [result, setResult] = useState<string>('pending');
+
+    return (
+      <>
+        <button
+          onClick={async () => {
+            setResult((await confirm({ title: 'Remove account', message: 'Continue?' })) ? 'confirmed' : 'cancelled');
+          }}
+        >
+          Open confirmation
+        </button>
+        <span>{result}</span>
+        {confirmDialog}
+      </>
+    );
+  }
+
+  it('resolves false on cancel and true on confirmation', async () => {
+    render(<ConfirmHarness />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open confirmation' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel' }));
+    expect(await screen.findByText('cancelled')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open confirmation' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }));
+    expect(await screen.findByText('confirmed')).toBeInTheDocument();
+  });
+});
+
+describe('AsyncState', () => {
+  it('renders loading, error retry, or content as appropriate', () => {
+    const { rerender } = render(
+      <AsyncState loading loadingMessage="Loading clients">
+        Content
+      </AsyncState>
+    );
+    expect(screen.getByText('Loading clients')).toBeInTheDocument();
+
+    const retry = vi.fn();
+    rerender(
+      <AsyncState loading={false} error="Request failed" onRetry={retry}>
+        Content
+      </AsyncState>
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    expect(retry).toHaveBeenCalledOnce();
+
+    rerender(<AsyncState loading={false}>Content</AsyncState>);
+    expect(screen.getByText('Content')).toBeInTheDocument();
+  });
+});

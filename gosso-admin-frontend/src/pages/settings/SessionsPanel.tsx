@@ -3,9 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Laptop, MapPin } from 'lucide-react';
 import { gossoClient, logout } from '../../auth';
 import type { SessionInfo } from '../../auth';
-import { ConfirmDialog, DataTable, Feedback, PageLoader, Panel, PanelHeader, Tag } from '../../components/ui';
+import { DataTable, Feedback, PageLoader, Panel, PanelHeader, Tag, useConfirm } from '../../components/ui';
 import { parseUserAgent } from '../../utils/format';
-
 
 export default function SessionsPanel() {
   const { t } = useTranslation();
@@ -14,12 +13,7 @@ export default function SessionsPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [confirmState, setConfirmState] = useState<{
-    title: string;
-    message: string;
-    onConfirm: () => void;
-    onCancel: () => void;
-  } | null>(null);
+  const { confirm, confirmDialog } = useConfirm();
 
   useEffect(() => {
     loadSessions();
@@ -47,19 +41,10 @@ export default function SessionsPanel() {
   const handleRevokeSession = async (sessionId: string) => {
     setError(null);
     setSuccess(null);
-    const confirmed = await new Promise<boolean>((resolve) => {
-      setConfirmState({
-        title: t('sessions.terminateSessionTitle'),
-        message: t('sessions.terminateSessionConfirmMessage'),
-        onConfirm: () => {
-          setConfirmState(null);
-          resolve(true);
-        },
-        onCancel: () => {
-          setConfirmState(null);
-          resolve(false);
-        },
-      });
+    const confirmed = await confirm({
+      title: t('sessions.terminateSessionTitle'),
+      message: t('sessions.terminateSessionConfirmMessage'),
+      confirmLabel: t('sessions.terminateButton'),
     });
     if (!confirmed) return;
     try {
@@ -164,14 +149,7 @@ export default function SessionsPanel() {
         </DataTable>
       </Panel>
 
-      <ConfirmDialog
-        open={!!confirmState}
-        title={confirmState?.title || ''}
-        message={confirmState?.message || ''}
-        confirmLabel={t('sessions.terminateButton')}
-        onConfirm={() => confirmState?.onConfirm()}
-        onCancel={() => confirmState?.onCancel()}
-      />
+      {confirmDialog}
     </>
   );
 }
