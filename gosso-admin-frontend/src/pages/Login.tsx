@@ -56,11 +56,11 @@ export default function Login() {
   }, [t]);
 
   const hasAuthorizeRedirect = searchParams.has('redirect_uri');
-  const redirectUri = searchParams.get('redirect_uri') || '/admin';
+  const redirectUri = searchParams.get('redirect_uri') || '/system-management';
 
   const doRedirect = () => {
     if (!redirectUri.startsWith('/') || redirectUri.startsWith('//')) {
-      window.location.href = appPath('/admin');
+      window.location.href = appPath('/system-management');
       return;
     }
     window.location.href = `${window.location.origin}${redirectUri}`;
@@ -71,7 +71,7 @@ export default function Login() {
       doRedirect();
       return;
     }
-    await redirectToAuthorize('/admin');
+    await redirectToAuthorize('/system-management');
   };
 
   const handlePasskeyLogin = async () => {

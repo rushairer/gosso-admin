@@ -10,7 +10,7 @@ const Callback = lazy(() => import('./pages/Callback'));
 const Login = lazy(() => import('./pages/Login'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
-const Admin = lazy(() => import('./pages/Admin'));
+const SystemManagement = lazy(() => import('./pages/SystemManagement'));
 const AccountSettings = lazy(() => import('./pages/AccountSettings'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
@@ -45,12 +45,12 @@ export default function App() {
                   </AdminLayout>
                 }
               />
-              <Route path="/admin" element={<Navigate replace to="/admin/clients" />} />
+              <Route path="/system-management" element={<Navigate replace to="/system-management/clients" />} />
               <Route
-                path="/admin/:tab"
+                path="/system-management/:tab"
                 element={
                   <AdminLayout>
-                    <Admin />
+                    <SystemManagement />
                   </AdminLayout>
                 }
               />

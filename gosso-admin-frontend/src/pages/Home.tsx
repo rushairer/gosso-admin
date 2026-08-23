@@ -26,13 +26,13 @@ export default function Home() {
   }, []);
 
   if (!authChecked) {
-    return <PageLoader message={t('admin.checkingAccess')} />;
+    return <PageLoader message={t('home.checkingAccess')} />;
   }
 
   const handleAction = () => {
     if (logged) {
       if (userAdmin) {
-        navigate('/admin');
+        navigate('/system-management');
       } else {
         // Non-admin users already see "Access Denied" in the UI
       }

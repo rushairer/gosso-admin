@@ -23,7 +23,7 @@
     "brandName": "GOSSO",
     "brandSubtitle": "Admin Console",
     "overview": "Overview",
-    "administration": "Administration",
+    "systemManagement": "System Management",
     "accountSettings": "Account Settings",
     "sessionSection": "Session",
     "administrator": "Administrator",
@@ -37,8 +37,8 @@
   "pageTitles": {
     "overviewTitle": "Overview",
     "overviewDescription": "Unified identity management entry point.",
-    "administrationTitle": "Administration",
-    "administrationDescription": "Manage clients, accounts, audit records, and service status.",
+    "systemManagementTitle": "System Management",
+    "systemManagementDescription": "Manage clients, accounts, audit records, and service status.",
     "accountSettingsTitle": "Account Settings",
     "accountSettingsDescription": "Manage profile, MFA, passkeys, and active sessions."
   },
@@ -114,6 +114,7 @@
     "backToLogin": "Back to Login"
   },
   "home": {
+    "checkingAccess": "Checking access...",
     "title": "Identity Management Console",
     "description": "Welcome to the self-hosted OpenID Connect / OAuth 2.0 identity provider administration interface. Manage security credentials, clients, user scopes, and active sessions.",
     "loggedInAs": "Logged in as {{name}}",
@@ -128,8 +129,9 @@
     "mfaAndPasskeys": "MFA & Passkeys",
     "mfaAndPasskeysDescription": "View system audit logs, configure security, and manage global OIDC provider discovery profiles."
   },
-  "admin": {
+  "systemManagement": {
     "checkingAccess": "Checking access...",
+    "sectionsLabel": "System management sections",
     "accessDeniedTitle": "Access Denied",
     "accessDeniedDescription": "Your account is signed in, but it does not have administrator permissions to access this console.",
     "backHome": "Back Home",

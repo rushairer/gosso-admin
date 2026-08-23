@@ -13,8 +13,8 @@ describe('app paths', () => {
     expect(routerBasename).toBe('/identity-admin');
     expect(appPath('/callback')).toBe('/identity-admin/callback');
     expect(appPath('/')).toBe('/identity-admin/');
-    expect(routerPath('/identity-admin/admin')).toBe('/admin');
+    expect(routerPath('/identity-admin/system-management')).toBe('/system-management');
     expect(routerPath('/identity-admin/')).toBe('/');
-    expect(routerPath('/admin')).toBe('/admin');
+    expect(routerPath('/system-management')).toBe('/system-management');
   });
 });

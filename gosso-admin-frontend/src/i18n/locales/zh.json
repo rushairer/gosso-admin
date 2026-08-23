@@ -23,7 +23,7 @@
     "brandName": "GOSSO",
     "brandSubtitle": "管理控制台",
     "overview": "概览",
-    "administration": "系统管理",
+    "systemManagement": "系统管理",
     "accountSettings": "账户设置",
     "sessionSection": "会话",
     "administrator": "管理员",
@@ -37,8 +37,8 @@
   "pageTitles": {
     "overviewTitle": "概览",
     "overviewDescription": "统一身份管理入口。",
-    "administrationTitle": "系统管理",
-    "administrationDescription": "管理客户端、账户、审计记录及服务状态。",
+    "systemManagementTitle": "系统管理",
+    "systemManagementDescription": "管理客户端、账户、审计记录及服务状态。",
     "accountSettingsTitle": "账户设置",
     "accountSettingsDescription": "管理个人资料、MFA、通行密钥及活跃会话。"
   },
@@ -114,6 +114,7 @@
     "backToLogin": "返回登录"
   },
   "home": {
+    "checkingAccess": "正在检查访问权限...",
     "title": "身份管理控制台",
     "description": "欢迎使用自托管 OpenID Connect / OAuth 2.0 身份提供者管理界面。管理安全凭据、客户端、用户范围及活跃会话。",
     "loggedInAs": "当前登录用户：{{name}}",
@@ -128,8 +129,9 @@
     "mfaAndPasskeys": "MFA 与通行密钥",
     "mfaAndPasskeysDescription": "查看系统审计日志、配置安全设置、管理全局 OIDC 提供者发现配置。"
   },
-  "admin": {
+  "systemManagement": {
     "checkingAccess": "正在检查访问权限...",
+    "sectionsLabel": "系统管理栏目",
     "accessDeniedTitle": "访问被拒绝",
     "accessDeniedDescription": "您的账户已登录，但不具备访问此控制台的管理员权限。",
     "backHome": "返回首页",

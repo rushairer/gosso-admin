@@ -16,7 +16,7 @@ export const gossoClient = createGossoClient({
   clientId: 'gosso-admin-spa',
   redirectUri: `${window.location.origin}${appPath('/callback')}`,
   scope: 'openid profile email admin',
-  postLoginDefaultPath: appPath('/admin'),
+  postLoginDefaultPath: appPath('/system-management'),
   loginPath: appPath('/login'),
   storagePrefix: 'gosso-admin',
   sessionMode: 'cookie',
@@ -25,7 +25,7 @@ export const gossoClient = createGossoClient({
 
 export const apiFetch = gossoClient.apiFetch;
 
-export async function redirectToAuthorize(destination = '/admin') {
+export async function redirectToAuthorize(destination = '/system-management') {
   return gossoClient.redirectToAuthorize(appPath(destination));
 }
 

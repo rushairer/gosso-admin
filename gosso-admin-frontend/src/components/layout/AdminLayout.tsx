@@ -23,9 +23,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         title: t('pageTitles.overviewTitle'),
         description: t('pageTitles.overviewDescription'),
       },
-      '/admin': {
-        title: t('pageTitles.administrationTitle'),
-        description: t('pageTitles.administrationDescription'),
+      '/system-management': {
+        title: t('pageTitles.systemManagementTitle'),
+        description: t('pageTitles.systemManagementDescription'),
       },
       '/account-settings': {
         title: t('pageTitles.accountSettingsTitle'),
@@ -51,21 +51,23 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   const page = useMemo(() => {
-    if (location.pathname.startsWith('/admin')) return pageTitles['/admin'];
+    if (location.pathname.startsWith('/system-management')) return pageTitles['/system-management'];
     if (location.pathname.startsWith('/account-settings')) return pageTitles['/account-settings'];
     return pageTitles[location.pathname] || pageTitles['/'];
   }, [pageTitles, location.pathname]);
 
   const pageLabel = useMemo(() => {
-    const adminTab = location.pathname.match(/^\/admin\/([^/]+)/)?.[1];
-    const adminLabels: Record<string, string> = {
-      clients: t('admin.tabClients'),
-      users: t('admin.tabUsers'),
-      'audit-logs': t('admin.tabAuditLogs'),
+    const systemManagementTab = location.pathname.match(/^\/system-management\/([^/]+)/)?.[1];
+    const systemManagementLabels: Record<string, string> = {
+      clients: t('systemManagement.tabClients'),
+      users: t('systemManagement.tabUsers'),
+      'audit-logs': t('systemManagement.tabAuditLogs'),
       'site-settings': t('site.tabLabel'),
-      system: t('admin.tabSystemStatus'),
+      system: t('systemManagement.tabSystemStatus'),
     };
-    if (adminTab) return adminLabels[adminTab] || pageTitles['/admin'].title;
+    if (systemManagementTab) {
+      return systemManagementLabels[systemManagementTab] || pageTitles['/system-management'].title;
+    }
 
     const accountSettingsTab = location.pathname.match(/^\/account-settings\/([^/]+)/)?.[1];
     const accountSettingsLabels: Record<string, string> = {
@@ -105,9 +107,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             <span>{t('nav.overview')}</span>
           </NavLink>
           {session.loggedIn && session.isAdmin && (
-            <NavLink to="/admin/clients" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+            <NavLink
+              to="/system-management/clients"
+              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+            >
               <LayoutDashboard size={17} />
-              <span>{t('nav.administration')}</span>
+              <span>{t('nav.systemManagement')}</span>
             </NavLink>
           )}
           {session.loggedIn && (
@@ -138,7 +143,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               {t('nav.signOut')}
             </button>
           ) : (
-            <button className="sidebar-action primary" onClick={() => redirectToAuthorize('/admin/clients')}>
+            <button
+              className="sidebar-action primary"
+              onClick={() => redirectToAuthorize('/system-management/clients')}
+            >
               <LogIn size={16} />
               {t('nav.signIn')}
             </button>

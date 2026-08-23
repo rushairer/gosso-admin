@@ -55,7 +55,7 @@ describe('Login', () => {
 
     await waitFor(() => {
       expect(gossoClient.loginWithPassword).toHaveBeenCalledWith('admin', 'admin123');
-      expect(redirectToAuthorize).toHaveBeenCalledWith('/admin');
+      expect(redirectToAuthorize).toHaveBeenCalledWith('/system-management');
     });
   });
 

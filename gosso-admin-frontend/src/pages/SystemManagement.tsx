@@ -10,30 +10,30 @@ import {
 } from 'lucide-react';
 import { gossoClient, redirectToAuthorize } from '../auth';
 import { Panel, PageLoader, Tabs } from '../components/ui';
-import ClientsTab from './admin/ClientsTab';
-import UsersTab from './admin/UsersTab';
-import AuditLogsTab from './admin/AuditLogsTab';
-import SystemStatusTab from './admin/SystemStatusTab';
-import SiteSettingsTab from './admin/SiteSettingsTab';
+import ClientsTab from './system-management/ClientsTab';
+import UsersTab from './system-management/UsersTab';
+import AuditLogsTab from './system-management/AuditLogsTab';
+import SystemStatusTab from './system-management/SystemStatusTab';
+import SiteSettingsTab from './system-management/SiteSettingsTab';
 
-const adminTabs = ['clients', 'users', 'audit-logs', 'site-settings', 'system'] as const;
-type AdminTab = (typeof adminTabs)[number];
+const systemManagementTabs = ['clients', 'users', 'audit-logs', 'site-settings', 'system'] as const;
+type SystemManagementTab = (typeof systemManagementTabs)[number];
 
-function isAdminTab(value: string | undefined): value is AdminTab {
-  return Boolean(value && adminTabs.includes(value as AdminTab));
+function isSystemManagementTab(value: string | undefined): value is SystemManagementTab {
+  return Boolean(value && systemManagementTabs.includes(value as SystemManagementTab));
 }
 
-export default function Admin() {
+export default function SystemManagement() {
   const { t } = useTranslation();
   const { tab } = useParams();
   const navigate = useNavigate();
-  const activeTab = isAdminTab(tab) ? tab : 'clients';
+  const activeTab = isSystemManagementTab(tab) ? tab : 'clients';
   const [accessDenied, setAccessDenied] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     if (!gossoClient.isLoggedIn()) {
-      redirectToAuthorize(`/admin/${activeTab}`);
+      redirectToAuthorize(`/system-management/${activeTab}`);
       return;
     }
 
@@ -41,14 +41,14 @@ export default function Admin() {
       setAccessDenied(true);
     }
     setAuthChecked(true);
-  }, []);
+  }, [activeTab]);
 
   if (!authChecked) {
-    return <PageLoader message={t('admin.checkingAccess')} />;
+    return <PageLoader message={t('systemManagement.checkingAccess')} />;
   }
 
-  if (!isAdminTab(tab)) {
-    return <Navigate replace to="/admin/clients" />;
+  if (!isSystemManagementTab(tab)) {
+    return <Navigate replace to="/system-management/clients" />;
   }
 
   if (accessDenied) {
@@ -73,14 +73,14 @@ export default function Admin() {
           }}
         />
         <h3 style={{ color: 'var(--color-text-main)', marginBottom: '12px', fontSize: '20px' }}>
-          {t('admin.accessDeniedTitle')}
+          {t('systemManagement.accessDeniedTitle')}
         </h3>
         <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', lineHeight: 1.6, marginBottom: '24px' }}>
-          {t('admin.accessDeniedDescription')}
+          {t('systemManagement.accessDeniedDescription')}
         </p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
           <button className="btn btn-secondary" onClick={() => (window.location.href = '/')}>
-            {t('admin.backHome')}
+            {t('systemManagement.backHome')}
           </button>
         </div>
       </div>
@@ -88,11 +88,19 @@ export default function Admin() {
   }
 
   const tabs = [
-    { value: 'clients' as const, label: t('admin.tabClients'), icon: <KeyIcon aria-hidden="true" size={16} /> },
-    { value: 'users' as const, label: t('admin.tabUsers'), icon: <UserIcon aria-hidden="true" size={16} /> },
+    {
+      value: 'clients' as const,
+      label: t('systemManagement.tabClients'),
+      icon: <KeyIcon aria-hidden="true" size={16} />,
+    },
+    {
+      value: 'users' as const,
+      label: t('systemManagement.tabUsers'),
+      icon: <UserIcon aria-hidden="true" size={16} />,
+    },
     {
       value: 'audit-logs' as const,
-      label: t('admin.tabAuditLogs'),
+      label: t('systemManagement.tabAuditLogs'),
       icon: <AuditIcon aria-hidden="true" size={16} />,
     },
     {
@@ -100,7 +108,11 @@ export default function Admin() {
       label: t('site.tabLabel'),
       icon: <SlidersHorizontal aria-hidden="true" size={16} />,
     },
-    { value: 'system' as const, label: t('admin.tabSystemStatus'), icon: <ShieldIcon aria-hidden="true" size={16} /> },
+    {
+      value: 'system' as const,
+      label: t('systemManagement.tabSystemStatus'),
+      icon: <ShieldIcon aria-hidden="true" size={16} />,
+    },
   ];
 
   return (
@@ -108,8 +120,8 @@ export default function Admin() {
       <Tabs
         value={activeTab}
         items={tabs}
-        onValueChange={(next) => navigate(`/admin/${next}`)}
-        ariaLabel="Administration sections"
+        onValueChange={(next) => navigate(`/system-management/${next}`)}
+        ariaLabel={t('systemManagement.sectionsLabel')}
       />
 
       <Panel>
