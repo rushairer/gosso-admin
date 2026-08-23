@@ -36,7 +36,7 @@
   },
   "pageTitles": {
     "overviewTitle": "概览",
-    "overviewDescription": "GOSSO 身份管理入口。",
+    "overviewDescription": "统一身份管理入口。",
     "administrationTitle": "系统管理",
     "administrationDescription": "管理客户端、账户、审计记录及服务状态。",
     "settingsTitle": "账户设置",
@@ -114,7 +114,7 @@
     "backToLogin": "返回登录"
   },
   "home": {
-    "title": "GOSSO 管理控制台",
+    "title": "身份管理控制台",
     "description": "欢迎使用自托管 OpenID Connect / OAuth 2.0 身份提供者管理界面。管理安全凭据、客户端、用户范围及活跃会话。",
     "loggedInAs": "当前登录用户：{{name}}",
     "enterDashboard": "进入控制面板",

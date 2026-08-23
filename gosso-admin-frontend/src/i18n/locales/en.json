@@ -36,7 +36,7 @@
   },
   "pageTitles": {
     "overviewTitle": "Overview",
-    "overviewDescription": "GOSSO identity administration entry point.",
+    "overviewDescription": "Unified identity management entry point.",
     "administrationTitle": "Administration",
     "administrationDescription": "Manage clients, accounts, audit records, and service status.",
     "settingsTitle": "Account Settings",
@@ -114,7 +114,7 @@
     "backToLogin": "Back to Login"
   },
   "home": {
-    "title": "GOSSO Admin Console",
+    "title": "Identity Management Console",
     "description": "Welcome to the self-hosted OpenID Connect / OAuth 2.0 identity provider administration interface. Manage security credentials, clients, user scopes, and active sessions.",
     "loggedInAs": "Logged in as {{name}}",
     "enterDashboard": "Enter Dashboard",
