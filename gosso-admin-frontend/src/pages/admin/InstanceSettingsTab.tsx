@@ -3,21 +3,13 @@ import { Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AsyncState, FormField, PanelBody, PanelHeader, PlainSection, useToast } from '../../components/ui';
 import { instanceSettingsService } from '../../services';
+import { DEFAULT_INSTANCE_SETTINGS, mergeInstanceSettings } from '../../config/instance-defaults';
 import type { InstanceSettings } from '../../types/api';
-
-const fallbackSettings: InstanceSettings = {
-  product_name: 'GOSSO',
-  logo_url: '',
-  favicon_url: '',
-  login_title: '',
-  login_description: '',
-  login_background_url: '',
-};
 
 export default function InstanceSettingsTab() {
   const { t } = useTranslation();
   const { showSuccess, showError } = useToast();
-  const [settings, setSettings] = useState<InstanceSettings>(fallbackSettings);
+  const [settings, setSettings] = useState<InstanceSettings>(DEFAULT_INSTANCE_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +19,7 @@ export default function InstanceSettingsTab() {
       setLoading(true);
       setError(null);
       const nextSettings = await instanceSettingsService.getSettings();
-      setSettings(nextSettings);
+      setSettings(mergeInstanceSettings(nextSettings));
     } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : t('instance.loadFailed'));
     } finally {
@@ -48,7 +40,7 @@ export default function InstanceSettingsTab() {
     try {
       setSaving(true);
       const updated = await instanceSettingsService.updateSettings(settings);
-      setSettings(updated);
+      setSettings(mergeInstanceSettings(updated));
       showSuccess(t('instance.saved'));
     } catch (reason: unknown) {
       showError(reason instanceof Error ? reason.message : t('instance.saveFailed'));

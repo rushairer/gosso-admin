@@ -6,17 +6,9 @@ import { gossoClient, redirectToAuthorize } from '../auth';
 import { Feedback, FormField } from '../components/ui';
 import { logger } from '../utils/logger';
 import { appPath } from '../config/appPaths';
+import { DEFAULT_INSTANCE_SETTINGS, mergeInstanceSettings } from '../config/instance-defaults';
 import { instanceSettingsService } from '../services';
 import type { PublicInstanceBranding } from '../types/api';
-
-const defaultBranding: PublicInstanceBranding = {
-  product_name: 'GOSSO',
-  logo_url: '',
-  favicon_url: '',
-  login_title: '',
-  login_description: '',
-  login_background_url: '',
-};
 
 export default function Login() {
   const { t } = useTranslation();
@@ -27,7 +19,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [passkeyLoading, setPasskeyLoading] = useState(false);
-  const [branding, setBranding] = useState(defaultBranding);
+  const [branding, setBranding] = useState<PublicInstanceBranding>(DEFAULT_INSTANCE_SETTINGS);
 
   // MFA state
   const [mfaRequired, setMfaRequired] = useState(false);
@@ -40,14 +32,15 @@ export default function Login() {
       .getPublicBranding()
       .then((next) => {
         if (!active) return;
-        setBranding(next);
-        document.title = next.product_name;
-        if (next.favicon_url) {
+        const resolved = mergeInstanceSettings(next);
+        setBranding(resolved);
+        document.title = resolved.product_name;
+        if (resolved.favicon_url) {
           const icon =
             document.querySelector<HTMLLinkElement>('link[rel="icon"]') ||
             document.head.appendChild(document.createElement('link'));
           icon.rel = 'icon';
-          icon.href = next.favicon_url;
+          icon.href = resolved.favicon_url;
         }
       })
       .catch(() => undefined);
