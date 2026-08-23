@@ -27,9 +27,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         title: t('pageTitles.administrationTitle'),
         description: t('pageTitles.administrationDescription'),
       },
-      '/settings': {
-        title: t('pageTitles.settingsTitle'),
-        description: t('pageTitles.settingsDescription'),
+      '/account-settings': {
+        title: t('pageTitles.accountSettingsTitle'),
+        description: t('pageTitles.accountSettingsDescription'),
       },
     }),
     [t]
@@ -52,7 +52,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   const page = useMemo(() => {
     if (location.pathname.startsWith('/admin')) return pageTitles['/admin'];
-    if (location.pathname.startsWith('/settings')) return pageTitles['/settings'];
+    if (location.pathname.startsWith('/account-settings')) return pageTitles['/account-settings'];
     return pageTitles[location.pathname] || pageTitles['/'];
   }, [pageTitles, location.pathname]);
 
@@ -67,14 +67,16 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     };
     if (adminTab) return adminLabels[adminTab] || pageTitles['/admin'].title;
 
-    const settingsTab = location.pathname.match(/^\/settings\/([^/]+)/)?.[1];
-    const settingsLabels: Record<string, string> = {
-      profile: t('settings.tabProfile'),
-      mfa: t('settings.tabMFA'),
-      passkeys: t('settings.tabPasskeys'),
-      sessions: t('settings.tabSessions'),
+    const accountSettingsTab = location.pathname.match(/^\/account-settings\/([^/]+)/)?.[1];
+    const accountSettingsLabels: Record<string, string> = {
+      profile: t('accountSettings.tabProfile'),
+      mfa: t('accountSettings.tabMFA'),
+      passkeys: t('accountSettings.tabPasskeys'),
+      sessions: t('accountSettings.tabSessions'),
     };
-    if (settingsTab) return settingsLabels[settingsTab] || pageTitles['/settings'].title;
+    if (accountSettingsTab) {
+      return accountSettingsLabels[accountSettingsTab] || pageTitles['/account-settings'].title;
+    }
     return page.title;
   }, [location.pathname, page.title, pageTitles, t]);
 
@@ -109,9 +111,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </NavLink>
           )}
           {session.loggedIn && (
-            <NavLink to="/settings/profile" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+            <NavLink
+              to="/account-settings/profile"
+              className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+            >
               <Settings size={17} />
-              <span>{t('nav.settings')}</span>
+              <span>{t('nav.accountSettings')}</span>
             </NavLink>
           )}
         </nav>

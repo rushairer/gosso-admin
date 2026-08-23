@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import Settings from '../Settings';
+import AccountSettings from '../AccountSettings';
 
 const { isLoggedIn, getUserProfile, redirectToAuthorize } = vi.hoisted(() => ({
   isLoggedIn: vi.fn(),
@@ -14,23 +14,23 @@ vi.mock('../../auth', () => ({
   redirectToAuthorize,
 }));
 
-vi.mock('../settings/ProfilePanel', () => ({ default: () => <div>Profile content</div> }));
-vi.mock('../settings/MFAPanel', () => ({ default: () => <div>MFA content</div> }));
-vi.mock('../settings/PasskeysPanel', () => ({ default: () => <div>Passkeys content</div> }));
-vi.mock('../settings/SessionsPanel', () => ({ default: () => <div>Sessions content</div> }));
+vi.mock('../account-settings/ProfilePanel', () => ({ default: () => <div>Profile content</div> }));
+vi.mock('../account-settings/MFAPanel', () => ({ default: () => <div>MFA content</div> }));
+vi.mock('../account-settings/PasskeysPanel', () => ({ default: () => <div>Passkeys content</div> }));
+vi.mock('../account-settings/SessionsPanel', () => ({ default: () => <div>Sessions content</div> }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 
-function renderSettings(path = '/settings/profile') {
+function renderAccountSettings(path = '/account-settings/profile') {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/settings/:tab" element={<Settings />} />
+        <Route path="/account-settings/:tab" element={<AccountSettings />} />
       </Routes>
     </MemoryRouter>
   );
 }
 
-describe('Settings access gate', () => {
+describe('AccountSettings access gate', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getUserProfile.mockReturnValue({ sub: 'account-1', preferred_username: 'operator' });
@@ -38,14 +38,14 @@ describe('Settings access gate', () => {
 
   it('redirects an anonymous visitor to authorization', async () => {
     isLoggedIn.mockReturnValue(false);
-    renderSettings();
-    await waitFor(() => expect(redirectToAuthorize).toHaveBeenCalledWith('/settings/profile'));
-    expect(screen.getByText('settings.checkingAccess')).toBeInTheDocument();
+    renderAccountSettings();
+    await waitFor(() => expect(redirectToAuthorize).toHaveBeenCalledWith('/account-settings/profile'));
+    expect(screen.getByText('accountSettings.checkingAccess')).toBeInTheDocument();
   });
 
   it('shows the profile panel for a signed-in account', async () => {
     isLoggedIn.mockReturnValue(true);
-    renderSettings();
+    renderAccountSettings();
     expect(await screen.findByText('Profile content')).toBeInTheDocument();
     expect(redirectToAuthorize).not.toHaveBeenCalled();
   });

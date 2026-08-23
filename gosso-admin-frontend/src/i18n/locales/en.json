@@ -24,7 +24,7 @@
     "brandSubtitle": "Admin Console",
     "overview": "Overview",
     "administration": "Administration",
-    "settings": "Settings",
+    "accountSettings": "Account Settings",
     "sessionSection": "Session",
     "administrator": "Administrator",
     "user": "User",
@@ -39,8 +39,8 @@
     "overviewDescription": "Unified identity management entry point.",
     "administrationTitle": "Administration",
     "administrationDescription": "Manage clients, accounts, audit records, and service status.",
-    "settingsTitle": "Account Settings",
-    "settingsDescription": "Manage profile, MFA, passkeys, and active sessions."
+    "accountSettingsTitle": "Account Settings",
+    "accountSettingsDescription": "Manage profile, MFA, passkeys, and active sessions."
   },
   "auth": {
     "goHome": "Go Home",
@@ -138,8 +138,9 @@
     "tabAuditLogs": "Audit Logs",
     "tabSystemStatus": "System Status"
   },
-  "settings": {
+  "accountSettings": {
     "checkingAccess": "Checking access...",
+    "sectionsLabel": "Account settings sections",
     "tabProfile": "Profile & Password",
     "tabMFA": "Multi-Factor (MFA)",
     "tabPasskeys": "Passkeys (FIDO2)",
@@ -281,7 +282,7 @@
     "newPasswordPlaceholder": "Enter new password",
     "updatePasswordButton": "Update Password",
     "passwordUpdatedSuccess": "Password updated successfully. All user sessions have been revoked.",
-    "cannotResetOwnMfa": "You cannot reset MFA on your own admin account. Please use Security Settings page instead.",
+    "cannotResetOwnMfa": "You cannot reset MFA on your own admin account. Please use Account Settings instead.",
     "resetMfaConfirmMessage": "Are you sure you want to reset MFA for user \"{{username}}\"? This will disable TOTP, Backup Codes, and WebAuthn Passkeys for their account.",
     "mfaResetSuccess": "MFA successfully reset for user \"{{username}}\".",
     "rolesModalTitle": "Manage Roles - {{name}}",

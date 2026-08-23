@@ -24,7 +24,7 @@
     "brandSubtitle": "管理控制台",
     "overview": "概览",
     "administration": "系统管理",
-    "settings": "设置",
+    "accountSettings": "账户设置",
     "sessionSection": "会话",
     "administrator": "管理员",
     "user": "用户",
@@ -39,8 +39,8 @@
     "overviewDescription": "统一身份管理入口。",
     "administrationTitle": "系统管理",
     "administrationDescription": "管理客户端、账户、审计记录及服务状态。",
-    "settingsTitle": "账户设置",
-    "settingsDescription": "管理个人资料、MFA、通行密钥及活跃会话。"
+    "accountSettingsTitle": "账户设置",
+    "accountSettingsDescription": "管理个人资料、MFA、通行密钥及活跃会话。"
   },
   "auth": {
     "goHome": "返回首页",
@@ -138,8 +138,9 @@
     "tabAuditLogs": "审计日志",
     "tabSystemStatus": "系统状态"
   },
-  "settings": {
+  "accountSettings": {
     "checkingAccess": "正在检查访问权限...",
+    "sectionsLabel": "账户设置栏目",
     "tabProfile": "个人资料与密码",
     "tabMFA": "多因素认证 (MFA)",
     "tabPasskeys": "通行密钥 (FIDO2)",
@@ -281,7 +282,7 @@
     "newPasswordPlaceholder": "请输入新密码",
     "updatePasswordButton": "更新密码",
     "passwordUpdatedSuccess": "密码更新成功。该用户的所有会话已被撤销。",
-    "cannotResetOwnMfa": "您不能重置自己管理员账户的 MFA，请前往安全设置页面操作。",
+    "cannotResetOwnMfa": "您不能重置自己管理员账户的 MFA，请前往账户设置页面操作。",
     "resetMfaConfirmMessage": "确定要重置用户 \"{{username}}\" 的 MFA 吗？这将禁用其账户的 TOTP、备用码和 WebAuthn 通行密钥。",
     "mfaResetSuccess": "用户 \"{{username}}\" 的 MFA 已成功重置。",
     "rolesModalTitle": "管理角色 - {{name}}",
