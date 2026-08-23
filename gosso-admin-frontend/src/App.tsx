@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Navigate, Routes, Route, useParams } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider, PageLoader } from './components/ui';
@@ -13,11 +13,6 @@ const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Admin = lazy(() => import('./pages/Admin'));
 const AccountSettings = lazy(() => import('./pages/AccountSettings'));
 const NotFound = lazy(() => import('./pages/NotFound'));
-
-function LegacyAccountSettingsRedirect() {
-  const { tab } = useParams();
-  return <Navigate replace to={`/account-settings/${tab || 'profile'}`} />;
-}
 
 export default function App() {
   return (
@@ -50,8 +45,6 @@ export default function App() {
                   </AdminLayout>
                 }
               />
-              <Route path="/settings" element={<LegacyAccountSettingsRedirect />} />
-              <Route path="/settings/:tab" element={<LegacyAccountSettingsRedirect />} />
               <Route path="/admin" element={<Navigate replace to="/admin/clients" />} />
               <Route
                 path="/admin/:tab"
