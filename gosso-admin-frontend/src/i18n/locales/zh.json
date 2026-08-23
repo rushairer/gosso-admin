@@ -161,7 +161,10 @@
     "loginTitle": "登录页标题",
     "loginDescription": "登录页说明",
     "loginBackgroundUrl": "登录页背景地址",
-    "preview": "登录页预览"
+    "preview": "登录页预览",
+    "previewViewport": "预览视口",
+    "previewDesktop": "桌面",
+    "previewMobile": "移动端"
   },
   "clients": {
     "title": "OAuth2 客户端",

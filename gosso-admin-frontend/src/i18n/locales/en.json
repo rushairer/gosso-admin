@@ -161,7 +161,10 @@
     "loginTitle": "Login title",
     "loginDescription": "Login description",
     "loginBackgroundUrl": "Login background URL",
-    "preview": "Login page preview"
+    "preview": "Login page preview",
+    "previewViewport": "Preview viewport",
+    "previewDesktop": "Desktop",
+    "previewMobile": "Mobile"
   },
   "clients": {
     "title": "OAuth2 Clients",

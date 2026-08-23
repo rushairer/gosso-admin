@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import { ToastProvider } from '../../components/ui';
 import { siteSettingsService } from '../../services';
 import SiteSettingsTab from './SiteSettingsTab';
@@ -30,9 +31,11 @@ describe('SiteSettingsTab', () => {
 
   it('loads settings and saves the updated brand form', async () => {
     render(
-      <ToastProvider>
-        <SiteSettingsTab />
-      </ToastProvider>
+      <MemoryRouter>
+        <ToastProvider>
+          <SiteSettingsTab />
+        </ToastProvider>
+      </MemoryRouter>
     );
     expect(await screen.findByDisplayValue('Acme Identity')).toBeInTheDocument();
 
@@ -46,5 +49,28 @@ describe('SiteSettingsTab', () => {
         expect.objectContaining({ product_name: 'Acme SSO' })
       )
     );
+  });
+
+  it('renders the real login surface and updates its desktop and mobile previews from draft values', async () => {
+    render(
+      <MemoryRouter>
+        <ToastProvider>
+          <SiteSettingsTab />
+        </ToastProvider>
+      </MemoryRouter>
+    );
+
+    const productName = await screen.findByDisplayValue('Acme Identity');
+    const loginTitle = screen.getByPlaceholderText('Acme Identity');
+    await userEvent.type(loginTitle, 'Welcome to Acme');
+
+    expect(screen.getByRole('heading', { name: 'Welcome to Acme', hidden: true })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Enter your username')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^sign in$/i, hidden: true })).toBeInTheDocument();
+    expect(screen.getByText('1440 × 900')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /mobile/i }));
+    expect(screen.getByText('390 × 844')).toBeInTheDocument();
+    expect(productName).toHaveValue('Acme Identity');
   });
 });

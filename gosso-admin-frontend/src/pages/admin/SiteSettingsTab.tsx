@@ -5,6 +5,7 @@ import { AsyncState, FormField, PanelBody, PanelHeader, PlainSection, useToast }
 import { siteSettingsService } from '../../services';
 import { DEFAULT_SITE_SETTINGS, mergeSiteSettings } from '../../config/site-defaults';
 import type { SiteSettings } from '../../types/api';
+import LoginPreview from '../../components/auth/LoginPreview';
 
 export default function SiteSettingsTab() {
   const { t } = useTranslation();
@@ -121,11 +122,6 @@ export default function SiteSettingsTab() {
                 />
               </FormField>
             </div>
-            <div className="notice-card">
-              <strong>{t('site.preview')}</strong>
-              <div style={{ marginTop: '8px' }}>{settings.login_title || settings.product_name || 'GOSSO'}</div>
-              <div className="text-muted">{settings.login_description || t('login.subtitle')}</div>
-            </div>
           </PlainSection>
 
           <PanelBody>
@@ -135,6 +131,10 @@ export default function SiteSettingsTab() {
             </button>
           </PanelBody>
         </form>
+
+        <PlainSection title={t('site.preview')}>
+          <LoginPreview branding={settings} />
+        </PlainSection>
       </>
     </AsyncState>
   );
