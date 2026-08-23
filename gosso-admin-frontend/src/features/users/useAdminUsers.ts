@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { accountService } from '../../services';
 import type { Account, Role } from '../../types/api';
 import { logger } from '../../utils/logger';
@@ -7,6 +8,7 @@ import { collectRolesFromAccounts } from './roles';
 const PAGE_SIZE = 20;
 
 export function useAdminUsers() {
+  const { t } = useTranslation();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,13 +25,13 @@ export function useAdminUsers() {
       setTotalAccounts(data.total);
       setRoles(collectRolesFromAccounts(data.accounts));
     } catch (reason: unknown) {
-      const message = reason instanceof Error ? reason.message : 'Error loading accounts';
+      const message = reason instanceof Error ? reason.message : t('users.loadAccountsFailed');
       logger.error('Failed to load accounts', reason);
       setError(message);
     } finally {
       setLoading(false);
     }
-  }, [page]);
+  }, [page, t]);
 
   useEffect(() => {
     void refresh();

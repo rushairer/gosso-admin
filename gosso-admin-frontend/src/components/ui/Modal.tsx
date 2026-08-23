@@ -1,4 +1,5 @@
 import React, { useEffect, useId, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X as XIcon } from 'lucide-react';
 
 export interface ModalProps {
@@ -30,6 +31,7 @@ export function Modal({
   ariaLabel,
   contentStyle,
 }: ModalProps) {
+  const { t } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
@@ -110,7 +112,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
-        aria-label={title ? undefined : ariaLabel || 'Dialog'}
+        aria-label={title ? undefined : ariaLabel || t('common.dialog')}
         tabIndex={-1}
       >
         {title && (
@@ -119,7 +121,7 @@ export function Modal({
               {title}
             </h3>
             {showCloseButton && (
-              <button type="button" className="modal-close-btn" onClick={onClose} aria-label="Close">
+              <button type="button" className="modal-close-btn" onClick={onClose} aria-label={t('common.close')}>
                 <XIcon style={{ width: '18px', height: '18px' }} />
               </button>
             )}

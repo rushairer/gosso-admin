@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { auditService } from '../../services';
 import type { AuditLog } from '../../types/api';
 import { logger } from '../../utils/logger';
@@ -13,6 +14,7 @@ interface AuditFilters {
 const emptyFilters: AuditFilters = { eventType: '', accountId: '' };
 
 export function useAuditLogs() {
+  const { t } = useTranslation();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -21,27 +23,30 @@ export function useAuditLogs() {
   const [eventType, setEventType] = useState('');
   const [accountId, setAccountId] = useState('');
 
-  const fetchPage = useCallback(async (nextPage: number, filters: AuditFilters) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await auditService.fetchAuditLogs({
-        page: nextPage,
-        pageSize: PAGE_SIZE,
-        eventType: filters.eventType || undefined,
-        accountId: filters.accountId || undefined,
-      });
-      setLogs(data.logs);
-      setTotal(data.total);
-      setPage(nextPage);
-    } catch (reason: unknown) {
-      const message = reason instanceof Error ? reason.message : 'Error loading audit logs';
-      logger.error('Failed to load audit logs', reason);
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetchPage = useCallback(
+    async (nextPage: number, filters: AuditFilters) => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await auditService.fetchAuditLogs({
+          page: nextPage,
+          pageSize: PAGE_SIZE,
+          eventType: filters.eventType || undefined,
+          accountId: filters.accountId || undefined,
+        });
+        setLogs(data.logs);
+        setTotal(data.total);
+        setPage(nextPage);
+      } catch (reason: unknown) {
+        const message = reason instanceof Error ? reason.message : t('audit.loadFailed');
+        logger.error('Failed to load audit logs', reason);
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [t]
+  );
 
   useEffect(() => {
     void fetchPage(1, emptyFilters);

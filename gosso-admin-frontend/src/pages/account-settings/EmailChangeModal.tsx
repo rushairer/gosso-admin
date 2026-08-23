@@ -43,7 +43,7 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
       await gossoClient.requestEmailChange(newEmail.trim(), password);
       setStep('verify');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error requesting email verification code');
+      setError(err instanceof Error ? err.message : t('profile.emailVerificationRequestFailed'));
     } finally {
       setLoading(false);
     }
@@ -60,7 +60,7 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
       onProfileUpdated(updatedProfile);
       onClose();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error verifying email code');
+      setError(err instanceof Error ? err.message : t('profile.emailVerificationFailed'));
     } finally {
       setLoading(false);
     }

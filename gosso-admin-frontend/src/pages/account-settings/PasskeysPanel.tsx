@@ -40,7 +40,7 @@ export default function PasskeysPanel() {
       setError(null);
       setPasskeys(await gossoClient.listPasskeys());
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error loading passkeys';
+      const message = err instanceof Error ? err.message : t('passkeys.loadFailed');
       setError(message);
     } finally {
       setLoading(false);
@@ -64,7 +64,7 @@ export default function PasskeysPanel() {
       setNewPasskeyName('');
       await loadPasskeys();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'WebAuthn registration failed.';
+      const message = err instanceof Error ? err.message : t('passkeys.webauthnRegistrationFailed');
       logger.error('WebAuthn registration failed', err);
       setError(message);
     } finally {
@@ -87,7 +87,7 @@ export default function PasskeysPanel() {
       setSuccess(t('passkeys.passkeyRemovedSuccess'));
       await loadPasskeys();
     } catch (err: unknown) {
-      let message = err instanceof Error ? err.message : 'Error removing passkey';
+      let message = err instanceof Error ? err.message : t('passkeys.removeFailed');
       if (message === 'credential not found') {
         message = t('passkeys.credentialNotFound');
       } else if (message === 'credential does not belong to account') {

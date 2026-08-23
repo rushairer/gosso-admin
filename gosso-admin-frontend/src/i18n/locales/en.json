@@ -17,7 +17,9 @@
     "remove": "Remove",
     "assign": "Assign",
     "loading": "Loading...",
-    "notAvailable": "n/a"
+    "loadingLabel": "Loading",
+    "notAvailable": "n/a",
+    "dialog": "Dialog"
   },
   "nav": {
     "brandName": "GOSSO",
@@ -32,7 +34,8 @@
     "notSignedIn": "Not signed in",
     "signOut": "Sign out",
     "signIn": "Sign in",
-    "selfHostedProvider": "Self-hosted OIDC provider"
+    "selfHostedProvider": "Self-hosted OIDC provider",
+    "primaryNavigation": "Primary navigation"
   },
   "pageTitles": {
     "overviewTitle": "Overview",
@@ -160,10 +163,13 @@
     "productName": "Product name",
     "loginAppearance": "Login appearance",
     "logoUrl": "Logo URL",
+    "logoUrlPlaceholder": "Leave empty to show the product name as a text logo",
     "faviconUrl": "Favicon URL",
+    "faviconUrlPlaceholder": "Leave empty to keep the browser default icon",
     "loginTitle": "Login title",
     "loginDescription": "Login description",
     "loginBackgroundUrl": "Login background URL",
+    "loginBackgroundUrlPlaceholder": "Leave empty to use the console's default dark background",
     "preview": "Login page preview",
     "previewViewport": "Preview viewport",
     "previewDesktop": "Desktop",
@@ -206,6 +212,8 @@
     "adminScopeLabel": "admin (management APIs)",
     "adminScopeWarning": "Admin scope allows this client to request tokens for GOSSO management APIs. Only enable it for trusted first-party admin clients.",
     "saveClient": "Save Client",
+    "registerClientButton": "Register Client",
+    "saveChangesButton": "Save Changes",
     "nameRedirectRequired": "Name and Redirect URIs are required.",
     "failedToRegisterClient": "Failed to register client",
     "clientRegisteredSuccess": "OAuth2 Client registered successfully!",
@@ -269,14 +277,21 @@
     "emailOrPhoneRequired": "Email or phone is required.",
     "passwordTooShort": "Password must be at least 12 characters long.",
     "userCreatedSuccess": "User account created successfully.",
+    "createFailed": "Unable to create the user account.",
+    "loadAccountsFailed": "Unable to load user accounts.",
     "cannotToggleOwnAccount": "You cannot enable/disable your own admin account.",
     "enableConfirmMessage": "Are you sure you want to enable user \"{{username}}\"?",
     "disableConfirmMessage": "Are you sure you want to disable user \"{{username}}\"?",
+    "userActivatedSuccess": "User account activated.",
+    "userSuspendedSuccess": "User account suspended.",
+    "statusUpdateFailed": "Unable to update the user status.",
     "removeRole": "Remove Role",
     "clearLockout": "Clear Lockout",
     "revokeConsent": "Revoke Consent",
     "deleteUserConfirmTitle": "Delete User",
-    "deleteUserConfirmMessage": "Are you sure you want to permanently delete this user account?",
+    "deleteUserConfirmMessage": "Are you sure you want to permanently delete user \"{{username}}\"?",
+    "userDeletedSuccess": "User account deleted.",
+    "deleteUserFailed": "Unable to delete the user account.",
     "cannotDeleteOwnAccount": "You cannot delete your own admin account.",
     "changePasswordModalTitle": "Change Password",
     "changePasswordDescription": "Set a new password for user {{name}}.",
@@ -284,9 +299,11 @@
     "newPasswordPlaceholder": "Enter new password",
     "updatePasswordButton": "Update Password",
     "passwordUpdatedSuccess": "Password updated successfully. All user sessions have been revoked.",
+    "passwordUpdateFailed": "Unable to update the password.",
     "cannotResetOwnMfa": "You cannot reset MFA on your own admin account. Please use Account Settings instead.",
     "resetMfaConfirmMessage": "Are you sure you want to reset MFA for user \"{{username}}\"? This will disable TOTP, Backup Codes, and WebAuthn Passkeys for their account.",
     "mfaResetSuccess": "MFA successfully reset for user \"{{username}}\".",
+    "resetMfaFailed": "Unable to reset MFA.",
     "rolesModalTitle": "Manage Roles - {{name}}",
     "activeRolesSection": "Active Roles",
     "noRolesAssignedDescription": "No roles assigned to this account.",
@@ -296,19 +313,26 @@
     "assignRoleHint": "Select a previously loaded role from user databases, or input a specific Role UUID.",
     "cannotRemoveOwnRoles": "You cannot remove roles from your own admin account.",
     "removeRoleConfirmMessage": "Are you sure you want to remove this role from the user?",
+    "roleAssignedSuccess": "Role assigned successfully.",
+    "roleRemovedSuccess": "Role removed successfully.",
+    "assignRoleFailed": "Unable to assign the role.",
+    "removeRoleFailed": "Unable to remove the role.",
     "cannotClearOwnLockout": "You cannot clear lockout on your own admin account.",
     "clearLockoutConfirmMessage": "Are you sure you want to clear the lockout for this account?",
     "lockoutClearedSuccess": "Lockout successfully cleared.",
+    "unlockAccountFailed": "Unable to unlock the account.",
     "consentsModalTitle": "Authorized Applications - {{name}}",
     "consentsDescription": "View and revoke applications authorized by this user to access their account profile.",
     "loadingConsents": "Loading authorized applications...",
+    "loadConsentsFailed": "Unable to load authorized applications.",
     "noConsentsTitle": "No authorized applications",
     "noConsentsDescription": "This user has not authorized any OIDC applications yet.",
     "revokeAccess": "Revoke Access",
     "authorizedAt": "Authorized At:",
     "cannotRevokeOwnConsent": "You cannot revoke consents for your own admin account.",
     "revokeConsentConfirmMessage": "Are you sure you want to revoke authorization for this application?",
-    "consentRevokedSuccess": "Consent successfully revoked."
+    "consentRevokedSuccess": "Consent successfully revoked.",
+    "revokeConsentFailed": "Unable to revoke the authorization."
   },
   "audit": {
     "title": "Audit Logs",
@@ -334,7 +358,8 @@
     "detailTargetUser": "Target User:",
     "detailCreatedAt": "Created At:",
     "detailResourceData": "Resource Data:",
-    "detailMetaContext": "Meta Context:"
+    "detailMetaContext": "Meta Context:",
+    "loadFailed": "Unable to load audit logs."
   },
   "system": {
     "title": "System Status",
@@ -362,7 +387,8 @@
     "maxSessions": "Maximum sessions",
     "tokenExpiry": "Access / refresh token lifetime",
     "loginRateLimit": "Login attempts / window",
-    "mfaRateLimit": "MFA attempts / window"
+    "mfaRateLimit": "MFA attempts / window",
+    "readinessFailed": "Unable to reach the readiness endpoint."
   },
   "profile": {
     "title": "Profile & Password",
@@ -392,7 +418,11 @@
     "confirmEmailButton": "Confirm Change",
     "emailUpdatedSuccess": "Email address updated successfully.",
     "editDisplayName": "Edit Display Name",
-    "displayNameUpdatedSuccess": "Display name updated successfully."
+    "displayNameUpdatedSuccess": "Display name updated successfully.",
+    "displayNameUpdateFailed": "Unable to update the display name.",
+    "passwordUpdateFailed": "Unable to change the password.",
+    "emailVerificationRequestFailed": "Unable to send the email verification code.",
+    "emailVerificationFailed": "Unable to verify the email code."
   },
   "mfa": {
     "title": "Multi-Factor Authentication (MFA)",
@@ -429,7 +459,12 @@
     "mfaDisabled": "MFA has been disabled.",
     "regenerateConfirmTitle": "Regenerate Backup Codes",
     "regenerateConfirmMessage": "Generating new backup codes will invalidate any existing recovery codes. Continue?",
-    "backupCodesGenerated": "New backup codes generated."
+    "backupCodesGenerated": "New backup codes generated.",
+    "loadFailed": "Unable to load MFA status.",
+    "enrollFailed": "Unable to start MFA enrollment.",
+    "activateFailed": "Unable to activate MFA.",
+    "disableFailed": "Unable to disable MFA.",
+    "backupCodesFailed": "Unable to generate backup codes."
   },
   "passkeys": {
     "title": "Passkeys",
@@ -454,7 +489,9 @@
     "removePasskeyConfirmMessage": "Are you sure you want to remove the passkey \"{{name}}\"?",
     "passkeyRemovedSuccess": "Passkey removed successfully.",
     "credentialNotFound": "Credential not found.",
-    "credentialOwnershipMismatch": "This credential does not belong to your account."
+    "credentialOwnershipMismatch": "This credential does not belong to your account.",
+    "loadFailed": "Unable to load passkeys.",
+    "removeFailed": "Unable to remove the passkey."
   },
   "sessions": {
     "title": "Active Sessions",
@@ -470,7 +507,9 @@
     "terminateSessionTitle": "Terminate Session",
     "terminateSessionConfirmMessage": "Are you sure you want to terminate this session? The device will be signed out immediately.",
     "sessionRevoked": "Session revoked.",
-    "terminateButton": "Terminate"
+    "terminateButton": "Terminate",
+    "loadFailed": "Unable to load active sessions.",
+    "revokeFailed": "Unable to revoke the session."
   },
   "errorBoundary": {
     "title": "Something went wrong",

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { siteSettingsService, systemService } from '../../services';
 import type { SystemHealth } from '../../services';
 import type { OidcConfiguration, SecurityPolicy } from '../../types/api';
 import { logger } from '../../utils/logger';
 
-function unavailableHealth(reason: unknown): SystemHealth {
-  const message = reason instanceof Error ? reason.message : 'Failed to reach readiness endpoint';
+function unavailableHealth(reason: unknown, fallbackMessage: string): SystemHealth {
+  const message = reason instanceof Error ? reason.message : fallbackMessage;
   return {
     status: 'unavailable',
     ready: false,
@@ -17,6 +18,7 @@ function unavailableHealth(reason: unknown): SystemHealth {
 }
 
 export function useSystemStatus() {
+  const { t } = useTranslation();
   const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
   const [oidcConfig, setOidcConfig] = useState<OidcConfiguration | null>(null);
   const [securityPolicy, setSecurityPolicy] = useState<SecurityPolicy | null>(null);
@@ -34,7 +36,7 @@ export function useSystemStatus() {
       setSystemHealth(healthResult.value);
     } else {
       logger.error('Error fetching readiness health status', healthResult.reason);
-      setSystemHealth(unavailableHealth(healthResult.reason));
+      setSystemHealth(unavailableHealth(healthResult.reason, t('system.readinessFailed')));
     }
 
     if (oidcResult.status === 'fulfilled') {
@@ -45,7 +47,7 @@ export function useSystemStatus() {
     }
     setSecurityPolicy(securityResult.status === 'fulfilled' ? securityResult.value : null);
     setLoading(false);
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void refresh();

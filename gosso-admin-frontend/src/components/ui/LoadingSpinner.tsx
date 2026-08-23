@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -13,13 +14,14 @@ const sizeMap = {
 };
 
 export function LoadingSpinner({ size = 'md', className = '', style }: LoadingSpinnerProps) {
+  const { t } = useTranslation();
   const dimensions = sizeMap[size];
 
   return (
     <div
       className={className}
       role="status"
-      aria-label="Loading"
+      aria-label={t('common.loadingLabel')}
       style={{
         width: dimensions.width,
         height: dimensions.height,

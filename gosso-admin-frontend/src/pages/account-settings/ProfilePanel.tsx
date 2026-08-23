@@ -64,7 +64,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
       setIsEditingName(false);
       setLocalProfile(updated);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error updating display name';
+      const message = err instanceof Error ? err.message : t('profile.displayNameUpdateFailed');
       setError(message);
     } finally {
       setEditNameLoading(false);
@@ -100,7 +100,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error changing password';
+      const message = err instanceof Error ? err.message : t('profile.passwordUpdateFailed');
       setError(message);
     } finally {
       setLoading(false);

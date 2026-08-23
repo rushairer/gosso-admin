@@ -17,7 +17,9 @@
     "remove": "移除",
     "assign": "分配",
     "loading": "加载中...",
-    "notAvailable": "不可用"
+    "loadingLabel": "加载中",
+    "notAvailable": "不可用",
+    "dialog": "对话框"
   },
   "nav": {
     "brandName": "GOSSO",
@@ -32,7 +34,8 @@
     "notSignedIn": "未登录",
     "signOut": "退出登录",
     "signIn": "登录",
-    "selfHostedProvider": "自托管 OIDC 提供者"
+    "selfHostedProvider": "自托管 OIDC 提供者",
+    "primaryNavigation": "主导航"
   },
   "pageTitles": {
     "overviewTitle": "概览",
@@ -160,10 +163,13 @@
     "productName": "产品名称",
     "loginAppearance": "登录页外观",
     "logoUrl": "Logo 地址",
+    "logoUrlPlaceholder": "留空则显示产品名称文字标识",
     "faviconUrl": "Favicon 地址",
+    "faviconUrlPlaceholder": "留空则保留浏览器默认图标",
     "loginTitle": "登录页标题",
     "loginDescription": "登录页说明",
     "loginBackgroundUrl": "登录页背景地址",
+    "loginBackgroundUrlPlaceholder": "留空则使用控制台默认深色背景",
     "preview": "登录页预览",
     "previewViewport": "预览视口",
     "previewDesktop": "桌面",
@@ -206,6 +212,8 @@
     "adminScopeLabel": "admin（管理 API）",
     "adminScopeWarning": "admin scope 允许该客户端申请访问 GOSSO 管理 API 的令牌。只应为可信的一方后台管理客户端开启。",
     "saveClient": "保存客户端",
+    "registerClientButton": "注册客户端",
+    "saveChangesButton": "保存更改",
     "nameRedirectRequired": "名称和重定向 URI 为必填项。",
     "failedToRegisterClient": "注册客户端失败",
     "clientRegisteredSuccess": "OAuth2 客户端注册成功！",
@@ -269,14 +277,21 @@
     "emailOrPhoneRequired": "邮箱或手机号为必填项。",
     "passwordTooShort": "密码长度不能少于12个字符。",
     "userCreatedSuccess": "用户账户创建成功。",
+    "createFailed": "无法创建用户账户。",
+    "loadAccountsFailed": "无法加载用户账户。",
     "cannotToggleOwnAccount": "您不能停用自己的管理员账户。",
     "enableConfirmMessage": "确定要启用用户 \"{{username}}\" 吗？",
     "disableConfirmMessage": "确定要停用用户 \"{{username}}\" 吗？",
+    "userActivatedSuccess": "用户账户已启用。",
+    "userSuspendedSuccess": "用户账户已停用。",
+    "statusUpdateFailed": "无法更新用户状态。",
     "removeRole": "移除角色",
     "clearLockout": "解除锁定",
     "revokeConsent": "撤销授权",
     "deleteUserConfirmTitle": "删除用户",
-    "deleteUserConfirmMessage": "确定要永久删除此用户账户吗？",
+    "deleteUserConfirmMessage": "确定要永久删除用户 \"{{username}}\" 吗？",
+    "userDeletedSuccess": "用户账户已删除。",
+    "deleteUserFailed": "无法删除用户账户。",
     "cannotDeleteOwnAccount": "您不能删除自己的管理员账户。",
     "changePasswordModalTitle": "修改密码",
     "changePasswordDescription": "为用户 {{name}} 设置新密码。",
@@ -284,9 +299,11 @@
     "newPasswordPlaceholder": "请输入新密码",
     "updatePasswordButton": "更新密码",
     "passwordUpdatedSuccess": "密码更新成功。该用户的所有会话已被撤销。",
+    "passwordUpdateFailed": "无法更新密码。",
     "cannotResetOwnMfa": "您不能重置自己管理员账户的 MFA，请前往账户设置页面操作。",
     "resetMfaConfirmMessage": "确定要重置用户 \"{{username}}\" 的 MFA 吗？这将禁用其账户的 TOTP、备用码和 WebAuthn 通行密钥。",
     "mfaResetSuccess": "用户 \"{{username}}\" 的 MFA 已成功重置。",
+    "resetMfaFailed": "无法重置 MFA。",
     "rolesModalTitle": "管理角色 - {{name}}",
     "activeRolesSection": "当前角色",
     "noRolesAssignedDescription": "该账户未分配任何角色。",
@@ -296,19 +313,26 @@
     "assignRoleHint": "从用户数据库中选择之前加载过的角色，或输入特定的角色 UUID。",
     "cannotRemoveOwnRoles": "您不能移除自己管理员账户的角色。",
     "removeRoleConfirmMessage": "确定要移除此用户的角色吗？",
+    "roleAssignedSuccess": "角色分配成功。",
+    "roleRemovedSuccess": "角色移除成功。",
+    "assignRoleFailed": "无法分配角色。",
+    "removeRoleFailed": "无法移除角色。",
     "cannotClearOwnLockout": "您不能清除自己管理员账户的锁定状态。",
     "clearLockoutConfirmMessage": "确定要清除此账户的锁定状态吗？",
     "lockoutClearedSuccess": "锁定已成功解除。",
+    "unlockAccountFailed": "无法解锁账户。",
     "consentsModalTitle": "已授权应用 - {{name}}",
     "consentsDescription": "查看和撤销此用户已授权访问其账户信息的应用。",
     "loadingConsents": "正在加载已授权应用...",
+    "loadConsentsFailed": "无法加载已授权应用。",
     "noConsentsTitle": "暂无已授权的应用",
     "noConsentsDescription": "该用户尚未授权任何 OIDC 应用。",
     "revokeAccess": "撤销授权",
     "authorizedAt": "授权时间：",
     "cannotRevokeOwnConsent": "您不能撤销自己管理员账户的授权。",
     "revokeConsentConfirmMessage": "确定要撤销此应用的授权吗？",
-    "consentRevokedSuccess": "授权已成功撤销。"
+    "consentRevokedSuccess": "授权已成功撤销。",
+    "revokeConsentFailed": "无法撤销授权。"
   },
   "audit": {
     "title": "审计日志",
@@ -334,7 +358,8 @@
     "detailTargetUser": "目标用户：",
     "detailCreatedAt": "创建时间：",
     "detailResourceData": "资源数据：",
-    "detailMetaContext": "元数据上下文："
+    "detailMetaContext": "元数据上下文：",
+    "loadFailed": "无法加载审计日志。"
   },
   "system": {
     "title": "系统状态",
@@ -362,7 +387,8 @@
     "maxSessions": "最大会话数",
     "tokenExpiry": "访问令牌 / 刷新令牌有效期",
     "loginRateLimit": "登录尝试次数 / 窗口",
-    "mfaRateLimit": "MFA 尝试次数 / 窗口"
+    "mfaRateLimit": "MFA 尝试次数 / 窗口",
+    "readinessFailed": "无法访问就绪检查端点。"
   },
   "profile": {
     "title": "个人资料与密码",
@@ -392,7 +418,11 @@
     "confirmEmailButton": "确认修改",
     "emailUpdatedSuccess": "邮箱地址已成功更新。",
     "editDisplayName": "修改显示名称",
-    "displayNameUpdatedSuccess": "显示名称已成功更新。"
+    "displayNameUpdatedSuccess": "显示名称已成功更新。",
+    "displayNameUpdateFailed": "无法更新显示名称。",
+    "passwordUpdateFailed": "无法修改密码。",
+    "emailVerificationRequestFailed": "无法发送邮箱验证码。",
+    "emailVerificationFailed": "无法验证邮箱验证码。"
   },
   "mfa": {
     "title": "多因素认证 (MFA)",
@@ -429,7 +459,12 @@
     "mfaDisabled": "MFA 已禁用。",
     "regenerateConfirmTitle": "重新生成备用码",
     "regenerateConfirmMessage": "生成新的备用码将使所有现有的恢复码失效。是否继续？",
-    "backupCodesGenerated": "新的备用码已生成。"
+    "backupCodesGenerated": "新的备用码已生成。",
+    "loadFailed": "无法加载 MFA 状态。",
+    "enrollFailed": "无法开始设置 MFA。",
+    "activateFailed": "无法激活 MFA。",
+    "disableFailed": "无法禁用 MFA。",
+    "backupCodesFailed": "无法生成备用码。"
   },
   "passkeys": {
     "title": "通行密钥",
@@ -454,7 +489,9 @@
     "removePasskeyConfirmMessage": "确定要移除通行密钥 \"{{name}}\" 吗？",
     "passkeyRemovedSuccess": "通行密钥已成功移除。",
     "credentialNotFound": "找不到该密钥记录。",
-    "credentialOwnershipMismatch": "该密钥记录不属于您的账号。"
+    "credentialOwnershipMismatch": "该密钥记录不属于您的账号。",
+    "loadFailed": "无法加载通行密钥。",
+    "removeFailed": "无法移除通行密钥。"
   },
   "sessions": {
     "title": "活跃会话",
@@ -470,7 +507,9 @@
     "terminateSessionTitle": "终止会话",
     "terminateSessionConfirmMessage": "确定要终止此会话吗？该设备将立即退出登录。",
     "sessionRevoked": "会话已撤销。",
-    "terminateButton": "终止"
+    "terminateButton": "终止",
+    "loadFailed": "无法加载活跃会话。",
+    "revokeFailed": "无法撤销会话。"
   },
   "errorBoundary": {
     "title": "出现错误",

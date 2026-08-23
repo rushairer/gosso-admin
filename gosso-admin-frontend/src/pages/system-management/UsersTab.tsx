@@ -72,8 +72,8 @@ export default function UsersTab() {
       !(await confirm({
         title: isActivating ? t('users.activateUser') : t('users.suspendUser'),
         message: isActivating
-          ? t('users.confirmActivate', { name: acc.display_name || acc.username })
-          : t('users.confirmSuspend', { name: acc.display_name || acc.username }),
+          ? t('users.enableConfirmMessage', { username: acc.display_name || acc.username })
+          : t('users.disableConfirmMessage', { username: acc.display_name || acc.username }),
       }))
     )
       return;
@@ -82,7 +82,7 @@ export default function UsersTab() {
       showSuccess(isActivating ? t('users.userActivatedSuccess') : t('users.userSuspendedSuccess'));
       fetchAccounts();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error updating user status';
+      const message = err instanceof Error ? err.message : t('users.statusUpdateFailed');
       showError(message);
     }
   };
@@ -91,8 +91,10 @@ export default function UsersTab() {
     const targetUser = accounts.find((a) => a.id === accountId);
     if (
       !(await confirm({
-        title: t('users.deleteUserTitle'),
-        message: t('users.deleteUserConfirm', { name: targetUser?.display_name || targetUser?.username || accountId }),
+        title: t('users.deleteUserConfirmTitle'),
+        message: t('users.deleteUserConfirmMessage', {
+          username: targetUser?.display_name || targetUser?.username || accountId,
+        }),
       }))
     )
       return;
@@ -101,7 +103,7 @@ export default function UsersTab() {
       showSuccess(t('users.userDeletedSuccess'));
       fetchAccounts();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error deleting user';
+      const message = err instanceof Error ? err.message : t('users.deleteUserFailed');
       showError(message);
     }
   };
@@ -111,16 +113,18 @@ export default function UsersTab() {
     if (
       !(await confirm({
         title: t('users.unlockAccount'),
-        message: t('users.confirmUnlock', { name: targetUser?.display_name || targetUser?.username || accountId }),
+        message: t('users.clearLockoutConfirmMessage', {
+          username: targetUser?.display_name || targetUser?.username || accountId,
+        }),
       }))
     )
       return;
     try {
       await accountService.clearLockout(accountId);
-      showSuccess(t('users.accountUnlockedSuccess'));
+      showSuccess(t('users.lockoutClearedSuccess'));
       fetchAccounts();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error unlocking user';
+      const message = err instanceof Error ? err.message : t('users.unlockAccountFailed');
       showError(message);
     }
   };
@@ -128,17 +132,17 @@ export default function UsersTab() {
   const handleResetUserMFA = async (acc: Account) => {
     if (
       !(await confirm({
-        title: t('users.resetMfaTitle'),
-        message: t('users.resetMfaConfirm', { name: acc.display_name || acc.username }),
+        title: t('users.resetMfaButton'),
+        message: t('users.resetMfaConfirmMessage', { username: acc.display_name || acc.username }),
       }))
     )
       return;
     try {
       await accountService.resetMfa(acc.id);
-      showSuccess(t('users.mfaResetSuccess'));
+      showSuccess(t('users.mfaResetSuccess', { username: acc.display_name || acc.username }));
       fetchAccounts();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error resetting MFA';
+      const message = err instanceof Error ? err.message : t('users.resetMfaFailed');
       showError(message);
     }
   };
@@ -157,7 +161,7 @@ export default function UsersTab() {
       setSelectedAccount((prev) => (prev ? { ...prev, roles: updatedRoles } : null));
       fetchAccounts();
     } catch (err: unknown) {
-      showError(err instanceof Error ? err.message : 'Error assigning role');
+      showError(err instanceof Error ? err.message : t('users.assignRoleFailed'));
       throw err;
     }
   };
@@ -171,7 +175,7 @@ export default function UsersTab() {
       setSelectedAccount((prev) => (prev ? { ...prev, roles: updatedRoles } : null));
       fetchAccounts();
     } catch (err: unknown) {
-      showError(err instanceof Error ? err.message : 'Error removing role');
+      showError(err instanceof Error ? err.message : t('users.removeRoleFailed'));
     }
   };
 
@@ -194,7 +198,7 @@ export default function UsersTab() {
       const list = await accountService.fetchAccountConsents(acc.id);
       setConsentsList(list);
     } catch (err: unknown) {
-      showError(err instanceof Error ? err.message : 'Error loading consents');
+      showError(err instanceof Error ? err.message : t('users.loadConsentsFailed'));
     } finally {
       setConsentsLoading(false);
     }
@@ -208,7 +212,7 @@ export default function UsersTab() {
       const updated = await accountService.fetchAccountConsents(selectedAccount.id);
       setConsentsList(updated);
     } catch (err: unknown) {
-      showError(err instanceof Error ? err.message : 'Error revoking consent');
+      showError(err instanceof Error ? err.message : t('users.revokeConsentFailed'));
     }
   };
 

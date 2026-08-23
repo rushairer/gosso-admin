@@ -101,7 +101,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </span>
         </Link>
 
-        <nav className="sidebar-nav" aria-label="Primary">
+        <nav className="sidebar-nav" aria-label={t('nav.primaryNavigation')}>
           <NavLink to="/" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
             <Home size={17} />
             <span>{t('nav.overview')}</span>

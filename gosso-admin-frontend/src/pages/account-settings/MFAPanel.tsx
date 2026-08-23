@@ -43,7 +43,7 @@ export default function MFAPanel() {
       setError(null);
       setMfaStatus(await gossoClient.getMfaStatus());
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error loading MFA status';
+      const message = err instanceof Error ? err.message : t('mfa.loadFailed');
       setError(message);
     } finally {
       setLoading(false);
@@ -57,7 +57,7 @@ export default function MFAPanel() {
       setLoading(true);
       setMfaEnrollment(await gossoClient.enrollMfa());
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error enrolling MFA';
+      const message = err instanceof Error ? err.message : t('mfa.enrollFailed');
       setError(message);
     } finally {
       setLoading(false);
@@ -79,7 +79,7 @@ export default function MFAPanel() {
 
       setBackupCodes(codes);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error activating MFA';
+      const message = err instanceof Error ? err.message : t('mfa.activateFailed');
       setError(message);
     } finally {
       setLoading(false);
@@ -100,7 +100,7 @@ export default function MFAPanel() {
       setBackupCodes([]);
       await loadMFAStatus();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error disabling MFA';
+      const message = err instanceof Error ? err.message : t('mfa.disableFailed');
       setError(message);
     } finally {
       setLoading(false);
@@ -122,7 +122,7 @@ export default function MFAPanel() {
       setBackupCodes(await gossoClient.generateBackupCodes());
       setSuccess(t('mfa.backupCodesGenerated'));
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error generating backup codes';
+      const message = err instanceof Error ? err.message : t('mfa.backupCodesFailed');
       setError(message);
     } finally {
       setLoading(false);

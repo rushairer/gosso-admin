@@ -79,7 +79,7 @@ export default function SiteSettingsTab() {
                 <input
                   className="input-field"
                   type="text"
-                  placeholder="留空则显示产品名称文字标识"
+                  placeholder={t('site.logoUrlPlaceholder')}
                   value={settings.logo_url}
                   onChange={(event) => update('logo_url', event.target.value)}
                 />
@@ -88,7 +88,7 @@ export default function SiteSettingsTab() {
                 <input
                   className="input-field"
                   type="text"
-                  placeholder="留空则保留浏览器默认图标"
+                  placeholder={t('site.faviconUrlPlaceholder')}
                   value={settings.favicon_url}
                   onChange={(event) => update('favicon_url', event.target.value)}
                 />
@@ -116,7 +116,7 @@ export default function SiteSettingsTab() {
                 <input
                   className="input-field"
                   type="text"
-                  placeholder="留空则使用控制台默认深色背景"
+                  placeholder={t('site.loginBackgroundUrlPlaceholder')}
                   value={settings.login_background_url}
                   onChange={(event) => update('login_background_url', event.target.value)}
                 />

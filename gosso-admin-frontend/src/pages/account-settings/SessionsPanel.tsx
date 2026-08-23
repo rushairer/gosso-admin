@@ -31,7 +31,7 @@ export default function SessionsPanel() {
       setSessions(activeSessions);
       setCurrentSessionId(currentSession.id || null);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error loading sessions';
+      const message = err instanceof Error ? err.message : t('sessions.loadFailed');
       setError(message);
     } finally {
       setLoading(false);
@@ -53,7 +53,7 @@ export default function SessionsPanel() {
       setSuccess(t('sessions.sessionRevoked'));
       await loadSessions();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error revoking session';
+      const message = err instanceof Error ? err.message : t('sessions.revokeFailed');
       setError(message);
     } finally {
       setLoading(false);
