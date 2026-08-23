@@ -86,6 +86,7 @@ export default function InstanceSettingsTab() {
                 <input
                   className="input-field"
                   type="text"
+                  placeholder="留空则显示产品名称文字标识"
                   value={settings.logo_url}
                   onChange={(event) => update('logo_url', event.target.value)}
                 />
@@ -94,6 +95,7 @@ export default function InstanceSettingsTab() {
                 <input
                   className="input-field"
                   type="text"
+                  placeholder="留空则保留浏览器默认图标"
                   value={settings.favicon_url}
                   onChange={(event) => update('favicon_url', event.target.value)}
                 />
@@ -102,6 +104,7 @@ export default function InstanceSettingsTab() {
                 <input
                   className="input-field"
                   maxLength={160}
+                  placeholder={settings.product_name || 'GOSSO'}
                   value={settings.login_title}
                   onChange={(event) => update('login_title', event.target.value)}
                 />
@@ -111,6 +114,7 @@ export default function InstanceSettingsTab() {
                   className="input-field"
                   rows={3}
                   maxLength={500}
+                  placeholder={t('login.subtitle')}
                   value={settings.login_description}
                   onChange={(event) => update('login_description', event.target.value)}
                 />
@@ -119,10 +123,16 @@ export default function InstanceSettingsTab() {
                 <input
                   className="input-field"
                   type="text"
+                  placeholder="留空则使用控制台默认深色背景"
                   value={settings.login_background_url}
                   onChange={(event) => update('login_background_url', event.target.value)}
                 />
               </FormField>
+            </div>
+            <div className="notice-card">
+              <strong>登录页预览</strong>
+              <div style={{ marginTop: '8px' }}>{settings.login_title || settings.product_name || 'GOSSO'}</div>
+              <div className="text-muted">{settings.login_description || t('login.subtitle')}</div>
             </div>
           </PlainSection>
 

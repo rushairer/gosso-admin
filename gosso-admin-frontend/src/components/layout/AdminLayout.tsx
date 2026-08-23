@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Home, Key, LayoutDashboard, LogIn, LogOut, Settings, ShieldCheck, User } from 'lucide-react';
 import { gossoClient, logout, redirectToAuthorize } from '../../auth';
+import { instanceSettingsService } from '../../services';
 import type { SessionSnapshot } from '../../auth';
 
 function initials(snapshot: SessionSnapshot) {
@@ -14,6 +15,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const location = useLocation();
   const [session, setSession] = useState<SessionSnapshot>(() => gossoClient.getSnapshot());
+  const [productName, setProductName] = useState('GOSSO');
 
   const pageTitles: Record<string, { title: string; description: string }> = useMemo(
     () => ({
@@ -38,6 +40,15 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     return gossoClient.subscribe(setSession);
   }, [location.pathname]);
 
+  useEffect(() => {
+    void instanceSettingsService
+      .getPublicBranding()
+      .then((branding) => {
+        setProductName(branding.product_name || 'GOSSO');
+      })
+      .catch(() => undefined);
+  }, []);
+
   const page = useMemo(() => {
     if (location.pathname.startsWith('/admin')) return pageTitles['/admin'];
     if (location.pathname.startsWith('/settings')) return pageTitles['/settings'];
@@ -53,7 +64,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             <ShieldCheck size={20} />
           </span>
           <span>
-            <strong>{t('nav.brandName')}</strong>
+            <strong>{productName}</strong>
             <small>{t('nav.brandSubtitle')}</small>
           </span>
         </Link>
