@@ -1,6 +1,11 @@
 package main
 
-import "testing"
+import (
+	"bytes"
+	"log"
+	"strings"
+	"testing"
+)
 
 func TestMissingSchemaCapabilities(t *testing.T) {
 	available := make(map[string]map[string]bool)
@@ -23,5 +28,12 @@ func TestMissingSchemaCapabilities(t *testing.T) {
 
 func TestValidateAdminSeedPolicyDevelopment(t *testing.T) {
 	// The development default remains intentionally available for the local quick start.
-	validateAdminSeedPolicy("development", "admin", "admin123")
+	var output bytes.Buffer
+	original := log.Writer()
+	log.SetOutput(&output)
+	t.Cleanup(func() { log.SetOutput(original) })
+	validateAdminSeedPolicy("development", "admin123")
+	if strings.Contains(output.String(), "admin123") {
+		t.Fatal("development warning must not log the default password")
+	}
 }

@@ -93,10 +93,10 @@ func isDevelopmentLike(env string) bool {
 	}
 }
 
-func validateAdminSeedPolicy(env, username, password string) {
+func validateAdminSeedPolicy(env, password string) {
 	if isDevelopmentLike(env) {
 		if password == "admin123" {
-			log.Printf("WARNING: using local development default credentials %q / %q. Do not use this outside local development.", username, password)
+			log.Print("WARNING: local development default credentials are enabled. Do not use this configuration outside local development.")
 		}
 		return
 	}
@@ -165,7 +165,7 @@ func main() {
 	if adminPassword == "" {
 		adminPassword = "admin123"
 	}
-	validateAdminSeedPolicy(env, adminUsername, adminPassword)
+	validateAdminSeedPolicy(env, adminPassword)
 	adminDisplayName := os.Getenv("ADMIN_DISPLAY_NAME")
 	if adminDisplayName == "" {
 		adminDisplayName = "System Admin"

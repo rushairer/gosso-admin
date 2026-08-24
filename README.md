@@ -130,8 +130,9 @@ npm ci
 npm run dev
 ```
 
-The frontend tracks `@gosso/client#main` during rapid development. The committed
-lockfile pins the exact SDK commit, and CI installs it with `npm ci`. OAuth/OIDC,
+The frontend uses the exact registry-published `@gosso/client@0.4.0`
+stable release while validating the 0.3 release line. The committed lockfile
+records the npm integrity hash, and CI installs it with `npm ci`. OAuth/OIDC,
 PKCE, session refresh, identity CSRF, MFA, passkey, profile, session, and
 password-reset protocol logic belongs to the SDK; React pages only manage UI
 state and call SDK methods.
