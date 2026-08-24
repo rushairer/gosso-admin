@@ -8,7 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 - Delegate profile, password, email, MFA, passkey, session, and password-reset flows to `@gosso/client#main` instead of maintaining endpoint and response logic in React pages.
-- Validate the commit-pinned SDK lock entry in CI while retaining the fast-moving `main` development channel.
+- Validate the commit-pinned SDK lock entry in CI while retaining the development channel until the 0.4 registry package is published.
+
+### Fixed
+- Preserve CSP, HSTS, Permissions-Policy, COOP, CORP, and related security headers on cached assets and SPA fallback responses.
+
+### Security
+- Upgrade the Seeder to Go 1.26.6 and `golang.org/x/text` 0.39.0 to resolve reachable advisories.
 
 ## [0.2.0] - 2026-08-15
 

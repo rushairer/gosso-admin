@@ -1,6 +1,6 @@
 module seed
 
-go 1.26.5
+go 1.26.6
 
 require (
 	github.com/jackc/pgx/v5 v5.9.2
@@ -13,5 +13,5 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
-	golang.org/x/text v0.38.0 // indirect
+	golang.org/x/text v0.39.0 // indirect
 )

@@ -13,12 +13,14 @@ FROM nginx:stable-alpine
 
 # Run nginx as non-root
 RUN apk upgrade --no-cache \
+    && mkdir -p /etc/nginx/snippets \
     && chown -R nginx:nginx /var/cache/nginx /var/log/nginx /etc/nginx/conf.d \
     && touch /var/run/nginx.pid \
     && chown nginx:nginx /var/run/nginx.pid
 
 COPY --from=builder --chown=nginx:nginx /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY security-headers.conf /etc/nginx/snippets/security-headers.conf
 
 USER nginx
 
