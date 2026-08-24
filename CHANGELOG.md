@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 - Delegate profile, password, email, MFA, passkey, session, and password-reset flows to `@gosso/client` instead of maintaining endpoint and response logic in React pages.
-- Validate the registry-published `@gosso/client` 0.4.0-rc.2 package and lockfile integrity before promoting the dependency to stable 0.4.0.
+- Consume the registry-published `@gosso/client` 0.4.0 package with lockfile integrity.
 
 ### Fixed
 - Preserve CSP, HSTS, Permissions-Policy, COOP, CORP, and related security headers on cached assets and SPA fallback responses.
