@@ -191,7 +191,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
             </div>
           </DefinitionRow>
 
-          <DefinitionRow label="账号唯一标识 (Subject ID)">
+          <DefinitionRow label={t('profile.subjectIdLabel')}>
             <div className="flex-row items-center justify-between" style={{ width: '100%' }}>
               <code
                 style={{
@@ -210,18 +210,18 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
                   type="button"
                   onClick={() => {
                     navigator.clipboard.writeText(localProfile.sub);
-                    setSuccess('已复制完整 Subject ID');
+                    setSuccess(t('profile.copiedSubjectId'));
                   }}
                   style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
                   <Copy style={{ width: '12px', height: '12px' }} />
-                  <span style={{ fontSize: '12px' }}>复制 ID</span>
+                  <span style={{ fontSize: '12px' }}>{t('profile.copyId')}</span>
                 </button>
               )}
             </div>
           </DefinitionRow>
 
-          <DefinitionRow label="身份认证源 (SSO Issuer)">
+          <DefinitionRow label={t('profile.ssoIssuerLabel')}>
             <div className="flex-row items-center justify-between" style={{ width: '100%' }}>
               <code
                 style={{
@@ -239,12 +239,12 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
                 type="button"
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.origin);
-                  setSuccess('已复制 SSO Issuer');
+                  setSuccess(t('profile.copiedIssuer'));
                 }}
                 style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
               >
                 <Copy style={{ width: '12px', height: '12px' }} />
-                <span style={{ fontSize: '12px' }}>复制 Issuer</span>
+                <span style={{ fontSize: '12px' }}>{t('profile.copyIssuer')}</span>
               </button>
             </div>
           </DefinitionRow>

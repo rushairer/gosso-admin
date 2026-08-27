@@ -422,7 +422,13 @@
     "displayNameUpdateFailed": "Unable to update the display name.",
     "passwordUpdateFailed": "Unable to change the password.",
     "emailVerificationRequestFailed": "Unable to send the email verification code.",
-    "emailVerificationFailed": "Unable to verify the email code."
+    "emailVerificationFailed": "Unable to verify the email code.",
+    "subjectIdLabel": "Subject Identifier (Subject ID)",
+    "copiedSubjectId": "Copied full Subject ID",
+    "copyId": "Copy ID",
+    "ssoIssuerLabel": "Identity Provider (SSO Issuer)",
+    "copiedIssuer": "Copied SSO Issuer",
+    "copyIssuer": "Copy Issuer"
   },
   "mfa": {
     "title": "Multi-Factor Authentication (MFA)",

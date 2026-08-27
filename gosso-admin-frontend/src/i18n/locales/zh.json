@@ -422,7 +422,13 @@
     "displayNameUpdateFailed": "无法更新显示名称。",
     "passwordUpdateFailed": "无法修改密码。",
     "emailVerificationRequestFailed": "无法发送邮箱验证码。",
-    "emailVerificationFailed": "无法验证邮箱验证码。"
+    "emailVerificationFailed": "无法验证邮箱验证码。",
+    "subjectIdLabel": "账号唯一标识 (Subject ID)",
+    "copiedSubjectId": "已复制完整 Subject ID",
+    "copyId": "复制 ID",
+    "ssoIssuerLabel": "身份认证源 (SSO Issuer)",
+    "copiedIssuer": "已复制 SSO Issuer",
+    "copyIssuer": "复制 Issuer"
   },
   "mfa": {
     "title": "多因素认证 (MFA)",
