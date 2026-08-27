@@ -193,7 +193,15 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
 
           <DefinitionRow label="账号唯一标识 (Subject ID)">
             <div className="flex-row items-center justify-between" style={{ width: '100%' }}>
-              <code style={{ fontSize: '12px', background: 'var(--color-surface-hover, rgba(0,0,0,0.05))', padding: '3px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>
+              <code
+                style={{
+                  fontSize: '12px',
+                  background: 'var(--color-surface-hover, rgba(0,0,0,0.05))',
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  fontFamily: 'monospace',
+                }}
+              >
                 {localProfile?.sub || '-'}
               </code>
               {localProfile?.sub && (
@@ -215,7 +223,15 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
 
           <DefinitionRow label="身份认证源 (SSO Issuer)">
             <div className="flex-row items-center justify-between" style={{ width: '100%' }}>
-              <code style={{ fontSize: '12px', background: 'var(--color-surface-hover, rgba(0,0,0,0.05))', padding: '3px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>
+              <code
+                style={{
+                  fontSize: '12px',
+                  background: 'var(--color-surface-hover, rgba(0,0,0,0.05))',
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  fontFamily: 'monospace',
+                }}
+              >
                 {window.location.origin}
               </code>
               <button
