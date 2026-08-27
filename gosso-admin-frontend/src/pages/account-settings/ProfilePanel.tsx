@@ -218,35 +218,18 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
               <code style={{ fontSize: '12px', background: 'var(--color-surface-hover, rgba(0,0,0,0.05))', padding: '3px 8px', borderRadius: '4px', fontFamily: 'monospace' }}>
                 {window.location.origin}
               </code>
-              <div className="flex-row gap-xs">
-                <button
-                  className="btn btn-secondary btn-sm"
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(window.location.origin);
-                    setSuccess('已复制 SSO Issuer');
-                  }}
-                  style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                >
-                  <Copy style={{ width: '12px', height: '12px' }} />
-                  <span style={{ fontSize: '12px' }}>复制 Issuer</span>
-                </button>
-                {localProfile?.sub && (
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    type="button"
-                    onClick={() => {
-                      const envStr = `BLOG_BOOTSTRAP_OWNER_ISSUER=${window.location.origin}\nBLOG_BOOTSTRAP_OWNER_SUBJECT=${localProfile.sub}`;
-                      navigator.clipboard.writeText(envStr);
-                      setSuccess('已复制客户端初始化配置 (BLOG_BOOTSTRAP_OWNER_*)');
-                    }}
-                    style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-primary)' }}
-                  >
-                    <Copy style={{ width: '12px', height: '12px' }} />
-                    <span style={{ fontSize: '12px' }}>复制初始化配置</span>
-                  </button>
-                )}
-              </div>
+              <button
+                className="btn btn-secondary btn-sm"
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.origin);
+                  setSuccess('已复制 SSO Issuer');
+                }}
+                style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                <Copy style={{ width: '12px', height: '12px' }} />
+                <span style={{ fontSize: '12px' }}>复制 Issuer</span>
+              </button>
             </div>
           </DefinitionRow>
         </DefinitionList>
