@@ -4,10 +4,12 @@ import { Plus as PlusIcon, Edit2 as EditIcon, Trash2 as TrashIcon, Key as KeyIco
 import { clientService } from '../../services';
 import type { OAuth2Client } from '../../types/api';
 import {
+  Button,
   ButtonGroup,
   AsyncState,
   DataTable,
   EmptyState,
+  IconButton,
   PanelHeader,
   StatusBadge,
   Tag,
@@ -133,10 +135,9 @@ export default function ClientsTab() {
           title={t('clients.title')}
           description={t('clients.description')}
           action={
-            <button className="btn btn-primary content-action" onClick={() => handleOpenClientModal(null)}>
-              <PlusIcon />
+            <Button variant="primary" icon={<PlusIcon size={16} />} onClick={() => handleOpenClientModal(null)}>
               {t('clients.registerClient')}
-            </button>
+            </Button>
           }
         />
         {clients.length === 0 ? (
@@ -222,20 +223,22 @@ export default function ClientsTab() {
                   </td>
                   <td>
                     <ButtonGroup compact>
-                      <button
-                        className="btn btn-secondary btn-sm"
+                      <IconButton
+                        label={t('clients.editClient')}
+                        variant="secondary"
+                        size="sm"
                         onClick={() => handleOpenClientModal(client)}
-                        title={t('clients.editClient')}
                       >
-                        <EditIcon style={{ width: '13px', height: '13px' }} />
-                      </button>
-                      <button
-                        className="btn btn-danger btn-sm"
+                        <EditIcon size={14} />
+                      </IconButton>
+                      <IconButton
+                        label={t('clients.deleteClient')}
+                        variant="danger"
+                        size="sm"
                         onClick={() => handleDeleteClient(client.client_id)}
-                        title={t('clients.deleteClient')}
                       >
-                        <TrashIcon style={{ width: '13px', height: '13px' }} />
-                      </button>
+                        <TrashIcon size={14} />
+                      </IconButton>
                     </ButtonGroup>
                   </td>
                 </tr>

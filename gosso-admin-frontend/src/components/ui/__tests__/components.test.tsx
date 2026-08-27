@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { useState } from 'react';
 import { Feedback } from '../Feedback';
 import { StatusBadge } from '../Badge';
@@ -12,7 +12,12 @@ import { FormField } from '../Form';
 import { Tabs } from '../Tabs';
 import { useConfirm } from '../useConfirm';
 import { AsyncState } from '../AsyncState';
-import { fireEvent } from '@testing-library/react';
+import { Button, IconButton } from '../Button';
+import { Input, Textarea, Select } from '../Input';
+import { Skeleton, TableSkeleton } from '../Skeleton';
+import { Drawer } from '../Drawer';
+import { Card, CardHeader, CardContent, CardFooter } from '../Card';
+import { DataTable } from '../DataTable';
 
 describe('Feedback', () => {
   it('renders error type with message', () => {
@@ -412,5 +417,119 @@ describe('AsyncState', () => {
 
     rerender(<AsyncState loading={false}>Content</AsyncState>);
     expect(screen.getByText('Content')).toBeInTheDocument();
+  });
+});
+
+describe('Design System Primitives', () => {
+  it('renders Button variants, sizes, icons, and handles loading state', () => {
+    const handleClick = vi.fn();
+    const { rerender } = render(
+      <Button variant="primary" size="sm" onClick={handleClick}>
+        Click Me
+      </Button>
+    );
+    const btn = screen.getByRole('button', { name: 'Click Me' });
+    expect(btn).toHaveClass('btn-primary', 'btn-sm');
+    fireEvent.click(btn);
+    expect(handleClick).toHaveBeenCalledOnce();
+
+    rerender(
+      <Button variant="primary" loading onClick={handleClick}>
+        Loading Btn
+      </Button>
+    );
+    const loadingBtn = screen.getByRole('button');
+    expect(loadingBtn).toBeDisabled();
+    expect(loadingBtn).toHaveAttribute('aria-busy', 'true');
+    expect(loadingBtn).toHaveClass('is-loading');
+  });
+
+  it('renders IconButton with accessible label', () => {
+    render(
+      <IconButton label="Edit item">
+        <span>Edit</span>
+      </IconButton>
+    );
+    const btn = screen.getByRole('button', { name: 'Edit item' });
+    expect(btn).toHaveAttribute('title', 'Edit item');
+  });
+
+  it('renders Input, Textarea, and Select components', () => {
+    render(
+      <div>
+        <Input placeholder="Enter username" isError />
+        <Textarea placeholder="Enter description" />
+        <Select aria-label="Select role">
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
+        </Select>
+      </div>
+    );
+    expect(screen.getByPlaceholderText('Enter username')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByPlaceholderText('Enter description')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Select role' })).toBeInTheDocument();
+  });
+
+  it('renders Skeleton and TableSkeleton', () => {
+    render(
+      <div>
+        <Skeleton variant="rectangular" width={100} height={40} data-testid="skeleton-rect" />
+        <TableSkeleton rows={3} columns={3} />
+      </div>
+    );
+    expect(screen.getByTestId('skeleton-rect')).toHaveClass('skeleton-rectangular');
+    expect(screen.getByRole('status', { name: 'Loading table data' })).toBeInTheDocument();
+  });
+
+  it('renders DataTable with built-in loading skeleton and empty state', () => {
+    const { rerender } = render(<DataTable loading loadingRows={2} loadingCols={2} />);
+    expect(screen.getByRole('status', { name: 'Loading table data' })).toBeInTheDocument();
+
+    rerender(<DataTable empty emptyState={<div>No records found</div>} />);
+    expect(screen.getByText('No records found')).toBeInTheDocument();
+
+    rerender(
+      <DataTable>
+        <tbody>
+          <tr>
+            <td>Row item</td>
+          </tr>
+        </tbody>
+      </DataTable>
+    );
+    expect(screen.getByText('Row item')).toBeInTheDocument();
+  });
+
+  it('renders Drawer when open and closes on ESC', () => {
+    const handleClose = vi.fn();
+    const { rerender } = render(
+      <Drawer isOpen={true} onClose={handleClose} title="Drawer Title">
+        <div>Drawer Body</div>
+      </Drawer>
+    );
+    expect(screen.getByText('Drawer Title')).toBeInTheDocument();
+    expect(screen.getByText('Drawer Body')).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(handleClose).toHaveBeenCalledOnce();
+
+    rerender(
+      <Drawer isOpen={false} onClose={handleClose} title="Drawer Title">
+        <div>Drawer Body</div>
+      </Drawer>
+    );
+    expect(screen.queryByText('Drawer Title')).not.toBeInTheDocument();
+  });
+
+  it('renders Card with header and content', () => {
+    render(
+      <Card>
+        <CardHeader title="Card Title" description="Card Desc" />
+        <CardContent>Content Area</CardContent>
+      </Card>
+    );
+    expect(screen.getByText('Card Title')).toBeInTheDocument();
+    expect(screen.getByText('Card Desc')).toBeInTheDocument();
+    expect(screen.getByText('Content Area')).toBeInTheDocument();
   });
 });

@@ -1,8 +1,9 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import i18n from '../i18n';
 import { logger } from '../utils/logger';
+import { Button } from './ui';
 
 interface Props {
   children: ReactNode;
@@ -45,70 +46,27 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: '100vh',
-            padding: '32px',
-          }}
-        >
-          <div
-            className="glass-card"
-            style={{
-              maxWidth: '520px',
-              width: '100%',
-              textAlign: 'center',
-              padding: '48px 32px',
-              borderLeft: '4px solid var(--danger-color)',
-            }}
-          >
-            <AlertTriangle
-              style={{
-                width: '48px',
-                height: '48px',
-                color: 'var(--danger-color)',
-                marginBottom: '20px',
-                display: 'inline-block',
-              }}
-            />
-            <h2 style={{ color: 'var(--color-text-main)', marginBottom: '12px', fontSize: '22px' }}>
-              {i18n.t('errorBoundary.title')}
-            </h2>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', lineHeight: 1.6, marginBottom: '8px' }}>
-              {i18n.t('errorBoundary.description')}
-            </p>
+        <div className="error-boundary-wrapper">
+          <div className="glass-card error-boundary-card">
+            <div className="error-boundary-icon-wrap">
+              <AlertTriangle className="error-boundary-icon" size={40} />
+            </div>
+            <h2 className="error-boundary-title">{i18n.t('errorBoundary.title')}</h2>
+            <p className="error-boundary-desc">{i18n.t('errorBoundary.description')}</p>
             {import.meta.env.DEV && this.state.error && (
-              <pre
-                style={{
-                  textAlign: 'left',
-                  background: 'rgba(0,0,0,0.3)',
-                  padding: '12px',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  color: '#fca5a5',
-                  overflow: 'auto',
-                  maxHeight: '200px',
-                  marginBottom: '20px',
-                  fontFamily: 'monospace',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-all',
-                }}
-              >
+              <pre className="error-boundary-stack">
                 {this.state.error.message}
                 {'\n\n'}
                 {this.state.error.stack}
               </pre>
             )}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '24px' }}>
-              <button className="btn btn-primary" onClick={this.handleReload}>
-                <RefreshCw style={{ width: '16px', height: '16px' }} />
+            <div className="error-boundary-actions">
+              <Button variant="primary" icon={<RefreshCw size={16} />} onClick={this.handleReload}>
                 {i18n.t('errorBoundary.reloadPage')}
-              </button>
-              <button className="btn btn-secondary" onClick={this.handleGoHome}>
+              </Button>
+              <Button variant="secondary" icon={<Home size={16} />} onClick={this.handleGoHome}>
                 {i18n.t('errorBoundary.goHome')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
