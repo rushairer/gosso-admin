@@ -1,13 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { GossoProvider } from '@gosso/client/react';
+import { GossoProvider, RequireAuth } from '@gosso/client/react';
 import AccountSettings from '../AccountSettings';
 
 const { subscribe, getSnapshot, redirectToAuthorize, mockClient } = vi.hoisted(() => {
   const subscribe = vi.fn(() => () => {});
   const getSnapshot = vi.fn();
-  const redirectToAuthorize = vi.fn();
+  const redirectToAuthorize = vi.fn().mockResolvedValue(undefined);
   const mockClient = {
     subscribe,
     getSnapshot,
@@ -32,7 +32,14 @@ function renderAccountSettings(path = '/account-settings/profile') {
     <GossoProvider client={mockClient}>
       <MemoryRouter initialEntries={[path]}>
         <Routes>
-          <Route path="/account-settings/:tab" element={<AccountSettings />} />
+          <Route
+            path="/account-settings/:tab"
+            element={
+              <RequireAuth redirectTo="/account-settings/profile" fallback={<div>accountSettings.checkingAccess</div>}>
+                <AccountSettings />
+              </RequireAuth>
+            }
+          />
         </Routes>
       </MemoryRouter>
     </GossoProvider>

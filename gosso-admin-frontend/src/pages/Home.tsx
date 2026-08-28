@@ -1,34 +1,15 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ShieldCheck, ArrowRight, UserCheck, Key, Settings } from 'lucide-react';
 import { useSession } from '@gosso/client/react';
-import { redirectToAuthorize } from '../auth';
-import { PageLoader } from '../components/ui';
 
 export default function Home() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { loggedIn: logged, isAdmin: userAdmin, profile: user } = useSession();
-
-  useEffect(() => {
-    if (!logged) void redirectToAuthorize('/');
-  }, [logged]);
-
-  if (!logged) {
-    return <PageLoader message={t('home.checkingAccess')} />;
-  }
+  const { isAdmin: userAdmin, profile: user } = useSession();
 
   const handleAction = () => {
-    if (logged) {
-      if (userAdmin) {
-        navigate('/system-management');
-      } else {
-        // Non-admin users already see "Access Denied" in the UI
-      }
-    } else {
-      redirectToAuthorize('/');
-    }
+    if (userAdmin) navigate('/system-management');
   };
 
   return (
@@ -55,47 +36,40 @@ export default function Home() {
           </p>
 
           <div>
-            {logged ? (
-              userAdmin ? (
-                <div className="flex-row items-center flex-wrap gap-lg">
-                  <p
-                    className="flex-row items-center gap-xs"
+            {userAdmin ? (
+              <div className="flex-row items-center flex-wrap gap-lg">
+                <p
+                  className="flex-row items-center gap-xs"
+                  style={{
+                    color: 'var(--success-color)',
+                    fontWeight: '600',
+                    fontSize: '15px',
+                  }}
+                >
+                  <span
                     style={{
-                      color: 'var(--success-color)',
-                      fontWeight: '600',
-                      fontSize: '15px',
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--success-color)',
                     }}
-                  >
-                    <span
-                      style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: 'var(--success-color)',
-                      }}
-                    />
-                    {t('home.loggedInAs', { name: user?.preferred_username || user?.name || 'Administrator' })}
-                  </p>
-                  <button className="btn btn-primary" onClick={handleAction}>
-                    {t('home.enterDashboard')}
-                    <ArrowRight style={{ width: '16px', height: '16px' }} />
-                  </button>
-                </div>
-              ) : (
-                <div className="flex-row items-center flex-wrap gap-lg">
-                  <p style={{ color: 'var(--warning-color)', fontWeight: '600', fontSize: '15px' }}>
-                    {t('home.accessDenied')}
-                  </p>
-                  <button className="btn btn-secondary" onClick={() => navigate('/')}>
-                    {t('home.refreshCredentials')}
-                  </button>
-                </div>
-              )
+                  />
+                  {t('home.loggedInAs', { name: user?.preferred_username || user?.name || 'Administrator' })}
+                </p>
+                <button className="btn btn-primary" onClick={handleAction}>
+                  {t('home.enterDashboard')}
+                  <ArrowRight style={{ width: '16px', height: '16px' }} />
+                </button>
+              </div>
             ) : (
-              <button className="btn btn-primary" onClick={handleAction}>
-                {t('home.signInToConsole')}
-                <ArrowRight style={{ width: '16px', height: '16px' }} />
-              </button>
+              <div className="flex-row items-center flex-wrap gap-lg">
+                <p style={{ color: 'var(--warning-color)', fontWeight: '600', fontSize: '15px' }}>
+                  {t('home.accessDenied')}
+                </p>
+                <button className="btn btn-secondary" onClick={() => navigate('/')}>
+                  {t('home.refreshCredentials')}
+                </button>
+              </div>
             )}
           </div>
         </div>

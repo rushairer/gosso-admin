@@ -2,17 +2,25 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ToastProvider } from '../../components/ui';
+import { GossoProvider } from '@gosso/client/react';
 import { apiFetch, gossoClient } from '../../auth';
 import UsersTab from './UsersTab';
 
-const { apiFetchMock } = vi.hoisted(() => ({
+const { apiFetchMock, sessionSnapshot } = vi.hoisted(() => ({
   apiFetchMock: vi.fn(),
+  sessionSnapshot: {
+    loggedIn: true,
+    isAdmin: true,
+    profile: { sub: 'current-admin', roles: ['admin'] },
+  },
 }));
 
 vi.mock('../../auth', () => ({
   apiFetch: apiFetchMock,
   gossoClient: {
     getUserProfile: vi.fn(),
+    subscribe: vi.fn(() => () => {}),
+    getSnapshot: vi.fn(() => sessionSnapshot),
     apiFetch: apiFetchMock,
     get: (url: string) =>
       apiFetchMock(url).then(async (res: Response) => {
@@ -82,9 +90,11 @@ describe('UsersTab pagination', () => {
 
   it('uses the bounded role projection without per-account requests', async () => {
     render(
-      <ToastProvider>
-        <UsersTab />
-      </ToastProvider>
+      <GossoProvider client={gossoClient as any}>
+        <ToastProvider>
+          <UsersTab />
+        </ToastProvider>
+      </GossoProvider>
     );
 
     expect(await screen.findByText('Operator 1')).toBeInTheDocument();

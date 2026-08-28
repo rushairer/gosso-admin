@@ -1,7 +1,7 @@
 import { render, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
-import { GossoProvider } from '@gosso/client/react';
+import { GossoProvider, RequireAuth } from '@gosso/client/react';
 import Home from '../Home';
 
 const { redirectToAuthorize, subscribe, getSnapshot, mockClient } = vi.hoisted(() => {
@@ -29,7 +29,9 @@ describe('management overview authentication', () => {
     render(
       <GossoProvider client={mockClient}>
         <MemoryRouter>
-          <Home />
+          <RequireAuth redirectTo="/" fallback={<div>checking</div>}>
+            <Home />
+          </RequireAuth>
         </MemoryRouter>
       </GossoProvider>
     );

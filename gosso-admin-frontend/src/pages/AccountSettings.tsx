@@ -1,8 +1,7 @@
 import { Shield, Key, Laptop, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { useRequireAuth } from '@gosso/client/react';
-import { PageLoader, Tabs } from '../components/ui';
+import { Tabs } from '../components/ui';
 import ProfilePanel from './account-settings/ProfilePanel';
 import MFAPanel from './account-settings/MFAPanel';
 import PasskeysPanel from './account-settings/PasskeysPanel';
@@ -20,14 +19,6 @@ export default function AccountSettings() {
   const { tab } = useParams();
   const navigate = useNavigate();
   const activeTab = isAccountSettingsTab(tab) ? tab : 'profile';
-  const { loggedIn } = useRequireAuth({
-    redirectTo: `/account-settings/${activeTab}`,
-  });
-
-  if (!loggedIn) {
-    return <PageLoader message={t('accountSettings.checkingAccess')} />;
-  }
-
   if (!isAccountSettingsTab(tab)) {
     return <Navigate replace to="/account-settings/profile" />;
   }

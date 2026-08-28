@@ -1,13 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { GossoProvider } from '@gosso/client/react';
+import { GossoProvider, RequireAdmin } from '@gosso/client/react';
 import SystemManagement from '../SystemManagement';
 
 const { subscribe, getSnapshot, redirectToAuthorize, mockClient } = vi.hoisted(() => {
   const subscribe = vi.fn(() => () => {});
   const getSnapshot = vi.fn();
-  const redirectToAuthorize = vi.fn();
+  const redirectToAuthorize = vi.fn().mockResolvedValue(undefined);
   const mockClient = {
     subscribe,
     getSnapshot,
@@ -32,7 +32,18 @@ function renderSystemManagement(path = '/system-management/clients') {
     <GossoProvider client={mockClient}>
       <MemoryRouter initialEntries={[path]}>
         <Routes>
-          <Route path="/system-management/:tab" element={<SystemManagement />} />
+          <Route
+            path="/system-management/:tab"
+            element={
+              <RequireAdmin
+                redirectTo="/system-management/clients"
+                fallback={<div>systemManagement.checkingAccess</div>}
+                unauthorized={<div>systemManagement.accessDeniedTitle</div>}
+              >
+                <SystemManagement />
+              </RequireAdmin>
+            }
+          />
         </Routes>
       </MemoryRouter>
     </GossoProvider>
