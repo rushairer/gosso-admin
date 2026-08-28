@@ -24,49 +24,49 @@ export default function App() {
           <BrowserRouter basename={routerBasename}>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-              {/* OIDC flow callbacks and triggers */}
-              <Route path="/callback" element={<Callback />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
+                {/* OIDC flow callbacks and triggers */}
+                <Route path="/callback" element={<Callback />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
-              {/* Regular layouts */}
-              <Route
-                path="/"
-                element={
-                  <AdminLayout>
-                    <Home />
-                  </AdminLayout>
-                }
-              />
-              <Route path="/account-settings" element={<Navigate replace to="/account-settings/profile" />} />
-              <Route
-                path="/account-settings/:tab"
-                element={
-                  <AdminLayout>
-                    <AccountSettings />
-                  </AdminLayout>
-                }
-              />
-              <Route path="/system-management" element={<Navigate replace to="/system-management/clients" />} />
-              <Route
-                path="/system-management/:tab"
-                element={
-                  <AdminLayout>
-                    <SystemManagement />
-                  </AdminLayout>
-                }
-              />
+                {/* Regular layouts */}
+                <Route
+                  path="/"
+                  element={
+                    <AdminLayout>
+                      <Home />
+                    </AdminLayout>
+                  }
+                />
+                <Route path="/account-settings" element={<Navigate replace to="/account-settings/profile" />} />
+                <Route
+                  path="/account-settings/:tab"
+                  element={
+                    <AdminLayout>
+                      <AccountSettings />
+                    </AdminLayout>
+                  }
+                />
+                <Route path="/system-management" element={<Navigate replace to="/system-management/clients" />} />
+                <Route
+                  path="/system-management/:tab"
+                  element={
+                    <AdminLayout>
+                      <SystemManagement />
+                    </AdminLayout>
+                  }
+                />
 
-              {/* 404 catch-all */}
-              <Route
-                path="*"
-                element={
-                  <AdminLayout>
-                    <NotFound />
-                  </AdminLayout>
-                }
-              />
+                {/* 404 catch-all */}
+                <Route
+                  path="*"
+                  element={
+                    <AdminLayout>
+                      <NotFound />
+                    </AdminLayout>
+                  }
+                />
               </Routes>
             </Suspense>
           </BrowserRouter>

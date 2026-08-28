@@ -17,12 +17,7 @@ import { EmailChangeModal } from './EmailChangeModal';
 export default function ProfilePanel() {
   const { t } = useTranslation();
   const profile = useUserProfile();
-  const {
-    loading,
-    error: profileError,
-    updateDisplayName,
-    changePassword,
-  } = useProfileManager();
+  const { loading, error: profileError, updateDisplayName, changePassword } = useProfileManager();
 
   // Password update states
   const [currentPassword, setCurrentPassword] = useState('');
