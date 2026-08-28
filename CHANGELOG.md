@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [0.5.1] - 2026-08-28
 
 ### Changed
-- Upgrade `@gosso/client` to `0.8.3`.
+- Upgrade `@gosso/client` to `0.8.4`.
 
 ## [0.5.0] - 2026-08-28
 
