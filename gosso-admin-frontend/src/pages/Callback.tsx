@@ -13,12 +13,12 @@ export default function Callback() {
   return (
     <AuthCallback
       onSuccess={handleSuccess}
-      renderError={(error) => (
+      renderError={(error, detail) => (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
           <div className="glass-card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center' }}>
             <h2 style={{ color: 'var(--danger-color)', marginBottom: '16px' }}>{t('auth.authenticationError')}</h2>
             <p style={{ color: 'var(--color-text-muted)', marginBottom: '24px', fontSize: '14.5px' }}>
-              {error === 'Missing authorization code or state parameter'
+              {detail?.code === 'CALLBACK_PARAMS_MISSING'
                 ? t('auth.invalidCallbackParams')
                 : error || t('auth.codeExchangeFailed')}
             </p>

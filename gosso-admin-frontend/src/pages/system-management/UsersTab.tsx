@@ -10,7 +10,7 @@ import {
   Unlock as UnlockIcon,
   CheckSquare as ConsentIcon,
 } from 'lucide-react';
-import { gossoClient } from '../../auth';
+import { useUserProfile } from '@gosso/client/react';
 import {
   ButtonGroup,
   AsyncState,
@@ -48,7 +48,7 @@ export default function UsersTab() {
   } = useAdminUsers();
   const { confirm, confirmDialog } = useConfirm();
 
-  const currentAdmin = gossoClient.getUserProfile();
+  const currentAdmin = useUserProfile();
 
   // Modals state
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);

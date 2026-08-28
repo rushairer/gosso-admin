@@ -1,11 +1,12 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider, PageLoader } from './components/ui';
 import { routerBasename } from './config/appPaths';
-import { GossoProvider } from '@gosso/client/react';
+import { GossoProvider, RequireAdmin, RequireAuth } from '@gosso/client/react';
 import { gossoClient } from './auth';
+import { appPath } from './config/appPaths';
 
 const Home = lazy(() => import('./pages/Home'));
 const Callback = lazy(() => import('./pages/Callback'));
@@ -16,9 +17,31 @@ const SystemManagement = lazy(() => import('./pages/SystemManagement'));
 const AccountSettings = lazy(() => import('./pages/AccountSettings'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
+function AccountRoute({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  return (
+    <RequireAuth redirectTo={appPath(location.pathname)} fallback={<PageLoader />}>
+      {children}
+    </RequireAuth>
+  );
+}
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  return (
+    <RequireAdmin
+      redirectTo={appPath(location.pathname)}
+      fallback={<PageLoader />}
+      unauthorized={<Navigate replace to="/" />}
+    >
+      {children}
+    </RequireAdmin>
+  );
+}
+
 export default function App() {
   return (
-    <GossoProvider client={gossoClient}>
+    <GossoProvider client={gossoClient} initializeSession fallback={<PageLoader />}>
       <ErrorBoundary>
         <ToastProvider>
           <BrowserRouter basename={routerBasename}>
@@ -35,7 +58,9 @@ export default function App() {
                   path="/"
                   element={
                     <AdminLayout>
-                      <Home />
+                      <AccountRoute>
+                        <Home />
+                      </AccountRoute>
                     </AdminLayout>
                   }
                 />
@@ -44,7 +69,9 @@ export default function App() {
                   path="/account-settings/:tab"
                   element={
                     <AdminLayout>
-                      <AccountSettings />
+                      <AccountRoute>
+                        <AccountSettings />
+                      </AccountRoute>
                     </AdminLayout>
                   }
                 />
@@ -53,7 +80,9 @@ export default function App() {
                   path="/system-management/:tab"
                   element={
                     <AdminLayout>
-                      <SystemManagement />
+                      <AdminRoute>
+                        <SystemManagement />
+                      </AdminRoute>
                     </AdminLayout>
                   }
                 />

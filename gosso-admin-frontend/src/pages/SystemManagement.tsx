@@ -7,8 +7,7 @@ import {
   FileText as AuditIcon,
   SlidersHorizontal,
 } from 'lucide-react';
-import { useRequireAuth } from '@gosso/client/react';
-import { Panel, PageLoader, Tabs } from '../components/ui';
+import { Panel, Tabs } from '../components/ui';
 import ClientsTab from './system-management/ClientsTab';
 import UsersTab from './system-management/UsersTab';
 import AuditLogsTab from './system-management/AuditLogsTab';
@@ -27,52 +26,8 @@ export default function SystemManagement() {
   const { tab } = useParams();
   const navigate = useNavigate();
   const activeTab = isSystemManagementTab(tab) ? tab : 'clients';
-  const { loggedIn, isAdmin } = useRequireAuth({
-    redirectTo: `/system-management/${activeTab}`,
-  });
-
-  if (!loggedIn) {
-    return <PageLoader message={t('systemManagement.checkingAccess')} />;
-  }
-
   if (!isSystemManagementTab(tab)) {
     return <Navigate replace to="/system-management/clients" />;
-  }
-
-  if (!isAdmin) {
-    return (
-      <div
-        className="glass-card"
-        style={{
-          maxWidth: '560px',
-          margin: '80px auto',
-          textAlign: 'center',
-          padding: '48px 32px',
-          borderLeft: '4px solid var(--warning-color)',
-        }}
-      >
-        <ShieldIcon
-          style={{
-            width: '48px',
-            height: '48px',
-            color: 'var(--warning-color)',
-            marginBottom: '20px',
-            display: 'inline-block',
-          }}
-        />
-        <h3 style={{ color: 'var(--color-text-main)', marginBottom: '12px', fontSize: '20px' }}>
-          {t('systemManagement.accessDeniedTitle')}
-        </h3>
-        <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', lineHeight: 1.6, marginBottom: '24px' }}>
-          {t('systemManagement.accessDeniedDescription')}
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
-          <button className="btn btn-secondary" onClick={() => (window.location.href = '/')}>
-            {t('systemManagement.backHome')}
-          </button>
-        </div>
-      </div>
-    );
   }
 
   const tabs = [
