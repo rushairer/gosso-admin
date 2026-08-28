@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Login from '../Login';
+import { AuthenticationError } from '@gosso/client';
 import { gossoClient, redirectToAuthorize } from '../../auth';
 import { siteSettingsService } from '../../services';
 
@@ -94,7 +95,9 @@ describe('Login', () => {
   });
 
   it('uses the verified profile-load error message from the hosted flow', async () => {
-    vi.mocked(gossoClient.loginWithPassword).mockRejectedValueOnce(new Error('Failed to fetch user profile'));
+    vi.mocked(gossoClient.loginWithPassword).mockRejectedValueOnce(
+      new AuthenticationError('Failed to fetch user profile', 'USER_PROFILE_FAILED')
+    );
     render(
       <MemoryRouter initialEntries={['/login']}>
         <Login />

@@ -8,7 +8,7 @@ import { appPath } from '../config/appPaths';
 import { DEFAULT_SITE_SETTINGS, mergeSiteSettings } from '../config/site-defaults';
 import { siteSettingsService } from '../services';
 import type { PublicSiteBranding } from '../types/api';
-import { safeLocalPath } from '@gosso/client';
+import { AuthenticationError, safeLocalPath } from '@gosso/client';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -25,7 +25,10 @@ export default function Login() {
   const [mfaCode, setMfaCode] = useState('');
 
   const loginErrorMessage = (reason: unknown, fallback: string) => {
-    if (reason instanceof Error && reason.message === 'Failed to fetch user profile') {
+    if (
+      (reason instanceof AuthenticationError && reason.code === 'USER_PROFILE_FAILED') ||
+      (reason instanceof Error && reason.message === 'Failed to fetch user profile')
+    ) {
       return t('login.failedLoadProfile');
     }
     return reason instanceof Error ? reason.message : fallback;
