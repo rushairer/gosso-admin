@@ -19,7 +19,7 @@ export interface UpdateProfilePayload {
   timezone?: string;
 }
 
-export interface SessionInfo {
+export interface AdminAccountSessionInfo {
   id: string;
   created_at: string;
   expires_at: string;
@@ -101,8 +101,8 @@ export const accountService = {
     );
   },
 
-  async fetchAccountSessions(accountId: string): Promise<SessionInfo[]> {
-    const data = await gossoClient.get<{ items?: SessionInfo[] }>(
+  async fetchAccountSessions(accountId: string): Promise<AdminAccountSessionInfo[]> {
+    const data = await gossoClient.get<{ items?: AdminAccountSessionInfo[] }>(
       `/api/v1/admin/accounts/${encodeURIComponent(accountId)}/sessions`
     );
     return data?.items || [];
