@@ -19,8 +19,6 @@ export const gossoClient = createGossoClient({
   postLoginDefaultPath: appPath('/system-management'),
   loginPath: appPath('/login'),
   storagePrefix: 'gosso-admin',
-  // Remove this explicit setting after the registry dependency moves to 0.4.
-  sessionMode: 'cookie',
   refreshIdentityRequests: true,
 });
 
