@@ -5,9 +5,47 @@ import { ToastProvider } from '../../components/ui';
 import { apiFetch } from '../../auth';
 import ClientsTab from './ClientsTab';
 
+const { apiFetchMock } = vi.hoisted(() => ({
+  apiFetchMock: vi.fn(),
+}));
+
 vi.mock('../../auth', () => ({
-  apiFetch: vi.fn(),
-  gossoClient: { getUserProfile: vi.fn() },
+  apiFetch: apiFetchMock,
+  gossoClient: {
+    getUserProfile: vi.fn(),
+    apiFetch: apiFetchMock,
+    get: (url: string) =>
+      apiFetchMock(url).then(async (res: Response) => {
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(body.message || 'GET request failed');
+        }
+        return body.data;
+      }),
+    post: (url: string, body?: unknown) =>
+      apiFetchMock(url, { method: 'POST', body: JSON.stringify(body) }).then(async (res: Response) => {
+        const b = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(b.message || 'POST request failed');
+        }
+        return b.data;
+      }),
+    put: (url: string, body?: unknown) =>
+      apiFetchMock(url, { method: 'PUT', body: JSON.stringify(body) }).then(async (res: Response) => {
+        const b = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(b.message || 'PUT request failed');
+        }
+        return b.data;
+      }),
+    delete: (url: string) =>
+      apiFetchMock(url, { method: 'DELETE' }).then(async (res: Response) => {
+        const b = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(b.message || 'DELETE request failed');
+        }
+      }),
+  },
 }));
 
 describe('ClientsTab', () => {

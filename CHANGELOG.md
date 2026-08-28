@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-08-28
+
+### Changed
+- Upgrade `@gosso/client` to `0.6.1`.
+- Refactor admin API services (`clientService`, `accountService`, `auditService`, `siteSettingsService`) to use `gossoClient.get / post / put / delete` with unified error handling.
+- Adopt `useRequireAuth` hook in `AccountSettings` and `SystemManagement` pages to eliminate duplicate authentication redirect logic.
+
 ## [0.4.0] - 2026-08-28
 
 ### Changed

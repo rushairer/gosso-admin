@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,8 +7,7 @@ import {
   FileText as AuditIcon,
   SlidersHorizontal,
 } from 'lucide-react';
-import { useSession } from '@gosso/client/react';
-import { redirectToAuthorize } from '../auth';
+import { useRequireAuth } from '@gosso/client/react';
 import { Panel, PageLoader, Tabs } from '../components/ui';
 import ClientsTab from './system-management/ClientsTab';
 import UsersTab from './system-management/UsersTab';
@@ -29,11 +27,9 @@ export default function SystemManagement() {
   const { tab } = useParams();
   const navigate = useNavigate();
   const activeTab = isSystemManagementTab(tab) ? tab : 'clients';
-  const { loggedIn, isAdmin } = useSession();
-
-  useEffect(() => {
-    if (!loggedIn) void redirectToAuthorize(`/system-management/${activeTab}`);
-  }, [activeTab, loggedIn]);
+  const { loggedIn, isAdmin } = useRequireAuth({
+    redirectTo: `/system-management/${activeTab}`,
+  });
 
   if (!loggedIn) {
     return <PageLoader message={t('systemManagement.checkingAccess')} />;

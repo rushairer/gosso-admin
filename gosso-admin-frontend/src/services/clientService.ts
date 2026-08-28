@@ -1,6 +1,5 @@
-import { apiFetch } from '../auth';
+import { gossoClient } from '../auth';
 import type { OAuth2Client } from '../types/api';
-import { extractErrorMessage } from './helper';
 
 export interface CreateClientPayload {
   name: string;
@@ -26,57 +25,25 @@ export interface RotateSecretResponse {
 
 export const clientService = {
   async fetchClients(): Promise<OAuth2Client[]> {
-    const res = await apiFetch('/api/v1/oauth2/clients');
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to load clients'));
-    }
-    const body = await res.json();
-    return body.data || [];
+    const data = await gossoClient.get<OAuth2Client[]>('/api/v1/oauth2/clients');
+    return data || [];
   },
 
-  async createClient(payload: CreateClientPayload): Promise<CreateClientResponse> {
-    const res = await apiFetch('/api/v1/oauth2/clients', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to create client'));
-    }
-    const body = await res.json();
-    return body.data;
+  createClient(payload: CreateClientPayload): Promise<CreateClientResponse> {
+    return gossoClient.post<CreateClientResponse>('/api/v1/oauth2/clients', payload);
   },
 
-  async updateClient(clientId: string, payload: UpdateClientPayload): Promise<OAuth2Client> {
-    const res = await apiFetch(`/api/v1/oauth2/clients/${encodeURIComponent(clientId)}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to update client'));
-    }
-    const body = await res.json();
-    return body.data;
+  updateClient(clientId: string, payload: UpdateClientPayload): Promise<OAuth2Client> {
+    return gossoClient.put<OAuth2Client>(`/api/v1/oauth2/clients/${encodeURIComponent(clientId)}`, payload);
   },
 
-  async deleteClient(clientId: string): Promise<void> {
-    const res = await apiFetch(`/api/v1/oauth2/clients/${encodeURIComponent(clientId)}`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to delete client'));
-    }
+  deleteClient(clientId: string): Promise<void> {
+    return gossoClient.delete<void>(`/api/v1/oauth2/clients/${encodeURIComponent(clientId)}`);
   },
 
-  async rotateSecret(clientId: string): Promise<RotateSecretResponse> {
-    const res = await apiFetch(`/api/v1/oauth2/clients/${encodeURIComponent(clientId)}/rotate-secret`, {
-      method: 'POST',
-    });
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to rotate secret'));
-    }
-    const body = await res.json();
-    return body.data;
+  rotateSecret(clientId: string): Promise<RotateSecretResponse> {
+    return gossoClient.post<RotateSecretResponse>(
+      `/api/v1/oauth2/clients/${encodeURIComponent(clientId)}/rotate-secret`
+    );
   },
 };

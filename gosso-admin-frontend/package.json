@@ -1,7 +1,7 @@
 {
   "name": "gosso-admin-frontend",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.4.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -17,7 +17,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@gosso/client": "0.6.0",
+    "@gosso/client": "0.6.1",
     "i18next": "^26.4.0",
     "i18next-browser-languagedetector": "^8.2.1",
     "lucide-react": "^1.34.0",

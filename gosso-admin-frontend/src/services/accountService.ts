@@ -1,6 +1,5 @@
-import { apiFetch } from '../auth';
+import { gossoClient } from '../auth';
 import type { Account, Role, Consent } from '../types/api';
-import { extractErrorMessage } from './helper';
 
 export interface CreateAccountPayload {
   username: string;
@@ -32,155 +31,86 @@ export interface SessionInfo {
 export const accountService = {
   async fetchAccounts(page = 1, pageSize = 20, includeRoles = true): Promise<{ accounts: Account[]; total: number }> {
     const rolesQuery = includeRoles ? '&include=roles' : '';
-    const res = await apiFetch(`/api/v1/admin/accounts?page=${page}&page_size=${pageSize}${rolesQuery}`);
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to load accounts'));
-    }
-    const body = await res.json();
+    const data = await gossoClient.get<{ items?: Account[]; total?: number }>(
+      `/api/v1/admin/accounts?page=${page}&page_size=${pageSize}${rolesQuery}`
+    );
     return {
-      accounts: body.data?.items || [],
-      total: body.data?.total || 0,
+      accounts: data?.items || [],
+      total: data?.total || 0,
     };
   },
 
-  async createAccount(payload: CreateAccountPayload): Promise<Account> {
-    const res = await apiFetch('/api/v1/admin/accounts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to create account'));
-    }
-    const body = await res.json();
-    return body.data;
+  createAccount(payload: CreateAccountPayload): Promise<Account> {
+    return gossoClient.post<Account>('/api/v1/admin/accounts', payload);
   },
 
-  async deleteAccount(accountId: string): Promise<void> {
-    const res = await apiFetch(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to delete account'));
-    }
+  deleteAccount(accountId: string): Promise<void> {
+    return gossoClient.delete<void>(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}`);
   },
 
-  async updateAccountStatus(accountId: string, status: string): Promise<void> {
-    const res = await apiFetch(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/status`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
-    });
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to update status'));
-    }
+  updateAccountStatus(accountId: string, status: string): Promise<void> {
+    return gossoClient.put<void>(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/status`, { status });
   },
 
-  async updateAccountProfile(accountId: string, profile: UpdateProfilePayload): Promise<void> {
-    const res = await apiFetch(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/profile`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(profile),
-    });
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to update profile'));
-    }
+  updateAccountProfile(accountId: string, profile: UpdateProfilePayload): Promise<void> {
+    return gossoClient.put<void>(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/profile`, profile);
   },
 
-  async resetPassword(accountId: string, password: string): Promise<void> {
-    const res = await apiFetch(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/password`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password }),
-    });
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to reset password'));
-    }
+  resetPassword(accountId: string, password: string): Promise<void> {
+    return gossoClient.put<void>(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/password`, { password });
   },
 
-  async clearLockout(accountId: string): Promise<void> {
-    const res = await apiFetch(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/lockout`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to clear lockout'));
-    }
+  clearLockout(accountId: string): Promise<void> {
+    return gossoClient.delete<void>(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/lockout`);
   },
 
-  async resetMfa(accountId: string): Promise<void> {
-    const res = await apiFetch(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/mfa`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to reset MFA'));
-    }
+  resetMfa(accountId: string): Promise<void> {
+    return gossoClient.delete<void>(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/mfa`);
   },
 
   async fetchAccountRoles(accountId: string): Promise<Role[]> {
-    const res = await apiFetch(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/roles`);
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to load roles'));
-    }
-    const body = await res.json();
-    return body.data?.items || [];
-  },
-
-  async assignRole(accountId: string, roleId: string): Promise<void> {
-    const res = await apiFetch(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/roles`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role_id: roleId }),
-    });
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to assign role'));
-    }
-  },
-
-  async removeRole(accountId: string, roleId: string): Promise<void> {
-    const res = await apiFetch(
-      `/api/v1/admin/accounts/${encodeURIComponent(accountId)}/roles/${encodeURIComponent(roleId)}`,
-      { method: 'DELETE' }
+    const data = await gossoClient.get<{ items?: Role[] }>(
+      `/api/v1/admin/accounts/${encodeURIComponent(accountId)}/roles`
     );
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to remove role'));
-    }
+    return data?.items || [];
+  },
+
+  assignRole(accountId: string, roleId: string): Promise<void> {
+    return gossoClient.post<void>(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/roles`, {
+      role_id: roleId,
+    });
+  },
+
+  removeRole(accountId: string, roleId: string): Promise<void> {
+    return gossoClient.delete<void>(
+      `/api/v1/admin/accounts/${encodeURIComponent(accountId)}/roles/${encodeURIComponent(roleId)}`
+    );
   },
 
   async fetchAccountConsents(accountId: string): Promise<Consent[]> {
-    const res = await apiFetch(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/consents`);
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to load consents'));
-    }
-    const body = await res.json();
-    return body.data?.items || body.data || [];
+    const data = await gossoClient.get<Consent[] | { items?: Consent[] }>(
+      `/api/v1/admin/accounts/${encodeURIComponent(accountId)}/consents`
+    );
+    if (Array.isArray(data)) return data;
+    return data?.items || [];
   },
 
-  async revokeConsent(accountId: string, clientId: string): Promise<void> {
-    const res = await apiFetch(
-      `/api/v1/admin/accounts/${encodeURIComponent(accountId)}/consents/${encodeURIComponent(clientId)}`,
-      { method: 'DELETE' }
+  revokeConsent(accountId: string, clientId: string): Promise<void> {
+    return gossoClient.delete<void>(
+      `/api/v1/admin/accounts/${encodeURIComponent(accountId)}/consents/${encodeURIComponent(clientId)}`
     );
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to revoke consent'));
-    }
   },
 
   async fetchAccountSessions(accountId: string): Promise<SessionInfo[]> {
-    const res = await apiFetch(`/api/v1/admin/accounts/${encodeURIComponent(accountId)}/sessions`);
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to load sessions'));
-    }
-    const body = await res.json();
-    return body.data?.items || [];
+    const data = await gossoClient.get<{ items?: SessionInfo[] }>(
+      `/api/v1/admin/accounts/${encodeURIComponent(accountId)}/sessions`
+    );
+    return data?.items || [];
   },
 
-  async revokeSession(accountId: string, sessionId: string): Promise<void> {
-    const res = await apiFetch(
-      `/api/v1/admin/accounts/${encodeURIComponent(accountId)}/sessions/${encodeURIComponent(sessionId)}`,
-      { method: 'DELETE' }
+  revokeSession(accountId: string, sessionId: string): Promise<void> {
+    return gossoClient.delete<void>(
+      `/api/v1/admin/accounts/${encodeURIComponent(accountId)}/sessions/${encodeURIComponent(sessionId)}`
     );
-    if (!res.ok) {
-      throw new Error(await extractErrorMessage(res, 'Failed to revoke session'));
-    }
   },
 };

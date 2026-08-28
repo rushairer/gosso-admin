@@ -1,4 +1,4 @@
-import { apiFetch } from '../auth';
+import { gossoClient } from '../auth';
 import type { AuditLog } from '../types/api';
 
 export interface FetchAuditLogsParams {
@@ -19,14 +19,10 @@ export const auditService = {
     if (params.accountId) {
       url += `&account_id=${encodeURIComponent(params.accountId)}`;
     }
-    const res = await apiFetch(url);
-    if (!res.ok) {
-      throw new Error(`Failed to load audit logs: ${res.statusText}`);
-    }
-    const body = await res.json();
+    const data = await gossoClient.get<{ items?: AuditLog[]; total?: number }>(url);
     return {
-      logs: body.data?.items || [],
-      total: body.data?.total || 0,
+      logs: data?.items || [],
+      total: data?.total || 0,
     };
   },
 };
