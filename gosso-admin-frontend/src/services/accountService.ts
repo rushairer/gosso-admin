@@ -30,10 +30,13 @@ export interface AdminAccountSessionInfo {
 
 export const accountService = {
   async fetchAccounts(page = 1, pageSize = 20, includeRoles = true): Promise<{ accounts: Account[]; total: number }> {
-    const rolesQuery = includeRoles ? '&include=roles' : '';
-    const data = await gossoClient.get<{ items?: Account[]; total?: number }>(
-      `/api/v1/admin/accounts?page=${page}&page_size=${pageSize}${rolesQuery}`
-    );
+    const data = await gossoClient.get<{ items?: Account[]; total?: number }>('/api/v1/admin/accounts', {
+      params: {
+        page,
+        page_size: pageSize,
+        include: includeRoles ? 'roles' : undefined,
+      },
+    });
     return {
       accounts: data?.items || [],
       total: data?.total || 0,

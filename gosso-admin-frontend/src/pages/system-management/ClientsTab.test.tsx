@@ -14,14 +14,26 @@ vi.mock('../../auth', () => ({
   gossoClient: {
     getUserProfile: vi.fn(),
     apiFetch: apiFetchMock,
-    get: (url: string) =>
-      apiFetchMock(url).then(async (res: Response) => {
+    get: (url: string, init?: { params?: Record<string, unknown> | URLSearchParams }) => {
+      let targetUrl = url;
+      if (init?.params) {
+        const query = init.params instanceof URLSearchParams ? init.params : new URLSearchParams();
+        if (!(init.params instanceof URLSearchParams)) {
+          Object.entries(init.params).forEach(([k, v]) => {
+            if (v !== undefined && v !== null && v !== '') query.set(k, String(v));
+          });
+        }
+        const qs = query.toString();
+        if (qs) targetUrl += (targetUrl.includes('?') ? '&' : '?') + qs;
+      }
+      return apiFetchMock(targetUrl).then(async (res: Response) => {
         const body = await res.json().catch(() => ({}));
         if (!res.ok) {
           throw new Error(body.message || 'GET request failed');
         }
         return body.data;
-      }),
+      });
+    },
     post: (url: string, body?: unknown) =>
       apiFetchMock(url, { method: 'POST', body: JSON.stringify(body) }).then(async (res: Response) => {
         const b = await res.json().catch(() => ({}));
