@@ -8,7 +8,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -trimpath -buildvcs=false -ldflags="-w -s" -o seed main.go
 
 FROM alpine:3.23
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache upgrade && apk --no-cache add ca-certificates
 WORKDIR /app
 RUN addgroup -S seed && adduser -S seed -G seed
 COPY --from=builder --chown=seed:seed /app/seed /app/seed
