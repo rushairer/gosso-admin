@@ -5,7 +5,8 @@ GOSSO Admin follows Semantic Versioning. During `0.x`, breaking changes may occu
 | Admin line | Gosso release | Gosso API | Database schema | `@gosso/client` | Status |
 |---|---|---|---:|---|---|
 | `0.1.x` | `1.1.x` | OpenAPI `1.2.x` | `20` | `0.1.x` | Supported baseline |
-| `0.3.0` | `1.2.1` | OpenAPI `1.2.x` | `20` | `0.4.0` | Stable release combination |
+| `0.3.0` | `1.2.1` | OpenAPI `1.2.x` | `20` | `0.4.0` | Supported release combination |
+| `0.4.0` | `1.2.1` | OpenAPI `1.2.x` | `20` | `0.6.0` | Latest stable release combination |
 
 Gosso `1.1.0` is the minimum supported server release. It includes the role-cache migration required for a newly issued admin access token to contain the permissions used by the Admin API; earlier server builds can return `403` until a token refresh.
 

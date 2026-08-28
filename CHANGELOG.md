@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-28
+
+### Changed
+- Upgrade `@gosso/client` dependency to `0.6.0`, enabling declarative route guards, typed API clients, and seamless responsive session subscriptions.
+- Align authentication, profile, MFA, and passkey management with latest SDK contracts.
+
 ## [0.3.0] - 2026-08-24
 
 ### Changed
@@ -50,7 +56,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Updated the Seeder to Go 1.26.5 and pgx 5.9.2 to remove reachable standard-library and SQL sanitizer vulnerabilities.
 - Upgrade Alpine runtime packages during frontend image builds so published images do not retain fixed high-severity base-image vulnerabilities.
 
-[Unreleased]: https://github.com/rushairer/gosso-admin/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/rushairer/gosso-admin/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/rushairer/gosso-admin/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/rushairer/gosso-admin/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/rushairer/gosso-admin/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/rushairer/gosso-admin/releases/tag/v0.1.0
