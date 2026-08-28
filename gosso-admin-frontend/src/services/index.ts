@@ -3,4 +3,3 @@ export * from './clientService';
 export * from './auditService';
 export * from './systemService';
 export * from './siteSettingsService';
-export * from './helper';
