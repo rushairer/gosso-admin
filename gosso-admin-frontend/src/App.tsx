@@ -4,6 +4,8 @@ import { AdminLayout } from './components/layout/AdminLayout';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider, PageLoader } from './components/ui';
 import { routerBasename } from './config/appPaths';
+import { GossoProvider } from '@gosso/client/react';
+import { gossoClient } from './auth';
 
 const Home = lazy(() => import('./pages/Home'));
 const Callback = lazy(() => import('./pages/Callback'));
@@ -16,11 +18,12 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 
 export default function App() {
   return (
-    <ErrorBoundary>
-      <ToastProvider>
-        <BrowserRouter basename={routerBasename}>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
+    <GossoProvider client={gossoClient}>
+      <ErrorBoundary>
+        <ToastProvider>
+          <BrowserRouter basename={routerBasename}>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
               {/* OIDC flow callbacks and triggers */}
               <Route path="/callback" element={<Callback />} />
               <Route path="/login" element={<Login />} />
@@ -64,10 +67,11 @@ export default function App() {
                   </AdminLayout>
                 }
               />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </ToastProvider>
-    </ErrorBoundary>
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </ToastProvider>
+      </ErrorBoundary>
+    </GossoProvider>
   );
 }

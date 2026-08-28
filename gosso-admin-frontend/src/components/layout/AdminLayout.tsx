@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Home, Key, LayoutDashboard, LogIn, LogOut, Settings, ShieldCheck, User } from 'lucide-react';
-import { gossoClient, logout, redirectToAuthorize } from '../../auth';
+import { useSession } from '@gosso/client/react';
+import { logout, redirectToAuthorize } from '../../auth';
 import { siteSettingsService } from '../../services';
 import type { SessionSnapshot } from '../../auth';
 
@@ -14,7 +15,7 @@ function initials(snapshot: SessionSnapshot) {
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const location = useLocation();
-  const [session, setSession] = useState<SessionSnapshot>(() => gossoClient.getSnapshot());
+  const session = useSession();
   const [productName, setProductName] = useState('GOSSO');
 
   const pageTitles: Record<string, { title: string; description: string }> = useMemo(
@@ -34,11 +35,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     }),
     [t]
   );
-
-  useEffect(() => {
-    setSession(gossoClient.getSnapshot());
-    return gossoClient.subscribe(setSession);
-  }, [location.pathname]);
 
   useEffect(() => {
     void siteSettingsService

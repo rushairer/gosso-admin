@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Lock, Eye, EyeOff, Edit2 as EditIcon, X as XIcon, Check, Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { gossoClient } from '../../auth';
+import { useProfileManager, useUserProfile } from '@gosso/client/react';
 import {
   Feedback,
   FormField,
@@ -12,12 +12,17 @@ import {
   DefinitionRow,
   Tag,
 } from '../../components/ui';
-import type { UserProfile } from '../../auth';
 import { EmailChangeModal } from './EmailChangeModal';
 
-export default function ProfilePanel({ profile: initialProfile }: { profile: UserProfile | null }) {
+export default function ProfilePanel() {
   const { t } = useTranslation();
-  const [localProfile, setLocalProfile] = useState<UserProfile | null>(initialProfile);
+  const profile = useUserProfile();
+  const {
+    loading,
+    error: profileError,
+    updateDisplayName,
+    changePassword,
+  } = useProfileManager();
 
   // Password update states
   const [currentPassword, setCurrentPassword] = useState('');
@@ -25,27 +30,20 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showCurrentPwd, setShowCurrentPwd] = useState(false);
   const [showNewPwd, setShowNewPwd] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   // Profile Edit States
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState('');
-  const [editNameLoading, setEditNameLoading] = useState(false);
 
   // Email Edit States
   const [showEmailModal, setShowEmailModal] = useState(false);
 
-  // Keep localProfile in sync if initialProfile changes from props
-  useEffect(() => {
-    setLocalProfile(initialProfile);
-  }, [initialProfile]);
-
   const handleStartEditName = () => {
-    setNewName(localProfile?.name || '');
+    setNewName(profile?.name || '');
     setIsEditingName(true);
-    setError(null);
+    setValidationError(null);
     setSuccess(null);
   };
 
@@ -54,26 +52,19 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
     if (!newName.trim()) return;
 
     try {
-      setEditNameLoading(true);
-      setError(null);
+      setValidationError(null);
       setSuccess(null);
 
-      const updated = await gossoClient.updateProfile(newName.trim());
+      await updateDisplayName(newName.trim());
 
       setSuccess(t('profile.displayNameUpdatedSuccess'));
       setIsEditingName(false);
-      setLocalProfile(updated);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('profile.displayNameUpdateFailed');
-      setError(message);
-    } finally {
-      setEditNameLoading(false);
-    }
+    } catch {}
   };
 
   const handleStartEditEmail = () => {
     setShowEmailModal(true);
-    setError(null);
+    setValidationError(null);
     setSuccess(null);
   };
 
@@ -83,37 +74,31 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setValidationError(null);
     setSuccess(null);
 
     if (newPassword !== confirmPassword) {
-      setError(t('profile.passwordsDoNotMatch'));
+      setValidationError(t('profile.passwordsDoNotMatch'));
       return;
     }
 
     try {
-      setLoading(true);
-      await gossoClient.changePassword(currentPassword, newPassword);
+      await changePassword(currentPassword, newPassword);
 
       setSuccess(t('profile.passwordUpdatedSuccess'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('profile.passwordUpdateFailed');
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
+    } catch {}
   };
 
   return (
     <Panel>
       <PanelHeader title={t('profile.title')} description={t('profile.description')} />
       <PlainSection title={t('profile.accountProfileSection')}>
-        {error && (
+        {(validationError || profileError) && (
           <div className="mb-md">
-            <Feedback type="error">{error}</Feedback>
+            <Feedback type="error">{validationError || profileError}</Feedback>
           </div>
         )}
         {success && (
@@ -123,7 +108,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
         )}
 
         <DefinitionList>
-          <DefinitionRow label={t('profile.usernameLabel')}>{localProfile?.preferred_username || '-'}</DefinitionRow>
+          <DefinitionRow label={t('profile.usernameLabel')}>{profile?.preferred_username || '-'}</DefinitionRow>
 
           <DefinitionRow label={t('profile.displayNameLabel')}>
             {isEditingName ? (
@@ -139,7 +124,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
                 <button
                   className="btn btn-primary btn-sm"
                   type="submit"
-                  disabled={editNameLoading}
+                  disabled={loading}
                   style={{ padding: '6px 10px' }}
                 >
                   <Check style={{ width: '14px', height: '14px' }} />
@@ -148,7 +133,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
                   className="btn btn-secondary btn-sm"
                   type="button"
                   onClick={() => setIsEditingName(false)}
-                  disabled={editNameLoading}
+                  disabled={loading}
                   style={{ padding: '6px 10px' }}
                 >
                   <XIcon style={{ width: '14px', height: '14px' }} />
@@ -156,7 +141,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
               </form>
             ) : (
               <div className="flex-row items-center justify-between" style={{ width: '100%' }}>
-                <span>{localProfile?.name || '-'}</span>
+                <span>{profile?.name || '-'}</span>
                 <button
                   className="btn btn-secondary btn-sm"
                   onClick={handleStartEditName}
@@ -171,7 +156,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
 
           <DefinitionRow label={t('profile.emailLabel')}>
             <div className="flex-row items-center justify-between" style={{ width: '100%' }}>
-              <span>{localProfile?.email || t('profile.notConfigured')}</span>
+              <span>{profile?.email || t('profile.notConfigured')}</span>
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={handleStartEditEmail}
@@ -185,7 +170,7 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
 
           <DefinitionRow label={t('profile.securityRoleLabel')}>
             <div className="flex-row flex-wrap gap-xs">
-              {localProfile?.roles?.map((role) => <Tag key={role}>{role}</Tag>) || (
+              {profile?.roles?.map((role) => <Tag key={role}>{role}</Tag>) || (
                 <Tag tone="secondary">{t('profile.standardUser')}</Tag>
               )}
             </div>
@@ -202,14 +187,14 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
                   fontFamily: 'monospace',
                 }}
               >
-                {localProfile?.sub || '-'}
+                {profile?.sub || '-'}
               </code>
-              {localProfile?.sub && (
+              {profile?.sub && (
                 <button
                   className="btn btn-secondary btn-sm"
                   type="button"
                   onClick={() => {
-                    navigator.clipboard.writeText(localProfile.sub);
+                    navigator.clipboard.writeText(profile.sub);
                     setSuccess(t('profile.copiedSubjectId'));
                   }}
                   style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
@@ -338,15 +323,16 @@ export default function ProfilePanel({ profile: initialProfile }: { profile: Use
       </PlainSection>
 
       {/* Edit Email Modal */}
-      <EmailChangeModal
-        isOpen={showEmailModal}
-        initialEmail={localProfile?.email || ''}
-        onClose={handleCloseEmailModal}
-        onProfileUpdated={(updatedProfile) => {
-          setLocalProfile(updatedProfile);
-          setSuccess(t('profile.emailUpdatedSuccess'));
-        }}
-      />
+      {showEmailModal ? (
+        <EmailChangeModal
+          isOpen
+          initialEmail={profile?.email || ''}
+          onClose={handleCloseEmailModal}
+          onProfileUpdated={() => {
+            setSuccess(t('profile.emailUpdatedSuccess'));
+          }}
+        />
+      ) : null}
     </Panel>
   );
 }

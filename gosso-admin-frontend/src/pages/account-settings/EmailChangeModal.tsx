@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Eye, EyeOff, Mail } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { gossoClient } from '../../auth';
+import { useProfileManager } from '@gosso/client/react';
 import { ButtonGroup, Feedback, FormField, Modal } from '../../components/ui';
 import type { UserProfile } from '../../auth';
 
@@ -15,13 +15,12 @@ interface EmailChangeModalProps {
 /** Two-step email change flow, kept separate from the profile overview. */
 export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdated }: EmailChangeModalProps) {
   const { t } = useTranslation();
+  const { loading, error, requestEmailChange, confirmEmailChange } = useProfileManager();
   const [newEmail, setNewEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'input' | 'verify'>('input');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -30,7 +29,6 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
     setShowPassword(false);
     setCode('');
     setStep('input');
-    setError(null);
   }, [initialEmail, isOpen]);
 
   const requestVerificationCode = async (event: React.FormEvent) => {
@@ -38,32 +36,20 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
     if (!newEmail.trim() || !password) return;
 
     try {
-      setLoading(true);
-      setError(null);
-      await gossoClient.requestEmailChange(newEmail.trim(), password);
+      await requestEmailChange(newEmail.trim(), password);
       setStep('verify');
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t('profile.emailVerificationRequestFailed'));
-    } finally {
-      setLoading(false);
-    }
+    } catch {}
   };
 
-  const confirmEmailChange = async (event: React.FormEvent) => {
+  const handleConfirmEmailChange = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!code.trim()) return;
 
     try {
-      setLoading(true);
-      setError(null);
-      const updatedProfile = await gossoClient.confirmEmailChange(newEmail.trim(), code.trim());
+      const updatedProfile = await confirmEmailChange(newEmail.trim(), code.trim());
       onProfileUpdated(updatedProfile);
       onClose();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t('profile.emailVerificationFailed'));
-    } finally {
-      setLoading(false);
-    }
+    } catch {}
   };
 
   return (
@@ -140,7 +126,7 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
           </ButtonGroup>
         </form>
       ) : (
-        <form onSubmit={confirmEmailChange} className="flex-col gap-lg">
+        <form onSubmit={handleConfirmEmailChange} className="flex-col gap-lg">
           <FormField label={t('profile.verificationCodeLabel')} noMargin>
             <input
               type="text"

@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QRCodeSVG } from 'qrcode.react';
 import { Shield, QrCode, Clipboard, AlertTriangle, RefreshCw, Unlock, Check, Copy } from 'lucide-react';
-import { gossoClient } from '../../auth';
+import { useMfa } from '@gosso/client/react';
 import {
   ButtonGroup,
   Feedback,
@@ -17,98 +17,56 @@ import {
   useToast,
 } from '../../components/ui';
 
-import type { MfaEnrollment, MfaStatus } from '../../auth';
-
 export default function MFAPanel() {
   const { t } = useTranslation();
   const { showSuccess } = useToast();
-  const [mfaStatus, setMfaStatus] = useState<MfaStatus>({ enabled: false, types: [] });
-  const [mfaEnrollment, setMfaEnrollment] = useState<MfaEnrollment | null>(null);
+  const {
+    status: mfaStatus,
+    enrollment: mfaEnrollment,
+    backupCodes,
+    loading,
+    error,
+    startEnroll,
+    activate,
+    disable,
+    regenerateBackupCodes,
+    cancelEnroll,
+  } = useMfa();
   const [totpCode, setTotpCode] = useState('');
-  const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [showDisableModal, setShowDisableModal] = useState(false);
   const [confirmPasswordForMFA, setConfirmPasswordForMFA] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const { confirm, confirmDialog } = useConfirm();
 
-  useEffect(() => {
-    loadMFAStatus();
-  }, []);
-
-  const loadMFAStatus = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      setMfaStatus(await gossoClient.getMfaStatus());
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('mfa.loadFailed');
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleEnrollMFA = async () => {
-    setError(null);
     setSuccess(null);
     try {
-      setLoading(true);
-      setMfaEnrollment(await gossoClient.enrollMfa());
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('mfa.enrollFailed');
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
+      await startEnroll();
+    } catch {}
   };
 
   const handleActivateMFA = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setSuccess(null);
     try {
-      setLoading(true);
-      const codes = await gossoClient.activateMfa(totpCode);
-
+      await activate(totpCode);
       setSuccess(t('mfa.mfaActivatedSuccess'));
-      setMfaEnrollment(null);
       setTotpCode('');
-      await loadMFAStatus();
-
-      setBackupCodes(codes);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('mfa.activateFailed');
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
+    } catch {}
   };
 
   const handleDisableMFA = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setSuccess(null);
     try {
-      setLoading(true);
-      await gossoClient.disableMfa(confirmPasswordForMFA);
-
+      await disable(confirmPasswordForMFA);
       setSuccess(t('mfa.mfaDisabled'));
       setShowDisableModal(false);
       setConfirmPasswordForMFA('');
-      setBackupCodes([]);
-      await loadMFAStatus();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('mfa.disableFailed');
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
+    } catch {}
   };
 
   const handleGenerateBackupCodes = async () => {
-    setError(null);
     setSuccess(null);
     const confirmed = await confirm({
       title: t('mfa.regenerateConfirmTitle'),
@@ -118,15 +76,9 @@ export default function MFAPanel() {
     });
     if (!confirmed) return;
     try {
-      setLoading(true);
-      setBackupCodes(await gossoClient.generateBackupCodes());
+      await regenerateBackupCodes();
       setSuccess(t('mfa.backupCodesGenerated'));
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('mfa.backupCodesFailed');
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
+    } catch {}
   };
 
   if (loading && !mfaStatus.enabled && !mfaEnrollment) {
@@ -273,7 +225,7 @@ export default function MFAPanel() {
                     <Check style={{ width: '16px', height: '16px' }} />
                     {t('mfa.verifyAndActivateButton')}
                   </button>
-                  <button className="btn btn-secondary" type="button" onClick={() => setMfaEnrollment(null)}>
+                  <button className="btn btn-secondary" type="button" onClick={cancelEnroll}>
                     {t('common.cancel')}
                   </button>
                 </ButtonGroup>

@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Shield, Key, Laptop, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { gossoClient, redirectToAuthorize } from '../auth';
+import { useSession } from '@gosso/client/react';
+import { redirectToAuthorize } from '../auth';
 import { PageLoader, Tabs } from '../components/ui';
 import ProfilePanel from './account-settings/ProfilePanel';
 import MFAPanel from './account-settings/MFAPanel';
@@ -21,18 +22,13 @@ export default function AccountSettings() {
   const { tab } = useParams();
   const navigate = useNavigate();
   const activeTab = isAccountSettingsTab(tab) ? tab : 'profile';
-  const [authChecked, setAuthChecked] = useState(false);
-  const profile = gossoClient.getUserProfile();
+  const { loggedIn } = useSession();
 
   useEffect(() => {
-    if (!gossoClient.isLoggedIn()) {
-      redirectToAuthorize(`/account-settings/${activeTab}`);
-      return;
-    }
-    setAuthChecked(true);
-  }, [activeTab]);
+    if (!loggedIn) void redirectToAuthorize(`/account-settings/${activeTab}`);
+  }, [activeTab, loggedIn]);
 
-  if (!authChecked) {
+  if (!loggedIn) {
     return <PageLoader message={t('accountSettings.checkingAccess')} />;
   }
 
@@ -60,7 +56,7 @@ export default function AccountSettings() {
         ariaLabel={t('accountSettings.sectionsLabel')}
       />
 
-      {activeTab === 'profile' && <ProfilePanel profile={profile} />}
+      {activeTab === 'profile' && <ProfilePanel />}
       {activeTab === 'mfa' && <MFAPanel />}
       {activeTab === 'passkeys' && <PasskeysPanel />}
       {activeTab === 'sessions' && <SessionsPanel />}

@@ -1,16 +1,23 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { GossoProvider } from '@gosso/client/react';
 import SystemManagement from '../SystemManagement';
 
-const { isLoggedIn, isAdmin, redirectToAuthorize } = vi.hoisted(() => ({
-  isLoggedIn: vi.fn(),
-  isAdmin: vi.fn(),
-  redirectToAuthorize: vi.fn(),
-}));
+const { subscribe, getSnapshot, redirectToAuthorize, mockClient } = vi.hoisted(() => {
+  const subscribe = vi.fn(() => () => {});
+  const getSnapshot = vi.fn();
+  const redirectToAuthorize = vi.fn();
+  const mockClient = {
+    subscribe,
+    getSnapshot,
+    redirectToAuthorize,
+  } as any;
+  return { subscribe, getSnapshot, redirectToAuthorize, mockClient };
+});
 
 vi.mock('../../auth', () => ({
-  gossoClient: { isLoggedIn, isAdmin },
+  gossoClient: mockClient,
   redirectToAuthorize,
 }));
 
@@ -22,11 +29,13 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => k
 
 function renderSystemManagement(path = '/system-management/clients') {
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/system-management/:tab" element={<SystemManagement />} />
-      </Routes>
-    </MemoryRouter>
+    <GossoProvider client={mockClient}>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/system-management/:tab" element={<SystemManagement />} />
+        </Routes>
+      </MemoryRouter>
+    </GossoProvider>
   );
 }
 
@@ -36,23 +45,21 @@ describe('SystemManagement access gate', () => {
   });
 
   it('redirects an anonymous visitor to authorization', async () => {
-    isLoggedIn.mockReturnValue(false);
+    getSnapshot.mockReturnValue({ loggedIn: false, isAdmin: false, profile: null });
     renderSystemManagement();
     await waitFor(() => expect(redirectToAuthorize).toHaveBeenCalledWith('/system-management/clients'));
     expect(screen.getByText('systemManagement.checkingAccess')).toBeInTheDocument();
   });
 
   it('shows an access-denied state for an authenticated non-admin', async () => {
-    isLoggedIn.mockReturnValue(true);
-    isAdmin.mockReturnValue(false);
+    getSnapshot.mockReturnValue({ loggedIn: true, isAdmin: false, profile: { sub: 'user-1' } });
     renderSystemManagement();
     expect(await screen.findByText('systemManagement.accessDeniedTitle')).toBeInTheDocument();
     expect(redirectToAuthorize).not.toHaveBeenCalled();
   });
 
   it('renders administration content only for administrators', async () => {
-    isLoggedIn.mockReturnValue(true);
-    isAdmin.mockReturnValue(true);
+    getSnapshot.mockReturnValue({ loggedIn: true, isAdmin: true, profile: { sub: 'admin-1' } });
     renderSystemManagement();
     expect(await screen.findByText('Clients content')).toBeInTheDocument();
   });

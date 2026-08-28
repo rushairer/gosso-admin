@@ -1,16 +1,23 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { GossoProvider } from '@gosso/client/react';
 import AccountSettings from '../AccountSettings';
 
-const { isLoggedIn, getUserProfile, redirectToAuthorize } = vi.hoisted(() => ({
-  isLoggedIn: vi.fn(),
-  getUserProfile: vi.fn(),
-  redirectToAuthorize: vi.fn(),
-}));
+const { subscribe, getSnapshot, redirectToAuthorize, mockClient } = vi.hoisted(() => {
+  const subscribe = vi.fn(() => () => {});
+  const getSnapshot = vi.fn();
+  const redirectToAuthorize = vi.fn();
+  const mockClient = {
+    subscribe,
+    getSnapshot,
+    redirectToAuthorize,
+  } as any;
+  return { subscribe, getSnapshot, redirectToAuthorize, mockClient };
+});
 
 vi.mock('../../auth', () => ({
-  gossoClient: { isLoggedIn, getUserProfile },
+  gossoClient: mockClient,
   redirectToAuthorize,
 }));
 
@@ -22,29 +29,39 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => k
 
 function renderAccountSettings(path = '/account-settings/profile') {
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/account-settings/:tab" element={<AccountSettings />} />
-      </Routes>
-    </MemoryRouter>
+    <GossoProvider client={mockClient}>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/account-settings/:tab" element={<AccountSettings />} />
+        </Routes>
+      </MemoryRouter>
+    </GossoProvider>
   );
 }
 
 describe('AccountSettings access gate', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getUserProfile.mockReturnValue({ sub: 'account-1', preferred_username: 'operator' });
+    getSnapshot.mockReturnValue({
+      loggedIn: true,
+      isAdmin: false,
+      profile: { sub: 'account-1', preferred_username: 'operator' },
+    });
   });
 
   it('redirects an anonymous visitor to authorization', async () => {
-    isLoggedIn.mockReturnValue(false);
+    getSnapshot.mockReturnValue({ loggedIn: false, isAdmin: false, profile: null });
     renderAccountSettings();
     await waitFor(() => expect(redirectToAuthorize).toHaveBeenCalledWith('/account-settings/profile'));
     expect(screen.getByText('accountSettings.checkingAccess')).toBeInTheDocument();
   });
 
   it('shows the profile panel for a signed-in account', async () => {
-    isLoggedIn.mockReturnValue(true);
+    getSnapshot.mockReturnValue({
+      loggedIn: true,
+      isAdmin: false,
+      profile: { sub: 'account-1', preferred_username: 'operator' },
+    });
     renderAccountSettings();
     expect(await screen.findByText('Profile content')).toBeInTheDocument();
     expect(redirectToAuthorize).not.toHaveBeenCalled();

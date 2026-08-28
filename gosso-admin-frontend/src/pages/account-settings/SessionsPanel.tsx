@@ -1,45 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Laptop, MapPin } from 'lucide-react';
-import { gossoClient, logout } from '../../auth';
-import type { SessionInfo } from '../../auth';
+import { useSessions } from '@gosso/client/react';
+import { logout } from '../../auth';
 import { DataTable, Feedback, PageLoader, Panel, PanelHeader, Tag, useConfirm } from '../../components/ui';
 import { parseUserAgent } from '../../utils/format';
 
 export default function SessionsPanel() {
   const { t } = useTranslation();
-  const [sessions, setSessions] = useState<SessionInfo[]>([]);
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { sessions, currentSession, loading, error, revoke } = useSessions();
   const [success, setSuccess] = useState<string | null>(null);
   const { confirm, confirmDialog } = useConfirm();
 
-  useEffect(() => {
-    loadSessions();
-  }, []);
-
-  const loadSessions = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const [activeSessions, currentSession] = await Promise.all([
-        gossoClient.listSessions(),
-        gossoClient.getCurrentSession(),
-      ]);
-      setSessions(activeSessions);
-      setCurrentSessionId(currentSession.id || null);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('sessions.loadFailed');
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleRevokeSession = async (sessionId: string) => {
-    setError(null);
     setSuccess(null);
     const confirmed = await confirm({
       title: t('sessions.terminateSessionTitle'),
@@ -48,16 +21,9 @@ export default function SessionsPanel() {
     });
     if (!confirmed) return;
     try {
-      setLoading(true);
-      await gossoClient.revokeSession(sessionId);
+      await revoke(sessionId);
       setSuccess(t('sessions.sessionRevoked'));
-      await loadSessions();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('sessions.revokeFailed');
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
+    } catch {}
   };
 
   if (loading) {
@@ -91,7 +57,7 @@ export default function SessionsPanel() {
           </thead>
           <tbody>
             {sessions.map((session) => {
-              const isCurrent = session.id === currentSessionId;
+              const isCurrent = session.id === currentSession?.id;
               return (
                 <tr
                   key={session.id}

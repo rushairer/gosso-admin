@@ -1,18 +1,24 @@
 import { render, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
+import { GossoProvider } from '@gosso/client/react';
 import Home from '../Home';
 
-const { redirectToAuthorize } = vi.hoisted(() => ({
-  redirectToAuthorize: vi.fn().mockResolvedValue(undefined),
-}));
+const { redirectToAuthorize, subscribe, getSnapshot, mockClient } = vi.hoisted(() => {
+  const defaultSnapshot = { loggedIn: false, isAdmin: false, profile: null };
+  const redirectToAuthorize = vi.fn().mockResolvedValue(undefined);
+  const subscribe = vi.fn(() => () => {});
+  const getSnapshot = vi.fn(() => defaultSnapshot);
+  const mockClient = {
+    redirectToAuthorize,
+    subscribe,
+    getSnapshot,
+  } as any;
+  return { redirectToAuthorize, subscribe, getSnapshot, mockClient };
+});
 
 vi.mock('../../auth', () => ({
-  gossoClient: {
-    getUserProfile: vi.fn(),
-    isAdmin: vi.fn(() => false),
-    isLoggedIn: vi.fn(() => false),
-  },
+  gossoClient: mockClient,
   redirectToAuthorize,
 }));
 
@@ -21,9 +27,11 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => k
 describe('management overview authentication', () => {
   it('returns root-entry authentication to the overview, not system management', async () => {
     render(
-      <MemoryRouter>
-        <Home />
-      </MemoryRouter>
+      <GossoProvider client={mockClient}>
+        <MemoryRouter>
+          <Home />
+        </MemoryRouter>
+      </GossoProvider>
     );
 
     await waitFor(() => expect(redirectToAuthorize).toHaveBeenCalledWith('/'));

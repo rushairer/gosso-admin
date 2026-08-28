@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,7 +8,8 @@ import {
   FileText as AuditIcon,
   SlidersHorizontal,
 } from 'lucide-react';
-import { gossoClient, redirectToAuthorize } from '../auth';
+import { useSession } from '@gosso/client/react';
+import { redirectToAuthorize } from '../auth';
 import { Panel, PageLoader, Tabs } from '../components/ui';
 import ClientsTab from './system-management/ClientsTab';
 import UsersTab from './system-management/UsersTab';
@@ -28,22 +29,13 @@ export default function SystemManagement() {
   const { tab } = useParams();
   const navigate = useNavigate();
   const activeTab = isSystemManagementTab(tab) ? tab : 'clients';
-  const [accessDenied, setAccessDenied] = useState(false);
-  const [authChecked, setAuthChecked] = useState(false);
+  const { loggedIn, isAdmin } = useSession();
 
   useEffect(() => {
-    if (!gossoClient.isLoggedIn()) {
-      redirectToAuthorize(`/system-management/${activeTab}`);
-      return;
-    }
+    if (!loggedIn) void redirectToAuthorize(`/system-management/${activeTab}`);
+  }, [activeTab, loggedIn]);
 
-    if (!gossoClient.isAdmin()) {
-      setAccessDenied(true);
-    }
-    setAuthChecked(true);
-  }, [activeTab]);
-
-  if (!authChecked) {
+  if (!loggedIn) {
     return <PageLoader message={t('systemManagement.checkingAccess')} />;
   }
 
@@ -51,7 +43,7 @@ export default function SystemManagement() {
     return <Navigate replace to="/system-management/clients" />;
   }
 
-  if (accessDenied) {
+  if (!isAdmin) {
     return (
       <div
         className="glass-card"

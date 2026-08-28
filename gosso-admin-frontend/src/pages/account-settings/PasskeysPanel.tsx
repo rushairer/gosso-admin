@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Key, Calendar, Trash2, Plus } from 'lucide-react';
-import { gossoClient } from '../../auth';
-import type { PasskeyInfo } from '../../auth';
+import { usePasskeys } from '@gosso/client/react';
 import {
   ButtonGroup,
   EmptyState,
@@ -22,58 +21,34 @@ import { logger } from '../../utils/logger';
 
 export default function PasskeysPanel() {
   const { t } = useTranslation();
-  const [passkeys, setPasskeys] = useState<PasskeyInfo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { passkeys, loading, error, register, remove } = usePasskeys();
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showPasskeyModal, setShowPasskeyModal] = useState(false);
   const [newPasskeyName, setNewPasskeyName] = useState('');
   const { confirm, confirmDialog } = useConfirm();
 
-  useEffect(() => {
-    loadPasskeys();
-  }, []);
-
-  const loadPasskeys = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      setPasskeys(await gossoClient.listPasskeys());
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('passkeys.loadFailed');
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleRegisterPasskey = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setValidationError(null);
     setSuccess(null);
     if (!newPasskeyName.trim()) {
-      setError(t('passkeys.passkeyNameRequired'));
+      setValidationError(t('passkeys.passkeyNameRequired'));
       return;
     }
 
     try {
-      setLoading(true);
-      await gossoClient.registerPasskey(newPasskeyName.trim());
+      await register(newPasskeyName.trim());
       setSuccess(t('passkeys.passkeyRegisteredSuccess', { name: newPasskeyName }));
       setShowPasskeyModal(false);
       setNewPasskeyName('');
-      await loadPasskeys();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('passkeys.webauthnRegistrationFailed');
       logger.error('WebAuthn registration failed', err);
-      setError(message);
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleDeletePasskey = async (id: string, name: string) => {
-    setError(null);
+    setValidationError(null);
     setSuccess(null);
     const confirmed = await confirm({
       title: t('passkeys.removePasskey'),
@@ -82,21 +57,9 @@ export default function PasskeysPanel() {
     });
     if (!confirmed) return;
     try {
-      setLoading(true);
-      await gossoClient.deletePasskey(id);
+      await remove(id);
       setSuccess(t('passkeys.passkeyRemovedSuccess'));
-      await loadPasskeys();
-    } catch (err: unknown) {
-      let message = err instanceof Error ? err.message : t('passkeys.removeFailed');
-      if (message === 'credential not found') {
-        message = t('passkeys.credentialNotFound');
-      } else if (message === 'credential does not belong to account') {
-        message = t('passkeys.credentialOwnershipMismatch');
-      }
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
+    } catch {}
   };
 
   if (loading) {
@@ -117,9 +80,16 @@ export default function PasskeysPanel() {
           }
         />
 
-        {error && (
+        {(validationError || error) && (
           <div style={{ padding: '16px 20px 0 20px' }}>
-            <Feedback type="error">{error}</Feedback>
+            <Feedback type="error">
+              {validationError ||
+                (error === 'credential not found'
+                  ? t('passkeys.credentialNotFound')
+                  : error === 'credential does not belong to account'
+                    ? t('passkeys.credentialOwnershipMismatch')
+                    : error)}
+            </Feedback>
           </div>
         )}
         {success && (

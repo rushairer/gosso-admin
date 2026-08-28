@@ -8,6 +8,7 @@ import { appPath } from '../config/appPaths';
 import { DEFAULT_SITE_SETTINGS, mergeSiteSettings } from '../config/site-defaults';
 import { siteSettingsService } from '../services';
 import type { PublicSiteBranding } from '../types/api';
+import { safeLocalPath } from '@gosso/client';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -59,11 +60,7 @@ export default function Login() {
   const redirectUri = searchParams.get('redirect_uri') || '/system-management';
 
   const doRedirect = () => {
-    if (!redirectUri.startsWith('/') || redirectUri.startsWith('//')) {
-      window.location.href = appPath('/system-management');
-      return;
-    }
-    window.location.href = `${window.location.origin}${redirectUri}`;
+    window.location.href = safeLocalPath(redirectUri, appPath('/system-management'));
   };
 
   const storeTokensAndRedirect = async () => {

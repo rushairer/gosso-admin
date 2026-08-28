@@ -1,31 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ShieldCheck, ArrowRight, UserCheck, Key, Settings } from 'lucide-react';
-import { gossoClient, redirectToAuthorize } from '../auth';
-import type { UserProfile } from '../auth';
+import { useSession } from '@gosso/client/react';
+import { redirectToAuthorize } from '../auth';
 import { PageLoader } from '../components/ui';
 
 export default function Home() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [logged, setLogged] = useState(false);
-  const [userAdmin, setUserAdmin] = useState(false);
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
+  const { loggedIn: logged, isAdmin: userAdmin, profile: user } = useSession();
 
   useEffect(() => {
-    if (!gossoClient.isLoggedIn()) {
-      redirectToAuthorize('/');
-      return;
-    }
-    setLogged(true);
-    setUserAdmin(gossoClient.isAdmin());
-    setUser(gossoClient.getUserProfile());
-    setAuthChecked(true);
-  }, []);
+    if (!logged) void redirectToAuthorize('/');
+  }, [logged]);
 
-  if (!authChecked) {
+  if (!logged) {
     return <PageLoader message={t('home.checkingAccess')} />;
   }
 
