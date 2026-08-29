@@ -77,7 +77,9 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
 
         <FormField
           label={t('clients.allowedResourcesLabel', { defaultValue: 'Allowed Resources (RFC 8707)' })}
-          hint={t('clients.allowedResourcesHint', { defaultValue: 'Comma-separated target resource URIs, e.g. https://blog.example.com/api' })}
+          hint={t('clients.allowedResourcesHint', {
+            defaultValue: 'Comma-separated target resource URIs, e.g. https://blog.example.com/api',
+          })}
         >
           <input
             type="text"
