@@ -75,6 +75,19 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
           />
         </FormField>
 
+        <FormField
+          label={t('clients.allowedResourcesLabel', { defaultValue: 'Allowed Resources (RFC 8707)' })}
+          hint={t('clients.allowedResourcesHint', { defaultValue: 'Comma-separated target resource URIs, e.g. https://blog.example.com/api' })}
+        >
+          <input
+            type="text"
+            className="input-field"
+            placeholder={t('clients.allowedResourcesPlaceholder', { defaultValue: 'https://blog.example.com/api' })}
+            value={clientForm.allowed_resources}
+            onChange={(e) => setClientForm((p) => ({ ...p, allowed_resources: e.target.value }))}
+          />
+        </FormField>
+
         <FormField label={t('clients.clientTypeLabel')}>
           <CheckboxField
             id="is_confidential"

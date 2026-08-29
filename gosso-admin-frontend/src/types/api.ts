@@ -24,6 +24,7 @@ export interface OAuth2Client {
   grant_types: string[];
   scopes: string[];
   is_confidential: boolean;
+  allowed_resources?: string[];
   metadata?: Record<string, unknown>;
 }
 

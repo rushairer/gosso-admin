@@ -9,6 +9,7 @@ export interface CreateClientPayload {
   grant_types: string[];
   scopes: string[];
   is_confidential: boolean;
+  allowed_resources?: string[];
 }
 
 export type UpdateClientPayload = CreateClientPayload;

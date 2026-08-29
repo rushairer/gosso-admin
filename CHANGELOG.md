@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-08-29
+
+### Added
+- Add RFC 8707 `allowed_resources` input field to ClientEditorModal with form serialization and validation.
+- Add English and Chinese translation keys for allowed resources.
+
+### Changed
+- Upgrade `@gosso/client` to `0.8.7`.
+
 ## [0.5.1] - 2026-08-28
 
 ### Changed
