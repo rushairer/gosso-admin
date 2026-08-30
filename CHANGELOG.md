@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-08-30
+
+### Fixed
+- Pin `@gosso/client` to the immutable registry release `0.9.1`.
+
 ## [0.7.1] - 2026-08-30
 
 ### Fixed
