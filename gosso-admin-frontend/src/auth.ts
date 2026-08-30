@@ -19,6 +19,7 @@ export const gossoClient = createGossoClient({
   postLoginDefaultPath: appPath('/system-management'),
   loginPath: appPath('/login'),
   storagePrefix: 'gosso-admin',
+  sessionMode: 'cookie',
   refreshIdentityRequests: true,
 });
 
