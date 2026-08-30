@@ -111,6 +111,18 @@ export default function ClientsTab() {
     }
   };
 
+  const handleRotateSecret = async (client: OAuth2Client) => {
+    if (!client.is_confidential) return;
+    if (!(await confirm({ title: t('clients.rotateSecretTitle'), message: t('clients.rotateSecretMessage') }))) return;
+    try {
+      const result = await clientService.rotateSecret(client.client_id);
+      setNewClientDetails({ client_id: result.client_id, client_secret: result.client_secret, name: client.name });
+      setShowSecretModal(true);
+    } catch (err: unknown) {
+      showError(err instanceof Error ? err.message : t('clients.errorSavingClient'));
+    }
+  };
+
   const copySecret = () => {
     if (!newClientDetails?.client_secret) return;
     navigator.clipboard.writeText(newClientDetails.client_secret);
@@ -231,6 +243,16 @@ export default function ClientsTab() {
                       >
                         <EditIcon size={14} />
                       </IconButton>
+                      {client.is_confidential && (
+                        <IconButton
+                          label={t('clients.rotateSecret')}
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => void handleRotateSecret(client)}
+                        >
+                          <KeyIcon size={14} />
+                        </IconButton>
+                      )}
                       <IconButton
                         label={t('clients.deleteClient')}
                         variant="danger"
