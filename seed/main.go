@@ -102,10 +102,10 @@ func validateAdminSeedPolicy(env, password string) {
 	}
 
 	if password == "" || password == "admin123" {
-		log.Fatalf("Refusing to seed default admin password in %q environment. Set ADMIN_PASSWORD to a unique password with at least 12 characters.", env)
+		log.Fatalf("Refusing to seed default admin password in %q environment. Set ADMIN_PASSWORD or ADMIN_PASSWORD_FILE to a unique password with at least 12 characters.", env)
 	}
 	if len(password) < 12 {
-		log.Fatalf("Refusing to seed weak admin password in %q environment. ADMIN_PASSWORD must be at least 12 characters.", env)
+		log.Fatalf("Refusing to seed weak admin password in %q environment. ADMIN_PASSWORD or ADMIN_PASSWORD_FILE must be at least 12 characters.", env)
 	}
 }
 
@@ -150,18 +150,34 @@ func parseRedirectURIs(envVal string) (string, error) {
 	return string(bytes), nil
 }
 
+func readRequiredSecret(name string) string {
+	fileName := name + "_FILE"
+	if path := strings.TrimSpace(os.Getenv(fileName)); path != "" {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			log.Fatalf("read %s: %v", fileName, err)
+		}
+		value := strings.TrimSpace(string(data))
+		if value == "" {
+			log.Fatalf("%s is empty", fileName)
+		}
+		return value
+	}
+	return strings.TrimSpace(os.Getenv(name))
+}
+
 func main() {
 	env := deploymentEnv()
-	dsn := os.Getenv("PG_DSN")
+	dsn := readRequiredSecret("PG_DSN")
 	if dsn == "" {
-		log.Fatal("PG_DSN environment variable is required")
+		log.Fatal("PG_DSN or PG_DSN_FILE is required")
 	}
 
 	adminUsername := os.Getenv("ADMIN_USERNAME")
 	if adminUsername == "" {
 		adminUsername = "admin"
 	}
-	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	adminPassword := readRequiredSecret("ADMIN_PASSWORD")
 	if adminPassword == "" {
 		adminPassword = "admin123"
 	}

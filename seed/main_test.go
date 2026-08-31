@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"log"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -23,6 +25,18 @@ func TestMissingSchemaCapabilities(t *testing.T) {
 	missing := missingSchemaCapabilities(available)
 	if len(missing) != 1 || missing[0] != "oauth2_clients.metadata" {
 		t.Fatalf("missing capabilities = %v; want oauth2_clients.metadata", missing)
+	}
+}
+
+func TestReadRequiredSecretPrefersConfiguredFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "admin_password")
+	if err := os.WriteFile(path, []byte(" file-password\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("ADMIN_PASSWORD_FILE", path)
+	t.Setenv("ADMIN_PASSWORD", "env-password")
+	if got := readRequiredSecret("ADMIN_PASSWORD"); got != "file-password" {
+		t.Fatalf("readRequiredSecret() = %q, want file value", got)
 	}
 }
 
