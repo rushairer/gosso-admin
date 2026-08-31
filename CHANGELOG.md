@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.7.3] - 2026-08-31
+
 ### Security
 - Allow the seed job to receive its database DSN and initial administrator
   password through authoritative Docker Secret files, failing closed when a
