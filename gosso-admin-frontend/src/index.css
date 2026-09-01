@@ -312,7 +312,10 @@ a {
   cursor: pointer;
   text-decoration: none;
   color: inherit;
-  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .glass-card--interactive:hover {
@@ -320,7 +323,6 @@ a {
   transform: translateY(-2px);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
 }
-
 
 .login-surface {
   container-type: inline-size;

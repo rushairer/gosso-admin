@@ -4,13 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.7.4] - 2026-09-01
+
+### Fixed
+- Upgrade `@gosso/client` to `0.9.2` to preserve in-flight OAuth flow state (`auth_state`, `pkce_verifier`, `post_login_redirect`) during unauthenticated session initialization and session clear, fixing `State mismatch. Potential CSRF attack.` error on direct IdP login.
+- Fix button text vertical centering on authentication error callback page.
 
 ### Changed
 - Provide tailored overview dashboard for non-admin users with quick shortcuts to profile, security, and session management instead of an access denied error.
-
-### Fixed
-- Fix button text vertical centering on authentication error callback page.
 
 ## [0.7.3] - 2026-08-31
 

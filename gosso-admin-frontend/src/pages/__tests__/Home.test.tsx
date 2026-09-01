@@ -131,4 +131,3 @@ describe('Home page dashboard', () => {
     expect(logout).toHaveBeenCalledWith('/');
   });
 });
-
