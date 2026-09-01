@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 - Provide tailored overview dashboard for non-admin users with quick shortcuts to profile, security, and session management instead of an access denied error.
 
+### Fixed
+- Fix button text vertical centering on authentication error callback page.
+
 ## [0.7.3] - 2026-08-31
 
 ### Security

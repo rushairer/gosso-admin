@@ -22,7 +22,7 @@ export default function Callback() {
                 ? t('auth.invalidCallbackParams')
                 : error || t('auth.codeExchangeFailed')}
             </p>
-            <a href="/" className="btn btn-primary" style={{ display: 'inline-block' }}>
+            <a href="/" className="btn btn-primary">
               {t('auth.goHome')}
             </a>
           </div>
