@@ -1301,21 +1301,122 @@ a {
 .badge {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   margin-right: 6px;
   margin-bottom: 4px;
   padding: 3px 8px;
-  border: 1px solid rgba(59, 130, 246, 0.26);
-  border-radius: 999px;
-  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid var(--action-primary-subtle);
+  border-radius: var(--radius-full, 9999px);
+  background: var(--action-primary-subtle);
   color: #bfdbfe;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
-.badge-secondary {
-  border-color: rgba(148, 163, 184, 0.22);
-  background: rgba(148, 163, 184, 0.1);
-  color: #cbd5e1;
+.badge-primary,
+.badge-brand {
+  border-color: rgba(59, 130, 246, 0.32);
+  background: var(--action-primary-subtle);
+  color: #bfdbfe;
+}
+
+.badge-secondary,
+.badge-neutral {
+  border-color: var(--border-subtle);
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+}
+
+.badge-success {
+  border-color: var(--status-success-border);
+  background: var(--status-success-subtle);
+  color: #86efac;
+}
+
+.badge-warning {
+  border-color: var(--status-warning-border);
+  background: var(--status-warning-subtle);
+  color: #fde047;
+}
+
+.badge-danger {
+  border-color: var(--status-danger-border);
+  background: var(--status-danger-subtle);
+  color: #fca5a5;
+}
+
+.confirm-dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.confirm-dialog-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.confirm-dialog-icon--danger {
+  color: var(--status-danger);
+}
+
+.confirm-dialog-icon--primary {
+  color: var(--action-primary);
+}
+
+.confirm-dialog-message {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.switch-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ui-switch {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.ui-switch__track {
+  display: inline-flex;
+  align-items: center;
+  width: 36px;
+  height: 20px;
+  padding: 2px;
+  background: var(--border-default);
+  border-radius: 9999px;
+  transition: background 0.16s ease;
+}
+
+.ui-switch:checked + .ui-switch__track {
+  background: var(--action-primary);
+}
+
+.ui-switch:focus-visible + .ui-switch__track {
+  outline: 2px solid var(--action-primary);
+  outline-offset: 2px;
+}
+
+.ui-switch__thumb {
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.16s ease;
+}
+
+.ui-switch:checked + .ui-switch__track .ui-switch__thumb {
+  transform: translateX(16px);
 }
 
 .modal-backdrop {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Info as InfoIcon, Copy as CopyIcon, Check as CheckIcon } from 'lucide-react';
-import { ButtonGroup, FormField, Modal } from '../../../components/ui';
+import { Button, ButtonGroup, FormField, Modal } from '../../../components/ui';
 
 interface ClientSecretModalProps {
   isOpen: boolean;
@@ -28,69 +28,34 @@ export const ClientSecretModal: React.FC<ClientSecretModalProps> = ({
 
   return (
     <Modal
-      isOpen={isOpen}
+      open={isOpen}
       onClose={onClose}
       title={t('clients.secretModalTitle')}
-      contentStyle={{ border: '1px solid rgba(168, 85, 247, 0.4)' }}
       closeOnBackdrop={false}
       footer={
-        <button type="button" className="btn btn-primary" onClick={onClose}>
+        <Button variant="primary" onClick={onClose}>
           {t('common.done')}
-        </button>
+        </Button>
       }
     >
-      <div className="notice-card" style={{ flexDirection: 'row', marginBottom: '20px' }}>
-        <InfoIcon style={{ width: '20px', height: '20px', stroke: 'var(--color-secondary)', flexShrink: 0 }} />
-        <p style={{ fontSize: '13.5px', color: 'var(--color-text-muted)', textAlign: 'left', lineHeight: '1.5' }}>
-          {t('clients.secretWarning')}
-        </p>
+      <div className="notice-card notice-card--info">
+        <InfoIcon className="notice-card__icon" />
+        <p className="notice-card__text">{t('clients.secretWarning')}</p>
       </div>
 
       <FormField label={t('clients.clientIdLabel')}>
-        <div
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            padding: '10px 14px',
-            borderRadius: '6px',
-            fontFamily: 'monospace',
-            fontSize: '14px',
-            border: '1px solid rgba(255,255,255,0.05)',
-          }}
-        >
-          {details.client_id}
-        </div>
+        <div className="code-block-preview">{details.client_id}</div>
       </FormField>
 
       <FormField label={t('clients.clientSecretLabel')}>
         <ButtonGroup compact>
-          <div
-            style={{
-              flex: 1,
-              background: 'rgba(255,255,255,0.03)',
-              padding: '10px 14px',
-              borderRadius: '6px',
-              fontFamily: 'monospace',
-              fontSize: '14px',
-              border: '1px solid rgba(255,255,255,0.05)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {details.client_secret}
-          </div>
-          <button
-            type="button"
-            className="btn btn-secondary"
+          <div className="code-block-preview code-block-preview--flex">{details.client_secret}</div>
+          <Button
+            variant="secondary"
             onClick={onCopySecret}
-            style={{ padding: '0 16px' }}
             title={t('clients.copySecret')}
-          >
-            {copied ? (
-              <CheckIcon style={{ width: '16px', height: '16px', stroke: 'var(--success-color)' }} />
-            ) : (
-              <CopyIcon style={{ width: '16px', height: '16px' }} />
-            )}
-          </button>
+            icon={copied ? <CheckIcon size={16} className="text-success" /> : <CopyIcon size={16} />}
+          />
         </ButtonGroup>
       </FormField>
     </Modal>

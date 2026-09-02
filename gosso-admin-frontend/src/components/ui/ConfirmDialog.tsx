@@ -1,41 +1,53 @@
 import { AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from './Modal';
+import { Button } from './Button';
 
 export interface ConfirmDialogProps {
   open: boolean;
   title: string;
-  message: string;
+  message?: string;
+  description?: string;
   confirmLabel?: string;
   confirmVariant?: 'danger' | 'primary';
+  danger?: boolean;
+  busy?: boolean;
+  loading?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
+  onClose?: () => void;
 }
 
 export function ConfirmDialog({
   open,
   title,
   message,
+  description,
   confirmLabel,
-  confirmVariant = 'danger',
+  confirmVariant,
+  danger,
+  busy = false,
+  loading = false,
   onConfirm,
   onCancel,
+  onClose,
 }: ConfirmDialogProps) {
   const { t } = useTranslation();
+  const handleCancel = onCancel || onClose || (() => {});
+  const isDanger = danger !== undefined ? danger : confirmVariant !== 'primary';
+  const resolvedVariant = isDanger ? 'danger' : 'primary';
   const resolvedConfirmLabel = confirmLabel ?? t('common.confirm');
+  const text = message || description || '';
+  const isBusy = busy || loading;
 
   return (
     <Modal
-      isOpen={open}
-      onClose={onCancel}
+      open={open}
+      onClose={handleCancel}
       title={
-        <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <span className="confirm-dialog-title">
           <AlertTriangle
-            style={{
-              width: '20px',
-              height: '20px',
-              color: confirmVariant === 'danger' ? 'var(--status-danger)' : 'var(--action-primary)',
-            }}
+            className={`confirm-dialog-icon ${isDanger ? 'confirm-dialog-icon--danger' : 'confirm-dialog-icon--primary'}`}
           />
           {title}
         </span>
@@ -45,16 +57,16 @@ export function ConfirmDialog({
       showCloseButton={false}
       footer={
         <>
-          <button className="btn btn-secondary" onClick={onCancel}>
+          <Button variant="secondary" onClick={handleCancel} disabled={isBusy}>
             {t('common.cancel')}
-          </button>
-          <button className={`btn btn-${confirmVariant}`} onClick={onConfirm}>
+          </Button>
+          <Button variant={resolvedVariant} onClick={onConfirm} loading={isBusy}>
             {resolvedConfirmLabel}
-          </button>
+          </Button>
         </>
       }
     >
-      <p style={{ fontSize: '14px', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>{message}</p>
+      <p className="confirm-dialog-message">{text}</p>
     </Modal>
   );
 }

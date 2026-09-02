@@ -75,11 +75,16 @@
   --control-h-sm: 32px;
   --control-h-base: 40px;
   --control-h-lg: 46px;
+  --control-height: 38px;
+  --control-height-compact: 34px;
 
   /* Focus & Focus-Visible Ring */
   --focus-ring: 0 0 0 2px var(--surface-canvas), 0 0 0 4px var(--action-primary);
+  --focus-ring-offset: 2px;
+  --focus-ring-width: 2px;
 
-  /* Animation Timings */
+  /* Animation & Active States */
+  --active-scale: 0.985;
   --duration-fast: 120ms;
   --duration-normal: 180ms;
   --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);

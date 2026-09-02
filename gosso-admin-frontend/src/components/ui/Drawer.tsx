@@ -3,7 +3,8 @@ import { X } from 'lucide-react';
 import { IconButton } from './Button';
 
 export interface DrawerProps {
-  isOpen: boolean;
+  isOpen?: boolean;
+  open?: boolean;
   onClose: () => void;
   title: React.ReactNode;
   description?: React.ReactNode;
@@ -15,6 +16,7 @@ export interface DrawerProps {
 
 export function Drawer({
   isOpen,
+  open,
   onClose,
   title,
   description,
@@ -23,16 +25,18 @@ export function Drawer({
   width = 480,
   className = '',
 }: DrawerProps) {
+  const visible = open ?? isOpen ?? false;
+
   useEffect(() => {
-    if (!isOpen) return;
+    if (!visible) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [visible, onClose]);
 
-  if (!isOpen) return null;
+  if (!visible) return null;
 
   return (
     <div className="drawer-overlay" onClick={onClose} role="dialog" aria-modal="true">
@@ -46,9 +50,7 @@ export function Drawer({
             <h3 className="drawer-title">{title}</h3>
             {description && <p className="drawer-description">{description}</p>}
           </div>
-          <IconButton label="Close drawer" variant="ghost" size="sm" onClick={onClose}>
-            <X size={18} />
-          </IconButton>
+          <IconButton label="Close drawer" icon={<X size={18} />} variant="ghost" size="sm" onClick={onClose} />
         </div>
         <div className="drawer-body">{children}</div>
         {footer && <div className="drawer-footer">{footer}</div>}

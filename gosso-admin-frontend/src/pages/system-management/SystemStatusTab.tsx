@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Shield as ShieldIcon, RefreshCw } from 'lucide-react';
 import {
+  Button,
   DefinitionList,
   DefinitionRow,
   Feedback,
@@ -31,16 +32,16 @@ export default function SystemStatusTab() {
         title={t('system.title')}
         description={t('system.description')}
         action={
-          <button
-            className="btn btn-secondary content-action"
-            type="button"
+          <Button
+            variant="secondary"
+            className="content-action"
             onClick={() => void refresh()}
             disabled={loading}
+            icon={<RefreshCw size={16} />}
             title={t('system.refreshButton')}
           >
-            <RefreshCw />
             {t('system.refreshButton')}
-          </button>
+          </Button>
         }
       />
 

@@ -12,7 +12,9 @@ import {
 } from 'lucide-react';
 import { useUserProfile } from '@gosso/client/react';
 import {
+  Button,
   ButtonGroup,
+  IconButton,
   AsyncState,
   DataTable,
   EmptyState,
@@ -229,10 +231,14 @@ export default function UsersTab() {
           title={t('users.title')}
           description={t('users.description')}
           action={
-            <button className="btn btn-primary content-action" onClick={() => setShowCreateUserModal(true)}>
-              <PlusIcon />
+            <Button
+              variant="primary"
+              className="content-action"
+              icon={<PlusIcon size={16} />}
+              onClick={() => setShowCreateUserModal(true)}
+            >
               {t('users.addUser')}
-            </button>
+            </Button>
           }
         />
         {accounts.length === 0 ? (
@@ -245,7 +251,7 @@ export default function UsersTab() {
                   <th>{t('users.colUser')}</th>
                   <th>{t('users.colStatus')}</th>
                   <th>{t('users.colRoles')}</th>
-                  <th style={{ width: '230px' }}>{t('users.colActions')}</th>
+                  <th className="col-actions">{t('users.colActions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -258,7 +264,7 @@ export default function UsersTab() {
                       </div>
                     </td>
                     <td>
-                      <div className="flex-col gap-xs" style={{ alignItems: 'flex-start' }}>
+                      <div className="flex-col gap-xs items-start">
                         {acc.status === 'active' ? (
                           <StatusBadge tone="success">{t('users.statusActive')}</StatusBadge>
                         ) : (
@@ -271,106 +277,104 @@ export default function UsersTab() {
                         {acc.roles && acc.roles.length > 0 ? (
                           acc.roles.map((role) => (
                             <Tag key={role.id} title={role.description}>
-                              <ShieldIcon
-                                style={{ width: '10px', height: '10px', marginRight: '4px', display: 'inline' }}
-                              />
+                              <ShieldIcon size={10} className="mr-xs inline" />
                               {role.name}
                             </Tag>
                           ))
                         ) : (
-                          <span className="text-sm text-dark" style={{ fontStyle: 'italic' }}>
-                            {t('users.noRolesAssigned')}
-                          </span>
+                          <span className="text-sm text-dark italic">{t('users.noRolesAssigned')}</span>
                         )}
                       </div>
                     </td>
                     <td>
                       <ButtonGroup compact>
-                        <button
-                          className="btn btn-secondary btn-sm"
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          icon={<ShieldIcon size={13} />}
                           onClick={() => handleOpenRoleModal(acc)}
                           title={t('users.manageRoles')}
                         >
-                          <ShieldIcon style={{ width: '13px', height: '13px' }} />
                           {t('users.rolesButton')}
-                        </button>
-                        <button
-                          className="btn btn-secondary btn-sm"
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          icon={<ConsentIcon size={13} />}
                           onClick={() => handleOpenConsentModal(acc)}
                           title={t('users.manageConsents')}
                         >
-                          <ConsentIcon style={{ width: '13px', height: '13px' }} />
                           {t('users.consentsButton')}
-                        </button>
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          style={{ opacity: acc.id === currentAdmin?.sub ? 0.4 : 1 }}
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          icon={<KeyIcon size={13} />}
                           onClick={() => handleOpenPasswordModal(acc)}
                           title={t('users.changePassword')}
                           disabled={acc.id === currentAdmin?.sub}
                         >
-                          <KeyIcon style={{ width: '13px', height: '13px' }} />
                           {t('users.passwordButton')}
-                        </button>
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          style={{ opacity: acc.id === currentAdmin?.sub ? 0.4 : 1 }}
+                        </Button>
+                        <IconButton
+                          variant="secondary"
+                          size="sm"
+                          icon={
+                            acc.status === 'active' ? (
+                              <LockIcon size={13} className="text-danger" />
+                            ) : (
+                              <UnlockIcon size={13} className="text-success" />
+                            )
+                          }
+                          label={acc.status === 'active' ? t('users.suspendUser') : t('users.activateUser')}
                           onClick={() => handleToggleUserStatus(acc)}
-                          title={acc.status === 'active' ? t('users.suspendUser') : t('users.activateUser')}
                           disabled={acc.id === currentAdmin?.sub}
-                        >
-                          {acc.status === 'active' ? (
-                            <LockIcon style={{ width: '13px', height: '13px', stroke: 'var(--danger-color)' }} />
-                          ) : (
-                            <UnlockIcon style={{ width: '13px', height: '13px', stroke: 'var(--success-color)' }} />
-                          )}
-                        </button>
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          style={{ opacity: acc.id === currentAdmin?.sub ? 0.4 : 1 }}
+                        />
+                        <IconButton
+                          variant="secondary"
+                          size="sm"
+                          icon={<UnlockIcon size={13} className="text-warning" />}
+                          label={t('users.unlockAccount')}
                           onClick={() => handleClearLockout(acc.id)}
-                          title={t('users.unlockAccount')}
                           disabled={acc.id === currentAdmin?.sub}
-                        >
-                          <UnlockIcon style={{ width: '13px', height: '13px', stroke: 'var(--warning-color)' }} />
-                        </button>
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          style={{ opacity: acc.id === currentAdmin?.sub ? 0.4 : 1 }}
+                        />
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          icon={<ShieldIcon size={13} className="text-warning" />}
                           onClick={() => handleResetUserMFA(acc)}
                           title={t('users.resetMfaButton')}
                           disabled={acc.id === currentAdmin?.sub}
                         >
-                          <ShieldIcon style={{ width: '13px', height: '13px', stroke: 'var(--warning-color)' }} />
                           {t('users.resetMfaButton')}
-                        </button>
-                        <button
-                          className="btn btn-danger btn-sm"
-                          style={{ opacity: acc.id === currentAdmin?.sub ? 0.4 : 1 }}
+                        </Button>
+                        <IconButton
+                          variant="danger"
+                          size="sm"
+                          icon={<TrashIcon size={13} />}
+                          label={t('users.deleteUser')}
                           onClick={() => handleDeleteUser(acc.id)}
-                          title={t('users.deleteUser')}
                           disabled={acc.id === currentAdmin?.sub}
-                        >
-                          <TrashIcon style={{ width: '13px', height: '13px' }} />
-                        </button>
+                        />
                       </ButtonGroup>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </DataTable>
-            <div className="flex-row items-center gap-sm" style={{ justifyContent: 'flex-end', padding: '16px 20px' }}>
+            <div className="flex-row items-center gap-sm pagination-row">
               <span className="text-sm text-dark">{t('users.paginationSummary', { page, total: totalAccounts })}</span>
-              <button className="btn btn-secondary btn-sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+              <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
                 {t('common.previous')}
-              </button>
-              <button
-                className="btn btn-secondary btn-sm"
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
                 disabled={page * pageSize >= totalAccounts}
                 onClick={() => setPage((p) => p + 1)}
               >
                 {t('common.next')}
-              </button>
+              </Button>
             </div>
           </>
         )}

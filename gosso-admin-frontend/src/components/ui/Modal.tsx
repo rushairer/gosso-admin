@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { X as XIcon } from 'lucide-react';
 
 export interface ModalProps {
-  isOpen: boolean;
+  isOpen?: boolean;
+  open?: boolean;
   onClose: () => void;
   title?: React.ReactNode;
   children: React.ReactNode;
@@ -19,6 +20,7 @@ export interface ModalProps {
 
 export function Modal({
   isOpen,
+  open,
   onClose,
   title,
   children,
@@ -31,6 +33,7 @@ export function Modal({
   ariaLabel,
   contentStyle,
 }: ModalProps) {
+  const visible = open ?? isOpen ?? false;
   const { t } = useTranslation();
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
@@ -38,12 +41,12 @@ export function Modal({
   const titleId = useId();
 
   onCloseRef.current = onClose;
-  if (isOpen && previousFocus.current === null) {
+  if (visible && previousFocus.current === null) {
     previousFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   }
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!visible) return;
 
     const dialog = dialogRef.current;
     const autofocusTarget = dialog?.querySelector<HTMLElement>('[autofocus]');
@@ -89,9 +92,9 @@ export function Modal({
       previousFocus.current?.focus();
       previousFocus.current = null;
     };
-  }, [isOpen, closeOnEsc]);
+  }, [visible, closeOnEsc]);
 
-  if (!isOpen) return null;
+  if (!visible) return null;
 
   return (
     <div

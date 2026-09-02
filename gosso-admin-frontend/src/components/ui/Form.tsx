@@ -40,6 +40,63 @@ export function FormField({
   );
 }
 
+export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+  label?: React.ReactNode;
+}
+
+export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(function Checkbox(
+  { id, label, className = '', ...props },
+  ref
+) {
+  if (!label) {
+    return <input ref={ref} type="checkbox" id={id} className={`ui-checkbox ${className}`} {...props} />;
+  }
+  return (
+    <label className={`checkbox-field ${className}`} htmlFor={id}>
+      <input ref={ref} type="checkbox" id={id} className="ui-checkbox" {...props} />
+      <span>{label}</span>
+    </label>
+  );
+});
+
+export interface RadioProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+  label?: React.ReactNode;
+}
+
+export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(function Radio(
+  { id, label, className = '', ...props },
+  ref
+) {
+  if (!label) {
+    return <input ref={ref} type="radio" id={id} className={`ui-radio ${className}`} {...props} />;
+  }
+  return (
+    <label className={`radio-field ${className}`} htmlFor={id}>
+      <input ref={ref} type="radio" id={id} className="ui-radio" {...props} />
+      <span>{label}</span>
+    </label>
+  );
+});
+
+export interface SwitchProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+  label?: React.ReactNode;
+}
+
+export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(function Switch(
+  { id, label, className = '', ...props },
+  ref
+) {
+  return (
+    <label className={`switch-field ${className}`} htmlFor={id}>
+      <input ref={ref} type="checkbox" id={id} role="switch" className="ui-switch" {...props} />
+      <span className="ui-switch__track" aria-hidden="true">
+        <span className="ui-switch__thumb" />
+      </span>
+      {label && <span className="ui-switch__label">{label}</span>}
+    </label>
+  );
+});
+
 export function CheckboxField({
   id,
   label,

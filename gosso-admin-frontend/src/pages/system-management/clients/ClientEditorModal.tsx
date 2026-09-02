@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Info as InfoIcon } from 'lucide-react';
-import { CheckboxField, CheckboxGroup, FormField, Modal } from '../../../components/ui';
+import { Button, CheckboxField, CheckboxGroup, FormField, Modal } from '../../../components/ui';
 import type { OAuth2Client } from '../../../types/api';
 import type { ClientFormData } from '../../../features/clients/clientForm';
 
@@ -129,13 +129,13 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
             <p className="text-sm text-muted">{t('clients.adminScopeWarning')}</p>
           </div>
         )}
-        <div className="modal-footer" style={{ margin: '20px -20px -20px -20px' }}>
-          <button type="button" className="btn btn-secondary" onClick={onClose}>
+        <div className="modal-footer modal-footer--embedded">
+          <Button variant="secondary" onClick={onClose}>
             {t('common.cancel')}
-          </button>
-          <button type="submit" className="btn btn-primary">
+          </Button>
+          <Button type="submit" variant="primary">
             {editingClient ? t('clients.saveChangesButton') : t('clients.registerClientButton')}
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

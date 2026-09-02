@@ -3,7 +3,7 @@ import { Key } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { PublicSiteBranding } from '../../types/api';
-import { Feedback, FormField } from '../ui';
+import { Button, Feedback, FormField } from '../ui';
 
 interface LoginSurfaceProps {
   branding: PublicSiteBranding;
@@ -110,9 +110,9 @@ export default function LoginSurface({
               </div>
             ) : null}
 
-            <button type="submit" className="btn btn-primary login-card__action" disabled={loading}>
+            <Button type="submit" variant="primary" className="login-card__action" loading={loading}>
               {loading ? t('login.signInLoading') : t('login.signInButton')}
-            </button>
+            </Button>
 
             <div className="login-card__separator flex-row items-center gap-md">
               <hr />
@@ -120,15 +120,16 @@ export default function LoginSurface({
               <hr />
             </div>
 
-            <button
+            <Button
               type="button"
-              className="btn btn-secondary login-card__action flex-row items-center justify-center gap-sm"
+              variant="secondary"
+              className="login-card__action flex-row items-center justify-center gap-sm"
               onClick={onPasskeyLogin}
-              disabled={passkeyLoading}
+              loading={passkeyLoading}
+              icon={<Key size={16} />}
             >
-              <Key size={16} />
               {passkeyLoading ? t('login.passkeyLoading') : t('login.passkeyButton')}
-            </button>
+            </Button>
           </form>
         ) : (
           <form onSubmit={onMfaSubmit}>
@@ -147,18 +148,19 @@ export default function LoginSurface({
               />
             </FormField>
 
-            <button type="submit" className="btn btn-primary login-card__action" disabled={loading}>
+            <Button type="submit" variant="primary" className="login-card__action" loading={loading}>
               {loading ? t('login.verifyLoading') : t('login.verifyButton')}
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
-              className="btn btn-secondary login-card__action login-card__back"
+              variant="secondary"
+              className="login-card__action login-card__back"
               onClick={onBackToLogin}
               disabled={loading}
             >
               {t('login.backToLogin')}
-            </button>
+            </Button>
           </form>
         )}
       </div>
