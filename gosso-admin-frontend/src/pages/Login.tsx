@@ -61,6 +61,7 @@ export default function Login() {
 
   const hasAuthorizeRedirect = searchParams.has('redirect_uri');
   const redirectUri = searchParams.get('redirect_uri') || '/system-management';
+  const requiresStrongAuth = searchParams.get('reason') === 'mfa';
 
   const doRedirect = () => {
     window.location.href = safeLocalPath(redirectUri, appPath('/system-management'));
@@ -103,6 +104,10 @@ export default function Login() {
         setMfaRequired(true);
         setMfaToken(String(result.mfa_token || ''));
         setMfaCode('');
+        return;
+      }
+      if (requiresStrongAuth) {
+        setError(t('login.strongAuthenticationUnavailable'));
         return;
       }
       await storeTokensAndRedirect();

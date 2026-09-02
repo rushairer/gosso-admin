@@ -66,6 +66,7 @@
     "passkeyButton": "Sign in with Passkey",
     "passkeyLoading": "Verifying passkey...",
     "mfaRequired": "Multi-factor authentication required. Enter the code from your authenticator app.",
+    "strongAuthenticationUnavailable": "This authorization request requires strong authentication. Use a registered passkey or enroll MFA before continuing.",
     "verificationCodeLabel": "Verification Code",
     "verificationCodePlaceholder": "Enter 6-digit code",
     "verifyButton": "Verify",

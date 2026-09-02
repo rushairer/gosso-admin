@@ -66,6 +66,7 @@
     "passkeyButton": "使用通行密钥登录",
     "passkeyLoading": "正在验证通行密钥...",
     "mfaRequired": "需要进行多因素认证。请输入身份验证器应用中的验证码。",
+    "strongAuthenticationUnavailable": "此授权请求要求强认证。请使用已注册的通行密钥，或先启用多因素认证后再继续。",
     "verificationCodeLabel": "验证码",
     "verificationCodePlaceholder": "请输入6位验证码",
     "verifyButton": "验证",
