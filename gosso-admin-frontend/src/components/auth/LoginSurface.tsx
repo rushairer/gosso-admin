@@ -3,7 +3,7 @@ import { Key } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { PublicSiteBranding } from '../../types/api';
-import { Button, Feedback, FormField } from '../ui';
+import { Button, Feedback, FormField, Input } from '../ui';
 
 interface LoginSurfaceProps {
   branding: PublicSiteBranding;
@@ -77,9 +77,8 @@ export default function LoginSurface({
         {!mfaRequired ? (
           <form onSubmit={onLoginSubmit}>
             <FormField label={t('login.usernameLabel')}>
-              <input
+              <Input
                 type="text"
-                className="input-field"
                 placeholder={t('login.usernamePlaceholder')}
                 value={username}
                 onChange={(event) => onUsernameChange(event.target.value)}
@@ -89,9 +88,8 @@ export default function LoginSurface({
             </FormField>
 
             <FormField label={t('login.passwordLabel')}>
-              <input
+              <Input
                 type="password"
-                className="input-field"
                 placeholder={t('login.passwordPlaceholder')}
                 value={password}
                 onChange={(event) => onPasswordChange(event.target.value)}
@@ -136,10 +134,10 @@ export default function LoginSurface({
             <div className="notice-card login-card__mfa-notice">{t('login.mfaRequired')}</div>
 
             <FormField label={t('login.verificationCodeLabel')}>
-              <input
+              <Input
                 type="text"
                 maxLength={8}
-                className="input-field login-card__mfa-code"
+                className="login-card__mfa-code"
                 placeholder={t('login.verificationCodePlaceholder')}
                 value={mfaCode}
                 onChange={(event) => onMfaCodeChange(event.target.value.replace(/\D/g, ''))}

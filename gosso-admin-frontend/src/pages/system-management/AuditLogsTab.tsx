@@ -9,8 +9,8 @@ import {
   Feedback,
   FormField,
   Input,
-  PageLoader,
   PanelHeader,
+  TableSkeleton,
   Tag,
 } from '../../components/ui';
 import { AuditLogDetailModal } from './audit/AuditLogDetailModal';
@@ -81,7 +81,9 @@ export default function AuditLogsTab() {
       )}
 
       {auditLoading ? (
-        <PageLoader message={t('audit.loadingLogs')} padding="40px 0" size="sm" />
+        <div style={{ padding: '0 20px 20px 20px' }}>
+          <TableSkeleton rows={5} columns={5} />
+        </div>
       ) : auditLogs.length === 0 ? (
         <EmptyState icon={<AuditIcon />} title={t('audit.noLogsTitle')} description={t('audit.noLogsDescription')} />
       ) : (

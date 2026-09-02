@@ -20,6 +20,7 @@ import {
   EmptyState,
   PanelHeader,
   StatusBadge,
+  TableSkeleton,
   Tag,
   useConfirm,
   useToast,
@@ -222,6 +223,20 @@ export default function UsersTab() {
     <AsyncState
       loading={loading}
       loadingMessage={t('users.loadingAccounts')}
+      skeleton={
+        <div>
+          <PanelHeader
+            title={t('users.title')}
+            description={t('users.description')}
+            action={
+              <Button variant="primary" className="content-action" icon={<PlusIcon size={16} />} disabled>
+                {t('users.addUser')}
+              </Button>
+            }
+          />
+          <TableSkeleton rows={5} columns={4} />
+        </div>
+      }
       error={error}
       retryLabel={t('common.retry')}
       onRetry={() => void fetchAccounts()}

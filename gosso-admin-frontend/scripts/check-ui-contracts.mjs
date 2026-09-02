@@ -64,7 +64,8 @@ for (const path of files) {
 }
 
 if (failures.length) {
-  console.warn("UI contract warnings:\n" + failures.join("\n"));
+  console.error("UI contract failures:\n" + failures.join("\n"));
+  process.exit(1);
 } else {
   console.log(`UI contracts passed across ${files.length} source files.`);
 }

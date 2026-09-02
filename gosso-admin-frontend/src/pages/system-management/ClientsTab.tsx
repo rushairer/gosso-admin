@@ -12,6 +12,7 @@ import {
   IconButton,
   PanelHeader,
   StatusBadge,
+  TableSkeleton,
   Tag,
   useConfirm,
   useToast,
@@ -138,6 +139,20 @@ export default function ClientsTab() {
     <AsyncState
       loading={loading}
       loadingMessage={t('clients.loadingClients')}
+      skeleton={
+        <div>
+          <PanelHeader
+            title={t('clients.title')}
+            description={t('clients.description')}
+            action={
+              <Button variant="primary" icon={<PlusIcon size={16} />} disabled>
+                {t('clients.registerClient')}
+              </Button>
+            }
+          />
+          <TableSkeleton rows={5} columns={6} />
+        </div>
+      }
       error={error}
       retryLabel={t('common.retry')}
       onRetry={() => void fetchClients()}

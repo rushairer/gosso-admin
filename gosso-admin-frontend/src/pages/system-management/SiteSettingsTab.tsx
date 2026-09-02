@@ -114,7 +114,9 @@ export default function SiteSettingsTab() {
                   maxLength={500}
                   placeholder={t('login.subtitle')}
                   value={settings.login_description}
-                  onChange={(event: ChangeEvent<HTMLTextAreaElement>) => update('login_description', event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
+                    update('login_description', event.target.value)
+                  }
                 />
               </FormField>
               <FormField label={t('site.loginBackgroundUrl')}>
@@ -122,7 +124,9 @@ export default function SiteSettingsTab() {
                   type="text"
                   placeholder={t('site.loginBackgroundUrlPlaceholder')}
                   value={settings.login_background_url}
-                  onChange={(event: ChangeEvent<HTMLInputElement>) => update('login_background_url', event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    update('login_background_url', event.target.value)
+                  }
                 />
               </FormField>
             </div>

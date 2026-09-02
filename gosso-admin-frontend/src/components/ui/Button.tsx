@@ -94,6 +94,7 @@ export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(functio
     className = '',
     to,
     disabled = false,
+    onClick,
     ...props
   },
   ref
@@ -107,7 +108,15 @@ export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(functio
         size,
         className: `${disabled ? 'is-disabled' : ''} ${className}`,
       })}
-      aria-disabled={disabled || undefined}
+      aria-disabled={disabled ? 'true' : undefined}
+      tabIndex={disabled ? -1 : undefined}
+      onClick={(e) => {
+        if (disabled) {
+          e.preventDefault();
+          return;
+        }
+        onClick?.(e);
+      }}
       {...props}
     >
       {icon && iconPosition === 'left' ? (

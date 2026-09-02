@@ -223,10 +223,10 @@ export default function MFAPanel() {
           {/* MFA Active */}
           {mfaStatus.enabled && (
             <div className="flex-col gap-xl">
-              <div className="inline-status-row" style={{ color: '#a7f3d0', paddingTop: 0 }}>
+              <div className="inline-status-row" style={{ color: 'var(--status-success)', paddingTop: 0 }}>
                 <Shield size={24} color="var(--status-success)" />
                 <div>
-                  <div style={{ fontWeight: '600', fontSize: '15px' }}>{t('mfa.accountProtected')}</div>
+                  <div style={{ fontWeight: 600, fontSize: 'var(--font-size-md)' }}>{t('mfa.accountProtected')}</div>
                   <div className="text-sm text-muted" style={{ marginTop: '2px' }}>
                     {t('mfa.totpRegistered')}
                   </div>
@@ -249,7 +249,9 @@ export default function MFAPanel() {
             <div>
               <div className="flex-row items-center gap-sm" style={{ color: 'var(--status-warning)' }}>
                 <AlertTriangle size={16} />
-                <h4 style={{ fontSize: '14.5px', fontWeight: 'bold' }}>{t('mfa.recoveryBackupCodesTitle')}</h4>
+                <h4 style={{ fontSize: 'var(--font-size-base)', fontWeight: 'bold' }}>
+                  {t('mfa.recoveryBackupCodesTitle')}
+                </h4>
               </div>
 
               <p className="text-sm text-muted" style={{ lineHeight: '1.4' }}>
