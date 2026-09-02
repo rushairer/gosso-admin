@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState, type FormEventHandler } from 'react'
 import { Monitor, Smartphone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { PublicSiteBranding } from '../../types/api';
+import { Button } from '../ui';
 import LoginSurface from './LoginSurface';
 
 const VIEWPORTS = {
@@ -44,24 +45,26 @@ export default function LoginPreview({ branding }: LoginPreviewProps) {
   return (
     <div className="login-preview">
       <div className="login-preview__toolbar" role="group" aria-label={t('site.previewViewport')}>
-        <button
-          className={`btn btn-sm ${viewport === 'desktop' ? 'btn-primary' : 'btn-secondary'}`}
+        <Button
+          variant={viewport === 'desktop' ? 'primary' : 'secondary'}
+          size="sm"
           type="button"
           aria-pressed={viewport === 'desktop'}
+          icon={<Monitor size={15} />}
           onClick={() => setViewport('desktop')}
         >
-          <Monitor size={15} />
           {t('site.previewDesktop')}
-        </button>
-        <button
-          className={`btn btn-sm ${viewport === 'mobile' ? 'btn-primary' : 'btn-secondary'}`}
+        </Button>
+        <Button
+          variant={viewport === 'mobile' ? 'primary' : 'secondary'}
+          size="sm"
           type="button"
           aria-pressed={viewport === 'mobile'}
+          icon={<Smartphone size={15} />}
           onClick={() => setViewport('mobile')}
         >
-          <Smartphone size={15} />
           {t('site.previewMobile')}
-        </button>
+        </Button>
         <span className="text-muted">
           {dimensions.width} × {dimensions.height}
         </span>

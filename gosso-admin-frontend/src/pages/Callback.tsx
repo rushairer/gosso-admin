@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthCallback } from '@gosso/client/react';
 import { routerPath } from '../config/appPaths';
-import { LoadingSpinner } from '../components/ui';
+import { ButtonLink, Card, LoadingSpinner } from '../components/ui';
 
 export default function Callback() {
   const { t } = useTranslation();
@@ -14,29 +14,29 @@ export default function Callback() {
     <AuthCallback
       onSuccess={handleSuccess}
       renderError={(error, detail) => (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          <div className="glass-card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-            <h2 style={{ color: 'var(--danger-color)', marginBottom: '16px' }}>{t('auth.authenticationError')}</h2>
-            <p style={{ color: 'var(--color-text-muted)', marginBottom: '24px', fontSize: '14.5px' }}>
+        <div className="login-surface flex-row items-center justify-center">
+          <Card className="login-card text-center">
+            <h2 className="login-card__title" style={{ color: 'var(--status-danger)' }}>
+              {t('auth.authenticationError')}
+            </h2>
+            <p className="text-muted login-card__description mb-md">
               {detail?.code === 'CALLBACK_PARAMS_MISSING'
                 ? t('auth.invalidCallbackParams')
                 : error || t('auth.codeExchangeFailed')}
             </p>
-            <a href="/" className="btn btn-primary">
+            <ButtonLink to="/" variant="primary">
               {t('auth.goHome')}
-            </a>
-          </div>
+            </ButtonLink>
+          </Card>
         </div>
       )}
       renderLoading={() => (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          <div className="glass-card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-            <h2 style={{ marginBottom: '16px' }}>{t('auth.authenticating')}</h2>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '14.5px' }}>
-              {t('auth.authenticatingDescription')}
-            </p>
-            <LoadingSpinner size="md" style={{ margin: '24px auto 0 auto' }} />
-          </div>
+        <div className="login-surface flex-row items-center justify-center">
+          <Card className="login-card text-center">
+            <h2 className="login-card__title">{t('auth.authenticating')}</h2>
+            <p className="text-muted login-card__description mb-md">{t('auth.authenticatingDescription')}</p>
+            <LoadingSpinner size="md" />
+          </Card>
         </div>
       )}
     />

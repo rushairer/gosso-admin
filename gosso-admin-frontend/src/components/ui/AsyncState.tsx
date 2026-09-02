@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
 import { Feedback } from './Feedback';
 import { PageLoader } from './LoadingSpinner';
+import { Button } from './Button';
 
 interface AsyncStateProps {
   loading: boolean;
   loadingMessage?: string;
+  skeleton?: ReactNode;
   error?: string | null;
   retryLabel?: string;
   onRetry?: () => void;
@@ -15,20 +17,25 @@ interface AsyncStateProps {
 export function AsyncState({
   loading,
   loadingMessage,
+  skeleton,
   error,
   retryLabel = 'Retry',
   onRetry,
   children,
 }: AsyncStateProps) {
-  if (loading) return <PageLoader message={loadingMessage} />;
+  if (loading) {
+    return skeleton ? <>{skeleton}</> : <PageLoader message={loadingMessage} />;
+  }
   if (error) {
     return (
       <div className="panel-body">
         <Feedback type="error">{error}</Feedback>
         {onRetry && (
-          <button type="button" className="btn btn-secondary btn-sm mt-md" onClick={onRetry}>
-            {retryLabel}
-          </button>
+          <div style={{ marginTop: '16px' }}>
+            <Button variant="secondary" size="sm" onClick={onRetry}>
+              {retryLabel}
+            </Button>
+          </div>
         )}
       </div>
     );

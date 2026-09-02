@@ -1,11 +1,7 @@
 import React from 'react';
 
 export function Panel({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`glass-card admin-panel ${className}`} style={{ padding: 0, overflow: 'hidden' }}>
-      {children}
-    </div>
-  );
+  return <div className={`glass-card admin-panel ${className}`}>{children}</div>;
 }
 
 export function PanelHeader({

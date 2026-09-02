@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Feedback, FormField, Modal } from '../../../components/ui';
+import { Button, Feedback, FormField, Input, Modal } from '../../../components/ui';
 import type { CreateAccountPayload } from '../../../services';
 
 interface CreateUserModalProps {
@@ -53,19 +53,23 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
       maxWidth="520px"
       footer={
         <>
-          <button type="button" className="btn btn-secondary" onClick={onClose} disabled={submitting || !!success}>
+          <Button variant="secondary" onClick={onClose} disabled={submitting || !!success}>
             {t('common.cancel')}
-          </button>
-          <button form="create-user-form" type="submit" className="btn btn-primary" disabled={submitting || !!success}>
+          </Button>
+          <Button
+            form="create-user-form"
+            type="submit"
+            variant="primary"
+            loading={submitting}
+            disabled={submitting || !!success}
+          >
             {t('users.createUserButton')}
-          </button>
+          </Button>
         </>
       }
     >
       <form id="create-user-form" onSubmit={handleSubmit}>
-        <p className="mb-md text-dark" style={{ fontSize: '14px' }}>
-          {t('users.createModalDescription')}
-        </p>
+        <p className="mb-md text-dark text-sm">{t('users.createModalDescription')}</p>
 
         {error && (
           <div className="mb-md">
@@ -80,10 +84,9 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
           <FormField id="new-username" label={t('users.usernameLabel')} required>
-            <input
+            <Input
               id="new-username"
               type="text"
-              className="input-field"
               placeholder={t('users.usernamePlaceholder')}
               value={form.username}
               onChange={(e) => setForm((p) => ({ ...p, username: e.target.value }))}
@@ -93,10 +96,9 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
             />
           </FormField>
           <FormField id="new-display-name" label={t('users.displayNameLabel')} required>
-            <input
+            <Input
               id="new-display-name"
               type="text"
-              className="input-field"
               placeholder={t('users.displayNamePlaceholder')}
               value={form.display_name}
               onChange={(e) => setForm((p) => ({ ...p, display_name: e.target.value }))}
@@ -108,10 +110,9 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
           <FormField id="new-email" label={t('users.emailLabel')}>
-            <input
+            <Input
               id="new-email"
               type="email"
-              className="input-field"
               placeholder={t('users.emailPlaceholder')}
               value={form.email}
               onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
@@ -119,10 +120,9 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
             />
           </FormField>
           <FormField id="new-phone" label={t('users.phoneLabel')}>
-            <input
+            <Input
               id="new-phone"
               type="text"
-              className="input-field"
               placeholder={t('users.phonePlaceholder')}
               value={form.phone}
               onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
@@ -135,10 +135,9 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
         </div>
 
         <FormField id="new-password" label={t('users.initialPasswordLabel')} required>
-          <input
+          <Input
             id="new-password"
             type="password"
-            className="input-field"
             placeholder={t('users.initialPasswordPlaceholder')}
             value={form.password}
             onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
@@ -149,20 +148,18 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
           <FormField id="new-locale" label={t('users.localeLabel')} noMargin>
-            <input
+            <Input
               id="new-locale"
               type="text"
-              className="input-field"
               value={form.locale}
               onChange={(e) => setForm((p) => ({ ...p, locale: e.target.value }))}
               disabled={submitting || !!success}
             />
           </FormField>
           <FormField id="new-timezone" label={t('users.timezoneLabel')} noMargin>
-            <input
+            <Input
               id="new-timezone"
               type="text"
-              className="input-field"
               value={form.timezone}
               onChange={(e) => setForm((p) => ({ ...p, timezone: e.target.value }))}
               disabled={submitting || !!success}

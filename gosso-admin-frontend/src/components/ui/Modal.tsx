@@ -1,6 +1,7 @@
 import React, { useEffect, useId, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X as XIcon } from 'lucide-react';
+import { IconButton } from './Button';
 
 export interface ModalProps {
   isOpen?: boolean;
@@ -124,9 +125,14 @@ export function Modal({
               {title}
             </h3>
             {showCloseButton && (
-              <button type="button" className="modal-close-btn" onClick={onClose} aria-label={t('common.close')}>
-                <XIcon style={{ width: '18px', height: '18px' }} />
-              </button>
+              <IconButton
+                label={t('common.close')}
+                icon={<XIcon size={18} />}
+                variant="ghost"
+                size="sm"
+                className="modal-close-btn"
+                onClick={onClose}
+              />
             )}
           </div>
         )}

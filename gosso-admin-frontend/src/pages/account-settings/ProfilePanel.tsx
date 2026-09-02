@@ -3,8 +3,11 @@ import { Lock, Eye, EyeOff, Edit2 as EditIcon, X as XIcon, Check, Copy } from 'l
 import { useTranslation } from 'react-i18next';
 import { useProfileManager, useUserProfile } from '@gosso/client/react';
 import {
+  Button,
   Feedback,
   FormField,
+  IconButton,
+  Input,
   Panel,
   PanelHeader,
   PlainSection,
@@ -107,59 +110,48 @@ export default function ProfilePanel() {
 
           <DefinitionRow label={t('profile.displayNameLabel')}>
             {isEditingName ? (
-              <form onSubmit={handleSaveName} className="flex-row items-center gap-sm" style={{ width: '100%' }}>
-                <input
+              <form onSubmit={handleSaveName} className="flex-row items-center gap-sm flex-1 min-w-0">
+                <Input
                   type="text"
-                  className="input-field"
                   required
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  style={{ padding: '6px 12px', fontSize: '13px', width: '220px' }}
+                  style={{ maxWidth: '240px' }}
                 />
-                <button
-                  className="btn btn-primary btn-sm"
+                <IconButton
+                  label="Save display name"
+                  icon={<Check size={14} />}
+                  variant="primary"
+                  size="sm"
                   type="submit"
                   disabled={loading}
-                  style={{ padding: '6px 10px' }}
-                >
-                  <Check style={{ width: '14px', height: '14px' }} />
-                </button>
-                <button
-                  className="btn btn-secondary btn-sm"
+                />
+                <IconButton
+                  label="Cancel"
+                  icon={<XIcon size={14} />}
+                  variant="secondary"
+                  size="sm"
                   type="button"
                   onClick={() => setIsEditingName(false)}
                   disabled={loading}
-                  style={{ padding: '6px 10px' }}
-                >
-                  <XIcon style={{ width: '14px', height: '14px' }} />
-                </button>
+                />
               </form>
             ) : (
-              <div className="flex-row items-center justify-between" style={{ width: '100%' }}>
+              <div className="flex-row items-center justify-between flex-1 min-w-0">
                 <span>{profile?.name || '-'}</span>
-                <button
-                  className="btn btn-secondary btn-sm"
-                  onClick={handleStartEditName}
-                  style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                >
-                  <EditIcon style={{ width: '12px', height: '12px' }} />
-                  <span style={{ fontSize: '12px' }}>{t('common.edit')}</span>
-                </button>
+                <Button variant="secondary" size="sm" icon={<EditIcon size={12} />} onClick={handleStartEditName}>
+                  {t('common.edit')}
+                </Button>
               </div>
             )}
           </DefinitionRow>
 
           <DefinitionRow label={t('profile.emailLabel')}>
-            <div className="flex-row items-center justify-between" style={{ width: '100%' }}>
+            <div className="flex-row items-center justify-between flex-1 min-w-0">
               <span>{profile?.email || t('profile.notConfigured')}</span>
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={handleStartEditEmail}
-                style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
-              >
-                <EditIcon style={{ width: '12px', height: '12px' }} />
-                <span style={{ fontSize: '12px' }}>{t('common.edit')}</span>
-              </button>
+              <Button variant="secondary" size="sm" icon={<EditIcon size={12} />} onClick={handleStartEditEmail}>
+                {t('common.edit')}
+              </Button>
             </div>
           </DefinitionRow>
 
@@ -172,60 +164,48 @@ export default function ProfilePanel() {
           </DefinitionRow>
 
           <DefinitionRow label={t('profile.subjectIdLabel')}>
-            <div className="flex-row items-center justify-between" style={{ width: '100%' }}>
+            <div className="flex-row items-center justify-between flex-1 min-w-0">
               <code
-                style={{
-                  fontSize: '12px',
-                  background: 'var(--color-surface-hover, rgba(0,0,0,0.05))',
-                  padding: '3px 8px',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace',
-                }}
+                className="text-mono text-sm"
+                style={{ background: 'var(--surface-subtle)', padding: '3px 8px', borderRadius: '4px' }}
               >
                 {profile?.sub || '-'}
               </code>
               {profile?.sub && (
-                <button
-                  className="btn btn-secondary btn-sm"
-                  type="button"
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<Copy size={12} />}
                   onClick={() => {
                     navigator.clipboard.writeText(profile.sub);
                     setSuccess(t('profile.copiedSubjectId'));
                   }}
-                  style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
-                  <Copy style={{ width: '12px', height: '12px' }} />
-                  <span style={{ fontSize: '12px' }}>{t('profile.copyId')}</span>
-                </button>
+                  {t('profile.copyId')}
+                </Button>
               )}
             </div>
           </DefinitionRow>
 
           <DefinitionRow label={t('profile.ssoIssuerLabel')}>
-            <div className="flex-row items-center justify-between" style={{ width: '100%' }}>
+            <div className="flex-row items-center justify-between flex-1 min-w-0">
               <code
-                style={{
-                  fontSize: '12px',
-                  background: 'var(--color-surface-hover, rgba(0,0,0,0.05))',
-                  padding: '3px 8px',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace',
-                }}
+                className="text-mono text-sm"
+                style={{ background: 'var(--surface-subtle)', padding: '3px 8px', borderRadius: '4px' }}
               >
                 {window.location.origin}
               </code>
-              <button
-                className="btn btn-secondary btn-sm"
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Copy size={12} />}
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.origin);
                   setSuccess(t('profile.copiedIssuer'));
                 }}
-                style={{ padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
               >
-                <Copy style={{ width: '12px', height: '12px' }} />
-                <span style={{ fontSize: '12px' }}>{t('profile.copyIssuer')}</span>
-              </button>
+                {t('profile.copyIssuer')}
+              </Button>
             </div>
           </DefinitionRow>
         </DefinitionList>
@@ -234,75 +214,46 @@ export default function ProfilePanel() {
       <PlainSection title={t('profile.updatePasswordSection')}>
         <form onSubmit={handleChangePassword} className="flex-col gap-lg" style={{ maxWidth: '500px' }}>
           <FormField label={t('profile.currentPasswordLabel')} noMargin>
-            <div style={{ position: 'relative' }}>
-              <input
-                type={showCurrentPwd ? 'text' : 'password'}
-                className="input-field"
-                required
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="••••••••••••"
-              />
-              <button
-                type="button"
-                onClick={() => setShowCurrentPwd(!showCurrentPwd)}
-                style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--color-text-muted)',
-                  cursor: 'pointer',
-                }}
-              >
-                {showCurrentPwd ? (
-                  <EyeOff style={{ width: '16px', height: '16px' }} />
-                ) : (
-                  <Eye style={{ width: '16px', height: '16px' }} />
-                )}
-              </button>
-            </div>
+            <Input
+              type={showCurrentPwd ? 'text' : 'password'}
+              required
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              placeholder="••••••••••••"
+              suffixIcon={
+                <IconButton
+                  label="Toggle current password visibility"
+                  icon={showCurrentPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowCurrentPwd(!showCurrentPwd)}
+                />
+              }
+            />
           </FormField>
 
           <FormField label={t('profile.newPasswordLabel')} noMargin>
-            <div style={{ position: 'relative' }}>
-              <input
-                type={showNewPwd ? 'text' : 'password'}
-                className="input-field"
-                required
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder={t('profile.newPasswordPlaceholder')}
-              />
-              <button
-                type="button"
-                onClick={() => setShowNewPwd(!showNewPwd)}
-                style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--color-text-muted)',
-                  cursor: 'pointer',
-                }}
-              >
-                {showNewPwd ? (
-                  <EyeOff style={{ width: '16px', height: '16px' }} />
-                ) : (
-                  <Eye style={{ width: '16px', height: '16px' }} />
-                )}
-              </button>
-            </div>
+            <Input
+              type={showNewPwd ? 'text' : 'password'}
+              required
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder={t('profile.newPasswordPlaceholder')}
+              suffixIcon={
+                <IconButton
+                  label="Toggle new password visibility"
+                  icon={showNewPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowNewPwd(!showNewPwd)}
+                />
+              }
+            />
           </FormField>
 
           <FormField label={t('profile.confirmPasswordLabel')} noMargin>
-            <input
+            <Input
               type="password"
-              className="input-field"
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -310,10 +261,15 @@ export default function ProfilePanel() {
             />
           </FormField>
 
-          <button className="btn btn-primary self-start mt-sm" type="submit" disabled={loading}>
-            <Lock style={{ width: '16px', height: '16px' }} />
-            {loading ? t('profile.changePasswordLoading') : t('profile.changePasswordButton')}
-          </button>
+          <Button
+            variant="primary"
+            className="self-start mt-sm"
+            type="submit"
+            loading={loading}
+            icon={<Lock size={16} />}
+          >
+            {t('profile.changePasswordButton')}
+          </Button>
         </form>
       </PlainSection>
 

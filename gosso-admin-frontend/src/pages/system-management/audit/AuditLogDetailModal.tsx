@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText as AuditIcon } from 'lucide-react';
-import { Modal } from '../../../components/ui';
+import { Button, Modal } from '../../../components/ui';
 import type { AuditLog } from '../../../types/api';
 
 interface AuditLogDetailModalProps {
@@ -26,9 +26,9 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({ isOpen
       }
       maxWidth="640px"
       footer={
-        <button type="button" className="btn btn-secondary" onClick={onClose}>
+        <Button variant="secondary" onClick={onClose}>
           {t('common.close')}
-        </button>
+        </Button>
       }
     >
       <div className="flex-col gap-sm">

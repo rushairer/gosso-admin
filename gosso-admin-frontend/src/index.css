@@ -1972,3 +1972,114 @@ a {
   padding: 14px 20px;
   border-top: 1px solid var(--border-default);
 }
+
+/* Toast Notification System */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 380px;
+  width: calc(100% - 40px);
+  pointer-events: none;
+}
+
+.toast-item {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm, 6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transform: translateX(120%);
+  opacity: 0;
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease;
+}
+
+.toast-item--visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast-item--success {
+  background: var(--status-success-subtle);
+  border: 1px solid var(--status-success-border);
+}
+
+.toast-item--error {
+  background: var(--status-danger-subtle);
+  border: 1px solid var(--status-danger-border);
+}
+
+.toast-item--info {
+  background: var(--action-primary-subtle);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.toast-item__icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.toast-item__message {
+  flex: 1;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.toast-item__close {
+  flex-shrink: 0;
+}
+
+/* Empty State Action Slot */
+.empty-state-actions {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Home & Dashboard Utilities */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.home-hero {
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-badge-icon {
+  background: var(--action-primary-subtle);
+  padding: 12px;
+  border-radius: var(--radius-control, 8px);
+  display: inline-flex;
+  width: fit-content;
+  border: 1px solid rgba(59, 130, 246, 0.22);
+}
+
+.home-admin-notice {
+  padding: 16px 20px;
+  background-color: rgba(59, 130, 246, 0.05);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--status-success);
+  display: inline-block;
+  flex-shrink: 0;
+}

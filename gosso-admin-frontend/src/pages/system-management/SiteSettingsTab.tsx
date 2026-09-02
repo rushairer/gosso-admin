@@ -1,7 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import { Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { AsyncState, FormField, PanelBody, PanelHeader, PlainSection, useToast } from '../../components/ui';
+import {
+  AsyncState,
+  Button,
+  FormField,
+  Input,
+  PanelBody,
+  PanelHeader,
+  PlainSection,
+  Textarea,
+  useToast,
+} from '../../components/ui';
 import { siteSettingsService } from '../../services';
 import { DEFAULT_SITE_SETTINGS, mergeSiteSettings } from '../../config/site-defaults';
 import type { SiteSettings } from '../../types/api';
@@ -63,12 +73,11 @@ export default function SiteSettingsTab() {
         <form onSubmit={save}>
           <PanelBody stack>
             <FormField label={t('site.productName')} required>
-              <input
-                className="input-field"
+              <Input
                 required
                 maxLength={120}
                 value={settings.product_name}
-                onChange={(event) => update('product_name', event.target.value)}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => update('product_name', event.target.value)}
               />
             </FormField>
           </PanelBody>
@@ -76,59 +85,53 @@ export default function SiteSettingsTab() {
           <PlainSection title={t('site.loginAppearance')}>
             <div className="flex-col gap-lg">
               <FormField label={t('site.logoUrl')}>
-                <input
-                  className="input-field"
+                <Input
                   type="text"
                   placeholder={t('site.logoUrlPlaceholder')}
                   value={settings.logo_url}
-                  onChange={(event) => update('logo_url', event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) => update('logo_url', event.target.value)}
                 />
               </FormField>
               <FormField label={t('site.faviconUrl')}>
-                <input
-                  className="input-field"
+                <Input
                   type="text"
                   placeholder={t('site.faviconUrlPlaceholder')}
                   value={settings.favicon_url}
-                  onChange={(event) => update('favicon_url', event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) => update('favicon_url', event.target.value)}
                 />
               </FormField>
               <FormField label={t('site.loginTitle')}>
-                <input
-                  className="input-field"
+                <Input
                   maxLength={160}
                   placeholder={settings.product_name || 'GOSSO'}
                   value={settings.login_title}
-                  onChange={(event) => update('login_title', event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) => update('login_title', event.target.value)}
                 />
               </FormField>
               <FormField label={t('site.loginDescription')}>
-                <textarea
-                  className="input-field"
+                <Textarea
                   rows={3}
                   maxLength={500}
                   placeholder={t('login.subtitle')}
                   value={settings.login_description}
-                  onChange={(event) => update('login_description', event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLTextAreaElement>) => update('login_description', event.target.value)}
                 />
               </FormField>
               <FormField label={t('site.loginBackgroundUrl')}>
-                <input
-                  className="input-field"
+                <Input
                   type="text"
                   placeholder={t('site.loginBackgroundUrlPlaceholder')}
                   value={settings.login_background_url}
-                  onChange={(event) => update('login_background_url', event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) => update('login_background_url', event.target.value)}
                 />
               </FormField>
             </div>
           </PlainSection>
 
           <PanelBody>
-            <button className="btn btn-primary self-start" type="submit" disabled={saving}>
-              <Save size={16} />
-              {saving ? t('common.loading') : t('site.save')}
-            </button>
+            <Button variant="primary" className="self-start" type="submit" loading={saving} icon={<Save size={16} />}>
+              {t('site.save')}
+            </Button>
           </PanelBody>
         </form>
 

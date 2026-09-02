@@ -152,7 +152,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
       <div className="workbench">
         <header className="topbar">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+          <div className="flex-row items-start justify-between flex-1 min-w-0">
             <div>
               <p className="eyebrow">
                 <Key size={14} />

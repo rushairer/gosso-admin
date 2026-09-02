@@ -78,6 +78,22 @@
   --control-height: 38px;
   --control-height-compact: 34px;
 
+  /* Typography Scale */
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-md: 15px;
+  --font-size-lg: 18px;
+  --font-size-xl: 22px;
+  --font-size-2xl: 26px;
+  --font-size-3xl: 30px;
+  --font-size-4xl: 34px;
+
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.35;
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.65;
+
   /* Focus & Focus-Visible Ring */
   --focus-ring: 0 0 0 2px var(--surface-canvas), 0 0 0 4px var(--action-primary);
   --focus-ring-offset: 2px;

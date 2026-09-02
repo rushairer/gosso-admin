@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Feedback, FormField, Modal } from '../../../components/ui';
+import { Button, Feedback, FormField, Input, Modal } from '../../../components/ui';
 import type { Account } from '../../../types/api';
 
 interface ResetPasswordModalProps {
@@ -47,22 +47,23 @@ export function ResetPasswordModal({ isOpen, onClose, account, onSubmit }: Reset
       maxWidth="400px"
       footer={
         <>
-          <button type="button" className="btn btn-secondary" onClick={onClose} disabled={submitting || !!success}>
+          <Button variant="secondary" onClick={onClose} disabled={submitting || !!success}>
             {t('common.cancel')}
-          </button>
-          <button
+          </Button>
+          <Button
             form="reset-password-form"
             type="submit"
-            className="btn btn-primary"
+            variant="primary"
+            loading={submitting}
             disabled={!newPassword || submitting || !!success}
           >
             {t('users.updatePasswordButton')}
-          </button>
+          </Button>
         </>
       }
     >
       <form id="reset-password-form" onSubmit={handleSubmit}>
-        <p className="mb-md text-dark" style={{ fontSize: '14px' }}>
+        <p className="mb-md text-dark text-sm">
           {t('users.changePasswordDescription', {
             name: account.display_name || account.username,
           })}
@@ -80,10 +81,9 @@ export function ResetPasswordModal({ isOpen, onClose, account, onSubmit }: Reset
         )}
 
         <FormField id="new-password" label={t('users.newPasswordLabel')} noMargin required>
-          <input
+          <Input
             id="new-password"
             type="password"
-            className="input-field"
             placeholder={t('users.newPasswordPlaceholder')}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}

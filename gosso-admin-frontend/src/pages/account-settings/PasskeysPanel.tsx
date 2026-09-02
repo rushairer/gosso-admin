@@ -3,10 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Key, Calendar, Trash2, Plus } from 'lucide-react';
 import { usePasskeys } from '@gosso/client/react';
 import {
+  Button,
   ButtonGroup,
   EmptyState,
   Feedback,
   FormField,
+  IconButton,
+  Input,
   ListRow,
   ListStack,
   Modal,
@@ -73,10 +76,9 @@ export default function PasskeysPanel() {
           title={t('passkeys.title')}
           description={t('passkeys.description')}
           action={
-            <button className="btn btn-primary content-action" onClick={() => setShowPasskeyModal(true)}>
-              <Plus />
+            <Button variant="primary" size="sm" icon={<Plus size={14} />} onClick={() => setShowPasskeyModal(true)}>
               {t('passkeys.addPasskey')}
-            </button>
+            </Button>
           }
         />
 
@@ -110,25 +112,24 @@ export default function PasskeysPanel() {
               {passkeys.map((passkey) => (
                 <ListRow
                   key={passkey.id}
-                  icon={<Key style={{ width: '16px', height: '16px' }} />}
+                  icon={<Key size={16} />}
                   title={passkey.name}
                   meta={
                     <>
-                      <Calendar style={{ width: '11px', height: '11px' }} />
+                      <Calendar size={12} />
                       {passkey.created_at
                         ? new Date(passkey.created_at).toLocaleString()
                         : t('passkeys.registeredDevice')}
                     </>
                   }
                   action={
-                    <button
-                      className="btn btn-danger btn-sm"
+                    <IconButton
+                      variant="danger"
+                      size="sm"
+                      icon={<Trash2 size={14} />}
+                      label={t('passkeys.removePasskey')}
                       onClick={() => handleDeletePasskey(passkey.id, passkey.name)}
-                      style={{ padding: '6px' }}
-                      title={t('passkeys.removePasskey')}
-                    >
-                      <Trash2 style={{ width: '14px', height: '14px' }} />
-                    </button>
+                    />
                   }
                 />
               ))}
@@ -147,15 +148,12 @@ export default function PasskeysPanel() {
           setNewPasskeyName('');
         }}
       >
-        <p className="text-muted" style={{ fontSize: '13.5px', lineHeight: '1.5' }}>
-          {t('passkeys.registerModalDescription')}
-        </p>
+        <p className="text-muted text-sm">{t('passkeys.registerModalDescription')}</p>
 
-        <form onSubmit={handleRegisterPasskey} className="flex-col mt-md" style={{ gap: '14px' }}>
+        <form onSubmit={handleRegisterPasskey} className="flex-col mt-md gap-md">
           <FormField label={t('passkeys.passkeyNameLabel')} noMargin>
-            <input
+            <Input
               type="text"
-              className="input-field"
               required
               value={newPasskeyName}
               onChange={(e) => setNewPasskeyName(e.target.value)}
@@ -164,11 +162,11 @@ export default function PasskeysPanel() {
           </FormField>
 
           <ButtonGroup align="right">
-            <button className="btn btn-primary" type="submit" disabled={loading}>
-              {loading ? t('passkeys.registeringLoading') : t('passkeys.registerDeviceButton')}
-            </button>
-            <button
-              className="btn btn-secondary"
+            <Button variant="primary" type="submit" loading={loading}>
+              {t('passkeys.registerDeviceButton')}
+            </Button>
+            <Button
+              variant="secondary"
               type="button"
               onClick={() => {
                 setShowPasskeyModal(false);
@@ -176,7 +174,7 @@ export default function PasskeysPanel() {
               }}
             >
               {t('common.cancel')}
-            </button>
+            </Button>
           </ButtonGroup>
         </form>
       </Modal>

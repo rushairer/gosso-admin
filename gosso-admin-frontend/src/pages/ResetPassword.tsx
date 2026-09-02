@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, Lock } from 'lucide-react';
-import { Feedback, FormField } from '../components/ui';
+import { Button, Card, Feedback, FormField, IconButton, Input } from '../components/ui';
 import { gossoClient } from '../auth';
 import { logger } from '../utils/logger';
 
@@ -56,15 +56,11 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="flex-row items-center justify-center" style={{ minHeight: '100vh', padding: '24px' }}>
-      <div className="glass-card" style={{ maxWidth: '440px', width: '100%' }}>
-        <div className="text-center" style={{ marginBottom: '28px' }}>
-          <h1 style={{ color: 'var(--color-text-main)', fontSize: '28px', marginBottom: '8px' }}>
-            {t('passwordReset.resetTitle')}
-          </h1>
-          <p className="text-muted" style={{ fontSize: '14.5px', lineHeight: 1.6 }}>
-            {t('passwordReset.resetDescription')}
-          </p>
+    <div className="login-surface flex-row items-center justify-center">
+      <Card className="login-card">
+        <div className="text-center mb-md">
+          <h1 className="login-card__title">{t('passwordReset.resetTitle')}</h1>
+          <p className="text-muted login-card__description">{t('passwordReset.resetDescription')}</p>
         </div>
 
         {error && (
@@ -82,47 +78,31 @@ export default function ResetPassword() {
         {!success && (
           <form onSubmit={handleSubmit}>
             <FormField label={t('passwordReset.newPasswordLabel')}>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  className="input-field"
-                  aria-label={t('passwordReset.newPasswordLabel')}
-                  placeholder={t('passwordReset.newPasswordPlaceholder')}
-                  value={newPassword}
-                  onChange={(event) => setNewPassword(event.target.value)}
-                  disabled={loading || !token}
-                  required
-                  autoFocus={Boolean(token)}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={!token}
-                  aria-label={showPassword ? t('passwordReset.hidePassword') : t('passwordReset.showPassword')}
-                  style={{
-                    position: 'absolute',
-                    right: '12px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--color-text-muted)',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {showPassword ? (
-                    <EyeOff style={{ width: '16px', height: '16px' }} />
-                  ) : (
-                    <Eye style={{ width: '16px', height: '16px' }} />
-                  )}
-                </button>
-              </div>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                aria-label={t('passwordReset.newPasswordLabel')}
+                placeholder={t('passwordReset.newPasswordPlaceholder')}
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                disabled={loading || !token}
+                required
+                autoFocus={Boolean(token)}
+                suffixIcon={
+                  <IconButton
+                    label={showPassword ? t('passwordReset.hidePassword') : t('passwordReset.showPassword')}
+                    icon={showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    variant="ghost"
+                    size="sm"
+                    disabled={!token}
+                    onClick={() => setShowPassword(!showPassword)}
+                  />
+                }
+              />
             </FormField>
 
             <FormField label={t('passwordReset.confirmPasswordLabel')}>
-              <input
+              <Input
                 type="password"
-                className="input-field"
                 aria-label={t('passwordReset.confirmPasswordLabel')}
                 placeholder={t('passwordReset.confirmPasswordPlaceholder')}
                 value={confirmPassword}
@@ -132,22 +112,25 @@ export default function ResetPassword() {
               />
             </FormField>
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading || !token}>
-              <Lock style={{ width: '16px', height: '16px' }} />
-              {loading ? t('passwordReset.resetting') : t('passwordReset.resetButton')}
-            </button>
+            <Button
+              type="submit"
+              variant="primary"
+              className="login-card__action"
+              loading={loading}
+              disabled={loading || !token}
+              icon={<Lock size={16} />}
+            >
+              {t('passwordReset.resetButton')}
+            </Button>
           </form>
         )}
 
-        <div className="text-center" style={{ marginTop: '18px' }}>
-          <Link
-            to="/login"
-            style={{ color: 'var(--color-primary)', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}
-          >
+        <div className="text-center mt-md">
+          <Link to="/login" className="btn-link">
             {t('passwordReset.backToLogin')}
           </Link>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

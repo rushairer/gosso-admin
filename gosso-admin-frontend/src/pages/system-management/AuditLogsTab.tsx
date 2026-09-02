@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText as AuditIcon } from 'lucide-react';
 import {
+  Button,
   ButtonGroup,
   DataTable,
   EmptyState,
   Feedback,
   FormField,
+  Input,
   PageLoader,
   PanelHeader,
   Tag,
@@ -41,9 +43,8 @@ export default function AuditLogsTab() {
         <div className="flex-row flex-wrap gap-lg" style={{ alignItems: 'flex-end' }}>
           <div className="flex-col gap-xs">
             <FormField label={t('audit.eventTypeLabel')} noMargin>
-              <input
+              <Input
                 type="text"
-                className="input-field"
                 placeholder={t('audit.eventTypePlaceholder')}
                 value={filterEventType}
                 onChange={(e) => setFilterEventType(e.target.value)}
@@ -53,9 +54,8 @@ export default function AuditLogsTab() {
           </div>
           <div className="flex-col gap-xs">
             <FormField label={t('audit.accountIdLabel')} noMargin>
-              <input
+              <Input
                 type="text"
-                className="input-field"
                 placeholder={t('audit.accountIdPlaceholder')}
                 value={filterAccountID}
                 onChange={(e) => setFilterAccountID(e.target.value)}
@@ -64,12 +64,12 @@ export default function AuditLogsTab() {
             </FormField>
           </div>
           <ButtonGroup compact>
-            <button className="btn btn-primary" onClick={search}>
+            <Button variant="primary" onClick={search}>
               {t('common.search')}
-            </button>
-            <button className="btn btn-secondary" onClick={clearFilters}>
+            </Button>
+            <Button variant="secondary" onClick={clearFilters}>
               {t('common.clear')}
-            </button>
+            </Button>
           </ButtonGroup>
         </div>
       </div>
@@ -108,9 +108,9 @@ export default function AuditLogsTab() {
                   <td className="text-sm text-mono">{log.actor}</td>
                   <td className="text-sm text-mono text-muted">{log.account_id || '-'}</td>
                   <td>
-                    <button className="btn btn-secondary btn-sm" onClick={() => setSelectedAuditLog(log)}>
+                    <Button variant="secondary" size="sm" onClick={() => setSelectedAuditLog(log)}>
                       {t('common.view')}
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -125,27 +125,20 @@ export default function AuditLogsTab() {
               padding: '0 20px 20px 20px',
             }}
           >
-            <div className="text-muted" style={{ fontSize: '14px' }}>
-              {t('audit.totalLogs', { count: auditTotal })}
-            </div>
+            <div className="text-muted text-sm">{t('audit.totalLogs', { count: auditTotal })}</div>
             <ButtonGroup compact>
-              <button
-                className="btn btn-secondary btn-sm"
-                disabled={auditPage <= 1}
-                onClick={() => goToPage(auditPage - 1)}
-              >
+              <Button variant="secondary" size="sm" disabled={auditPage <= 1} onClick={() => goToPage(auditPage - 1)}>
                 {t('common.previous')}
-              </button>
-              <span style={{ fontSize: '14px', color: 'var(--color-text-main)' }}>
-                {t('audit.pageLabel', { page: auditPage })}
-              </span>
-              <button
-                className="btn btn-secondary btn-sm"
+              </Button>
+              <span className="text-sm text-dark">{t('audit.pageLabel', { page: auditPage })}</span>
+              <Button
+                variant="secondary"
+                size="sm"
                 disabled={auditLogs.length < pageSize || auditPage * pageSize >= auditTotal}
                 onClick={() => goToPage(auditPage + 1)}
               >
                 {t('common.next')}
-              </button>
+              </Button>
             </ButtonGroup>
           </div>
         </div>

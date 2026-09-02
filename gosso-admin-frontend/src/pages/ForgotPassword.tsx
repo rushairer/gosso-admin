@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Mail } from 'lucide-react';
-import { Feedback, FormField } from '../components/ui';
+import { Button, Card, Feedback, FormField, Input } from '../components/ui';
 import { gossoClient } from '../auth';
 import { logger } from '../utils/logger';
 
@@ -23,7 +23,6 @@ export default function ForgotPassword() {
 
     try {
       await gossoClient.requestPasswordReset(email.trim());
-
       setSuccess(true);
     } catch (err: unknown) {
       logger.error('Password reset request failed', err);
@@ -34,15 +33,11 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="flex-row items-center justify-center" style={{ minHeight: '100vh', padding: '24px' }}>
-      <div className="glass-card" style={{ maxWidth: '440px', width: '100%' }}>
-        <div className="text-center" style={{ marginBottom: '28px' }}>
-          <h1 style={{ color: 'var(--color-text-main)', fontSize: '28px', marginBottom: '8px' }}>
-            {t('passwordReset.forgotTitle')}
-          </h1>
-          <p className="text-muted" style={{ fontSize: '14.5px', lineHeight: 1.6 }}>
-            {t('passwordReset.forgotDescription')}
-          </p>
+    <div className="login-surface flex-row items-center justify-center">
+      <Card className="login-card">
+        <div className="text-center mb-md">
+          <h1 className="login-card__title">{t('passwordReset.forgotTitle')}</h1>
+          <p className="text-muted login-card__description">{t('passwordReset.forgotDescription')}</p>
         </div>
 
         {error && (
@@ -59,52 +54,36 @@ export default function ForgotPassword() {
 
         <form onSubmit={handleSubmit}>
           <FormField label={t('passwordReset.emailLabel')} hint={t('passwordReset.emailHint')}>
-            <div style={{ position: 'relative' }}>
-              <input
-                type="email"
-                className="input-field"
-                aria-label={t('passwordReset.emailLabel')}
-                placeholder={t('passwordReset.emailPlaceholder')}
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                disabled={loading}
-                required
-                autoFocus
-                style={{ paddingLeft: '38px' }}
-              />
-              <Mail
-                style={{
-                  position: 'absolute',
-                  left: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: '16px',
-                  height: '16px',
-                  color: 'var(--color-text-muted)',
-                }}
-              />
-            </div>
+            <Input
+              type="email"
+              prefixIcon={<Mail size={16} />}
+              aria-label={t('passwordReset.emailLabel')}
+              placeholder={t('passwordReset.emailPlaceholder')}
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              disabled={loading}
+              required
+              autoFocus
+            />
           </FormField>
 
-          <button
+          <Button
             type="submit"
-            className="btn btn-primary"
-            style={{ width: '100%' }}
-            disabled={loading || !email.trim()}
+            variant="primary"
+            className="login-card__action"
+            loading={loading}
+            disabled={!email.trim()}
           >
-            {loading ? t('passwordReset.sending') : t('passwordReset.sendLinkButton')}
-          </button>
+            {t('passwordReset.sendLinkButton')}
+          </Button>
         </form>
 
-        <div className="text-center" style={{ marginTop: '18px' }}>
-          <Link
-            to="/login"
-            style={{ color: 'var(--color-primary)', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}
-          >
+        <div className="text-center mt-md">
+          <Link to="/login" className="btn-link">
             {t('passwordReset.backToLogin')}
           </Link>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

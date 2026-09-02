@@ -4,9 +4,12 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Shield, QrCode, Clipboard, AlertTriangle, RefreshCw, Unlock, Check, Copy } from 'lucide-react';
 import { useMfa } from '@gosso/client/react';
 import {
+  Button,
   ButtonGroup,
   Feedback,
   FormField,
+  IconButton,
+  Input,
   Modal,
   PageLoader,
   Panel,
@@ -114,13 +117,10 @@ export default function MFAPanel() {
           {/* Not enrolled */}
           {!mfaStatus.enabled && !mfaEnrollment && (
             <div className="flex-col items-start gap-lg">
-              <p className="text-muted" style={{ fontSize: '14.5px', lineHeight: '1.6' }}>
-                {t('mfa.mfaNotEnrolledDescription')}
-              </p>
-              <button className="btn btn-primary" onClick={handleEnrollMFA}>
-                <QrCode style={{ width: '16px', height: '16px' }} />
+              <p className="text-muted text-sm">{t('mfa.mfaNotEnrolledDescription')}</p>
+              <Button variant="primary" icon={<QrCode size={16} />} onClick={handleEnrollMFA}>
                 {t('mfa.setupAuthenticatorButton')}
-              </button>
+              </Button>
             </div>
           )}
 
@@ -152,12 +152,8 @@ export default function MFAPanel() {
                 </div>
 
                 <div className="flex-1 flex-col gap-md" style={{ minWidth: '260px' }}>
-                  <p className="text-muted" style={{ fontSize: '14px', lineHeight: '1.5' }}>
-                    {t('mfa.scanQrStep1')}
-                  </p>
-                  <p className="text-muted" style={{ fontSize: '14px', lineHeight: '1.5' }}>
-                    {t('mfa.manualEntryStep2')}
-                  </p>
+                  <p className="text-muted text-sm">{t('mfa.scanQrStep1')}</p>
+                  <p className="text-muted text-sm">{t('mfa.manualEntryStep2')}</p>
                   <div
                     className="flex-row items-center gap-sm"
                     style={{
@@ -177,23 +173,16 @@ export default function MFAPanel() {
                     >
                       {mfaEnrollment.secret}
                     </code>
-                    <button
-                      type="button"
+                    <IconButton
+                      label={t('mfa.copySecret')}
+                      icon={<Copy size={14} />}
+                      variant="ghost"
+                      size="sm"
                       onClick={() => {
                         navigator.clipboard.writeText(mfaEnrollment.secret);
                         showSuccess(t('mfa.secretKeyCopied'));
                       }}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--color-text-muted)',
-                        cursor: 'pointer',
-                        padding: 0,
-                      }}
-                      title={t('mfa.copySecret')}
-                    >
-                      <Copy style={{ width: '14px', height: '14px' }} />
-                    </button>
+                    />
                   </div>
                 </div>
               </div>
@@ -208,10 +197,9 @@ export default function MFAPanel() {
                 }}
               >
                 <FormField label={t('mfa.verificationCodeLabel')} noMargin>
-                  <input
+                  <Input
                     type="text"
                     maxLength={8}
-                    className="input-field"
                     required
                     value={totpCode}
                     onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
@@ -221,13 +209,12 @@ export default function MFAPanel() {
                 </FormField>
 
                 <ButtonGroup>
-                  <button className="btn btn-primary" type="submit" disabled={loading}>
-                    <Check style={{ width: '16px', height: '16px' }} />
+                  <Button variant="primary" type="submit" disabled={loading} icon={<Check size={16} />}>
                     {t('mfa.verifyAndActivateButton')}
-                  </button>
-                  <button className="btn btn-secondary" type="button" onClick={cancelEnroll}>
+                  </Button>
+                  <Button variant="secondary" type="button" onClick={cancelEnroll}>
                     {t('common.cancel')}
-                  </button>
+                  </Button>
                 </ButtonGroup>
               </form>
             </div>
@@ -237,7 +224,7 @@ export default function MFAPanel() {
           {mfaStatus.enabled && (
             <div className="flex-col gap-xl">
               <div className="inline-status-row" style={{ color: '#a7f3d0', paddingTop: 0 }}>
-                <Shield style={{ width: '24px', height: '24px', color: 'var(--success-color)' }} />
+                <Shield size={24} color="var(--status-success)" />
                 <div>
                   <div style={{ fontWeight: '600', fontSize: '15px' }}>{t('mfa.accountProtected')}</div>
                   <div className="text-sm text-muted" style={{ marginTop: '2px' }}>
@@ -247,14 +234,12 @@ export default function MFAPanel() {
               </div>
 
               <ButtonGroup>
-                <button className="btn btn-secondary" onClick={handleGenerateBackupCodes}>
-                  <RefreshCw style={{ width: '14px', height: '14px' }} />
+                <Button variant="secondary" icon={<RefreshCw size={14} />} onClick={handleGenerateBackupCodes}>
                   {t('mfa.regenerateBackupCodes')}
-                </button>
-                <button className="btn btn-danger" onClick={() => setShowDisableModal(true)}>
-                  <Unlock style={{ width: '14px', height: '14px' }} />
+                </Button>
+                <Button variant="danger" icon={<Unlock size={14} />} onClick={() => setShowDisableModal(true)}>
                   {t('mfa.disableTwoFactorAuth')}
-                </button>
+                </Button>
               </ButtonGroup>
             </div>
           )}
@@ -262,8 +247,8 @@ export default function MFAPanel() {
           {/* Backup Codes */}
           {backupCodes.length > 0 && (
             <div>
-              <div className="flex-row items-center gap-sm" style={{ color: 'var(--warning-color)' }}>
-                <AlertTriangle style={{ width: '16px', height: '16px' }} />
+              <div className="flex-row items-center gap-sm" style={{ color: 'var(--status-warning)' }}>
+                <AlertTriangle size={16} />
                 <h4 style={{ fontSize: '14.5px', fontWeight: 'bold' }}>{t('mfa.recoveryBackupCodesTitle')}</h4>
               </div>
 
@@ -289,7 +274,7 @@ export default function MFAPanel() {
                     style={{
                       fontSize: '13px',
                       letterSpacing: '0.05em',
-                      color: 'var(--color-text-main)',
+                      color: 'var(--text-primary)',
                       fontWeight: 'bold',
                     }}
                   >
@@ -299,16 +284,17 @@ export default function MFAPanel() {
               </div>
 
               <ButtonGroup>
-                <button
-                  className="btn btn-secondary btn-sm"
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<Clipboard size={13} />}
                   onClick={() => {
                     navigator.clipboard.writeText(backupCodes.join('\n'));
                     showSuccess(t('mfa.backupCodesCopied'));
                   }}
                 >
-                  <Clipboard style={{ width: '13px', height: '13px' }} />
                   {t('mfa.copyCodesButton')}
-                </button>
+                </Button>
               </ButtonGroup>
             </div>
           )}
@@ -325,15 +311,12 @@ export default function MFAPanel() {
           setConfirmPasswordForMFA('');
         }}
       >
-        <p className="text-muted" style={{ fontSize: '13.5px', lineHeight: '1.5' }}>
-          {t('mfa.disableModalDescription')}
-        </p>
+        <p className="text-muted text-sm">{t('mfa.disableModalDescription')}</p>
 
-        <form onSubmit={handleDisableMFA} className="flex-col mt-md" style={{ gap: '14px' }}>
+        <form onSubmit={handleDisableMFA} className="flex-col mt-md gap-md">
           <FormField label={t('mfa.accountPasswordLabel')} noMargin>
-            <input
+            <Input
               type="password"
-              className="input-field"
               required
               value={confirmPasswordForMFA}
               onChange={(e) => setConfirmPasswordForMFA(e.target.value)}
@@ -342,11 +325,11 @@ export default function MFAPanel() {
           </FormField>
 
           <ButtonGroup align="right">
-            <button className="btn btn-danger" type="submit" disabled={loading}>
-              {loading ? t('mfa.disablingLoading') : t('mfa.confirmDisableButton')}
-            </button>
-            <button
-              className="btn btn-secondary"
+            <Button variant="danger" type="submit" loading={loading}>
+              {t('mfa.confirmDisableButton')}
+            </Button>
+            <Button
+              variant="secondary"
               type="button"
               onClick={() => {
                 setShowDisableModal(false);
@@ -354,7 +337,7 @@ export default function MFAPanel() {
               }}
             >
               {t('common.cancel')}
-            </button>
+            </Button>
           </ButtonGroup>
         </form>
       </Modal>

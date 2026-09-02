@@ -1,7 +1,17 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Shield as ShieldIcon } from 'lucide-react';
-import { ButtonGroup, EmptyState, FormField, ListRow, ListStack, Modal } from '../../../components/ui';
+import {
+  Button,
+  ButtonGroup,
+  EmptyState,
+  FormField,
+  Input,
+  ListRow,
+  ListStack,
+  Modal,
+  Select,
+} from '../../../components/ui';
 import type { Account, Role } from '../../../types/api';
 
 interface AssignRolesModalProps {
@@ -49,9 +59,9 @@ export function AssignRolesModal({
       onClose={onClose}
       title={t('users.rolesModalTitle', { name: account.display_name || account.username })}
       footer={
-        <button className="btn btn-secondary" onClick={onClose}>
+        <Button variant="secondary" onClick={onClose}>
           {t('common.close')}
-        </button>
+        </Button>
       }
     >
       <div className="plain-section-title">{t('users.activeRolesSection')}</div>
@@ -61,22 +71,13 @@ export function AssignRolesModal({
             {account.roles.map((role) => (
               <ListRow
                 key={role.id}
-                icon={<ShieldIcon style={{ width: '16px', height: '16px' }} />}
+                icon={<ShieldIcon size={16} />}
                 title={role.name}
                 meta={role.description}
                 action={
-                  <button
-                    className="btn btn-danger btn-sm"
-                    style={{
-                      padding: '4px 8px',
-                      fontSize: '11px',
-                      opacity: isSelf ? 0.4 : 1,
-                    }}
-                    onClick={() => onRemoveRole(role.id)}
-                    disabled={isSelf}
-                  >
+                  <Button variant="danger" size="sm" onClick={() => onRemoveRole(role.id)} disabled={isSelf}>
                     {t('common.remove')}
-                  </button>
+                  </Button>
                 }
               />
             ))}
@@ -95,12 +96,7 @@ export function AssignRolesModal({
             <ButtonGroup>
               <div className="flex-1">
                 {discoveredRoles.length > 0 ? (
-                  <select
-                    id="assign-role"
-                    className="input-field"
-                    value={newRoleInput}
-                    onChange={(e) => setNewRoleInput(e.target.value)}
-                  >
+                  <Select id="assign-role" value={newRoleInput} onChange={(e) => setNewRoleInput(e.target.value)}>
                     <option value="">{t('users.selectDiscoveredRole')}</option>
                     {discoveredRoles
                       .filter((role) => !account.roles?.some((ur) => ur.id === role.id))
@@ -109,21 +105,20 @@ export function AssignRolesModal({
                           {role.name} ({role.id.substring(0, 8)})
                         </option>
                       ))}
-                  </select>
+                  </Select>
                 ) : (
-                  <input
+                  <Input
                     id="assign-role"
                     type="text"
-                    className="input-field"
                     placeholder={t('users.enterRoleUuid')}
                     value={newRoleInput}
                     onChange={(e) => setNewRoleInput(e.target.value)}
                   />
                 )}
               </div>
-              <button type="submit" className="btn btn-primary" disabled={!newRoleInput || assigning}>
+              <Button type="submit" variant="primary" loading={assigning} disabled={!newRoleInput || assigning}>
                 {t('common.assign')}
-              </button>
+              </Button>
             </ButtonGroup>
             <div className="form-hint">{t('users.assignRoleHint')}</div>
           </FormField>

@@ -239,28 +239,25 @@ export default function ClientsTab() {
                         label={t('clients.editClient')}
                         variant="secondary"
                         size="sm"
+                        icon={<EditIcon size={14} />}
                         onClick={() => handleOpenClientModal(client)}
-                      >
-                        <EditIcon size={14} />
-                      </IconButton>
+                      />
                       {client.is_confidential && (
                         <IconButton
                           label={t('clients.rotateSecret')}
                           variant="secondary"
                           size="sm"
+                          icon={<KeyIcon size={14} />}
                           onClick={() => void handleRotateSecret(client)}
-                        >
-                          <KeyIcon size={14} />
-                        </IconButton>
+                        />
                       )}
                       <IconButton
                         label={t('clients.deleteClient')}
                         variant="danger"
                         size="sm"
+                        icon={<TrashIcon size={14} />}
                         onClick={() => handleDeleteClient(client.client_id)}
-                      >
-                        <TrashIcon size={14} />
-                      </IconButton>
+                      />
                     </ButtonGroup>
                   </td>
                 </tr>

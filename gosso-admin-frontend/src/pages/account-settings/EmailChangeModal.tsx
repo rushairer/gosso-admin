@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Eye, EyeOff, Mail } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProfileManager } from '@gosso/client/react';
-import { ButtonGroup, Feedback, FormField, Modal } from '../../components/ui';
+import { Button, ButtonGroup, Feedback, FormField, IconButton, Input, Modal } from '../../components/ui';
 import type { UserProfile } from '../../auth';
 
 interface EmailChangeModalProps {
@@ -54,9 +54,7 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
 
   return (
     <Modal isOpen={isOpen} title={t('profile.editEmailTitle')} maxWidth="460px" onClose={onClose}>
-      <p className="text-muted mb-md" style={{ fontSize: '13.5px', lineHeight: '1.5' }}>
-        {t('profile.editEmailDescription')}
-      </p>
+      <p className="text-muted text-sm mb-md">{t('profile.editEmailDescription')}</p>
 
       {error && (
         <div className="mb-md">
@@ -67,70 +65,54 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
       {step === 'input' ? (
         <form onSubmit={requestVerificationCode} className="flex-col gap-lg">
           <FormField label={t('profile.newEmailLabel')} noMargin>
-            <div style={{ position: 'relative' }}>
-              <input
-                type="email"
-                className="input-field"
-                required
-                value={newEmail}
-                onChange={(event) => setNewEmail(event.target.value)}
-                placeholder="user@example.com"
-                style={{ paddingLeft: '38px' }}
-              />
-              <Mail
-                style={{
-                  position: 'absolute',
-                  left: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  width: '16px',
-                  height: '16px',
-                  color: 'var(--color-text-muted)',
-                }}
-              />
-            </div>
+            <Input
+              type="email"
+              prefixIcon={<Mail size={16} />}
+              required
+              value={newEmail}
+              onChange={(event) => setNewEmail(event.target.value)}
+              placeholder="user@example.com"
+            />
           </FormField>
 
           <FormField label={t('profile.currentPasswordLabel')} noMargin>
-            <div style={{ position: 'relative' }}>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                className="input-field"
-                required
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="••••••••••••"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((visible) => !visible)}
-                className="input-icon-button"
-                aria-label={showPassword ? t('passwordReset.hidePassword') : t('passwordReset.showPassword')}
-              >
-                {showPassword ? (
-                  <EyeOff style={{ width: '16px', height: '16px' }} />
-                ) : (
-                  <Eye style={{ width: '16px', height: '16px' }} />
-                )}
-              </button>
-            </div>
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="••••••••••••"
+              suffixIcon={
+                <IconButton
+                  label={showPassword ? t('passwordReset.hidePassword') : t('passwordReset.showPassword')}
+                  icon={showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                />
+              }
+            />
           </FormField>
 
           <ButtonGroup align="right">
-            <button className="btn btn-secondary" type="button" onClick={onClose} disabled={loading}>
+            <Button variant="secondary" type="button" onClick={onClose} disabled={loading}>
               {t('common.cancel')}
-            </button>
-            <button className="btn btn-primary" type="submit" disabled={loading || !newEmail.trim() || !password}>
-              {loading ? t('common.loading') : t('profile.sendCodeButton')}
-            </button>
+            </Button>
+            <Button
+              variant="primary"
+              type="submit"
+              loading={loading}
+              disabled={loading || !newEmail.trim() || !password}
+            >
+              {t('profile.sendCodeButton')}
+            </Button>
           </ButtonGroup>
         </form>
       ) : (
         <form onSubmit={handleConfirmEmailChange} className="flex-col gap-lg">
           <FormField label={t('profile.verificationCodeLabel')} noMargin>
-            <input
+            <Input
               type="text"
-              className="input-field"
               required
               value={code}
               onChange={(event) => setCode(event.target.value)}
@@ -139,12 +121,12 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
           </FormField>
 
           <ButtonGroup align="right">
-            <button className="btn btn-secondary" type="button" onClick={() => setStep('input')} disabled={loading}>
+            <Button variant="secondary" type="button" onClick={() => setStep('input')} disabled={loading}>
               {t('common.previous') || 'Back'}
-            </button>
-            <button className="btn btn-primary" type="submit" disabled={loading || !code.trim()}>
-              {loading ? t('common.loading') : t('profile.confirmEmailButton')}
-            </button>
+            </Button>
+            <Button variant="primary" type="submit" loading={loading} disabled={loading || !code.trim()}>
+              {t('profile.confirmEmailButton')}
+            </Button>
           </ButtonGroup>
         </form>
       )}

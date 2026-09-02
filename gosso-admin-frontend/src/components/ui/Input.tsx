@@ -5,20 +5,22 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   prefixIcon?: React.ReactNode;
   suffixIcon?: React.ReactNode;
   isError?: boolean;
+  invalid?: boolean;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { prefixIcon, suffixIcon, isError, className = '', ...props },
+  { prefixIcon, suffixIcon, isError, invalid, className = '', ...props },
   ref
 ) {
+  const hasError = invalid ?? isError;
   if (prefixIcon || suffixIcon) {
     return (
-      <div className={`input-affix-wrapper ${isError ? 'has-error' : ''}`}>
+      <div className={`input-affix-wrapper ${hasError ? 'has-error' : ''}`}>
         {prefixIcon && <span className="input-prefix-icon">{prefixIcon}</span>}
         <input
           ref={ref}
           className={`input-field ${prefixIcon ? 'has-prefix' : ''} ${suffixIcon ? 'has-suffix' : ''} ${className}`}
-          aria-invalid={isError ? true : undefined}
+          aria-invalid={hasError ? true : undefined}
           {...props}
         />
         {suffixIcon && <span className="input-suffix-icon">{suffixIcon}</span>}
@@ -29,8 +31,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   return (
     <input
       ref={ref}
-      className={`input-field ${isError ? 'input-error' : ''} ${className}`}
-      aria-invalid={isError ? true : undefined}
+      className={`input-field ${hasError ? 'input-error' : ''} ${className}`}
+      aria-invalid={hasError ? true : undefined}
       {...props}
     />
   );
@@ -38,18 +40,20 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
 
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   isError?: boolean;
+  invalid?: boolean;
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
-  { isError, className = '', rows = 4, ...props },
+  { isError, invalid, className = '', rows = 4, ...props },
   ref
 ) {
+  const hasError = invalid ?? isError;
   return (
     <textarea
       ref={ref}
       rows={rows}
-      className={`input-field textarea-field ${isError ? 'input-error' : ''} ${className}`}
-      aria-invalid={isError ? true : undefined}
+      className={`input-field textarea-field ${hasError ? 'input-error' : ''} ${className}`}
+      aria-invalid={hasError ? true : undefined}
       {...props}
     />
   );
@@ -57,18 +61,20 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
 
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   isError?: boolean;
+  invalid?: boolean;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  { isError, className = '', children, ...props },
+  { isError, invalid, className = '', children, ...props },
   ref
 ) {
+  const hasError = invalid ?? isError;
   return (
-    <div className={`select-control-wrapper ${isError ? 'has-error' : ''}`}>
+    <div className={`select-control-wrapper ${hasError ? 'has-error' : ''}`}>
       <select
         ref={ref}
         className={`input-field select-field ${className}`}
-        aria-invalid={isError ? true : undefined}
+        aria-invalid={hasError ? true : undefined}
         {...props}
       >
         {children}

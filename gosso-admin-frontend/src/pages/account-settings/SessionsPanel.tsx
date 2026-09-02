@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Laptop, MapPin } from 'lucide-react';
 import { useSessions } from '@gosso/client/react';
 import { logout } from '../../auth';
-import { DataTable, Feedback, PageLoader, Panel, PanelHeader, Tag, useConfirm } from '../../components/ui';
+import { Button, DataTable, Feedback, PageLoader, Panel, PanelHeader, Tag, useConfirm } from '../../components/ui';
 import { parseUserAgent } from '../../utils/format';
 
 export default function SessionsPanel() {
@@ -65,13 +65,7 @@ export default function SessionsPanel() {
                 >
                   <td>
                     <div className="flex-row items-center gap-sm">
-                      <Laptop
-                        style={{
-                          width: '16px',
-                          height: '16px',
-                          color: isCurrent ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                        }}
-                      />
+                      <Laptop size={16} color={isCurrent ? 'var(--action-primary)' : 'var(--text-secondary)'} />
                       <div className="flex-row items-center gap-sm">
                         <span style={{ fontSize: '14px', fontWeight: '600' }}>
                           {parseUserAgent(session.user_agent)}
@@ -80,32 +74,22 @@ export default function SessionsPanel() {
                       </div>
                     </div>
                   </td>
-                  <td style={{ fontSize: '13.5px', color: 'var(--color-text-main)' }}>
+                  <td className="text-sm text-dark">
                     <span className="flex-row items-center gap-xs">
-                      <MapPin style={{ width: '12px', height: '12px', color: 'var(--color-text-dark)' }} />
+                      <MapPin size={12} color="var(--text-tertiary)" />
                       {session.ip}
                     </span>
                   </td>
-                  <td className="text-muted" style={{ fontSize: '13.5px' }}>
-                    {new Date(session.last_active_at).toLocaleString()}
-                  </td>
+                  <td className="text-muted text-sm">{new Date(session.last_active_at).toLocaleString()}</td>
                   <td className="text-right">
                     {isCurrent ? (
-                      <button
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => void logout()}
-                        style={{ fontSize: '11px', padding: '4px 10px' }}
-                      >
+                      <Button variant="secondary" size="sm" onClick={() => void logout()}>
                         {t('sessions.signOutButton')}
-                      </button>
+                      </Button>
                     ) : (
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => handleRevokeSession(session.id)}
-                        style={{ fontSize: '11px', padding: '4px 10px' }}
-                      >
+                      <Button variant="danger" size="sm" onClick={() => handleRevokeSession(session.id)}>
                         {t('sessions.revokeButton')}
-                      </button>
+                      </Button>
                     )}
                   </td>
                 </tr>
