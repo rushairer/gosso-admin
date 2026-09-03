@@ -76,7 +76,7 @@ export default function PasskeysPanel() {
           title={t('passkeys.title')}
           description={t('passkeys.description')}
           action={
-            <Button variant="primary" size="sm" icon={<Plus size={14} />} onClick={() => setShowPasskeyModal(true)}>
+            <Button variant="primary" icon={<Plus size={16} />} onClick={() => setShowPasskeyModal(true)}>
               {t('passkeys.addPasskey')}
             </Button>
           }

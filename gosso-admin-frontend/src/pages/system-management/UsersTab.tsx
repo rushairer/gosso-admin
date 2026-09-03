@@ -228,7 +228,6 @@ export default function UsersTab() {
         action={
           <Button
             variant="primary"
-            className="content-action"
             icon={<PlusIcon size={16} />}
             disabled={loading}
             onClick={() => setShowCreateUserModal(true)}

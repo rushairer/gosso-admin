@@ -173,7 +173,7 @@ export default function MFAPanel() {
                   />
                 </FormField>
 
-                <ButtonGroup>
+                <ButtonGroup align="right">
                   <Button variant="primary" type="submit" disabled={loading} icon={<Check size={16} />}>
                     {t('mfa.verifyAndActivateButton')}
                   </Button>
@@ -188,7 +188,7 @@ export default function MFAPanel() {
           {/* MFA Active */}
           {mfaStatus.enabled && (
             <div className="flex flex-col gap-6">
-              <div className="flex items-center gap-3.5 pb-5 border-b border-[var(--border-default)]">
+              <div className="flex items-center gap-3.5">
                 <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
                   <Shield size={20} />
                 </div>

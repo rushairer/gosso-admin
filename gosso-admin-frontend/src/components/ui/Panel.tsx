@@ -19,7 +19,7 @@ export function PanelHeader({
         <h3>{title}</h3>
         {description && <p>{description}</p>}
       </div>
-      {action}
+      {action && <div className="panel-header__action">{action}</div>}
     </div>
   );
 }

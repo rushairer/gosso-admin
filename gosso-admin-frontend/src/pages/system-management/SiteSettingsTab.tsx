@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   AsyncState,
   Button,
+  ButtonGroup,
   FormField,
   Input,
   PanelBody,
@@ -24,13 +25,15 @@ export default function SiteSettingsTab() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [baseline, setBaseline] = useState<string | null>(null);
 
   const load = async () => {
     try {
       setLoading(true);
       setError(null);
-      const nextSettings = await siteSettingsService.getSiteSettings();
-      setSettings(mergeSiteSettings(nextSettings));
+      const nextSettings = mergeSiteSettings(await siteSettingsService.getSiteSettings());
+      setSettings(nextSettings);
+      setBaseline(JSON.stringify(nextSettings));
     } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : t('site.loadFailed'));
     } finally {
@@ -46,12 +49,15 @@ export default function SiteSettingsTab() {
     setSettings((current) => ({ ...current, [key]: value }));
   };
 
+  const dirty = baseline !== null && JSON.stringify(settings) !== baseline;
+
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
       setSaving(true);
-      const updated = await siteSettingsService.updateSiteSettings(settings);
-      setSettings(mergeSiteSettings(updated));
+      const updated = mergeSiteSettings(await siteSettingsService.updateSiteSettings(settings));
+      setSettings(updated);
+      setBaseline(JSON.stringify(updated));
       showSuccess(t('site.saved'));
     } catch (reason: unknown) {
       showError(reason instanceof Error ? reason.message : t('site.saveFailed'));
@@ -132,10 +138,20 @@ export default function SiteSettingsTab() {
             </div>
           </PlainSection>
 
-          <PanelBody>
-            <Button variant="primary" className="self-start" type="submit" loading={saving} icon={<Save size={16} />}>
-              {t('site.save')}
-            </Button>
+          <PanelBody className={`form-action-bar${dirty ? ' is-sticky' : ''}`}>
+            <p className="form-action-bar__status m-0" aria-live="polite">
+              {dirty && (
+                <>
+                  <span className="status-dot status-dot--warning" aria-hidden="true" />
+                  {t('site.unsavedChanges')}
+                </>
+              )}
+            </p>
+            <ButtonGroup align="right">
+              <Button variant="primary" type="submit" loading={saving} icon={<Save size={16} />}>
+                {t('site.save')}
+              </Button>
+            </ButtonGroup>
           </PanelBody>
         </form>
 

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useProfileManager, useUserProfile } from '@gosso/client/react';
 import {
   Button,
+  ButtonGroup,
   Feedback,
   FormField,
   IconButton,
@@ -255,11 +256,11 @@ export default function ProfilePanel() {
             />
           </FormField>
 
-          <div className="pt-2">
+          <ButtonGroup align="right" className="pt-2">
             <Button variant="primary" type="submit" loading={loading} icon={<Lock size={16} />}>
               {t('profile.changePasswordButton')}
             </Button>
-          </div>
+          </ButtonGroup>
         </form>
       </PlainSection>
 

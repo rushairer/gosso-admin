@@ -197,9 +197,17 @@ export default function ClientsTab() {
             {clients.map((client) => (
               <tr key={client.client_id}>
                 <td>
-                  <div className="client-name">{client.name}</div>
-                  <code className="client-id-code">{client.client_id}</code>
-                  {client.description && <div className="client-desc">{client.description}</div>}
+                  <div className="client-name-row">
+                    <span className="client-name">{client.name}</span>
+                    <code className="client-id-code" title={client.client_id}>
+                      {client.client_id}
+                    </code>
+                  </div>
+                  {client.description && (
+                    <div className="client-desc" title={client.description}>
+                      {client.description}
+                    </div>
+                  )}
                 </td>
                 <td>
                   {client.is_confidential ? (

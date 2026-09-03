@@ -122,6 +122,7 @@
   },
   "home": {
     "checkingAccess": "正在检查访问权限...",
+    "quickNavigation": "快速导航",
     "title": "身份管理控制台",
     "description": "欢迎使用自托管 OpenID Connect / OAuth 2.0 身份提供者管理界面。管理安全凭据、客户端、用户范围及活跃会话。",
     "userTitle": "个人账户与安全中心",
@@ -173,6 +174,7 @@
     "saved": "站点设置已保存。",
     "saveFailed": "无法保存站点设置。",
     "save": "保存设置",
+    "unsavedChanges": "有未保存的更改",
     "productName": "产品名称",
     "loginAppearance": "登录页外观",
     "logoUrl": "Logo 地址",

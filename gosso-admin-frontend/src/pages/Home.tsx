@@ -1,9 +1,61 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ShieldCheck, ArrowRight, UserCheck, Key, Settings, User, Shield, Laptop, Info, LogOut } from 'lucide-react';
+import {
+  ArrowRight,
+  Info,
+  Key,
+  Laptop,
+  LogOut,
+  Settings,
+  Shield,
+  ShieldCheck,
+  User,
+  UserCheck,
+} from 'lucide-react';
+import type { ComponentType } from 'react';
 import { useSession } from '@gosso/client/react';
 import { logout } from '../auth';
 import { Button, Card } from '../components/ui';
+
+const iconTileTones = {
+  primary: 'bg-blue-500/10 border border-blue-500/20 text-blue-400',
+  neutral: 'bg-slate-500/10 border border-slate-500/20 text-slate-300',
+} as const;
+
+interface QuickLink {
+  to: string;
+  icon: ComponentType<{ size?: number }>;
+  tone: keyof typeof iconTileTones;
+  title: string;
+  description: string;
+}
+
+function QuickCard({ link, onOpen }: { link: QuickLink; onOpen: () => void }) {
+  const { icon: Icon, tone, title, description } = link;
+
+  return (
+    <Card
+      className="home-nav-card flex items-center gap-4 p-5"
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(e) => e.key === 'Enter' && onOpen()}
+    >
+      <div className={`w-11 h-11 rounded-xl border flex items-center justify-center shrink-0 ${iconTileTones[tone]}`}>
+        <Icon size={20} />
+      </div>
+
+      <div className="flex flex-col gap-1 min-w-0 flex-1">
+        <h3 className="home-nav-card__title text-base font-semibold m-0">{title}</h3>
+        <p className="text-muted text-xs leading-relaxed m-0">{description}</p>
+      </div>
+
+      <span className="home-nav-card__arrow" aria-hidden="true">
+        <ArrowRight size={16} />
+      </span>
+    </Card>
+  );
+}
 
 export default function Home() {
   const { t } = useTranslation();
@@ -11,62 +63,104 @@ export default function Home() {
   const { isAdmin: userAdmin, profile: user } = useSession();
 
   const userName = user?.preferred_username || user?.name || (userAdmin ? 'Administrator' : 'User');
+  const userInitial = userName.charAt(0).toUpperCase();
+
+  const adminQuickLinks: QuickLink[] = [
+    {
+      to: '/system-management/clients',
+      icon: Key,
+      tone: 'primary',
+      title: t('home.clientRegistry'),
+      description: t('home.clientRegistryDescription'),
+    },
+    {
+      to: '/system-management/users',
+      icon: UserCheck,
+      tone: 'neutral',
+      title: t('home.userControl'),
+      description: t('home.userControlDescription'),
+    },
+    {
+      to: '/system-management/system',
+      icon: Settings,
+      tone: 'primary',
+      title: t('home.mfaAndPasskeys'),
+      description: t('home.mfaAndPasskeysDescription'),
+    },
+  ];
+
+  const userQuickLinks: QuickLink[] = [
+    {
+      to: '/account-settings/profile',
+      icon: User,
+      tone: 'primary',
+      title: t('home.userProfile'),
+      description: t('home.userProfileDescription'),
+    },
+    {
+      to: '/account-settings/mfa',
+      icon: Shield,
+      tone: 'neutral',
+      title: t('home.userSecurity'),
+      description: t('home.userSecurityDescription'),
+    },
+    {
+      to: '/account-settings/sessions',
+      icon: Laptop,
+      tone: 'primary',
+      title: t('home.userSessions'),
+      description: t('home.userSessionsDescription'),
+    },
+  ];
+
+  const quickLinks = userAdmin ? adminQuickLinks : userQuickLinks;
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
       <Card className="home-hero p-6 sm:p-8">
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col items-start gap-4">
-            <div className="home-badge-icon">
+        <div className="home-hero__glow" aria-hidden="true" />
+
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:gap-12">
+          <div className="flex items-start gap-5 flex-1 min-w-0">
+            <div className="home-hero__icon">
               {userAdmin ? (
-                <ShieldCheck size={28} color="var(--action-primary)" />
+                <ShieldCheck size={26} color="var(--action-primary)" />
               ) : (
-                <UserCheck size={28} color="var(--action-primary)" />
+                <UserCheck size={26} color="var(--action-primary)" />
               )}
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2.5 min-w-0">
               <h2 className="home-hero-title text-xl sm:text-2xl font-bold tracking-tight m-0">
                 {userAdmin ? t('home.title') : t('home.userTitle')}
               </h2>
-              <p className="home-hero-desc text-sm leading-relaxed text-[var(--color-text-muted)] max-w-2xl m-0">
+              <p className="home-hero-desc text-sm leading-relaxed text-[var(--color-text-muted)] m-0">
                 {userAdmin ? t('home.description') : t('home.userDescription')}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-5 border-t border-white/[0.08]">
-            {userAdmin ? (
-              <>
-                <p className="flex items-center gap-2 text-sm font-semibold home-user-status m-0">
-                  <span className="status-dot" />
-                  {t('home.loggedInAsAdmin', { name: userName })}
-                </p>
-                <Button
-                  variant="primary"
-                  icon={<ArrowRight size={16} />}
-                  iconPosition="right"
-                  onClick={() => navigate('/system-management')}
-                >
-                  {t('home.enterDashboard')}
-                </Button>
-              </>
-            ) : (
-              <>
-                <p className="flex items-center gap-2 text-sm font-semibold home-user-status m-0">
-                  <span className="status-dot" />
-                  {t('home.loggedInAsUser', { name: userName })}
-                </p>
-                <Button
-                  variant="primary"
-                  icon={<ArrowRight size={16} />}
-                  iconPosition="right"
-                  onClick={() => navigate('/account-settings/profile')}
-                >
-                  {t('home.goToAccountSettings')}
-                </Button>
-              </>
-            )}
+          <div className="flex flex-col gap-5 lg:w-72 lg:shrink-0 lg:border-l lg:border-white/[0.08] lg:pl-10">
+            <div className="flex items-center gap-3.5">
+              <span className="home-hero__avatar" aria-hidden="true">
+                {userInitial}
+              </span>
+              <p className="home-user-status flex items-center gap-2 text-sm font-semibold m-0 min-w-0">
+                <span className="status-dot" />
+                {userAdmin
+                  ? t('home.loggedInAsAdmin', { name: userName })
+                  : t('home.loggedInAsUser', { name: userName })}
+              </p>
+            </div>
+
+            <Button
+              variant="primary"
+              icon={<ArrowRight size={16} />}
+              iconPosition="right"
+              onClick={() => navigate(userAdmin ? '/system-management' : '/account-settings/profile')}
+            >
+              {userAdmin ? t('home.enterDashboard') : t('home.goToAccountSettings')}
+            </Button>
           </div>
         </div>
       </Card>
@@ -83,107 +177,15 @@ export default function Home() {
         </Card>
       )}
 
-      {userAdmin ? (
+      <div className="flex flex-col gap-5 lg:gap-6">
+        <div className="home-section-label">{t('home.quickNavigation')}</div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
-          <Card
-            className="home-nav-card flex flex-col gap-4 p-6"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/system-management/clients')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/system-management/clients')}
-          >
-            <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
-              <Key size={20} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <h3 className="home-nav-card__title text-base font-semibold m-0">{t('home.clientRegistry')}</h3>
-              <p className="text-muted text-xs leading-relaxed m-0">{t('home.clientRegistryDescription')}</p>
-            </div>
-          </Card>
-
-          <Card
-            className="home-nav-card flex flex-col gap-4 p-6"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/system-management/users')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/system-management/users')}
-          >
-            <div className="w-10 h-10 rounded-lg bg-slate-500/10 border border-slate-500/20 flex items-center justify-center text-slate-300 shrink-0">
-              <UserCheck size={20} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <h3 className="home-nav-card__title text-base font-semibold m-0">{t('home.userControl')}</h3>
-              <p className="text-muted text-xs leading-relaxed m-0">{t('home.userControlDescription')}</p>
-            </div>
-          </Card>
-
-          <Card
-            className="home-nav-card flex flex-col gap-4 p-6"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/system-management/system')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/system-management/system')}
-          >
-            <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
-              <Settings size={20} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <h3 className="home-nav-card__title text-base font-semibold m-0">{t('home.mfaAndPasskeys')}</h3>
-              <p className="text-muted text-xs leading-relaxed m-0">{t('home.mfaAndPasskeysDescription')}</p>
-            </div>
-          </Card>
+          {quickLinks.map((link) => (
+            <QuickCard key={link.to} link={link} onOpen={() => navigate(link.to)} />
+          ))}
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
-          <Card
-            className="home-nav-card flex flex-col gap-4 p-6"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/account-settings/profile')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/account-settings/profile')}
-          >
-            <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
-              <User size={20} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <h3 className="home-nav-card__title text-base font-semibold m-0">{t('home.userProfile')}</h3>
-              <p className="text-muted text-xs leading-relaxed m-0">{t('home.userProfileDescription')}</p>
-            </div>
-          </Card>
-
-          <Card
-            className="home-nav-card flex flex-col gap-4 p-6"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/account-settings/mfa')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/account-settings/mfa')}
-          >
-            <div className="w-10 h-10 rounded-lg bg-slate-500/10 border border-slate-500/20 flex items-center justify-center text-slate-300 shrink-0">
-              <Shield size={20} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <h3 className="home-nav-card__title text-base font-semibold m-0">{t('home.userSecurity')}</h3>
-              <p className="text-muted text-xs leading-relaxed m-0">{t('home.userSecurityDescription')}</p>
-            </div>
-          </Card>
-
-          <Card
-            className="home-nav-card flex flex-col gap-4 p-6"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/account-settings/sessions')}
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/account-settings/sessions')}
-          >
-            <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
-              <Laptop size={20} />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <h3 className="home-nav-card__title text-base font-semibold m-0">{t('home.userSessions')}</h3>
-              <p className="text-muted text-xs leading-relaxed m-0">{t('home.userSessionsDescription')}</p>
-            </div>
-          </Card>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

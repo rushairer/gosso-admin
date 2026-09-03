@@ -38,15 +38,15 @@ export default function AuditLogsTab() {
   return (
     <div>
       <PanelHeader title={t('audit.title')} description={t('audit.description')} />
-      <div className="panel-body panel-filter-bar p-5 sm:p-6 border-b border-[var(--border-default)]">
+      <div className="panel-body panel-filter-bar">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             search();
           }}
-          className="flex flex-col sm:flex-row sm:items-end flex-wrap gap-4"
+          className="table-filter-bar"
         >
-          <div className="w-full sm:w-64">
+          <div className="table-filter-field">
             <FormField label={t('audit.eventTypeLabel')} noMargin>
               <Input
                 type="text"
@@ -57,7 +57,7 @@ export default function AuditLogsTab() {
               />
             </FormField>
           </div>
-          <div className="w-full sm:w-72">
+          <div className="table-filter-field table-filter-field--wide">
             <FormField label={t('audit.accountIdLabel')} noMargin>
               <Input
                 type="text"
@@ -68,7 +68,7 @@ export default function AuditLogsTab() {
               />
             </FormField>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="table-filter-actions">
             <Button variant="primary" type="submit">
               {t('common.search')}
             </Button>
