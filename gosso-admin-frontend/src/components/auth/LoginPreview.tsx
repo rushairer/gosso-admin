@@ -80,7 +80,7 @@ export default function LoginPreview({ branding }: LoginPreviewProps) {
           style={{
             width: dimensions.width,
             height: dimensions.height,
-            transform: viewport === 'mobile' ? `translateX(-50%) scale(${scale})` : `scale(${scale})`,
+            transform: `translateX(-50%) scale(${scale})`,
           }}
         >
           <LoginSurface

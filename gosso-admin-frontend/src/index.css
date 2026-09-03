@@ -465,12 +465,8 @@ a {
 .login-preview__viewport {
   position: absolute;
   top: 0;
-  left: 0;
-  transform-origin: top left;
-}
-
-.login-preview__stage--mobile .login-preview__viewport {
   left: 50%;
+  transform-origin: top center;
 }
 
 .login-preview__viewport .login-surface {
