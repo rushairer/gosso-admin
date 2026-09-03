@@ -110,13 +110,13 @@ export default function ProfilePanel() {
 
           <DefinitionRow label={t('profile.displayNameLabel')}>
             {isEditingName ? (
-              <form onSubmit={handleSaveName} className="flex-row items-center gap-sm flex-1 min-w-0">
+              <form onSubmit={handleSaveName} className="flex items-center gap-2 max-w-md w-full">
                 <Input
                   type="text"
                   required
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="max-w-240"
+                  className="max-w-[240px]"
                 />
                 <IconButton
                   label="Save display name"
@@ -137,8 +137,8 @@ export default function ProfilePanel() {
                 />
               </form>
             ) : (
-              <div className="flex-row items-center justify-between flex-1 min-w-0">
-                <span>{profile?.name || '-'}</span>
+              <div className="flex items-center justify-between gap-4 max-w-xl w-full">
+                <span className="text-sm font-medium text-[var(--color-text-main)]">{profile?.name || '-'}</span>
                 <Button variant="secondary" size="sm" icon={<EditIcon size={12} />} onClick={handleStartEditName}>
                   {t('common.edit')}
                 </Button>
@@ -147,8 +147,12 @@ export default function ProfilePanel() {
           </DefinitionRow>
 
           <DefinitionRow label={t('profile.emailLabel')}>
-            <div className="flex-row items-center justify-between flex-1 min-w-0">
-              <span>{profile?.email || t('profile.notConfigured')}</span>
+            <div className="flex items-center justify-between gap-4 max-w-xl w-full">
+              <span
+                className={`text-sm ${profile?.email ? 'font-medium text-[var(--color-text-main)]' : 'text-muted'}`}
+              >
+                {profile?.email || t('profile.notConfigured')}
+              </span>
               <Button variant="secondary" size="sm" icon={<EditIcon size={12} />} onClick={handleStartEditEmail}>
                 {t('common.edit')}
               </Button>
@@ -156,7 +160,7 @@ export default function ProfilePanel() {
           </DefinitionRow>
 
           <DefinitionRow label={t('profile.securityRoleLabel')}>
-            <div className="flex-row flex-wrap gap-xs">
+            <div className="flex items-center gap-2">
               {profile?.roles?.map((role) => <Tag key={role}>{role}</Tag>) || (
                 <Tag tone="secondary">{t('profile.standardUser')}</Tag>
               )}
@@ -164,8 +168,8 @@ export default function ProfilePanel() {
           </DefinitionRow>
 
           <DefinitionRow label={t('profile.subjectIdLabel')}>
-            <div className="flex-row items-center justify-between flex-1 min-w-0">
-              <code className="text-mono text-sm inline-code">{profile?.sub || '-'}</code>
+            <div className="flex items-center justify-between gap-4 max-w-xl w-full">
+              <code className="text-mono text-xs inline-code">{profile?.sub || '-'}</code>
               {profile?.sub && (
                 <Button
                   variant="secondary"
@@ -183,8 +187,8 @@ export default function ProfilePanel() {
           </DefinitionRow>
 
           <DefinitionRow label={t('profile.ssoIssuerLabel')}>
-            <div className="flex-row items-center justify-between flex-1 min-w-0">
-              <code className="text-mono text-sm inline-code">{window.location.origin}</code>
+            <div className="flex items-center justify-between gap-4 max-w-xl w-full">
+              <code className="text-mono text-xs inline-code">{window.location.origin}</code>
               <Button
                 variant="secondary"
                 size="sm"
@@ -202,7 +206,7 @@ export default function ProfilePanel() {
       </PlainSection>
 
       <PlainSection title={t('profile.updatePasswordSection')}>
-        <form onSubmit={handleChangePassword} className="flex-col gap-lg max-w-500">
+        <form onSubmit={handleChangePassword} className="flex flex-col gap-4 max-w-lg mt-2">
           <FormField label={t('profile.currentPasswordLabel')} noMargin>
             <Input
               type={showCurrentPwd ? 'text' : 'password'}
@@ -251,15 +255,11 @@ export default function ProfilePanel() {
             />
           </FormField>
 
-          <Button
-            variant="primary"
-            className="self-start mt-sm"
-            type="submit"
-            loading={loading}
-            icon={<Lock size={16} />}
-          >
-            {t('profile.changePasswordButton')}
-          </Button>
+          <div className="pt-2">
+            <Button variant="primary" type="submit" loading={loading} icon={<Lock size={16} />}>
+              {t('profile.changePasswordButton')}
+            </Button>
+          </div>
         </form>
       </PlainSection>
 

@@ -1115,8 +1115,9 @@ a {
 
 .definition-row {
   display: flex;
+  align-items: center;
   gap: 18px;
-  padding: 11px 0;
+  padding: 12px 0;
   border-bottom: 1px solid var(--border-color);
 }
 
