@@ -52,7 +52,6 @@ export default function Home() {
   const { isAdmin: userAdmin, profile: user } = useSession();
 
   const userName = user?.preferred_username || user?.name || (userAdmin ? 'Administrator' : 'User');
-  const userInitial = userName.charAt(0).toUpperCase();
 
   const adminQuickLinks: QuickLink[] = [
     {
@@ -109,41 +108,40 @@ export default function Home() {
       <Card className="home-hero p-6 sm:p-8">
         <div className="home-hero__glow" aria-hidden="true" />
 
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:gap-12">
-          <div className="flex items-start gap-5 flex-1 min-w-0">
-            <div className="home-hero__icon">
+        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-start gap-4 sm:gap-5 flex-1 min-w-0">
+            <div className="home-hero__icon shrink-0">
               {userAdmin ? (
-                <ShieldCheck size={26} color="var(--action-primary)" />
+                <ShieldCheck size={28} color="var(--action-primary)" />
               ) : (
-                <UserCheck size={26} color="var(--action-primary)" />
+                <UserCheck size={28} color="var(--action-primary)" />
               )}
             </div>
 
             <div className="flex flex-col gap-2.5 min-w-0">
-              <h2 className="home-hero-title text-xl sm:text-2xl font-bold tracking-tight m-0">
-                {userAdmin ? t('home.title') : t('home.userTitle')}
-              </h2>
-              <p className="home-hero-desc text-sm leading-relaxed text-[var(--color-text-muted)] m-0">
+              <div className="flex flex-wrap items-center gap-3">
+                <h2 className="home-hero-title text-xl sm:text-2xl font-bold tracking-tight m-0">
+                  {userAdmin ? t('home.title') : t('home.userTitle')}
+                </h2>
+                <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                  <span className="status-dot" />
+                  <span>
+                    {userAdmin
+                      ? t('home.loggedInAsAdmin', { name: userName })
+                      : t('home.loggedInAsUser', { name: userName })}
+                  </span>
+                </span>
+              </div>
+              <p className="home-hero-desc text-sm leading-relaxed text-[var(--color-text-muted)] m-0 max-w-2xl">
                 {userAdmin ? t('home.description') : t('home.userDescription')}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col gap-5 lg:w-72 lg:shrink-0 lg:border-l lg:border-white/[0.08] lg:pl-10">
-            <div className="flex items-center gap-3.5">
-              <span className="home-hero__avatar" aria-hidden="true">
-                {userInitial}
-              </span>
-              <p className="home-user-status flex items-center gap-2 text-sm font-semibold m-0 min-w-0">
-                <span className="status-dot" />
-                {userAdmin
-                  ? t('home.loggedInAsAdmin', { name: userName })
-                  : t('home.loggedInAsUser', { name: userName })}
-              </p>
-            </div>
-
+          <div className="flex items-center shrink-0 self-start md:self-center">
             <Button
               variant="primary"
+              size="base"
               icon={<ArrowRight size={16} />}
               iconPosition="right"
               onClick={() => navigate(userAdmin ? '/system-management' : '/account-settings/profile')}
