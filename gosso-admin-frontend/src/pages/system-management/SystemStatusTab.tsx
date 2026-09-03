@@ -86,8 +86,10 @@ export default function SystemStatusTab() {
               className="inline-icon"
               style={{
                 background:
-                  systemHealth?.checks?.database === 'ok' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
-                color: systemHealth?.checks?.database === 'ok' ? 'var(--success-color)' : 'var(--danger-color)',
+                  systemHealth?.checks?.database === 'ok'
+                    ? 'var(--status-success-subtle)'
+                    : 'var(--status-danger-subtle)',
+                color: systemHealth?.checks?.database === 'ok' ? 'var(--status-success)' : 'var(--status-danger)',
               }}
             >
               <ShieldIcon style={{ width: '22px', height: '22px' }} />
@@ -102,8 +104,8 @@ export default function SystemStatusTab() {
                   fontWeight: 'bold',
                   marginTop: '2px',
                   color: dependencyIsHealthy(systemHealth?.checks?.database)
-                    ? 'var(--success-color)'
-                    : 'var(--danger-color)',
+                    ? 'var(--status-success)'
+                    : 'var(--status-danger)',
                 }}
               >
                 {dependencyLabel(systemHealth?.checks?.database)}
@@ -117,8 +119,8 @@ export default function SystemStatusTab() {
               className="inline-icon"
               style={{
                 background:
-                  systemHealth?.checks?.redis === 'ok' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
-                color: systemHealth?.checks?.redis === 'ok' ? 'var(--success-color)' : 'var(--danger-color)',
+                  systemHealth?.checks?.redis === 'ok' ? 'var(--status-success-subtle)' : 'var(--status-danger-subtle)',
+                color: systemHealth?.checks?.redis === 'ok' ? 'var(--status-success)' : 'var(--status-danger)',
               }}
             >
               <RefreshCw style={{ width: '22px', height: '22px' }} />
@@ -133,8 +135,8 @@ export default function SystemStatusTab() {
                   fontWeight: 'bold',
                   marginTop: '2px',
                   color: dependencyIsHealthy(systemHealth?.checks?.redis)
-                    ? 'var(--success-color)'
-                    : 'var(--danger-color)',
+                    ? 'var(--status-success)'
+                    : 'var(--status-danger)',
                 }}
               >
                 {dependencyLabel(systemHealth?.checks?.redis)}

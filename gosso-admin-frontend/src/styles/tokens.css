@@ -50,6 +50,13 @@
   --status-info-subtle: rgba(56, 189, 248, 0.12);
   --status-info-border: rgba(56, 189, 248, 0.28);
 
+  /* Status Text Accents */
+  --status-primary-text: #bfdbfe;
+  --status-success-text: #86efac;
+  --status-warning-text: #fde68a;
+  --status-info-text: #bae6fd;
+  --status-danger-text: #fca5a5;
+
   /* Spacing Scale (4px/8px Grid) */
   --space-0-5: 2px;
   --space-1: 4px;

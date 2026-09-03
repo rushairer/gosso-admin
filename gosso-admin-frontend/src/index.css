@@ -185,11 +185,11 @@ a {
 .session-card {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px;
+  gap: var(--space-2, 8px);
+  padding: var(--space-3, 12px);
   border: 1px solid var(--border-default);
-  border-radius: 8px;
-  background: #151b24;
+  border-radius: var(--radius-md, 8px);
+  background: var(--surface-card);
 }
 
 .avatar {
@@ -690,7 +690,7 @@ a {
 }
 
 .btn:active:not(:disabled) {
-  transform: translateY(1px) scale(0.99);
+  transform: translateY(1px) scale(var(--active-scale, 0.985));
 }
 
 .btn:focus-visible {
@@ -822,7 +822,13 @@ a {
 }
 
 .icon-btn:active:not(:disabled) {
-  transform: translateY(1px) scale(0.96);
+  transform: translateY(1px) scale(var(--active-scale, 0.985));
+}
+
+.icon-btn:focus-visible {
+  outline: 2px solid var(--action-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--border-focus-ring);
 }
 
 .icon-btn.btn-sm {
@@ -878,13 +884,13 @@ a {
 }
 
 .tab-btn:hover {
-  background: #1b2330;
+  background: var(--surface-hover);
   color: var(--text-primary);
 }
 
 .tab-btn.active {
   background: var(--surface-elevated);
-  color: #bfdbfe;
+  color: var(--status-primary-text, #bfdbfe);
 }
 
 .table-wrapper {
@@ -1133,6 +1139,20 @@ a {
   word-break: break-all;
 }
 
+.code-block-viewer {
+  margin: var(--space-1, 4px) 0 0 0;
+  padding: var(--space-3, 12px);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm, 6px);
+  font-size: var(--font-size-xs, 12px);
+  color: var(--status-info-text, #bae6fd);
+  overflow-x: auto;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
 .empty-state {
   padding: 48px 24px;
   text-align: center;
@@ -1237,7 +1257,7 @@ a {
 .admin-table th {
   padding: 12px 16px;
   border-bottom: 1px solid var(--border-color);
-  background: #151b24;
+  background: var(--surface-card);
   color: var(--color-text-muted);
   font-size: 11px;
   font-weight: 800;
@@ -1247,7 +1267,7 @@ a {
 
 .admin-table td {
   padding: 14px 16px;
-  border-bottom: 1px solid #242c38;
+  border-bottom: 1px solid var(--border-subtle);
   color: var(--color-text-main);
   vertical-align: middle;
 }
@@ -1257,7 +1277,7 @@ a {
 }
 
 .admin-table tr:hover td {
-  background: #1a212b;
+  background: var(--surface-hover);
 }
 
 .table {
@@ -1328,7 +1348,7 @@ a {
   border: 1px solid var(--action-primary-subtle);
   border-radius: var(--radius-full, 9999px);
   background: var(--action-primary-subtle);
-  color: #bfdbfe;
+  color: var(--status-primary-text, #bfdbfe);
   font-size: 12px;
   font-weight: 600;
   line-height: 1.2;
@@ -1338,7 +1358,7 @@ a {
 .badge-brand {
   border-color: rgba(59, 130, 246, 0.32);
   background: var(--action-primary-subtle);
-  color: #bfdbfe;
+  color: var(--status-primary-text, #bfdbfe);
 }
 
 .badge-secondary,
@@ -1351,19 +1371,19 @@ a {
 .badge-success {
   border-color: var(--status-success-border);
   background: var(--status-success-subtle);
-  color: #86efac;
+  color: var(--status-success-text, #86efac);
 }
 
 .badge-warning {
   border-color: var(--status-warning-border);
   background: var(--status-warning-subtle);
-  color: #fde047;
+  color: var(--status-warning-text, #fde047);
 }
 
 .badge-danger {
   border-color: var(--status-danger-border);
   background: var(--status-danger-subtle);
-  color: #fca5a5;
+  color: var(--status-danger-text, #fca5a5);
 }
 
 .confirm-dialog-title {
@@ -1498,7 +1518,7 @@ a {
   gap: 10px;
   padding: 16px 20px;
   border-top: 1px solid var(--border-color);
-  background: #151b24;
+  background: var(--surface-panel);
 }
 
 .feedback {
@@ -1793,7 +1813,12 @@ a {
 
 /* Skeleton & Shimmer */
 .skeleton {
-  background: linear-gradient(90deg, #18202b 0%, #263345 50%, #18202b 100%);
+  background: linear-gradient(
+    90deg,
+    var(--surface-panel-soft) 0%,
+    var(--surface-elevated) 50%,
+    var(--surface-panel-soft) 100%
+  );
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.6s infinite linear;
   border-radius: var(--radius-xs, 4px);

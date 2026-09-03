@@ -100,7 +100,13 @@ export default function PasskeysPanel() {
           </div>
         )}
 
-        {passkeys.length === 0 ? (
+        {loading ? (
+          <PanelBody>
+            <div className="py-xl">
+              <PageLoader message={t('common.loading')} />
+            </div>
+          </PanelBody>
+        ) : passkeys.length === 0 ? (
           <EmptyState
             icon={<Key />}
             title={t('passkeys.noPasskeysTitle')}

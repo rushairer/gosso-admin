@@ -43,8 +43,8 @@ export function UserConsentsModal({
       <p className="mb-md text-dark text-sm">{t('users.consentsDescription')}</p>
 
       {loading ? (
-        <div className="text-center" style={{ padding: '30px 0' }}>
-          <LoadingSpinner size="sm" style={{ margin: '0 auto 12px auto' }} />
+        <div className="text-center py-xl">
+          <LoadingSpinner size="sm" className="mx-auto mb-sm" />
           <p className="text-muted text-sm">{t('users.loadingConsents')}</p>
         </div>
       ) : consents.length === 0 ? (
@@ -60,7 +60,7 @@ export function UserConsentsModal({
                 </Button>
               }
             >
-              <div className="flex-1" style={{ marginRight: '16px' }}>
+              <div className="flex-1 mr-md">
                 <div className="flex-row items-center gap-sm">
                   <span className="list-icon">
                     <ConsentIcon size={16} />
