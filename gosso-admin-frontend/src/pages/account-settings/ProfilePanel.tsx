@@ -1,12 +1,10 @@
 import { useState } from 'react';
-import { Lock, Eye, EyeOff, Edit2 as EditIcon, X as XIcon, Check, Copy } from 'lucide-react';
+import { Edit2 as EditIcon, X as XIcon, Check, Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProfileManager, useUserProfile } from '@gosso/client/react';
 import {
   Button,
-  ButtonGroup,
   Feedback,
-  FormField,
   IconButton,
   Input,
   Panel,
@@ -21,14 +19,8 @@ import { EmailChangeModal } from './EmailChangeModal';
 export default function ProfilePanel() {
   const { t } = useTranslation();
   const profile = useUserProfile();
-  const { loading, error: profileError, updateDisplayName, changePassword } = useProfileManager();
+  const { loading, error: profileError, updateDisplayName } = useProfileManager();
 
-  // Password update states
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showCurrentPwd, setShowCurrentPwd] = useState(false);
-  const [showNewPwd, setShowNewPwd] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -69,26 +61,6 @@ export default function ProfilePanel() {
 
   const handleCloseEmailModal = () => {
     setShowEmailModal(false);
-  };
-
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setValidationError(null);
-    setSuccess(null);
-
-    if (newPassword !== confirmPassword) {
-      setValidationError(t('profile.passwordsDoNotMatch'));
-      return;
-    }
-
-    try {
-      await changePassword(currentPassword, newPassword);
-
-      setSuccess(t('profile.passwordUpdatedSuccess'));
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch {}
   };
 
   return (
@@ -206,65 +178,8 @@ export default function ProfilePanel() {
         </DefinitionList>
       </PlainSection>
 
-      <PlainSection title={t('profile.updatePasswordSection')}>
-        <form onSubmit={handleChangePassword} className="flex flex-col gap-4 max-w-lg mt-2">
-          <FormField label={t('profile.currentPasswordLabel')} noMargin>
-            <Input
-              type={showCurrentPwd ? 'text' : 'password'}
-              required
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="••••••••••••"
-              suffixIcon={
-                <IconButton
-                  label="Toggle current password visibility"
-                  icon={showCurrentPwd ? <EyeOff size={16} /> : <Eye size={16} />}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowCurrentPwd(!showCurrentPwd)}
-                />
-              }
-            />
-          </FormField>
-
-          <FormField label={t('profile.newPasswordLabel')} noMargin>
-            <Input
-              type={showNewPwd ? 'text' : 'password'}
-              required
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder={t('profile.newPasswordPlaceholder')}
-              suffixIcon={
-                <IconButton
-                  label="Toggle new password visibility"
-                  icon={showNewPwd ? <EyeOff size={16} /> : <Eye size={16} />}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowNewPwd(!showNewPwd)}
-                />
-              }
-            />
-          </FormField>
-
-          <FormField label={t('profile.confirmPasswordLabel')} noMargin>
-            <Input
-              type="password"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder={t('profile.confirmPasswordPlaceholder')}
-            />
-          </FormField>
-
-          <ButtonGroup align="right" className="pt-2">
-            <Button variant="primary" type="submit" loading={loading} icon={<Lock size={16} />}>
-              {t('profile.changePasswordButton')}
-            </Button>
-          </ButtonGroup>
-        </form>
-      </PlainSection>
-
       {/* Edit Email Modal */}
+
       {showEmailModal ? (
         <EmailChangeModal
           isOpen

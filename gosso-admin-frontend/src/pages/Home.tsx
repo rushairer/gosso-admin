@@ -105,11 +105,11 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
-      <Card className="home-hero p-6 sm:p-8">
+      <Card className="home-hero p-7 sm:p-9">
         <div className="home-hero__glow" aria-hidden="true" />
 
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-start gap-4 sm:gap-5 flex-1 min-w-0">
+        <div className="relative flex flex-col items-start gap-6">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-5">
             <div className="home-hero__icon shrink-0">
               {userAdmin ? (
                 <ShieldCheck size={28} color="var(--action-primary)" />
@@ -118,32 +118,32 @@ export default function Home() {
               )}
             </div>
 
-            <div className="flex flex-col gap-2.5 min-w-0">
-              <div className="flex flex-wrap items-center gap-3">
-                <h2 className="home-hero-title text-xl sm:text-2xl font-bold tracking-tight m-0">
-                  {userAdmin ? t('home.title') : t('home.userTitle')}
-                </h2>
-                <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
-                  <span className="status-dot" />
-                  <span>
-                    {userAdmin
-                      ? t('home.loggedInAsAdmin', { name: userName })
-                      : t('home.loggedInAsUser', { name: userName })}
-                  </span>
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+              <h2 className="home-hero-title text-2xl sm:text-3xl font-bold tracking-tight m-0">
+                {userAdmin ? t('home.title') : t('home.userTitle')}
+              </h2>
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                <span className="status-dot" />
+                <span>
+                  {userAdmin
+                    ? t('home.loggedInAsAdmin', { name: userName })
+                    : t('home.loggedInAsUser', { name: userName })}
                 </span>
-              </div>
-              <p className="home-hero-desc text-sm leading-relaxed text-[var(--color-text-muted)] m-0 max-w-2xl">
-                {userAdmin ? t('home.description') : t('home.userDescription')}
-              </p>
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center shrink-0 self-start md:self-center">
+          <p className="home-hero-desc text-sm sm:text-base leading-relaxed text-[var(--color-text-muted)] m-0 max-w-3xl">
+            {userAdmin ? t('home.description') : t('home.userDescription')}
+          </p>
+
+          <div className="pt-2">
             <Button
               variant="primary"
               size="base"
               icon={<ArrowRight size={16} />}
               iconPosition="right"
+              className="px-5 py-2.5 shadow-md shadow-blue-500/15"
               onClick={() => navigate(userAdmin ? '/system-management' : '/account-settings/profile')}
             >
               {userAdmin ? t('home.enterDashboard') : t('home.goToAccountSettings')}

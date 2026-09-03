@@ -69,6 +69,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     const accountSettingsTab = location.pathname.match(/^\/account-settings\/([^/]+)/)?.[1];
     const accountSettingsLabels: Record<string, string> = {
       profile: t('accountSettings.tabProfile'),
+      password: t('accountSettings.tabPassword'),
       mfa: t('accountSettings.tabMFA'),
       passkeys: t('accountSettings.tabPasskeys'),
       sessions: t('accountSettings.tabSessions'),

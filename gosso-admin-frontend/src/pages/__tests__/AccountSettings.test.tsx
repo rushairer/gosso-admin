@@ -22,6 +22,7 @@ vi.mock('../../auth', () => ({
 }));
 
 vi.mock('../account-settings/ProfilePanel', () => ({ default: () => <div>Profile content</div> }));
+vi.mock('../account-settings/PasswordPanel', () => ({ default: () => <div>Password content</div> }));
 vi.mock('../account-settings/MFAPanel', () => ({ default: () => <div>MFA content</div> }));
 vi.mock('../account-settings/PasskeysPanel', () => ({ default: () => <div>Passkeys content</div> }));
 vi.mock('../account-settings/SessionsPanel', () => ({ default: () => <div>Sessions content</div> }));

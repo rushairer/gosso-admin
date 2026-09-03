@@ -160,7 +160,8 @@
   "accountSettings": {
     "checkingAccess": "Checking access...",
     "sectionsLabel": "Account settings sections",
-    "tabProfile": "Profile & Password",
+    "tabProfile": "Profile",
+    "tabPassword": "Password",
     "tabMFA": "Multi-Factor (MFA)",
     "tabPasskeys": "Passkeys (FIDO2)",
     "tabSessions": "Active Sessions"
@@ -412,8 +413,8 @@
     "readinessFailed": "Unable to reach the readiness endpoint."
   },
   "profile": {
-    "title": "Profile & Password",
-    "description": "Review account attributes and update the password used for username and password sign-in.",
+    "title": "Profile",
+    "description": "Review and manage your account attributes, display name, and email address.",
     "accountProfileSection": "Account Profile",
     "usernameLabel": "Username",
     "displayNameLabel": "Display Name",
@@ -450,6 +451,20 @@
     "ssoIssuerLabel": "Identity Provider (SSO Issuer)",
     "copiedIssuer": "Copied SSO Issuer",
     "copyIssuer": "Copy Issuer"
+  },
+  "password": {
+    "title": "Password",
+    "description": "Update your security password for sign in. We recommend using a strong combination.",
+    "currentPasswordLabel": "Current Password",
+    "newPasswordLabel": "New Password",
+    "newPasswordPlaceholder": "At least 12 characters",
+    "confirmPasswordLabel": "Confirm New Password",
+    "confirmPasswordPlaceholder": "Repeat new password",
+    "changePasswordButton": "Update Password",
+    "changePasswordLoading": "Updating...",
+    "passwordsDoNotMatch": "New passwords do not match",
+    "passwordUpdatedSuccess": "Password updated successfully. Please use your new password next time you sign in.",
+    "passwordUpdateFailed": "Unable to update the password."
   },
   "mfa": {
     "title": "Multi-Factor Authentication (MFA)",

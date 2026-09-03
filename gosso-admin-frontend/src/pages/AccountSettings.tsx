@@ -1,13 +1,14 @@
-import { Shield, Key, Laptop, User } from 'lucide-react';
+import { Shield, Key, Laptop, Lock, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { Tabs } from '../components/ui';
 import ProfilePanel from './account-settings/ProfilePanel';
+import PasswordPanel from './account-settings/PasswordPanel';
 import MFAPanel from './account-settings/MFAPanel';
 import PasskeysPanel from './account-settings/PasskeysPanel';
 import SessionsPanel from './account-settings/SessionsPanel';
 
-const accountSettingsTabs = ['profile', 'mfa', 'passkeys', 'sessions'] as const;
+const accountSettingsTabs = ['profile', 'password', 'mfa', 'passkeys', 'sessions'] as const;
 type AccountSettingsTab = (typeof accountSettingsTabs)[number];
 
 function isAccountSettingsTab(value: string | undefined): value is AccountSettingsTab {
@@ -25,6 +26,11 @@ export default function AccountSettings() {
 
   const tabs = [
     { value: 'profile' as const, label: t('accountSettings.tabProfile'), icon: <User aria-hidden="true" size={16} /> },
+    {
+      value: 'password' as const,
+      label: t('accountSettings.tabPassword'),
+      icon: <Lock aria-hidden="true" size={16} />,
+    },
     { value: 'mfa' as const, label: t('accountSettings.tabMFA'), icon: <Shield aria-hidden="true" size={16} /> },
     { value: 'passkeys' as const, label: t('accountSettings.tabPasskeys'), icon: <Key aria-hidden="true" size={16} /> },
     {
@@ -44,6 +50,7 @@ export default function AccountSettings() {
       />
 
       {activeTab === 'profile' && <ProfilePanel />}
+      {activeTab === 'password' && <PasswordPanel />}
       {activeTab === 'mfa' && <MFAPanel />}
       {activeTab === 'passkeys' && <PasskeysPanel />}
       {activeTab === 'sessions' && <SessionsPanel />}

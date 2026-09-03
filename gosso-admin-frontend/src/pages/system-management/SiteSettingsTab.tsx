@@ -138,6 +138,10 @@ export default function SiteSettingsTab() {
             </div>
           </PlainSection>
 
+          <PlainSection title={t('site.preview')}>
+            <LoginPreview branding={settings} />
+          </PlainSection>
+
           <PanelBody className={`form-action-bar${dirty ? ' is-sticky' : ''}`}>
             <p className="form-action-bar__status m-0" aria-live="polite">
               {dirty && (
@@ -154,10 +158,6 @@ export default function SiteSettingsTab() {
             </ButtonGroup>
           </PanelBody>
         </form>
-
-        <PlainSection title={t('site.preview')}>
-          <LoginPreview branding={settings} />
-        </PlainSection>
       </>
     </AsyncState>
   );
