@@ -31,7 +31,7 @@ export function AsyncState({
       <div className="panel-body">
         <Feedback type="error">{error}</Feedback>
         {onRetry && (
-          <div style={{ marginTop: '16px' }}>
+          <div className="mt-md">
             <Button variant="secondary" size="sm" onClick={onRetry}>
               {retryLabel}
             </Button>

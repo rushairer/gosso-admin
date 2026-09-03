@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Info as InfoIcon } from 'lucide-react';
-import { Button, CheckboxField, CheckboxGroup, FormField, Modal } from '../../../components/ui';
+import { Button, CheckboxField, CheckboxGroup, FormField, Input, Modal } from '../../../components/ui';
 import type { OAuth2Client } from '../../../types/api';
 import type { ClientFormData } from '../../../features/clients/clientForm';
 
@@ -38,27 +38,24 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
     >
       <form onSubmit={onSubmit}>
         <FormField label={t('clients.clientNameLabel')}>
-          <input
+          <Input
             type="text"
-            className="input-field"
             placeholder={t('clients.clientNamePlaceholder')}
             value={clientForm.name}
             onChange={(e) => setClientForm((p) => ({ ...p, name: e.target.value }))}
           />
         </FormField>
         <FormField label={t('clients.descriptionLabel')}>
-          <input
+          <Input
             type="text"
-            className="input-field"
             placeholder={t('clients.descriptionPlaceholder')}
             value={clientForm.description}
             onChange={(e) => setClientForm((p) => ({ ...p, description: e.target.value }))}
           />
         </FormField>
         <FormField label={t('clients.redirectUrisLabel')} hint={t('clients.redirectUrisHint')}>
-          <input
+          <Input
             type="text"
-            className="input-field"
             placeholder={t('clients.redirectUrisPlaceholder')}
             value={clientForm.redirect_uris}
             onChange={(e) => setClientForm((p) => ({ ...p, redirect_uris: e.target.value }))}
@@ -66,9 +63,8 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
         </FormField>
 
         <FormField label={t('clients.postLogoutRedirectUrisLabel')}>
-          <input
+          <Input
             type="text"
-            className="input-field"
             placeholder={t('clients.postLogoutRedirectUrisPlaceholder')}
             value={clientForm.post_logout_redirect_uris}
             onChange={(e) => setClientForm((p) => ({ ...p, post_logout_redirect_uris: e.target.value }))}
@@ -81,9 +77,8 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
             defaultValue: 'Comma-separated target resource URIs, e.g. https://blog.example.com/api',
           })}
         >
-          <input
+          <Input
             type="text"
-            className="input-field"
             placeholder={t('clients.allowedResourcesPlaceholder', { defaultValue: 'https://blog.example.com/api' })}
             value={clientForm.allowed_resources}
             onChange={(e) => setClientForm((p) => ({ ...p, allowed_resources: e.target.value }))}

@@ -59,7 +59,7 @@ export default function SystemManagement() {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="flex-col gap-xl">
       <Tabs
         value={activeTab}
         items={tabs}

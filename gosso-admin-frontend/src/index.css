@@ -695,30 +695,31 @@ a {
 
 .btn-secondary {
   border-color: var(--border-default);
-  background: #1b2330;
+  background: var(--action-secondary-bg, #1b2330);
+  color: var(--action-secondary-text, var(--text-primary));
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #242e3c;
+  background: var(--action-secondary-hover, #242e3c);
   border-color: var(--border-hover, #3d4a5d);
 }
 
 .btn-secondary:active:not(:disabled) {
-  background: #151c27;
+  background: var(--action-secondary-active, #151c27);
 }
 
 .btn-danger {
   border-color: var(--status-danger-border, rgba(239, 68, 68, 0.38));
   background: var(--status-danger-subtle, rgba(239, 68, 68, 0.12));
-  color: #fecaca;
+  color: var(--text-danger-soft, #fecaca);
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.22);
+  background: var(--status-danger-hover-bg, rgba(239, 68, 68, 0.22));
 }
 
 .btn-danger:active:not(:disabled) {
-  background: rgba(239, 68, 68, 0.32);
+  background: var(--status-danger-active-bg, rgba(239, 68, 68, 0.32));
 }
 
 .btn-ghost {
@@ -2082,4 +2083,175 @@ a {
   background-color: var(--status-success);
   display: inline-block;
   flex-shrink: 0;
+}
+
+/* Common Layout and Utility Classes */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.panel-feedback-wrapper {
+  padding: 16px 20px 0 20px;
+}
+
+.not-found-page {
+  min-height: 60vh;
+}
+
+/* Loading Spinner & Page Loader */
+.loading-spinner {
+  border-radius: 50%;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.06);
+  border-top-color: var(--action-primary);
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.loading-spinner--sm {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.loading-spinner--md {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+}
+
+.loading-spinner--lg {
+  width: 48px;
+  height: 48px;
+  border-width: 4px;
+}
+
+.page-loader {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 60px 0;
+}
+
+.page-loader__message {
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  margin-top: 16px;
+}
+
+/* Home & Account Settings Custom Sections */
+.home-hero-title {
+  font-size: var(--font-size-2xl);
+  color: var(--text-primary);
+}
+
+.home-hero-desc {
+  max-width: 680px;
+  line-height: var(--line-height-relaxed);
+}
+
+.home-user-status {
+  color: var(--status-success);
+}
+
+.home-nav-card {
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    box-shadow var(--duration-fast) ease;
+}
+
+.home-nav-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.home-nav-card:active {
+  transform: translateY(0) scale(var(--active-scale));
+}
+
+.home-nav-card:focus-visible {
+  outline: 2px solid var(--action-primary);
+  outline-offset: 2px;
+}
+
+.home-nav-card__icon {
+  color: var(--action-primary);
+}
+
+.home-nav-card__icon--secondary {
+  color: var(--text-secondary);
+}
+
+.home-nav-card__title {
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+}
+
+/* MFA & Security Panel Components */
+.mfa-qr-card {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: var(--radius-md, 8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.mfa-secret-box {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mfa-secret-code {
+  font-size: 13px;
+  color: var(--color-secondary);
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+.mfa-activation-form {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 16px;
+  max-width: 320px;
+}
+
+.mfa-code-input input,
+.mfa-code-input.input-field {
+  text-align: center;
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.inline-status-row--success {
+  color: var(--status-success);
+  padding-top: 0;
+}
+
+.mfa-backup-codes-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+}
+
+.mfa-backup-code {
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  font-weight: 700;
 }

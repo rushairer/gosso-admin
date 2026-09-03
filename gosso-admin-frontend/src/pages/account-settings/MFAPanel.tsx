@@ -130,17 +130,7 @@ export default function MFAPanel() {
               <h4 className="setup-title">{t('mfa.setupTitle')}</h4>
 
               <div className="flex-row flex-wrap gap-2xl items-center">
-                <div
-                  style={{
-                    background: '#ffffff',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-                  }}
-                >
+                <div className="mfa-qr-card">
                   <QRCodeSVG
                     value={mfaEnrollment.otpauth_url}
                     size={180}
@@ -151,28 +141,11 @@ export default function MFAPanel() {
                   />
                 </div>
 
-                <div className="flex-1 flex-col gap-md" style={{ minWidth: '260px' }}>
+                <div className="flex-1 flex-col gap-md">
                   <p className="text-muted text-sm">{t('mfa.scanQrStep1')}</p>
                   <p className="text-muted text-sm">{t('mfa.manualEntryStep2')}</p>
-                  <div
-                    className="flex-row items-center gap-sm"
-                    style={{
-                      background: 'rgba(0,0,0,0.2)',
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      border: '1px solid rgba(255,255,255,0.06)',
-                    }}
-                  >
-                    <code
-                      style={{
-                        fontSize: '13px',
-                        color: 'var(--color-secondary)',
-                        letterSpacing: '0.05em',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      {mfaEnrollment.secret}
-                    </code>
+                  <div className="flex-row items-center gap-sm mfa-secret-box">
+                    <code className="mfa-secret-code">{mfaEnrollment.secret}</code>
                     <IconButton
                       label={t('mfa.copySecret')}
                       icon={<Copy size={14} />}
@@ -187,15 +160,7 @@ export default function MFAPanel() {
                 </div>
               </div>
 
-              <form
-                onSubmit={handleActivateMFA}
-                className="flex-col gap-md"
-                style={{
-                  borderTop: '1px solid rgba(255,255,255,0.06)',
-                  paddingTop: '16px',
-                  maxWidth: '320px',
-                }}
-              >
+              <form onSubmit={handleActivateMFA} className="flex-col gap-md mfa-activation-form">
                 <FormField label={t('mfa.verificationCodeLabel')} noMargin>
                   <Input
                     type="text"
@@ -204,7 +169,7 @@ export default function MFAPanel() {
                     value={totpCode}
                     onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
                     placeholder={t('mfa.verificationCodePlaceholder')}
-                    style={{ textAlign: 'center', fontSize: '18px', letterSpacing: '0.1em', fontWeight: 'bold' }}
+                    className="mfa-code-input"
                   />
                 </FormField>
 
@@ -223,13 +188,11 @@ export default function MFAPanel() {
           {/* MFA Active */}
           {mfaStatus.enabled && (
             <div className="flex-col gap-xl">
-              <div className="inline-status-row" style={{ color: 'var(--status-success)', paddingTop: 0 }}>
+              <div className="inline-status-row inline-status-row--success">
                 <Shield size={24} color="var(--status-success)" />
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 'var(--font-size-md)' }}>{t('mfa.accountProtected')}</div>
-                  <div className="text-sm text-muted" style={{ marginTop: '2px' }}>
-                    {t('mfa.totpRegistered')}
-                  </div>
+                  <div className="font-bold text-md">{t('mfa.accountProtected')}</div>
+                  <div className="text-sm text-muted">{t('mfa.totpRegistered')}</div>
                 </div>
               </div>
 
@@ -247,39 +210,16 @@ export default function MFAPanel() {
           {/* Backup Codes */}
           {backupCodes.length > 0 && (
             <div>
-              <div className="flex-row items-center gap-sm" style={{ color: 'var(--status-warning)' }}>
+              <div className="flex-row items-center gap-sm text-warning">
                 <AlertTriangle size={16} />
-                <h4 style={{ fontSize: 'var(--font-size-base)', fontWeight: 'bold' }}>
-                  {t('mfa.recoveryBackupCodesTitle')}
-                </h4>
+                <h4 className="font-bold text-base">{t('mfa.recoveryBackupCodesTitle')}</h4>
               </div>
 
-              <p className="text-sm text-muted" style={{ lineHeight: '1.4' }}>
-                {t('mfa.recoveryBackupCodesDescription')}
-              </p>
+              <p className="text-sm text-muted">{t('mfa.recoveryBackupCodesDescription')}</p>
 
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: '10px',
-                  background: 'rgba(0,0,0,0.2)',
-                  padding: '16px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,0.05)',
-                  textAlign: 'center',
-                }}
-              >
+              <div className="mfa-backup-codes-grid">
                 {backupCodes.map((code, idx) => (
-                  <code
-                    key={idx}
-                    style={{
-                      fontSize: '13px',
-                      letterSpacing: '0.05em',
-                      color: 'var(--text-primary)',
-                      fontWeight: 'bold',
-                    }}
-                  >
+                  <code key={idx} className="mfa-backup-code">
                     {code}
                   </code>
                 ))}

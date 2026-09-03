@@ -2,24 +2,6 @@ import React from 'react';
 
 export type BadgeTone = 'primary' | 'secondary' | 'brand' | 'success' | 'warning' | 'danger' | 'neutral';
 
-export function Tag({
-  children,
-  tone = 'primary',
-  title,
-  className = '',
-}: {
-  children: React.ReactNode;
-  tone?: BadgeTone;
-  title?: string;
-  className?: string;
-}) {
-  return (
-    <span className={`badge badge-${tone} ${className}`} title={title}>
-      {children}
-    </span>
-  );
-}
-
 export function Badge({
   children,
   tone = 'primary',
@@ -37,6 +19,9 @@ export function Badge({
     </span>
   );
 }
+
+/** @deprecated Use `Badge` instead. */
+export const Tag = Badge;
 
 export function StatusBadge({
   children,

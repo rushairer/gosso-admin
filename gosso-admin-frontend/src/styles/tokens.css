@@ -99,7 +99,18 @@
   --focus-ring-offset: 2px;
   --focus-ring-width: 2px;
 
-  /* Animation & Active States */
+  /* Secondary & Neutral Actions */
+  --action-secondary-bg: #1b2330;
+  --action-secondary-hover: #242e3c;
+  --action-secondary-active: #151c27;
+  --action-secondary-text: var(--text-primary);
+
+  /* Danger States & Surfaces */
+  --text-danger-soft: #fecaca;
+  --status-danger-hover-bg: rgba(239, 68, 68, 0.22);
+  --status-danger-active-bg: rgba(239, 68, 68, 0.32);
+
+  /* Interactive Elements */
   --active-scale: 0.985;
   --duration-fast: 120ms;
   --duration-normal: 180ms;

@@ -82,7 +82,7 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+        <div className="form-grid-2">
           <FormField id="new-username" label={t('users.usernameLabel')} required>
             <Input
               id="new-username"

@@ -83,7 +83,7 @@ export default function PasskeysPanel() {
         />
 
         {(validationError || error) && (
-          <div style={{ padding: '16px 20px 0 20px' }}>
+          <div className="panel-feedback-wrapper">
             <Feedback type="error">
               {validationError ||
                 (error === 'credential not found'
@@ -95,7 +95,7 @@ export default function PasskeysPanel() {
           </div>
         )}
         {success && (
-          <div style={{ padding: '16px 20px 0 20px' }}>
+          <div className="panel-feedback-wrapper">
             <Feedback type="success">{success}</Feedback>
           </div>
         )}

@@ -8,9 +8,9 @@ export default function NotFound() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex-row items-center justify-center p-md" style={{ minHeight: '60vh' }}>
+    <div className="flex-row items-center justify-center p-md not-found-page">
       <Card className="login-card text-center">
-        <HelpCircle size={56} color="var(--text-tertiary)" className="mb-md" style={{ display: 'inline-block' }} />
+        <HelpCircle size={56} color="var(--text-tertiary)" className="mb-md" />
         <h2 className="login-card__title">{t('notFound.title')}</h2>
         <p className="text-muted login-card__description mb-md">{t('notFound.description')}</p>
         <div className="flex-row justify-center gap-md">

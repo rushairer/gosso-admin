@@ -24,18 +24,14 @@ export default function Home() {
             )}
           </div>
 
-          <h2 style={{ fontSize: 'var(--font-size-2xl)', color: 'var(--text-primary)' }}>
-            {userAdmin ? t('home.title') : t('home.userTitle')}
-          </h2>
+          <h2 className="home-hero-title">{userAdmin ? t('home.title') : t('home.userTitle')}</h2>
 
-          <p className="text-muted" style={{ maxWidth: '680px', lineHeight: 'var(--line-height-relaxed)' }}>
-            {userAdmin ? t('home.description') : t('home.userDescription')}
-          </p>
+          <p className="text-muted home-hero-desc">{userAdmin ? t('home.description') : t('home.userDescription')}</p>
 
           <div>
             {userAdmin ? (
               <div className="flex-row items-center flex-wrap gap-lg">
-                <p className="flex-row items-center gap-xs font-bold" style={{ color: 'var(--status-success)' }}>
+                <p className="flex-row items-center gap-xs font-bold home-user-status">
                   <span className="status-dot" />
                   {t('home.loggedInAsAdmin', { name: userName })}
                 </p>
@@ -50,7 +46,7 @@ export default function Home() {
               </div>
             ) : (
               <div className="flex-row items-center flex-wrap gap-lg">
-                <p className="flex-row items-center gap-xs font-bold" style={{ color: 'var(--status-success)' }}>
+                <p className="flex-row items-center gap-xs font-bold home-user-status">
                   <span className="status-dot" />
                   {t('home.loggedInAsUser', { name: userName })}
                 </p>
@@ -70,11 +66,9 @@ export default function Home() {
 
       {!userAdmin && (
         <Card className="home-admin-notice flex-row items-center justify-between flex-wrap gap-md">
-          <div className="flex-row items-center gap-md" style={{ flex: '1 1 300px' }}>
-            <Info size={20} color="var(--action-primary)" style={{ flexShrink: 0 }} />
-            <p className="text-muted text-sm" style={{ margin: 0 }}>
-              {t('home.adminNotice')}
-            </p>
+          <div className="flex-row items-center gap-md flex-1">
+            <Info size={20} color="var(--action-primary)" className="shrink-0" />
+            <p className="text-muted text-sm m-0">{t('home.adminNotice')}</p>
           </div>
           <Button variant="secondary" size="sm" icon={<LogOut size={14} />} onClick={() => logout('/')}>
             {t('home.switchAccount')}
@@ -85,92 +79,88 @@ export default function Home() {
       {userAdmin ? (
         <div className="card-grid">
           <Card
-            className="glass-card--interactive flex-col gap-md"
+            className="home-nav-card flex-col gap-md"
             role="button"
             tabIndex={0}
             onClick={() => navigate('/system-management/clients')}
             onKeyDown={(e) => e.key === 'Enter' && navigate('/system-management/clients')}
           >
-            <div style={{ color: 'var(--action-primary)' }}>
+            <div className="home-nav-card__icon">
               <Key size={24} />
             </div>
-            <h3 style={{ fontSize: 'var(--font-size-lg)', color: 'var(--text-primary)' }}>
-              {t('home.clientRegistry')}
-            </h3>
+            <h3 className="home-nav-card__title">{t('home.clientRegistry')}</h3>
             <p className="text-muted text-sm">{t('home.clientRegistryDescription')}</p>
           </Card>
 
           <Card
-            className="glass-card--interactive flex-col gap-md"
+            className="home-nav-card flex-col gap-md"
             role="button"
             tabIndex={0}
             onClick={() => navigate('/system-management/users')}
             onKeyDown={(e) => e.key === 'Enter' && navigate('/system-management/users')}
           >
-            <div style={{ color: 'var(--text-secondary)' }}>
+            <div className="home-nav-card__icon--secondary">
               <UserCheck size={24} />
             </div>
-            <h3 style={{ fontSize: 'var(--font-size-lg)', color: 'var(--text-primary)' }}>{t('home.userControl')}</h3>
+            <h3 className="home-nav-card__title">{t('home.userControl')}</h3>
             <p className="text-muted text-sm">{t('home.userControlDescription')}</p>
           </Card>
 
           <Card
-            className="glass-card--interactive flex-col gap-md"
+            className="home-nav-card flex-col gap-md"
             role="button"
             tabIndex={0}
             onClick={() => navigate('/system-management/system')}
             onKeyDown={(e) => e.key === 'Enter' && navigate('/system-management/system')}
           >
-            <div style={{ color: 'var(--action-primary)' }}>
+            <div className="home-nav-card__icon">
               <Settings size={24} />
             </div>
-            <h3 style={{ fontSize: 'var(--font-size-lg)', color: 'var(--text-primary)' }}>
-              {t('home.mfaAndPasskeys')}
-            </h3>
+            <h3 className="home-nav-card__title">{t('home.mfaAndPasskeys')}</h3>
             <p className="text-muted text-sm">{t('home.mfaAndPasskeysDescription')}</p>
           </Card>
         </div>
       ) : (
         <div className="card-grid">
           <Card
-            className="glass-card--interactive flex-col gap-md"
+            className="home-nav-card flex-col gap-md"
             role="button"
             tabIndex={0}
             onClick={() => navigate('/account-settings/profile')}
             onKeyDown={(e) => e.key === 'Enter' && navigate('/account-settings/profile')}
           >
-            <div style={{ color: 'var(--action-primary)' }}>
+            <div className="home-nav-card__icon">
               <User size={24} />
             </div>
-            <h3 style={{ fontSize: 'var(--font-size-lg)', color: 'var(--text-primary)' }}>{t('home.userProfile')}</h3>
+            <h3 className="home-nav-card__title">{t('home.userProfile')}</h3>
             <p className="text-muted text-sm">{t('home.userProfileDescription')}</p>
           </Card>
 
           <Card
-            className="glass-card--interactive flex-col gap-md"
+            className="home-nav-card flex-col gap-md"
             role="button"
             tabIndex={0}
             onClick={() => navigate('/account-settings/mfa')}
             onKeyDown={(e) => e.key === 'Enter' && navigate('/account-settings/mfa')}
           >
-            <div style={{ color: 'var(--text-secondary)' }}>
+            <div className="home-nav-card__icon--secondary">
               <Shield size={24} />
             </div>
-            <h3 style={{ fontSize: 'var(--font-size-lg)', color: 'var(--text-primary)' }}>{t('home.userSecurity')}</h3>
+            <h3 className="home-nav-card__title">{t('home.userSecurity')}</h3>
             <p className="text-muted text-sm">{t('home.userSecurityDescription')}</p>
           </Card>
 
           <Card
-            className="glass-card--interactive flex-col gap-md"
+            className="home-nav-card flex-col gap-md"
             role="button"
             tabIndex={0}
             onClick={() => navigate('/account-settings/sessions')}
             onKeyDown={(e) => e.key === 'Enter' && navigate('/account-settings/sessions')}
           >
-            <div style={{ color: 'var(--action-primary)' }}>
+            <div className="home-nav-card__icon">
               <Laptop size={24} />
             </div>
-            <h3 style={{ fontSize: 'var(--font-size-lg)', color: 'var(--text-primary)' }}>{t('home.userSessions')}</h3>
+            <h3 className="home-nav-card__title">{t('home.userSessions')}</h3>
             <p className="text-muted text-sm">{t('home.userSessionsDescription')}</p>
           </Card>
         </div>

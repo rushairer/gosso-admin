@@ -31,6 +31,28 @@ function location(sourceFile, node) {
   );
 }
 
+function buttonChildIcon(node, sourceFile) {
+  let icon = null;
+  function visitChild(child) {
+    if (icon) return;
+    const tag = jsxTagName(child, sourceFile);
+    if (tag && (tag === "svg" || /^[A-Z]/.test(tag))) {
+      icon = child;
+      return;
+    }
+    if (ts.isJsxExpression(child) && child.expression) {
+      if (ts.isConditionalExpression(child.expression)) {
+        visitChild(child.expression.whenTrue);
+        visitChild(child.expression.whenFalse);
+      } else if (ts.isParenthesizedExpression(child.expression)) {
+        visitChild(child.expression.expression);
+      }
+    }
+  }
+  visitChild(node);
+  return icon;
+}
+
 function checkTsxContracts(name, source) {
   if (!name.endsWith(".tsx") || name.includes("__tests__") || name.includes("test/")) return;
   const sourceFile = ts.createSourceFile(
@@ -49,6 +71,25 @@ function checkTsxContracts(name, source) {
         failures.push(
           `${name}:${location(sourceFile, node)} native button must use Button, ButtonLink, or IconButton`,
         );
+      }
+      if (!sharedPrimitive && tag === "select") {
+        failures.push(
+          `${name}:${location(sourceFile, node)} native select must use the shared Select component`,
+        );
+      }
+      if (
+        ts.isJsxElement(node) &&
+        ["Button", "ButtonLink"].includes(tag) &&
+        !sharedPrimitive
+      ) {
+        for (const child of node.children) {
+          const icon = buttonChildIcon(child, sourceFile);
+          if (icon) {
+            failures.push(
+              `${name}:${location(sourceFile, icon)} ${tag} icons must use the icon prop, not children`,
+            );
+          }
+        }
       }
     }
     ts.forEachChild(node, visit);
