@@ -1,11 +1,46 @@
 import React, { forwardRef } from 'react';
 import { Link, type LinkProps } from 'react-router-dom';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { LoadingSpinner } from './LoadingSpinner';
+import { cn } from '../../lib/utils';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'link';
-export type ButtonSize = 'sm' | 'base' | 'lg' | 'regular' | 'compact';
+export type ButtonVariant =
+  'primary' | 'secondary' | 'danger' | 'ghost' | 'link' | 'default' | 'destructive' | 'outline';
+export type ButtonSize = 'sm' | 'base' | 'lg' | 'regular' | 'compact' | 'default' | 'icon';
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export const buttonVariants = cva(
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer',
+  {
+    variants: {
+      variant: {
+        primary: 'btn btn-primary',
+        default: 'btn btn-primary',
+        secondary: 'btn btn-secondary',
+        danger: 'btn btn-danger',
+        destructive: 'btn btn-danger',
+        ghost: 'btn btn-ghost',
+        outline: 'btn btn-secondary',
+        link: 'btn btn-link',
+      },
+      size: {
+        base: 'btn-base',
+        default: 'btn-base',
+        regular: 'btn-base',
+        sm: 'btn-sm',
+        compact: 'btn-sm',
+        lg: 'btn-lg',
+        icon: 'btn-icon',
+      },
+    },
+    defaultVariants: {
+      variant: 'secondary',
+      size: 'base',
+    },
+  }
+);
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
@@ -13,7 +48,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   iconPosition?: 'left' | 'right';
 }
 
-export interface ButtonLinkProps extends Omit<LinkProps, 'to'> {
+export interface ButtonLinkProps extends Omit<LinkProps, 'to'>, VariantProps<typeof buttonVariants> {
   to: string;
   variant?: ButtonVariant;
   size?: ButtonSize;
@@ -33,12 +68,7 @@ export function buttonClassNames({
   loading?: boolean;
   className?: string;
 } = {}): string {
-  const parts = ['btn', `btn-${variant}`];
-  if (size === 'sm' || size === 'compact') parts.push('btn-sm');
-  if (size === 'lg') parts.push('btn-lg');
-  if (loading) parts.push('is-loading');
-  if (className) parts.push(className);
-  return parts.filter(Boolean).join(' ');
+  return cn(buttonVariants({ variant: variant as any, size: size as any }), loading && 'is-loading', className);
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(

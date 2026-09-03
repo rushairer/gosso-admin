@@ -19,3 +19,4 @@ export * from './Toast';
 export * from './Tabs';
 export * from './useConfirm';
 export * from './AsyncState';
+export * from './Dialog';
