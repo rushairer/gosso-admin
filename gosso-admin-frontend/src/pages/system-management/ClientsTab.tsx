@@ -213,7 +213,7 @@ export default function ClientsTab() {
                   )}
                 </td>
                 <td>
-                  <div className="flex-col gap-xs max-w-300">
+                  <div className="flex flex-col gap-1.5 max-w-[300px]">
                     {client.redirect_uris.map((uri, idx) => (
                       <div key={idx} className="uri-copy-chip" title={uri}>
                         <span className="uri-copy-text">{uri}</span>
@@ -230,7 +230,7 @@ export default function ClientsTab() {
                   </div>
                 </td>
                 <td>
-                  <div className="flex-row flex-wrap gap-xs">
+                  <div className="flex flex-row flex-wrap gap-1.5">
                     {client.grant_types.map((g) => (
                       <Tag key={g} tone="secondary">
                         {g.replace('_', ' ')}
@@ -239,7 +239,7 @@ export default function ClientsTab() {
                   </div>
                 </td>
                 <td>
-                  <div className="flex-row flex-wrap gap-xs">
+                  <div className="flex flex-row flex-wrap gap-1.5">
                     {client.scopes.map((s) => (
                       <Tag key={s} tone={isAdminScope(s) ? 'warning' : 'primary'}>
                         {s.toLowerCase()}

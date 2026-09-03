@@ -262,13 +262,15 @@ export default function UsersTab() {
             {accounts.map((acc) => (
               <tr key={acc.id}>
                 <td>
-                  <div className="font-bold">{acc.display_name || acc.username}</div>
-                  <div className="text-xs text-dark text-mono">
+                  <div className="font-bold text-sm text-[var(--color-text-main)]">
+                    {acc.display_name || acc.username}
+                  </div>
+                  <div className="text-xs text-[var(--color-text-muted)] font-mono">
                     {acc.username} ({acc.id})
                   </div>
                 </td>
                 <td>
-                  <div className="flex-col gap-xs items-start">
+                  <div className="flex flex-col gap-1 items-start">
                     {acc.status === 'active' ? (
                       <StatusBadge tone="success">{t('users.statusActive')}</StatusBadge>
                     ) : (
@@ -277,16 +279,18 @@ export default function UsersTab() {
                   </div>
                 </td>
                 <td>
-                  <div className="flex-row flex-wrap gap-xs">
+                  <div className="flex flex-row flex-wrap gap-1.5">
                     {acc.roles && acc.roles.length > 0 ? (
                       acc.roles.map((role) => (
                         <Tag key={role.id} title={role.description}>
-                          <ShieldIcon size={10} className="mr-xs inline" />
+                          <ShieldIcon size={10} className="mr-1 inline" />
                           {role.name}
                         </Tag>
                       ))
                     ) : (
-                      <span className="text-sm text-dark italic">{t('users.noRolesAssigned')}</span>
+                      <span className="text-sm text-[var(--color-text-muted)] italic">
+                        {t('users.noRolesAssigned')}
+                      </span>
                     )}
                   </div>
                 </td>

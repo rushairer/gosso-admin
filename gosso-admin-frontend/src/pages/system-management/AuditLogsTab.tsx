@@ -102,14 +102,14 @@ export default function AuditLogsTab() {
             <tbody>
               {auditLogs.map((log) => (
                 <tr key={log.id}>
-                  <td className="text-sm text-muted">
+                  <td className="text-sm text-[var(--color-text-muted)]">
                     {log.created_at ? new Date(log.created_at).toLocaleString() : '-'}
                   </td>
                   <td>
                     <Badge tone="neutral">{log.action}</Badge>
                   </td>
-                  <td className="text-sm text-mono">{log.actor}</td>
-                  <td className="text-sm text-mono text-muted">{log.account_id || '-'}</td>
+                  <td className="text-sm font-mono text-[var(--color-text-main)]">{log.actor}</td>
+                  <td className="text-sm font-mono text-[var(--color-text-muted)]">{log.account_id || '-'}</td>
                   <td>
                     <Button variant="secondary" size="sm" onClick={() => setSelectedAuditLog(log)}>
                       {t('common.view')}
