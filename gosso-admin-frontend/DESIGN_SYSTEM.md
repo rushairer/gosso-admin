@@ -41,6 +41,13 @@ Panels use the semantic dark surface hierarchy, an 8% text-derived border, a 12p
 
 `Dialog` and `Modal` use Radix UI focus management. Overlays blur by 8px, dialog surfaces use a 12px radius, and footer actions are separated by a top border and aligned to the end. Escape and outside-click behavior must be configured through the shared primitive rather than reimplemented by a page.
 
+## CSS cascade isolation
+
+- Tailwind is imported exactly once from `src/styles/tailwind.css`, which must be the first CSS entry loaded by `main.tsx`.
+- Global document defaults live in `@layer base`; reusable product styles live in `@layer components`; semantic variables live in `@layer theme`.
+- Accessibility overrides that must outrank utilities live in the final `overrides` layer.
+- Unlayered source rules and standalone universal spacing resets are rejected by `npm run lint:css`.
+
 ## Verification
 
 Before merging frontend changes, run:

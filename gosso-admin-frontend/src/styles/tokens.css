@@ -1,136 +1,138 @@
-/* Semantic tokens sit above the legacy palette in index.css. Feature code
- * should use these names so the visual theme can change without API churn. */
-:root {
-  /* Surface hierarchy */
-  --surface-canvas: var(--bg-main);
-  --surface-navigation: var(--bg-sidebar);
-  --surface-panel: var(--bg-panel);
-  --surface-panel-soft: var(--bg-panel-soft, #1c232d);
-  --surface-elevated: var(--bg-elevated);
-  --surface-subtle: rgba(255, 255, 255, 0.04);
-  --surface-hover: #18202a;
-  --surface-active: #1e293b;
+@layer theme {
+  /* Semantic tokens sit above the legacy palette in index.css. Feature code
+   * should use these names so the visual theme can change without API churn. */
+  :root {
+    /* Surface hierarchy */
+    --surface-canvas: var(--bg-main);
+    --surface-navigation: var(--bg-sidebar);
+    --surface-panel: var(--bg-panel);
+    --surface-panel-soft: var(--bg-panel-soft, #1c232d);
+    --surface-elevated: var(--bg-elevated);
+    --surface-subtle: rgba(255, 255, 255, 0.04);
+    --surface-hover: #18202a;
+    --surface-active: #1e293b;
 
-  /* Borders */
-  --border-default: var(--border-color);
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-hover: #3d4a5d;
-  --border-focus-ring: var(--border-focus);
+    /* Borders */
+    --border-default: var(--border-color);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-hover: #3d4a5d;
+    --border-focus-ring: var(--border-focus);
 
-  /* Typography Colors */
-  --text-primary: var(--color-text-main);
-  --text-secondary: var(--color-text-muted);
-  --text-tertiary: var(--color-text-dark);
-  --text-inverse: #ffffff;
+    /* Typography Colors */
+    --text-primary: var(--color-text-main);
+    --text-secondary: var(--color-text-muted);
+    --text-tertiary: var(--color-text-dark);
+    --text-inverse: #ffffff;
 
-  /* Brand / Action Palette */
-  --action-primary: var(--color-primary);
-  --action-primary-hover: var(--color-primary-hover);
-  --action-primary-active: #1d4ed8;
-  --action-primary-subtle: rgba(59, 130, 246, 0.12);
+    /* Brand / Action Palette */
+    --action-primary: var(--color-primary);
+    --action-primary-hover: var(--color-primary-hover);
+    --action-primary-active: #1d4ed8;
+    --action-primary-subtle: rgba(59, 130, 246, 0.12);
 
-  /* Status Colors */
-  --status-danger: var(--danger-color);
-  --status-danger-hover: #dc2626;
-  --status-danger-active: #b91c1c;
-  --status-danger-subtle: rgba(239, 68, 68, 0.12);
-  --status-danger-border: rgba(239, 68, 68, 0.28);
+    /* Status Colors */
+    --status-danger: var(--danger-color);
+    --status-danger-hover: #dc2626;
+    --status-danger-active: #b91c1c;
+    --status-danger-subtle: rgba(239, 68, 68, 0.12);
+    --status-danger-border: rgba(239, 68, 68, 0.28);
 
-  --status-success: var(--success-color);
-  --status-success-hover: #16a34a;
-  --status-success-subtle: rgba(34, 197, 94, 0.12);
-  --status-success-border: rgba(34, 197, 94, 0.28);
+    --status-success: var(--success-color);
+    --status-success-hover: #16a34a;
+    --status-success-subtle: rgba(34, 197, 94, 0.12);
+    --status-success-border: rgba(34, 197, 94, 0.28);
 
-  --status-warning: var(--warning-color);
-  --status-warning-hover: #d97706;
-  --status-warning-subtle: rgba(245, 158, 11, 0.12);
-  --status-warning-border: rgba(245, 158, 11, 0.28);
+    --status-warning: var(--warning-color);
+    --status-warning-hover: #d97706;
+    --status-warning-subtle: rgba(245, 158, 11, 0.12);
+    --status-warning-border: rgba(245, 158, 11, 0.28);
 
-  --status-info: #38bdf8;
-  --status-info-subtle: rgba(56, 189, 248, 0.12);
-  --status-info-border: rgba(56, 189, 248, 0.28);
+    --status-info: #38bdf8;
+    --status-info-subtle: rgba(56, 189, 248, 0.12);
+    --status-info-border: rgba(56, 189, 248, 0.28);
 
-  /* Status Text Accents */
-  --status-primary-text: #bfdbfe;
-  --status-success-text: #86efac;
-  --status-warning-text: #fde68a;
-  --status-info-text: #bae6fd;
-  --status-danger-text: #fca5a5;
+    /* Status Text Accents */
+    --status-primary-text: #bfdbfe;
+    --status-success-text: #86efac;
+    --status-warning-text: #fde68a;
+    --status-info-text: #bae6fd;
+    --status-danger-text: #fca5a5;
 
-  /* Spacing Scale (4px/8px Grid) */
-  --space-0-5: 2px;
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
-  --space-12: 48px;
+    /* Spacing Scale (4px/8px Grid) */
+    --space-0-5: 2px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
 
-  /* Border Radii */
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-control: 8px;
-  --radius-panel: 10px;
-  --radius-lg: 12px;
-  --radius-full: 9999px;
+    /* Border Radii */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-control: 8px;
+    --radius-panel: 10px;
+    --radius-lg: 12px;
+    --radius-full: 9999px;
 
-  /* Component Heights */
-  --control-h-sm: 32px;
-  --control-h-base: 40px;
-  --control-h-lg: 46px;
-  --control-height: 38px;
-  --control-height-compact: 34px;
+    /* Component Heights */
+    --control-h-sm: 32px;
+    --control-h-base: 40px;
+    --control-h-lg: 46px;
+    --control-height: 38px;
+    --control-height-compact: 34px;
 
-  /* Typography Scale */
-  --font-size-xs: 12px;
-  --font-size-sm: 13px;
-  --font-size-base: 14px;
-  --font-size-md: 15px;
-  --font-size-lg: 18px;
-  --font-size-xl: 22px;
-  --font-size-2xl: 26px;
-  --font-size-3xl: 30px;
-  --font-size-4xl: 34px;
+    /* Typography Scale */
+    --font-size-xs: 12px;
+    --font-size-sm: 13px;
+    --font-size-base: 14px;
+    --font-size-md: 15px;
+    --font-size-lg: 18px;
+    --font-size-xl: 22px;
+    --font-size-2xl: 26px;
+    --font-size-3xl: 30px;
+    --font-size-4xl: 34px;
 
-  --line-height-tight: 1.2;
-  --line-height-snug: 1.35;
-  --line-height-base: 1.5;
-  --line-height-relaxed: 1.65;
+    --line-height-tight: 1.2;
+    --line-height-snug: 1.35;
+    --line-height-base: 1.5;
+    --line-height-relaxed: 1.65;
 
-  /* Focus & Focus-Visible Ring */
-  --focus-ring: 0 0 0 2px var(--surface-canvas), 0 0 0 4px var(--action-primary);
-  --focus-ring-offset: 2px;
-  --focus-ring-width: 2px;
+    /* Focus & Focus-Visible Ring */
+    --focus-ring: 0 0 0 2px var(--surface-canvas), 0 0 0 4px var(--action-primary);
+    --focus-ring-offset: 2px;
+    --focus-ring-width: 2px;
 
-  /* Secondary & Neutral Actions */
-  --action-secondary-bg: #1b2330;
-  --action-secondary-hover: #242e3c;
-  --action-secondary-active: #151c27;
-  --action-secondary-text: var(--text-primary);
+    /* Secondary & Neutral Actions */
+    --action-secondary-bg: #1b2330;
+    --action-secondary-hover: #242e3c;
+    --action-secondary-active: #151c27;
+    --action-secondary-text: var(--text-primary);
 
-  /* Danger States & Surfaces */
-  --text-danger-soft: #fecaca;
-  --status-danger-hover-bg: rgba(239, 68, 68, 0.22);
-  --status-danger-active-bg: rgba(239, 68, 68, 0.32);
+    /* Danger States & Surfaces */
+    --text-danger-soft: #fecaca;
+    --status-danger-hover-bg: rgba(239, 68, 68, 0.22);
+    --status-danger-active-bg: rgba(239, 68, 68, 0.32);
 
-  /* Form & Input Controls */
-  --input-bg: #10151d;
-  --input-placeholder: #6b7280;
-  --input-disabled-bg: var(--surface-panel-soft);
-  --input-disabled-text: var(--text-tertiary);
+    /* Form & Input Controls */
+    --input-bg: #10151d;
+    --input-placeholder: #6b7280;
+    --input-disabled-bg: var(--surface-panel-soft);
+    --input-disabled-text: var(--text-tertiary);
 
-  /* Surfaces & Separators */
-  --surface-card: #151b24;
-  --surface-card-hover: #1a212b;
-  --surface-subtle-border: rgba(255, 255, 255, 0.06);
+    /* Surfaces & Separators */
+    --surface-card: #151b24;
+    --surface-card-hover: #1a212b;
+    --surface-subtle-border: rgba(255, 255, 255, 0.06);
 
-  /* Interactive Elements */
-  --active-scale: 0.985;
-  --duration-fast: 120ms;
-  --duration-normal: 180ms;
-  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+    /* Interactive Elements */
+    --active-scale: 0.985;
+    --duration-fast: 120ms;
+    --duration-normal: 180ms;
+    --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  }
 }
