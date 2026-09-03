@@ -29,14 +29,7 @@ export const badgeVariants = cva(
 );
 
 export type BadgeTone =
-  | 'primary'
-  | 'secondary'
-  | 'brand'
-  | 'success'
-  | 'warning'
-  | 'danger'
-  | 'destructive'
-  | 'neutral';
+  'primary' | 'secondary' | 'brand' | 'success' | 'warning' | 'danger' | 'destructive' | 'neutral';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof badgeVariants> {
   tone?: BadgeTone;

@@ -1,13 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from './Dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './Dialog';
 
 export interface ModalProps {
   isOpen?: boolean;

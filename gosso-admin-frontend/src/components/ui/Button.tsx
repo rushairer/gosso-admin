@@ -5,14 +5,7 @@ import { LoadingSpinner } from './LoadingSpinner';
 import { cn } from '../../lib/utils';
 
 export type ButtonVariant =
-  | 'primary'
-  | 'secondary'
-  | 'danger'
-  | 'ghost'
-  | 'link'
-  | 'default'
-  | 'destructive'
-  | 'outline';
+  'primary' | 'secondary' | 'danger' | 'ghost' | 'link' | 'default' | 'destructive' | 'outline';
 
 /**
  * Canonical sizes are sm/default/lg/icon. The legacy base/regular/compact
@@ -239,7 +232,18 @@ export interface IconButtonLinkProps extends Omit<LinkProps, 'to'>, VariantProps
 }
 
 export const IconButtonLink = forwardRef<HTMLAnchorElement, IconButtonLinkProps>(function IconButtonLink(
-  { to, label, icon, variant = 'ghost', size = 'default', className = '', disabled = false, children, onClick, ...props },
+  {
+    to,
+    label,
+    icon,
+    variant = 'ghost',
+    size = 'default',
+    className = '',
+    disabled = false,
+    children,
+    onClick,
+    ...props
+  },
   ref
 ) {
   return (
