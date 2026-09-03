@@ -38,39 +38,45 @@ export default function AuditLogsTab() {
   return (
     <div>
       <PanelHeader title={t('audit.title')} description={t('audit.description')} />
-      <div className="panel-body panel-filter-bar">
-        <div className="flex-row flex-wrap gap-lg items-end">
-          <div className="flex-col gap-xs">
+      <div className="panel-body panel-filter-bar p-5 sm:p-6 border-b border-[var(--border-default)]">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            search();
+          }}
+          className="flex flex-col sm:flex-row sm:items-end flex-wrap gap-4"
+        >
+          <div className="w-full sm:w-64">
             <FormField label={t('audit.eventTypeLabel')} noMargin>
               <Input
                 type="text"
                 placeholder={t('audit.eventTypePlaceholder')}
                 value={filterEventType}
                 onChange={(e) => setFilterEventType(e.target.value)}
-                className="input-w-md"
+                className="w-full"
               />
             </FormField>
           </div>
-          <div className="flex-col gap-xs">
+          <div className="w-full sm:w-72">
             <FormField label={t('audit.accountIdLabel')} noMargin>
               <Input
                 type="text"
                 placeholder={t('audit.accountIdPlaceholder')}
                 value={filterAccountID}
                 onChange={(e) => setFilterAccountID(e.target.value)}
-                className="input-w-lg"
+                className="w-full"
               />
             </FormField>
           </div>
-          <ButtonGroup compact>
-            <Button variant="primary" onClick={search}>
+          <div className="flex items-center gap-2">
+            <Button variant="primary" type="submit">
               {t('common.search')}
             </Button>
-            <Button variant="secondary" onClick={clearFilters}>
+            <Button variant="secondary" type="button" onClick={clearFilters}>
               {t('common.clear')}
             </Button>
-          </ButtonGroup>
-        </div>
+          </div>
+        </form>
       </div>
 
       <AsyncState
