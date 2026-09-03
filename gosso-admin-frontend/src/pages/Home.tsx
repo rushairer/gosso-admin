@@ -1,17 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  ArrowRight,
-  Info,
-  Key,
-  Laptop,
-  LogOut,
-  Settings,
-  Shield,
-  ShieldCheck,
-  User,
-  UserCheck,
-} from 'lucide-react';
+import { ArrowRight, Info, Key, Laptop, LogOut, Settings, Shield, ShieldCheck, User, UserCheck } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { useSession } from '@gosso/client/react';
 import { logout } from '../auth';

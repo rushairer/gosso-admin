@@ -216,3 +216,49 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
     </button>
   );
 });
+
+export interface IconButtonLinkProps extends Omit<LinkProps, 'to'>, VariantProps<typeof buttonVariants> {
+  to: string;
+  label: string;
+  icon?: React.ReactNode;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  disabled?: boolean;
+}
+
+export const IconButtonLink = forwardRef<HTMLAnchorElement, IconButtonLinkProps>(function IconButtonLink(
+  { to, label, icon, variant = 'ghost', size = 'base', className = '', disabled = false, children, onClick, ...props },
+  ref
+) {
+  return (
+    <Link
+      ref={ref}
+      to={to}
+      className={buttonClassNames({
+        variant,
+        size,
+        className: `icon-btn ${disabled ? 'is-disabled' : ''} ${className}`,
+      })}
+      aria-label={label}
+      title={label}
+      aria-disabled={disabled ? 'true' : undefined}
+      tabIndex={disabled ? -1 : undefined}
+      onClick={(e) => {
+        if (disabled) {
+          e.preventDefault();
+          return;
+        }
+        onClick?.(e);
+      }}
+      {...props}
+    >
+      {icon ? (
+        <span className="icon-btn__icon" aria-hidden="true">
+          {icon}
+        </span>
+      ) : (
+        children
+      )}
+    </Link>
+  );
+});
