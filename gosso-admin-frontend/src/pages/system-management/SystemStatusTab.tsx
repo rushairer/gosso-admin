@@ -6,12 +6,56 @@ import {
   DefinitionList,
   DefinitionRow,
   Feedback,
-  PageLoader,
   PanelHeader,
   PlainSection,
+  Skeleton,
 } from '../../components/ui';
 import { useSystemStatus } from '../../features/system/useSystemStatus';
 import { dependencyLabel, dependencyIsHealthy, formatHealthTimestamp } from '../../utils/format';
+
+function SystemStatusSkeleton() {
+  return (
+    <div className="panel-stack" aria-busy="true" aria-label="Loading system status">
+      <div className="flex-row items-center justify-between mb-lg">
+        <div>
+          <Skeleton height={28} width={200} className="mb-xs" />
+          <Skeleton height={16} width={320} />
+        </div>
+        <Skeleton height={36} width={100} />
+      </div>
+      <div className="metric-strip">
+        <div className="metric-item">
+          <Skeleton height={14} width={80} className="mb-xs" />
+          <Skeleton height={20} width={120} />
+        </div>
+        <div className="metric-item">
+          <Skeleton height={14} width={80} className="mb-xs" />
+          <Skeleton height={20} width={60} />
+        </div>
+        <div className="metric-item">
+          <Skeleton height={14} width={80} className="mb-xs" />
+          <Skeleton height={20} width={100} />
+        </div>
+      </div>
+      <div className="inline-status-list mt-md">
+        <div className="inline-status-row">
+          <Skeleton variant="rectangular" width={34} height={34} />
+          <div className="flex-1">
+            <Skeleton height={14} width={140} className="mb-xs" />
+            <Skeleton height={18} width={80} />
+          </div>
+        </div>
+        <div className="inline-status-row">
+          <Skeleton variant="rectangular" width={34} height={34} />
+          <div className="flex-1">
+            <Skeleton height={14} width={140} className="mb-xs" />
+            <Skeleton height={18} width={80} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function SystemStatusTab() {
   const { t } = useTranslation();
@@ -22,8 +66,8 @@ export default function SystemStatusTab() {
     !dependencyIsHealthy(systemHealth?.checks?.database) ||
     !dependencyIsHealthy(systemHealth?.checks?.redis);
 
-  if (loading) {
-    return <PageLoader message={t('system.loadingStatus')} />;
+  if (loading && !systemHealth) {
+    return <SystemStatusSkeleton />;
   }
 
   return (
@@ -68,8 +112,11 @@ export default function SystemStatusTab() {
         </div>
 
         {systemHealth?.fetch_error && (
-          <div className="mb-md">
+          <div className="mb-md flex-row items-center justify-between gap-md">
             <Feedback type="error">{systemHealth.fetch_error}</Feedback>
+            <Button variant="secondary" size="sm" onClick={() => void refresh()} loading={loading}>
+              {t('common.retry', { defaultValue: 'Retry' })}
+            </Button>
           </div>
         )}
 
@@ -83,30 +130,14 @@ export default function SystemStatusTab() {
           {/* Database Health */}
           <div className="inline-status-row">
             <div
-              className="inline-icon"
-              style={{
-                background:
-                  systemHealth?.checks?.database === 'ok'
-                    ? 'var(--status-success-subtle)'
-                    : 'var(--status-danger-subtle)',
-                color: systemHealth?.checks?.database === 'ok' ? 'var(--status-success)' : 'var(--status-danger)',
-              }}
+              className={`inline-icon ${systemHealth?.checks?.database === 'ok' ? 'inline-icon--success' : 'inline-icon--danger'}`}
             >
-              <ShieldIcon style={{ width: '22px', height: '22px' }} />
+              <ShieldIcon size={20} />
             </div>
             <div>
-              <div className="text-muted" style={{ fontSize: '14px' }}>
-                {t('system.databaseConnection')}
-              </div>
+              <div className="inline-status-title">{t('system.databaseConnection')}</div>
               <div
-                style={{
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  marginTop: '2px',
-                  color: dependencyIsHealthy(systemHealth?.checks?.database)
-                    ? 'var(--status-success)'
-                    : 'var(--status-danger)',
-                }}
+                className={`inline-status-value ${dependencyIsHealthy(systemHealth?.checks?.database) ? 'inline-status-value--success' : 'inline-status-value--danger'}`}
               >
                 {dependencyLabel(systemHealth?.checks?.database)}
               </div>
@@ -116,28 +147,14 @@ export default function SystemStatusTab() {
           {/* Redis Health */}
           <div className="inline-status-row">
             <div
-              className="inline-icon"
-              style={{
-                background:
-                  systemHealth?.checks?.redis === 'ok' ? 'var(--status-success-subtle)' : 'var(--status-danger-subtle)',
-                color: systemHealth?.checks?.redis === 'ok' ? 'var(--status-success)' : 'var(--status-danger)',
-              }}
+              className={`inline-icon ${systemHealth?.checks?.redis === 'ok' ? 'inline-icon--success' : 'inline-icon--danger'}`}
             >
-              <RefreshCw style={{ width: '22px', height: '22px' }} />
+              <RefreshCw size={20} />
             </div>
             <div>
-              <div className="text-muted" style={{ fontSize: '14px' }}>
-                {t('system.redisCacheAndLock')}
-              </div>
+              <div className="inline-status-title">{t('system.redisCacheAndLock')}</div>
               <div
-                style={{
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  marginTop: '2px',
-                  color: dependencyIsHealthy(systemHealth?.checks?.redis)
-                    ? 'var(--status-success)'
-                    : 'var(--status-danger)',
-                }}
+                className={`inline-status-value ${dependencyIsHealthy(systemHealth?.checks?.redis) ? 'inline-status-value--success' : 'inline-status-value--danger'}`}
               >
                 {dependencyLabel(systemHealth?.checks?.redis)}
               </div>
@@ -167,12 +184,7 @@ export default function SystemStatusTab() {
             </DefinitionRow>
 
             <DefinitionRow label={t('system.jwksUri')} mono>
-              <a
-                href={oidcConfig.jwks_uri}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: 'var(--color-primary)', textDecoration: 'none' }}
-              >
+              <a href={oidcConfig.jwks_uri} target="_blank" rel="noopener noreferrer" className="system-link">
                 {oidcConfig.jwks_uri}
               </a>
             </DefinitionRow>

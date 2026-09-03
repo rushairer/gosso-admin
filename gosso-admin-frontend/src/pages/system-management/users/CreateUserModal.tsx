@@ -130,9 +130,7 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
             />
           </FormField>
         </div>
-        <div className="form-hint mb-md" style={{ marginTop: '-10px' }}>
-          {t('users.contactHint')}
-        </div>
+        <div className="form-hint mb-md form-hint--attached">{t('users.contactHint')}</div>
 
         <FormField id="new-password" label={t('users.initialPasswordLabel')} required>
           <Input

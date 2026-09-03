@@ -116,7 +116,7 @@ export default function ProfilePanel() {
                   required
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  style={{ maxWidth: '240px' }}
+                  className="max-w-240"
                 />
                 <IconButton
                   label="Save display name"
@@ -202,7 +202,7 @@ export default function ProfilePanel() {
       </PlainSection>
 
       <PlainSection title={t('profile.updatePasswordSection')}>
-        <form onSubmit={handleChangePassword} className="flex-col gap-lg" style={{ maxWidth: '500px' }}>
+        <form onSubmit={handleChangePassword} className="flex-col gap-lg max-w-500">
           <FormField label={t('profile.currentPasswordLabel')} noMargin>
             <Input
               type={showCurrentPwd ? 'text' : 'password'}

@@ -121,13 +121,7 @@ export default function AuditLogsTab() {
           </DataTable>
 
           {/* Pagination */}
-          <div
-            className="flex-row items-center justify-between"
-            style={{
-              marginTop: '20px',
-              padding: '0 20px 20px 20px',
-            }}
-          >
+          <div className="table-pagination">
             <div className="text-muted text-sm">{t('audit.totalLogs', { count: auditTotal })}</div>
             <ButtonGroup compact>
               <Button variant="secondary" size="sm" disabled={auditPage <= 1} onClick={() => goToPage(auditPage - 1)}>

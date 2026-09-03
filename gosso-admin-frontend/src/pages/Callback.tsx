@@ -16,9 +16,7 @@ export default function Callback() {
       renderError={(error, detail) => (
         <div className="login-surface flex-row items-center justify-center">
           <Card className="login-card text-center">
-            <h2 className="login-card__title" style={{ color: 'var(--status-danger)' }}>
-              {t('auth.authenticationError')}
-            </h2>
+            <h2 className="login-card__title status-danger-text">{t('auth.authenticationError')}</h2>
             <p className="text-muted login-card__description mb-md">
               {detail?.code === 'CALLBACK_PARAMS_MISSING'
                 ? t('auth.invalidCallbackParams')

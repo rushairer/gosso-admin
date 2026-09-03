@@ -119,8 +119,8 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
           ))}
         </CheckboxGroup>
         {clientForm.scopes.some(isAdminScope) && (
-          <div className="notice-card" style={{ alignItems: 'flex-start', textAlign: 'left' }}>
-            <InfoIcon style={{ width: '18px', height: '18px', stroke: 'var(--warning-color)' }} />
+          <div className="notice-card notice-card--left">
+            <InfoIcon className="text-warning flex-shrink-0" size={18} />
             <p className="text-sm text-muted">{t('clients.adminScopeWarning')}</p>
           </div>
         )}
