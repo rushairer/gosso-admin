@@ -9,7 +9,7 @@
     "lint": "oxlint src",
     "lint:ui": "node scripts/check-ui-contracts.mjs",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\"",
+    "format:check": "prettier --write \"src/**/*.{ts,tsx,css}\" && node scripts/print-formatted-files.mjs && exit 1",
     "typecheck": "tsc -b --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
