@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.6] - 2026-09-03
+
+### Changed
+- Upgrade `Drawer` with Tab focus trapping, Esc close, previous focus restoration, body scroll locking, and explicit ARIA modal attributes.
+- Extend `AsyncState` with built-in empty state rendering, standardizing empty and error handling across sessions and audit log tabs.
+- Add explicit Chinese font fallbacks (`PingFang SC`, `Microsoft YaHei`) to body typography stack.
+- Modernize `SessionsPanel` to use `Badge` instead of deprecated `Tag`, replacing full-page spinner with table skeletons and localized empty state.
+- Standardize grid and spacing utility classes across user creation modal and audit log filters.
+
 ## [0.7.5] - 2026-09-02
 
 ### Added

@@ -532,4 +532,36 @@ describe('Design System Primitives', () => {
     expect(screen.getByText('Card Desc')).toBeInTheDocument();
     expect(screen.getByText('Content Area')).toBeInTheDocument();
   });
+
+  it('renders AsyncState with loading, error, empty, and data states', () => {
+    const { rerender } = render(
+      <AsyncState loading skeleton={<div>Skeleton Loader</div>}>
+        <div>Loaded Content</div>
+      </AsyncState>
+    );
+    expect(screen.getByText('Skeleton Loader')).toBeInTheDocument();
+
+    rerender(
+      <AsyncState loading={false} error="Load failed" retryLabel="Retry Now" onRetry={() => {}}>
+        <div>Loaded Content</div>
+      </AsyncState>
+    );
+    expect(screen.getByText('Load failed')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Retry Now' })).toBeInTheDocument();
+
+    rerender(
+      <AsyncState loading={false} empty emptyTitle="No records found" emptyDescription="Create one to get started">
+        <div>Loaded Content</div>
+      </AsyncState>
+    );
+    expect(screen.getByText('No records found')).toBeInTheDocument();
+    expect(screen.getByText('Create one to get started')).toBeInTheDocument();
+
+    rerender(
+      <AsyncState loading={false}>
+        <div>Loaded Content</div>
+      </AsyncState>
+    );
+    expect(screen.getByText('Loaded Content')).toBeInTheDocument();
+  });
 });

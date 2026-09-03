@@ -2,16 +2,15 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText as AuditIcon } from 'lucide-react';
 import {
+  AsyncState,
+  Badge,
   Button,
   ButtonGroup,
   DataTable,
-  EmptyState,
-  Feedback,
   FormField,
   Input,
   PanelHeader,
   TableSkeleton,
-  Tag,
 } from '../../components/ui';
 import { AuditLogDetailModal } from './audit/AuditLogDetailModal';
 import type { AuditLog } from '../../types/api';
@@ -74,19 +73,21 @@ export default function AuditLogsTab() {
         </div>
       </div>
 
-      {error && (
-        <div style={{ padding: '0 20px', marginTop: '16px' }}>
-          <Feedback type="error">{error}</Feedback>
-        </div>
-      )}
-
-      {auditLoading ? (
-        <div style={{ padding: '0 20px 20px 20px' }}>
-          <TableSkeleton rows={5} columns={5} />
-        </div>
-      ) : auditLogs.length === 0 ? (
-        <EmptyState icon={<AuditIcon />} title={t('audit.noLogsTitle')} description={t('audit.noLogsDescription')} />
-      ) : (
+      <AsyncState
+        loading={auditLoading}
+        skeleton={
+          <div style={{ padding: '0 20px 20px 20px' }}>
+            <TableSkeleton rows={5} columns={5} />
+          </div>
+        }
+        error={error}
+        retryLabel={t('common.retry')}
+        onRetry={search}
+        empty={!auditLoading && auditLogs.length === 0 && !error}
+        emptyIcon={<AuditIcon />}
+        emptyTitle={t('audit.noLogsTitle')}
+        emptyDescription={t('audit.noLogsDescription')}
+      >
         <div>
           <DataTable>
             <thead>
@@ -105,7 +106,7 @@ export default function AuditLogsTab() {
                     {log.created_at ? new Date(log.created_at).toLocaleString() : '-'}
                   </td>
                   <td>
-                    <Tag>{log.action}</Tag>
+                    <Badge tone="neutral">{log.action}</Badge>
                   </td>
                   <td className="text-sm text-mono">{log.actor}</td>
                   <td className="text-sm text-mono text-muted">{log.account_id || '-'}</td>
@@ -144,7 +145,7 @@ export default function AuditLogsTab() {
             </ButtonGroup>
           </div>
         </div>
-      )}
+      </AsyncState>
 
       <AuditLogDetailModal
         isOpen={Boolean(selectedAuditLog)}

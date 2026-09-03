@@ -530,6 +530,7 @@
     "terminateSessionConfirmMessage": "Are you sure you want to terminate this session? The device will be signed out immediately.",
     "sessionRevoked": "Session revoked.",
     "terminateButton": "Terminate",
+    "noSessionsTitle": "No active sessions found",
     "loadFailed": "Unable to load active sessions.",
     "revokeFailed": "Unable to revoke the session."
   },

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Shield as ShieldIcon, RefreshCw } from 'lucide-react';
 import {
+  Badge,
   Button,
   DefinitionList,
   DefinitionRow,
@@ -8,7 +9,6 @@ import {
   PageLoader,
   PanelHeader,
   PlainSection,
-  Tag,
 } from '../../components/ui';
 import { useSystemStatus } from '../../features/system/useSystemStatus';
 import { dependencyLabel, dependencyIsHealthy, formatHealthTimestamp } from '../../utils/format';
@@ -36,7 +36,7 @@ export default function SystemStatusTab() {
             variant="secondary"
             className="content-action"
             onClick={() => void refresh()}
-            disabled={loading}
+            loading={loading}
             icon={<RefreshCw size={16} />}
             title={t('system.refreshButton')}
           >
@@ -68,18 +68,8 @@ export default function SystemStatusTab() {
         </div>
 
         {systemHealth?.fetch_error && (
-          <div
-            style={{
-              marginBottom: '16px',
-              padding: '12px 14px',
-              borderRadius: '8px',
-              background: 'rgba(239, 68, 68, 0.10)',
-              border: '1px solid rgba(239, 68, 68, 0.16)',
-              color: '#fecaca',
-              fontSize: '13px',
-            }}
-          >
-            {systemHealth.fetch_error}
+          <div className="mb-md">
+            <Feedback type="error">{systemHealth.fetch_error}</Feedback>
           </div>
         )}
 
@@ -188,9 +178,9 @@ export default function SystemStatusTab() {
             <DefinitionRow label={t('system.supportedScopes')}>
               <div className="flex-row flex-wrap gap-xs">
                 {oidcConfig.scopes_supported?.map((scope: string) => (
-                  <Tag key={scope} tone="secondary">
+                  <Badge key={scope} tone="secondary">
                     {scope}
-                  </Tag>
+                  </Badge>
                 ))}
               </div>
             </DefinitionRow>
@@ -198,9 +188,9 @@ export default function SystemStatusTab() {
             <DefinitionRow label={t('system.grantTypesSupported')}>
               <div className="flex-row flex-wrap gap-xs">
                 {oidcConfig.grant_types_supported?.map((gt: string) => (
-                  <Tag key={gt} tone="secondary">
+                  <Badge key={gt} tone="secondary">
                     {gt}
-                  </Tag>
+                  </Badge>
                 ))}
               </div>
             </DefinitionRow>

@@ -530,6 +530,7 @@
     "terminateSessionConfirmMessage": "确定要终止此会话吗？该设备将立即退出登录。",
     "sessionRevoked": "会话已撤销。",
     "terminateButton": "终止",
+    "noSessionsTitle": "暂无活跃会话记录",
     "loadFailed": "无法加载活跃会话。",
     "revokeFailed": "无法撤销会话。"
   },

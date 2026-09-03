@@ -108,7 +108,7 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
           </FormField>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+        <div className="form-grid-2">
           <FormField id="new-email" label={t('users.emailLabel')}>
             <Input
               id="new-email"
@@ -146,7 +146,7 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
           />
         </FormField>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+        <div className="form-grid-2">
           <FormField id="new-locale" label={t('users.localeLabel')} noMargin>
             <Input
               id="new-locale"
