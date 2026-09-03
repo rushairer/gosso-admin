@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './Dialog';
@@ -37,6 +37,30 @@ export function Modal({
   const visible = open ?? isOpen ?? false;
   const { t } = useTranslation();
   const accessibleLabel = ariaLabel || t('common.dialog');
+  const previousFocus = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+
+  onCloseRef.current = onClose;
+  if (visible && previousFocus.current === null) {
+    previousFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  }
+
+  useEffect(() => {
+    if (!visible) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || !closeOnEsc) return;
+      event.preventDefault();
+      onCloseRef.current();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      previousFocus.current?.focus();
+      previousFocus.current = null;
+    };
+  }, [visible, closeOnEsc]);
 
   if (!visible) return null;
 
@@ -44,7 +68,7 @@ export function Modal({
     <Dialog
       open={visible}
       onOpenChange={(nextOpen) => {
-        if (!nextOpen) onClose();
+        if (!nextOpen) onCloseRef.current();
       }}
     >
       <DialogContent
@@ -53,12 +77,13 @@ export function Modal({
         showCloseButton={showCloseButton}
         closeLabel={t('common.close')}
         aria-label={title ? undefined : accessibleLabel}
-        onEscapeKeyDown={(event) => {
-          if (!closeOnEsc) event.preventDefault();
+        onBackdropClick={closeOnBackdrop ? () => onCloseRef.current() : undefined}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          previousFocus.current?.focus();
         }}
-        onPointerDownOutside={(event) => {
-          if (!closeOnBackdrop) event.preventDefault();
-        }}
+        onEscapeKeyDown={(event) => event.preventDefault()}
+        onPointerDownOutside={(event) => event.preventDefault()}
       >
         {title ? (
           <DialogHeader className="modal-header">

@@ -26,28 +26,46 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 interface DialogContentProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
   showCloseButton?: boolean;
   closeLabel?: string;
+  onBackdropClick?: () => void;
 }
 
 const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.Content>, DialogContentProps>(
-  ({ className, children, showCloseButton = true, closeLabel = 'Close', ...props }, ref) => (
+  ({ className, children, showCloseButton = true, closeLabel = 'Close', onBackdropClick, ...props }, ref) => (
     <DialogPortal>
-      <DialogOverlay />
-      <DialogPrimitive.Content
-        ref={ref}
-        className={cn(
-          'ds-dialog-content fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border p-6 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-          className
-        )}
-        {...props}
+      <div
+        className="ds-dialog-portal fixed inset-0 z-50 pointer-events-auto"
+        onClick={
+          onBackdropClick
+            ? (event) => {
+                const target = event.target;
+                if (
+                  target === event.currentTarget ||
+                  (target instanceof Element && target.classList.contains('ds-dialog-overlay'))
+                ) {
+                  onBackdropClick();
+                }
+              }
+            : undefined
+        }
       >
-        {children}
-        {showCloseButton ? (
-          <DialogPrimitive.Close className="ds-dialog-close absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-lg opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none">
-            <XIcon className="h-4 w-4 shrink-0" />
-            <span className="sr-only">{closeLabel}</span>
-          </DialogPrimitive.Close>
-        ) : null}
-      </DialogPrimitive.Content>
+        <DialogOverlay />
+        <DialogPrimitive.Content
+          ref={ref}
+          className={cn(
+            'ds-dialog-content fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border p-6 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+            className
+          )}
+          {...props}
+        >
+          {children}
+          {showCloseButton ? (
+            <DialogPrimitive.Close className="ds-dialog-close absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-lg opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none">
+              <XIcon className="h-4 w-4 shrink-0" />
+              <span className="sr-only">{closeLabel}</span>
+            </DialogPrimitive.Close>
+          ) : null}
+        </DialogPrimitive.Content>
+      </div>
     </DialogPortal>
   )
 );
