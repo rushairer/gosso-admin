@@ -122,7 +122,7 @@ export default function Home() {
               <h2 className="home-hero-title text-2xl sm:text-3xl font-bold tracking-tight m-0">
                 {userAdmin ? t('home.title') : t('home.userTitle')}
               </h2>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-medium border border-emerald-500/25 bg-emerald-500/10 text-emerald-400 shrink-0">
+              <span className="inline-flex items-center gap-2 pl-3.5 pr-4 py-1 rounded-md text-xs font-medium border border-emerald-500/25 bg-emerald-500/10 text-emerald-400 shrink-0">
                 <span className="status-dot" />
                 <span>
                   {userAdmin
