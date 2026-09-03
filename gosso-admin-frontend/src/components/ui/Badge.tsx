@@ -3,34 +3,42 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
 
 export const badgeVariants = cva(
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
+  'badge inline-flex items-center whitespace-nowrap border text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
   {
     variants: {
       tone: {
-        primary: 'badge badge-primary border-blue-500/30 bg-blue-500/10 text-blue-300',
-        brand: 'badge badge-brand border-blue-500/30 bg-blue-500/10 text-blue-300',
-        secondary: 'badge badge-secondary border-slate-700 bg-slate-800 text-slate-300',
-        neutral: 'badge badge-neutral border-slate-700 bg-slate-800 text-slate-300',
-        success: 'badge badge-success border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
-        warning: 'badge badge-warning border-amber-500/30 bg-amber-500/10 text-amber-300',
-        danger: 'badge badge-danger border-rose-500/30 bg-rose-500/10 text-rose-300',
+        primary: 'badge-primary badge-brand badge--brand',
+        brand: 'badge-primary badge-brand badge--brand',
+        secondary: 'badge-secondary badge-neutral badge--neutral',
+        neutral: 'badge-secondary badge-neutral badge--neutral',
+        success: 'badge-success badge--success',
+        warning: 'badge-warning badge--warning',
+        danger: 'badge-danger badge--danger',
+        destructive: 'badge-danger badge--danger',
+      },
+      pill: {
+        true: 'badge--pill',
+        false: '',
       },
     },
     defaultVariants: {
-      tone: 'primary',
+      tone: 'neutral',
+      pill: false,
     },
   }
 );
 
-export type BadgeTone = 'primary' | 'secondary' | 'brand' | 'success' | 'warning' | 'danger' | 'neutral';
+export type BadgeTone =
+  'primary' | 'secondary' | 'brand' | 'success' | 'warning' | 'danger' | 'destructive' | 'neutral';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof badgeVariants> {
   tone?: BadgeTone;
+  pill?: boolean;
 }
 
-export function Badge({ children, tone = 'primary', title, className, ...props }: BadgeProps) {
+export function Badge({ children, tone = 'neutral', pill = false, title, className, ...props }: BadgeProps) {
   return (
-    <span className={cn(badgeVariants({ tone }), className)} title={title} {...props}>
+    <span className={cn(badgeVariants({ tone, pill }), className)} title={title} {...props}>
       {children}
     </span>
   );

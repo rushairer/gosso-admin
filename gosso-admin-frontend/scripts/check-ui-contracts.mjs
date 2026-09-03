@@ -55,15 +55,34 @@ function buttonChildIcon(node, sourceFile) {
     if (ts.isConditionalExpression(child)) {
       visitChild(child.whenTrue);
       visitChild(child.whenFalse);
-      return;
     }
   }
   visitChild(node);
   return icon;
 }
 
+function staticClassName(attribute) {
+  const initializer = attribute.initializer;
+  if (!initializer) return "";
+  if (ts.isStringLiteral(initializer)) return initializer.text;
+  if (
+    ts.isJsxExpression(initializer) &&
+    initializer.expression &&
+    (ts.isStringLiteral(initializer.expression) ||
+      ts.isNoSubstitutionTemplateLiteral(initializer.expression))
+  ) {
+    return initializer.expression.text;
+  }
+  return "";
+}
+
 function checkTsxContracts(name, source) {
-  if (!name.endsWith(".tsx") || name.includes("__tests__") || name.includes("test/")) return;
+  if (
+    !name.endsWith(".tsx") ||
+    name.includes("__tests__") ||
+    name.includes("test/")
+  )
+    return;
   const sourceFile = ts.createSourceFile(
     name,
     source,
@@ -88,7 +107,7 @@ function checkTsxContracts(name, source) {
       }
       if (
         ts.isJsxElement(node) &&
-        ["Button", "ButtonLink"].includes(tag) &&
+        ["Button", "ButtonLink", "ChoiceButton"].includes(tag) &&
         !sharedPrimitive
       ) {
         for (const child of node.children) {
@@ -100,6 +119,38 @@ function checkTsxContracts(name, source) {
           }
         }
       }
+
+      const attributes = ts.isJsxElement(node)
+        ? node.openingElement.attributes
+        : node.attributes;
+      for (const attribute of attributes.properties) {
+        if (
+          !ts.isJsxAttribute(attribute) ||
+          attribute.name.text !== "className"
+        )
+          continue;
+        const value = staticClassName(attribute);
+        if (!sharedPrimitive && /(^|\s)btn(?:\s|$)/.test(value)) {
+          failures.push(
+            `${name}:${location(sourceFile, attribute)} shared button classes must use Button or ButtonLink`,
+          );
+        }
+        if (!sharedPrimitive && /(^|\s)badge(?:\s|$)/.test(value)) {
+          failures.push(
+            `${name}:${location(sourceFile, attribute)} shared badge classes must use Badge`,
+          );
+        }
+      }
+    }
+
+    if (
+      !sharedPrimitive &&
+      ts.isIdentifier(node) &&
+      node.text === "buttonClassName"
+    ) {
+      failures.push(
+        `${name}:${location(sourceFile, node)} buttonClassName is internal to the shared Button primitive`,
+      );
     }
     ts.forEachChild(node, visit);
   }

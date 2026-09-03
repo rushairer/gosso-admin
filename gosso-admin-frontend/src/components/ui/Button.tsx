@@ -6,10 +6,15 @@ import { cn } from '../../lib/utils';
 
 export type ButtonVariant =
   'primary' | 'secondary' | 'danger' | 'ghost' | 'link' | 'default' | 'destructive' | 'outline';
-export type ButtonSize = 'sm' | 'base' | 'lg' | 'regular' | 'compact' | 'default' | 'icon';
+
+/**
+ * Canonical sizes are sm/default/lg/icon. The legacy base/regular/compact
+ * aliases remain supported while feature code migrates to the shared contract.
+ */
+export type ButtonSize = 'sm' | 'default' | 'lg' | 'icon' | 'base' | 'regular' | 'compact';
 
 export const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer',
+  'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer',
   {
     variants: {
       variant: {
@@ -34,7 +39,7 @@ export const buttonVariants = cva(
     },
     defaultVariants: {
       variant: 'secondary',
-      size: 'base',
+      size: 'default',
     },
   }
 );
@@ -59,7 +64,7 @@ export interface ButtonLinkProps extends Omit<LinkProps, 'to'>, VariantProps<typ
 
 export function buttonClassNames({
   variant = 'secondary',
-  size = 'base',
+  size = 'default',
   loading = false,
   className = '',
 }: {
@@ -68,13 +73,13 @@ export function buttonClassNames({
   loading?: boolean;
   className?: string;
 } = {}): string {
-  return cn(buttonVariants({ variant: variant as any, size: size as any }), loading && 'is-loading', className);
+  return cn(buttonVariants({ variant, size }), loading && 'is-loading', className);
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
     variant = 'secondary',
-    size = 'base',
+    size = 'default',
     loading = false,
     disabled,
     icon,
@@ -98,15 +103,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       {...props}
     >
       {loading ? (
-        <LoadingSpinner size="sm" className="btn-spinner" />
+        <LoadingSpinner size="sm" className="btn-spinner shrink-0" />
       ) : icon && iconPosition === 'left' ? (
-        <span className="btn-icon" aria-hidden="true">
+        <span className="btn-icon shrink-0" aria-hidden="true">
           {icon}
         </span>
       ) : null}
-      {children && <span className="btn-label">{children}</span>}
+      {children && <span className="btn-label min-w-0">{children}</span>}
       {!loading && icon && iconPosition === 'right' ? (
-        <span className="btn-icon" aria-hidden="true">
+        <span className="btn-icon shrink-0" aria-hidden="true">
           {icon}
         </span>
       ) : null}
@@ -117,7 +122,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
 export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(function ButtonLink(
   {
     variant = 'secondary',
-    size = 'base',
+    size = 'default',
     icon,
     iconPosition = 'left',
     children,
@@ -140,23 +145,23 @@ export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(functio
       })}
       aria-disabled={disabled ? 'true' : undefined}
       tabIndex={disabled ? -1 : undefined}
-      onClick={(e) => {
+      onClick={(event) => {
         if (disabled) {
-          e.preventDefault();
+          event.preventDefault();
           return;
         }
-        onClick?.(e);
+        onClick?.(event);
       }}
       {...props}
     >
       {icon && iconPosition === 'left' ? (
-        <span className="btn-icon" aria-hidden="true">
+        <span className="btn-icon shrink-0" aria-hidden="true">
           {icon}
         </span>
       ) : null}
-      {children && <span className="btn-label">{children}</span>}
+      {children && <span className="btn-label min-w-0">{children}</span>}
       {icon && iconPosition === 'right' ? (
-        <span className="btn-icon" aria-hidden="true">
+        <span className="btn-icon shrink-0" aria-hidden="true">
           {icon}
         </span>
       ) : null}
@@ -177,7 +182,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
     label,
     icon,
     variant = 'ghost',
-    size = 'base',
+    size = 'default',
     loading = false,
     className = '',
     children,
@@ -205,9 +210,9 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
       {...props}
     >
       {loading ? (
-        <LoadingSpinner size="sm" className="btn-spinner" />
+        <LoadingSpinner size="sm" className="btn-spinner shrink-0" />
       ) : icon ? (
-        <span className="icon-btn__icon" aria-hidden="true">
+        <span className="icon-btn__icon shrink-0" aria-hidden="true">
           {icon}
         </span>
       ) : (
@@ -227,7 +232,18 @@ export interface IconButtonLinkProps extends Omit<LinkProps, 'to'>, VariantProps
 }
 
 export const IconButtonLink = forwardRef<HTMLAnchorElement, IconButtonLinkProps>(function IconButtonLink(
-  { to, label, icon, variant = 'ghost', size = 'base', className = '', disabled = false, children, onClick, ...props },
+  {
+    to,
+    label,
+    icon,
+    variant = 'ghost',
+    size = 'default',
+    className = '',
+    disabled = false,
+    children,
+    onClick,
+    ...props
+  },
   ref
 ) {
   return (
@@ -243,17 +259,17 @@ export const IconButtonLink = forwardRef<HTMLAnchorElement, IconButtonLinkProps>
       title={label}
       aria-disabled={disabled ? 'true' : undefined}
       tabIndex={disabled ? -1 : undefined}
-      onClick={(e) => {
+      onClick={(event) => {
         if (disabled) {
-          e.preventDefault();
+          event.preventDefault();
           return;
         }
-        onClick?.(e);
+        onClick?.(event);
       }}
       {...props}
     >
       {icon ? (
-        <span className="icon-btn__icon" aria-hidden="true">
+        <span className="icon-btn__icon shrink-0" aria-hidden="true">
           {icon}
         </span>
       ) : (
