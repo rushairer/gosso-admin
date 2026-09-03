@@ -1,0 +1,333 @@
+/*
+ * Cross-product design-system alignment layer.
+ *
+ * Keep product-specific brand tokens in tokens.css. This file normalizes
+ * geometry, rhythm, elevation, and interaction behavior shared with Gouno Blog.
+ */
+:root {
+  --ds-surface-page: var(--surface-canvas);
+  --ds-surface-panel: var(--surface-panel);
+  --ds-surface-elevated: var(--surface-elevated);
+  --ds-surface-control: var(--input-bg);
+  --ds-surface-control-hover: var(--surface-hover);
+  --ds-text-primary: var(--text-primary);
+  --ds-text-secondary: var(--text-secondary);
+  --ds-border-default: var(--border-default);
+  --ds-border-subtle: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  --ds-brand: var(--action-primary);
+  --ds-brand-hover: var(--action-primary-hover);
+  --ds-danger: var(--status-danger);
+  --ds-overlay: color-mix(in srgb, var(--surface-canvas) 82%, transparent);
+  --ds-panel-shadow: 0 8px 24px color-mix(in srgb, var(--surface-canvas) 72%, transparent);
+  --ds-panel-shadow-hover: 0 12px 30px color-mix(in srgb, var(--surface-canvas) 82%, transparent);
+  --ds-dialog-shadow: 0 24px 64px color-mix(in srgb, var(--surface-canvas) 92%, transparent);
+  --ds-page-padding-inline: clamp(20px, 3vw, 36px);
+
+  --control-h-sm: 34px;
+  --control-h-base: 38px;
+  --control-h-lg: 46px;
+  --control-height: 38px;
+  --control-height-compact: 34px;
+  --radius-control: 8px;
+  --radius-panel: 12px;
+  --radius-lg: 12px;
+}
+
+.topbar {
+  padding-inline: var(--ds-page-padding-inline);
+}
+
+.workspace {
+  padding: 28px var(--ds-page-padding-inline) 48px;
+}
+
+.btn {
+  min-height: var(--control-h-base);
+  gap: 8px;
+  border-radius: var(--radius-control);
+  padding-inline: 14px;
+  line-height: 1;
+}
+
+.btn-base {
+  min-height: var(--control-h-base);
+}
+
+.btn-sm {
+  min-height: var(--control-h-sm);
+  gap: 6px;
+  border-radius: var(--radius-control);
+  padding-inline: 12px;
+}
+
+.btn-lg {
+  min-height: var(--control-h-lg);
+  padding-inline: 18px;
+  font-size: var(--font-size-md);
+}
+
+.btn.btn-icon,
+.icon-btn {
+  width: var(--control-h-base);
+  height: var(--control-h-base);
+  min-height: var(--control-h-base);
+  padding: 0;
+}
+
+.icon-btn.btn-sm {
+  width: var(--control-h-sm);
+  height: var(--control-h-sm);
+  min-height: var(--control-h-sm);
+}
+
+.icon-btn.btn-lg {
+  width: var(--control-h-lg);
+  height: var(--control-h-lg);
+  min-height: var(--control-h-lg);
+}
+
+.btn > .btn-icon,
+.icon-btn__icon,
+.btn-spinner {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn > .btn-icon > svg,
+.icon-btn__icon > svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
+.btn-label {
+  min-width: 0;
+  line-height: 1;
+}
+
+.badge,
+.status-pill,
+.status-badge {
+  min-height: 24px;
+  gap: 4px;
+  margin: 0;
+  border-radius: var(--radius-control);
+  padding: 3px 8px;
+  line-height: 1.35;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.badge--pill {
+  border-radius: var(--radius-full);
+}
+
+.badge--brand {
+  border-color: color-mix(in srgb, var(--ds-brand) 32%, transparent);
+  background: var(--action-primary-subtle);
+  color: var(--status-primary-text);
+}
+
+.badge--neutral {
+  border-color: var(--ds-border-subtle);
+  background: var(--surface-subtle);
+  color: var(--ds-text-secondary);
+}
+
+.badge--success {
+  border-color: var(--status-success-border);
+  background: var(--status-success-subtle);
+  color: var(--status-success-text);
+}
+
+.badge--warning {
+  border-color: var(--status-warning-border);
+  background: var(--status-warning-subtle);
+  color: var(--status-warning-text);
+}
+
+.badge--danger {
+  border-color: var(--status-danger-border);
+  background: var(--status-danger-subtle);
+  color: var(--status-danger-text);
+}
+
+.glass-card,
+.admin-panel {
+  border-color: var(--ds-border-subtle);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--ds-panel-shadow);
+}
+
+.glass-card--interactive:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--ds-panel-shadow-hover);
+}
+
+.panel-stack {
+  gap: 16px;
+}
+
+.form-group {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.form-group.no-margin {
+  margin-bottom: 0;
+}
+
+.form-label {
+  margin-bottom: 0;
+}
+
+.form-actions,
+.modal-footer,
+.drawer-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 16px;
+}
+
+.data-table-wrap,
+.table-scroll {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.admin-table th,
+.admin-table td {
+  vertical-align: middle;
+}
+
+.admin-table th:last-child,
+.admin-table td:last-child {
+  text-align: right;
+}
+
+.table-actions,
+.button-group,
+.row-actions {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.admin-table td:last-child > :is(.table-actions, .button-group, .row-actions) {
+  width: 100%;
+}
+
+.table-actions > *,
+.button-group > *,
+.row-actions > *,
+.admin-table td :is(.btn, .icon-btn, .badge, .status-pill, .status-badge, svg) {
+  flex-shrink: 0;
+}
+
+.ds-dialog-overlay,
+.drawer-overlay {
+  z-index: 1000;
+  background: var(--ds-overlay);
+  backdrop-filter: blur(8px);
+}
+
+.ds-dialog-content,
+.modal-content,
+.drawer-panel {
+  border: 1px solid var(--ds-border-subtle);
+  border-radius: var(--radius-panel);
+  background: var(--ds-surface-panel);
+  color: var(--ds-text-primary);
+  box-shadow: var(--ds-dialog-shadow);
+}
+
+.ds-dialog-content {
+  z-index: 1001;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.ds-dialog-close {
+  background: transparent;
+  color: var(--ds-text-secondary);
+}
+
+.ds-dialog-close:hover {
+  background: var(--ds-surface-control-hover);
+  color: var(--ds-text-primary);
+}
+
+.ds-dialog-close:focus-visible {
+  outline: 2px solid var(--ds-brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--border-focus-ring);
+}
+
+.modal-content {
+  padding: 24px;
+}
+
+.modal-header {
+  margin: 0;
+  padding: 0 40px 16px 0;
+  border-bottom: 1px solid var(--ds-border-default);
+}
+
+.modal-body {
+  min-width: 0;
+  padding: 0;
+}
+
+.ds-dialog-footer,
+.modal-footer,
+.drawer-footer {
+  margin: 0;
+  border-top: 1px solid var(--ds-border-default);
+}
+
+@media (max-width: 720px) {
+  .topbar,
+  .workspace {
+    padding-inline: 20px;
+  }
+
+  .ds-dialog-content {
+    width: calc(100vw - 24px);
+    padding: 20px;
+  }
+
+  .ds-dialog-footer,
+  .modal-footer,
+  .drawer-footer {
+    align-items: stretch;
+  }
+
+  .ds-dialog-footer > *,
+  .modal-footer > *,
+  .drawer-footer > * {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .icon-btn,
+  .glass-card--interactive,
+  .ds-dialog-overlay,
+  .ds-dialog-content {
+    animation-duration: 0.01ms;
+    transition-duration: 0.01ms;
+  }
+}
