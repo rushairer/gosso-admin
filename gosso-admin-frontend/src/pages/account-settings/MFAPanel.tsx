@@ -187,35 +187,39 @@ export default function MFAPanel() {
 
           {/* MFA Active */}
           {mfaStatus.enabled && (
-            <div className="flex-col gap-xl">
-              <div className="inline-status-row inline-status-row--success">
-                <Shield size={24} color="var(--status-success)" />
-                <div>
-                  <div className="font-bold text-md">{t('mfa.accountProtected')}</div>
-                  <div className="text-sm text-muted">{t('mfa.totpRegistered')}</div>
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center gap-3.5 pb-5 border-b border-[var(--border-default)]">
+                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                  <Shield size={20} />
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <div className="font-semibold text-base text-[var(--color-text-main)]">
+                    {t('mfa.accountProtected')}
+                  </div>
+                  <div className="text-sm text-[var(--color-text-muted)]">{t('mfa.totpRegistered')}</div>
                 </div>
               </div>
 
-              <ButtonGroup>
+              <div className="flex flex-wrap items-center gap-3">
                 <Button variant="secondary" icon={<RefreshCw size={14} />} onClick={handleGenerateBackupCodes}>
                   {t('mfa.regenerateBackupCodes')}
                 </Button>
                 <Button variant="danger" icon={<Unlock size={14} />} onClick={() => setShowDisableModal(true)}>
                   {t('mfa.disableTwoFactorAuth')}
                 </Button>
-              </ButtonGroup>
+              </div>
             </div>
           )}
 
           {/* Backup Codes */}
           {backupCodes.length > 0 && (
-            <div>
-              <div className="flex-row items-center gap-sm text-warning">
+            <div className="flex flex-col gap-4 mt-6 pt-6 border-t border-[var(--border-default)]">
+              <div className="flex items-center gap-2 text-warning">
                 <AlertTriangle size={16} />
-                <h4 className="font-bold text-base">{t('mfa.recoveryBackupCodesTitle')}</h4>
+                <h4 className="font-bold text-base m-0">{t('mfa.recoveryBackupCodesTitle')}</h4>
               </div>
 
-              <p className="text-sm text-muted">{t('mfa.recoveryBackupCodesDescription')}</p>
+              <p className="text-sm text-muted m-0">{t('mfa.recoveryBackupCodesDescription')}</p>
 
               <div className="mfa-backup-codes-grid">
                 {backupCodes.map((code, idx) => (
@@ -225,7 +229,7 @@ export default function MFAPanel() {
                 ))}
               </div>
 
-              <ButtonGroup>
+              <div>
                 <Button
                   variant="secondary"
                   size="sm"
@@ -237,7 +241,7 @@ export default function MFAPanel() {
                 >
                   {t('mfa.copyCodesButton')}
                 </Button>
-              </ButtonGroup>
+              </div>
             </div>
           )}
         </PanelBody>
