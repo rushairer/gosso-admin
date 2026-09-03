@@ -112,16 +112,16 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
             <CheckboxField
               key={sc}
               id={`scope-${sc}`}
-              label={sc === 'admin' ? t('clients.adminScopeLabel') : sc}
+              label={sc}
               checked={clientForm.scopes.includes(sc)}
               onChange={() => onCheckboxChange('scopes', sc)}
             />
           ))}
         </CheckboxGroup>
         {clientForm.scopes.some(isAdminScope) && (
-          <div className="notice-card notice-card--left">
-            <InfoIcon className="text-warning flex-shrink-0" size={18} />
-            <p className="text-sm text-muted">{t('clients.adminScopeWarning')}</p>
+          <div className="notice-card notice-card--warning flex items-start gap-3 p-3.5 rounded-lg border border-amber-500/25 bg-amber-500/5">
+            <InfoIcon className="text-amber-400 shrink-0 mt-0.5" size={16} />
+            <p className="text-xs sm:text-sm leading-relaxed text-amber-200/90 m-0">{t('clients.adminScopeWarning')}</p>
           </div>
         )}
         <div className="modal-footer modal-footer--embedded">

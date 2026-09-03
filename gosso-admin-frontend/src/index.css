@@ -1079,9 +1079,9 @@ a {
 
 .notice-card {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background: var(--bg-panel-soft);
