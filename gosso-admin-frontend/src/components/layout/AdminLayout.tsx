@@ -6,6 +6,7 @@ import { useSession } from '@gosso/client/react';
 import { logout, redirectToAuthorize } from '../../auth';
 import { siteSettingsService } from '../../services';
 import type { SessionSnapshot } from '../../auth';
+import { Button, IconButton } from '../ui';
 
 function initials(snapshot: SessionSnapshot) {
   const name = snapshot.profile?.preferred_username || snapshot.profile?.name || 'Guest';
@@ -134,18 +135,23 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           {session.loggedIn ? (
-            <button className="sidebar-action" onClick={() => logout('/')}>
-              <LogOut size={16} />
+            <Button
+              variant="secondary"
+              className="sidebar-action"
+              icon={<LogOut size={16} />}
+              onClick={() => logout('/')}
+            >
               {t('nav.signOut')}
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
+              variant="primary"
               className="sidebar-action primary"
+              icon={<LogIn size={16} />}
               onClick={() => redirectToAuthorize('/system-management/clients')}
             >
-              <LogIn size={16} />
               {t('nav.signIn')}
-            </button>
+            </Button>
           )}
         </div>
       </aside>
@@ -163,9 +169,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </div>
             {/* Mobile session indicator — hidden on desktop via CSS */}
             {session.loggedIn && (
-              <button className="mobile-signout" onClick={() => logout('/')} title={t('nav.signOut')}>
-                <LogOut size={16} />
-              </button>
+              <IconButton
+                label={t('nav.signOut')}
+                icon={<LogOut size={16} />}
+                variant="ghost"
+                className="mobile-signout"
+                onClick={() => logout('/')}
+              />
             )}
           </div>
         </header>

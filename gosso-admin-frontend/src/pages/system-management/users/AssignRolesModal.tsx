@@ -65,7 +65,7 @@ export function AssignRolesModal({
       }
     >
       <div className="plain-section-title">{t('users.activeRolesSection')}</div>
-      <div style={{ margin: '8px 0 24px 0' }}>
+      <div className="my-md">
         {account.roles && account.roles.length > 0 ? (
           <ListStack>
             {account.roles.map((role) => (
@@ -88,10 +88,7 @@ export function AssignRolesModal({
       </div>
 
       {!isSelf && (
-        <form
-          onSubmit={handleAddRoleSubmit}
-          style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '20px' }}
-        >
+        <form onSubmit={handleAddRoleSubmit} className="modal-section-divider">
           <FormField id="assign-role" label={t('users.assignNewRoleLabel')} noMargin>
             <ButtonGroup>
               <div className="flex-1">

@@ -165,12 +165,7 @@ export default function ProfilePanel() {
 
           <DefinitionRow label={t('profile.subjectIdLabel')}>
             <div className="flex-row items-center justify-between flex-1 min-w-0">
-              <code
-                className="text-mono text-sm"
-                style={{ background: 'var(--surface-subtle)', padding: '3px 8px', borderRadius: '4px' }}
-              >
-                {profile?.sub || '-'}
-              </code>
+              <code className="text-mono text-sm inline-code">{profile?.sub || '-'}</code>
               {profile?.sub && (
                 <Button
                   variant="secondary"
@@ -189,12 +184,7 @@ export default function ProfilePanel() {
 
           <DefinitionRow label={t('profile.ssoIssuerLabel')}>
             <div className="flex-row items-center justify-between flex-1 min-w-0">
-              <code
-                className="text-mono text-sm"
-                style={{ background: 'var(--surface-subtle)', padding: '3px 8px', borderRadius: '4px' }}
-              >
-                {window.location.origin}
-              </code>
+              <code className="text-mono text-sm inline-code">{window.location.origin}</code>
               <Button
                 variant="secondary"
                 size="sm"

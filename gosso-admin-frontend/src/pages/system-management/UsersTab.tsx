@@ -220,216 +220,202 @@ export default function UsersTab() {
   };
 
   return (
-    <AsyncState
-      loading={loading}
-      loadingMessage={t('users.loadingAccounts')}
-      skeleton={
-        <div>
-          <PanelHeader
-            title={t('users.title')}
-            description={t('users.description')}
-            action={
-              <Button variant="primary" className="content-action" icon={<PlusIcon size={16} />} disabled>
-                {t('users.addUser')}
-              </Button>
-            }
-          />
-          <TableSkeleton rows={5} columns={4} />
-        </div>
-      }
-      error={error}
-      retryLabel={t('common.retry')}
-      onRetry={() => void fetchAccounts()}
-    >
-      <div>
-        <PanelHeader
-          title={t('users.title')}
-          description={t('users.description')}
-          action={
-            <Button
-              variant="primary"
-              className="content-action"
-              icon={<PlusIcon size={16} />}
-              onClick={() => setShowCreateUserModal(true)}
-            >
-              {t('users.addUser')}
-            </Button>
-          }
-        />
-        {accounts.length === 0 ? (
+    <div>
+      <PanelHeader
+        title={t('users.title')}
+        description={t('users.description')}
+        action={
+          <Button
+            variant="primary"
+            className="content-action"
+            icon={<PlusIcon size={16} />}
+            disabled={loading}
+            onClick={() => setShowCreateUserModal(true)}
+          >
+            {t('users.addUser')}
+          </Button>
+        }
+      />
+      <AsyncState
+        loading={loading}
+        loadingMessage={t('users.loadingAccounts')}
+        skeleton={<TableSkeleton rows={5} columns={4} />}
+        error={error}
+        retryLabel={t('common.retry')}
+        onRetry={() => void fetchAccounts()}
+        empty={accounts.length === 0}
+        emptyState={
           <EmptyState icon={<UserIcon />} title={t('users.noUsersTitle')} description={t('users.noUsersDescription')} />
-        ) : (
-          <>
-            <DataTable>
-              <thead>
-                <tr>
-                  <th>{t('users.colUser')}</th>
-                  <th>{t('users.colStatus')}</th>
-                  <th>{t('users.colRoles')}</th>
-                  <th className="col-actions">{t('users.colActions')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {accounts.map((acc) => (
-                  <tr key={acc.id}>
-                    <td>
-                      <div className="font-bold">{acc.display_name || acc.username}</div>
-                      <div className="text-xs text-dark text-mono">
-                        {acc.username} ({acc.id})
-                      </div>
-                    </td>
-                    <td>
-                      <div className="flex-col gap-xs items-start">
-                        {acc.status === 'active' ? (
-                          <StatusBadge tone="success">{t('users.statusActive')}</StatusBadge>
+        }
+      >
+        <DataTable>
+          <thead>
+            <tr>
+              <th>{t('users.colUser')}</th>
+              <th>{t('users.colStatus')}</th>
+              <th>{t('users.colRoles')}</th>
+              <th className="col-actions">{t('users.colActions')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {accounts.map((acc) => (
+              <tr key={acc.id}>
+                <td>
+                  <div className="font-bold">{acc.display_name || acc.username}</div>
+                  <div className="text-xs text-dark text-mono">
+                    {acc.username} ({acc.id})
+                  </div>
+                </td>
+                <td>
+                  <div className="flex-col gap-xs items-start">
+                    {acc.status === 'active' ? (
+                      <StatusBadge tone="success">{t('users.statusActive')}</StatusBadge>
+                    ) : (
+                      <StatusBadge tone="danger">{t('users.statusSuspended')}</StatusBadge>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <div className="flex-row flex-wrap gap-xs">
+                    {acc.roles && acc.roles.length > 0 ? (
+                      acc.roles.map((role) => (
+                        <Tag key={role.id} title={role.description}>
+                          <ShieldIcon size={10} className="mr-xs inline" />
+                          {role.name}
+                        </Tag>
+                      ))
+                    ) : (
+                      <span className="text-sm text-dark italic">{t('users.noRolesAssigned')}</span>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <ButtonGroup compact>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<ShieldIcon size={13} />}
+                      onClick={() => handleOpenRoleModal(acc)}
+                      title={t('users.manageRoles')}
+                    >
+                      {t('users.rolesButton')}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<ConsentIcon size={13} />}
+                      onClick={() => handleOpenConsentModal(acc)}
+                      title={t('users.manageConsents')}
+                    >
+                      {t('users.consentsButton')}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<KeyIcon size={13} />}
+                      onClick={() => handleOpenPasswordModal(acc)}
+                      title={t('users.changePassword')}
+                      disabled={acc.id === currentAdmin?.sub}
+                    >
+                      {t('users.passwordButton')}
+                    </Button>
+                    <IconButton
+                      variant="secondary"
+                      size="sm"
+                      icon={
+                        acc.status === 'active' ? (
+                          <LockIcon size={13} className="text-danger" />
                         ) : (
-                          <StatusBadge tone="danger">{t('users.statusSuspended')}</StatusBadge>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="flex-row flex-wrap gap-xs">
-                        {acc.roles && acc.roles.length > 0 ? (
-                          acc.roles.map((role) => (
-                            <Tag key={role.id} title={role.description}>
-                              <ShieldIcon size={10} className="mr-xs inline" />
-                              {role.name}
-                            </Tag>
-                          ))
-                        ) : (
-                          <span className="text-sm text-dark italic">{t('users.noRolesAssigned')}</span>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <ButtonGroup compact>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          icon={<ShieldIcon size={13} />}
-                          onClick={() => handleOpenRoleModal(acc)}
-                          title={t('users.manageRoles')}
-                        >
-                          {t('users.rolesButton')}
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          icon={<ConsentIcon size={13} />}
-                          onClick={() => handleOpenConsentModal(acc)}
-                          title={t('users.manageConsents')}
-                        >
-                          {t('users.consentsButton')}
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          icon={<KeyIcon size={13} />}
-                          onClick={() => handleOpenPasswordModal(acc)}
-                          title={t('users.changePassword')}
-                          disabled={acc.id === currentAdmin?.sub}
-                        >
-                          {t('users.passwordButton')}
-                        </Button>
-                        <IconButton
-                          variant="secondary"
-                          size="sm"
-                          icon={
-                            acc.status === 'active' ? (
-                              <LockIcon size={13} className="text-danger" />
-                            ) : (
-                              <UnlockIcon size={13} className="text-success" />
-                            )
-                          }
-                          label={acc.status === 'active' ? t('users.suspendUser') : t('users.activateUser')}
-                          onClick={() => handleToggleUserStatus(acc)}
-                          disabled={acc.id === currentAdmin?.sub}
-                        />
-                        <IconButton
-                          variant="secondary"
-                          size="sm"
-                          icon={<UnlockIcon size={13} className="text-warning" />}
-                          label={t('users.unlockAccount')}
-                          onClick={() => handleClearLockout(acc.id)}
-                          disabled={acc.id === currentAdmin?.sub}
-                        />
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          icon={<ShieldIcon size={13} className="text-warning" />}
-                          onClick={() => handleResetUserMFA(acc)}
-                          title={t('users.resetMfaButton')}
-                          disabled={acc.id === currentAdmin?.sub}
-                        >
-                          {t('users.resetMfaButton')}
-                        </Button>
-                        <IconButton
-                          variant="danger"
-                          size="sm"
-                          icon={<TrashIcon size={13} />}
-                          label={t('users.deleteUser')}
-                          onClick={() => handleDeleteUser(acc.id)}
-                          disabled={acc.id === currentAdmin?.sub}
-                        />
-                      </ButtonGroup>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </DataTable>
-            <div className="flex-row items-center gap-sm pagination-row">
-              <span className="text-sm text-dark">{t('users.paginationSummary', { page, total: totalAccounts })}</span>
-              <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-                {t('common.previous')}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                disabled={page * pageSize >= totalAccounts}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                {t('common.next')}
-              </Button>
-            </div>
-          </>
-        )}
+                          <UnlockIcon size={13} className="text-success" />
+                        )
+                      }
+                      label={acc.status === 'active' ? t('users.suspendUser') : t('users.activateUser')}
+                      onClick={() => handleToggleUserStatus(acc)}
+                      disabled={acc.id === currentAdmin?.sub}
+                    />
+                    <IconButton
+                      variant="secondary"
+                      size="sm"
+                      icon={<UnlockIcon size={13} className="text-warning" />}
+                      label={t('users.unlockAccount')}
+                      onClick={() => handleClearLockout(acc.id)}
+                      disabled={acc.id === currentAdmin?.sub}
+                    />
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<ShieldIcon size={13} className="text-warning" />}
+                      onClick={() => handleResetUserMFA(acc)}
+                      title={t('users.resetMfaButton')}
+                      disabled={acc.id === currentAdmin?.sub}
+                    >
+                      {t('users.resetMfaButton')}
+                    </Button>
+                    <IconButton
+                      variant="danger"
+                      size="sm"
+                      icon={<TrashIcon size={13} />}
+                      label={t('users.deleteUser')}
+                      onClick={() => handleDeleteUser(acc.id)}
+                      disabled={acc.id === currentAdmin?.sub}
+                    />
+                  </ButtonGroup>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
+        <div className="flex-row items-center gap-sm pagination-row">
+          <span className="text-sm text-dark">{t('users.paginationSummary', { page, total: totalAccounts })}</span>
+          <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            {t('common.previous')}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={page * pageSize >= totalAccounts}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            {t('common.next')}
+          </Button>
+        </div>
+      </AsyncState>
 
-        {/* Modals */}
-        <CreateUserModal
-          isOpen={showCreateUserModal}
-          onClose={() => setShowCreateUserModal(false)}
-          onSubmit={handleCreateUser}
-        />
+      {/* Modals */}
+      <CreateUserModal
+        isOpen={showCreateUserModal}
+        onClose={() => setShowCreateUserModal(false)}
+        onSubmit={handleCreateUser}
+      />
 
-        <AssignRolesModal
-          isOpen={showRoleModal}
-          onClose={() => setShowRoleModal(false)}
-          account={selectedAccount}
-          discoveredRoles={discoveredRoles}
-          currentAdminId={currentAdmin?.sub}
-          onAssignRole={handleAssignRole}
-          onRemoveRole={handleRemoveRole}
-        />
+      <AssignRolesModal
+        isOpen={showRoleModal}
+        onClose={() => setShowRoleModal(false)}
+        account={selectedAccount}
+        discoveredRoles={discoveredRoles}
+        currentAdminId={currentAdmin?.sub}
+        onAssignRole={handleAssignRole}
+        onRemoveRole={handleRemoveRole}
+      />
 
-        <ResetPasswordModal
-          isOpen={showPasswordModal}
-          onClose={() => setShowPasswordModal(false)}
-          account={selectedAccount}
-          onSubmit={handleResetPassword}
-        />
+      <ResetPasswordModal
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+        account={selectedAccount}
+        onSubmit={handleResetPassword}
+      />
 
-        <UserConsentsModal
-          isOpen={showConsentModal}
-          onClose={() => setShowConsentModal(false)}
-          account={selectedAccount}
-          consents={consentsList}
-          loading={consentsLoading}
-          currentAdminId={currentAdmin?.sub}
-          onRevokeConsent={handleRevokeConsent}
-        />
+      <UserConsentsModal
+        isOpen={showConsentModal}
+        onClose={() => setShowConsentModal(false)}
+        account={selectedAccount}
+        consents={consentsList}
+        loading={consentsLoading}
+        currentAdminId={currentAdmin?.sub}
+        onRevokeConsent={handleRevokeConsent}
+      />
 
-        {confirmDialog}
-      </div>
-    </AsyncState>
+      {confirmDialog}
+    </div>
   );
 }

@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useId, isValidElement, cloneElement } from 'react';
 
 export function FormField({
   label,
   children,
   hint,
   error,
-  id,
+  id: explicitId,
   required = false,
   noMargin = false,
+  className = '',
 }: {
   label: string;
   children: React.ReactNode;
@@ -16,15 +17,32 @@ export function FormField({
   id?: string;
   required?: boolean;
   noMargin?: boolean;
+  className?: string;
 }) {
-  const descriptionId = id && (hint || error) ? `${id}-description` : undefined;
+  const generatedId = useId();
+  const childId = isValidElement(children) ? (children.props as { id?: string }).id : undefined;
+  const id = explicitId || childId || `form-field-${generatedId.replace(/:/g, '')}`;
+  const descriptionId = hint || error ? `${id}-description` : undefined;
+
+  const content = isValidElement(children)
+    ? cloneElement(
+        children as React.ReactElement<{ id?: string; 'aria-describedby'?: string; 'aria-invalid'?: boolean }>,
+        {
+          id: (children.props as { id?: string }).id || id,
+          'aria-describedby': (children.props as { 'aria-describedby'?: string })['aria-describedby'] || descriptionId,
+          'aria-invalid':
+            (children.props as { 'aria-invalid'?: boolean })['aria-invalid'] ?? (error ? true : undefined),
+        }
+      )
+    : children;
+
   return (
-    <div className="form-group" style={noMargin ? { margin: 0 } : undefined}>
+    <div className={`form-group ${noMargin ? 'no-margin' : ''} ${className}`.trim()}>
       <label className="form-label" htmlFor={id}>
         {label}
         {required && <span aria-hidden="true"> *</span>}
       </label>
-      {children}
+      {content}
       {error ? (
         <div className="form-error" id={descriptionId} role="alert">
           {error}

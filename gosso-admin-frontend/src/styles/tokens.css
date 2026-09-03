@@ -110,6 +110,17 @@
   --status-danger-hover-bg: rgba(239, 68, 68, 0.22);
   --status-danger-active-bg: rgba(239, 68, 68, 0.32);
 
+  /* Form & Input Controls */
+  --input-bg: #10151d;
+  --input-placeholder: #6b7280;
+  --input-disabled-bg: var(--surface-panel-soft);
+  --input-disabled-text: var(--text-tertiary);
+
+  /* Surfaces & Separators */
+  --surface-card: #151b24;
+  --surface-card-hover: #1a212b;
+  --surface-subtle-border: rgba(255, 255, 255, 0.06);
+
   /* Interactive Elements */
   --active-scale: 0.985;
   --duration-fast: 120ms;

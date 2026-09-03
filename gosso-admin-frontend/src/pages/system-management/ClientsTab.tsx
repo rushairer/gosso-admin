@@ -136,176 +136,155 @@ export default function ClientsTab() {
   };
 
   return (
-    <AsyncState
-      loading={loading}
-      loadingMessage={t('clients.loadingClients')}
-      skeleton={
-        <div>
-          <PanelHeader
-            title={t('clients.title')}
-            description={t('clients.description')}
-            action={
-              <Button variant="primary" icon={<PlusIcon size={16} />} disabled>
-                {t('clients.registerClient')}
-              </Button>
-            }
-          />
-          <TableSkeleton rows={5} columns={6} />
-        </div>
-      }
-      error={error}
-      retryLabel={t('common.retry')}
-      onRetry={() => void fetchClients()}
-    >
-      <div>
-        <PanelHeader
-          title={t('clients.title')}
-          description={t('clients.description')}
-          action={
-            <Button variant="primary" icon={<PlusIcon size={16} />} onClick={() => handleOpenClientModal(null)}>
-              {t('clients.registerClient')}
-            </Button>
-          }
-        />
-        {clients.length === 0 ? (
+    <div>
+      <PanelHeader
+        title={t('clients.title')}
+        description={t('clients.description')}
+        action={
+          <Button
+            variant="primary"
+            icon={<PlusIcon size={16} />}
+            disabled={loading}
+            onClick={() => handleOpenClientModal(null)}
+          >
+            {t('clients.registerClient')}
+          </Button>
+        }
+      />
+      <AsyncState
+        loading={loading}
+        loadingMessage={t('clients.loadingClients')}
+        skeleton={<TableSkeleton rows={5} columns={6} />}
+        error={error}
+        retryLabel={t('common.retry')}
+        onRetry={() => void fetchClients()}
+        empty={clients.length === 0}
+        emptyState={
           <EmptyState
             icon={<KeyIcon />}
             title={t('clients.noClientsTitle')}
             description={t('clients.noClientsDescription')}
           />
-        ) : (
-          <DataTable>
-            <thead>
-              <tr>
-                <th>{t('clients.colNameId')}</th>
-                <th>{t('clients.colType')}</th>
-                <th>{t('clients.colRedirectUris')}</th>
-                <th>{t('clients.colGrantTypes')}</th>
-                <th>{t('clients.colScopes')}</th>
-                <th style={{ width: '120px' }}>{t('clients.colActions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clients.map((client) => (
-                <tr key={client.client_id}>
-                  <td>
-                    <div className="text-sm text-dark">{client.name}</div>
-                    <div className="text-xs text-dark text-mono">{client.client_id}</div>
-                    {client.description && (
-                      <div className="text-sm text-muted" style={{ marginTop: '4px' }}>
-                        {client.description}
-                      </div>
+        }
+      >
+        <DataTable>
+          <thead>
+            <tr>
+              <th>{t('clients.colNameId')}</th>
+              <th>{t('clients.colType')}</th>
+              <th>{t('clients.colRedirectUris')}</th>
+              <th>{t('clients.colGrantTypes')}</th>
+              <th>{t('clients.colScopes')}</th>
+              <th className="col-w-actions">{t('clients.colActions')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {clients.map((client) => (
+              <tr key={client.client_id}>
+                <td>
+                  <div className="text-sm text-dark">{client.name}</div>
+                  <div className="text-xs text-dark text-mono">{client.client_id}</div>
+                  {client.description && <div className="text-sm text-muted mt-xs">{client.description}</div>}
+                </td>
+                <td>
+                  {client.is_confidential ? (
+                    <StatusBadge tone="danger" compact>
+                      {t('clients.statusConfidential')}
+                    </StatusBadge>
+                  ) : (
+                    <StatusBadge tone="success" compact>
+                      {t('clients.statusPublic')}
+                    </StatusBadge>
+                  )}
+                </td>
+                <td>
+                  <div className="flex-col gap-xs max-w-300">
+                    {client.redirect_uris.map((uri, idx) => (
+                      <span key={idx} className="text-sm text-mono truncate" title={uri}>
+                        {uri}
+                      </span>
+                    ))}
+                  </div>
+                </td>
+                <td>
+                  <div className="flex-row flex-wrap gap-xs">
+                    {client.grant_types.map((g) => (
+                      <Tag key={g} tone="secondary">
+                        {g.replace('_', ' ')}
+                      </Tag>
+                    ))}
+                  </div>
+                </td>
+                <td>
+                  <div className="flex-row flex-wrap gap-xs">
+                    {client.scopes.map((s) =>
+                      isAdminScope(s) ? (
+                        <StatusBadge key={s} tone="warning" compact>
+                          {s}
+                        </StatusBadge>
+                      ) : (
+                        <Tag key={s}>{s}</Tag>
+                      )
                     )}
-                  </td>
-                  <td>
-                    {client.is_confidential ? (
-                      <StatusBadge tone="danger" compact>
-                        {t('clients.statusConfidential')}
-                      </StatusBadge>
-                    ) : (
-                      <StatusBadge tone="success" compact>
-                        {t('clients.statusPublic')}
-                      </StatusBadge>
-                    )}
-                  </td>
-                  <td>
-                    <div className="flex-col gap-xs" style={{ maxWidth: '300px' }}>
-                      {client.redirect_uris.map((uri, idx) => (
-                        <span
-                          key={idx}
-                          className="text-sm text-mono"
-                          style={{
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                          title={uri}
-                        >
-                          {uri}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="flex-row flex-wrap gap-xs">
-                      {client.grant_types.map((g) => (
-                        <Tag key={g} tone="secondary">
-                          {g.replace('_', ' ')}
-                        </Tag>
-                      ))}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="flex-row flex-wrap gap-xs">
-                      {client.scopes.map((s) =>
-                        isAdminScope(s) ? (
-                          <StatusBadge key={s} tone="warning" compact>
-                            {s}
-                          </StatusBadge>
-                        ) : (
-                          <Tag key={s}>{s}</Tag>
-                        )
-                      )}
-                    </div>
-                  </td>
-                  <td>
-                    <ButtonGroup compact>
+                  </div>
+                </td>
+                <td>
+                  <ButtonGroup compact>
+                    <IconButton
+                      label={t('clients.editClient')}
+                      variant="secondary"
+                      size="sm"
+                      icon={<EditIcon size={14} />}
+                      onClick={() => handleOpenClientModal(client)}
+                    />
+                    {client.is_confidential && (
                       <IconButton
-                        label={t('clients.editClient')}
+                        label={t('clients.rotateSecret')}
                         variant="secondary"
                         size="sm"
-                        icon={<EditIcon size={14} />}
-                        onClick={() => handleOpenClientModal(client)}
+                        icon={<KeyIcon size={14} />}
+                        onClick={() => void handleRotateSecret(client)}
                       />
-                      {client.is_confidential && (
-                        <IconButton
-                          label={t('clients.rotateSecret')}
-                          variant="secondary"
-                          size="sm"
-                          icon={<KeyIcon size={14} />}
-                          onClick={() => void handleRotateSecret(client)}
-                        />
-                      )}
-                      <IconButton
-                        label={t('clients.deleteClient')}
-                        variant="danger"
-                        size="sm"
-                        icon={<TrashIcon size={14} />}
-                        onClick={() => handleDeleteClient(client.client_id)}
-                      />
-                    </ButtonGroup>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </DataTable>
-        )}
+                    )}
+                    <IconButton
+                      label={t('clients.deleteClient')}
+                      variant="danger"
+                      size="sm"
+                      icon={<TrashIcon size={14} />}
+                      onClick={() => handleDeleteClient(client.client_id)}
+                    />
+                  </ButtonGroup>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </DataTable>
+      </AsyncState>
 
-        <ClientEditorModal
-          isOpen={showClientModal}
-          editingClient={editingClient}
-          clientForm={clientForm}
-          setClientForm={setClientForm}
-          clientScopeOptions={clientScopeOptions}
-          isAdminScope={isAdminScope}
-          onClose={() => setShowClientModal(false)}
-          onSubmit={handleClientFormSubmit}
-          onCheckboxChange={handleCheckboxChange}
-        />
+      <ClientEditorModal
+        isOpen={showClientModal}
+        editingClient={editingClient}
+        clientForm={clientForm}
+        setClientForm={setClientForm}
+        clientScopeOptions={clientScopeOptions}
+        isAdminScope={isAdminScope}
+        onClose={() => setShowClientModal(false)}
+        onSubmit={handleClientFormSubmit}
+        onCheckboxChange={handleCheckboxChange}
+      />
 
-        <ClientSecretModal
-          isOpen={showSecretModal}
-          details={newClientDetails}
-          copied={copied}
-          onCopySecret={copySecret}
-          onClose={() => {
-            setShowSecretModal(false);
-            setNewClientDetails(null);
-          }}
-        />
+      <ClientSecretModal
+        isOpen={showSecretModal}
+        details={newClientDetails}
+        copied={copied}
+        onCopySecret={copySecret}
+        onClose={() => {
+          setShowSecretModal(false);
+          setNewClientDetails(null);
+        }}
+      />
 
-        {confirmDialog}
-      </div>
-    </AsyncState>
+      {confirmDialog}
+    </div>
   );
 }

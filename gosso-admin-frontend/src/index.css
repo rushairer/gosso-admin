@@ -232,24 +232,27 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2, 8px);
   min-height: 36px;
   border: 1px solid var(--border-default);
-  border-radius: 8px;
-  background: #151b24;
+  border-radius: var(--radius-control, 8px);
+  background: var(--surface-card, #151b24);
   color: var(--text-primary);
   cursor: pointer;
   font-weight: 700;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease;
 }
 
 .sidebar-action:hover {
-  background: #1d2632;
+  background: var(--surface-card-hover, #1d2632);
 }
 
 .sidebar-action.primary {
-  border-color: #1d4ed8;
-  background: #1d4ed8;
-  color: white;
+  border-color: var(--action-primary);
+  background: var(--action-primary);
+  color: var(--text-inverse, #ffffff);
 }
 
 .workbench {
@@ -489,10 +492,10 @@ a {
   border: 1px solid var(--border-default);
   border-radius: var(--radius-control, 8px);
   outline: none;
-  background: #10151d;
+  background: var(--input-bg, #10151d);
   color: var(--text-primary);
   font-family: inherit;
-  font-size: 14px;
+  font-size: var(--font-size-base, 14px);
   line-height: 1.4;
   transition:
     border-color 0.16s ease,
@@ -509,11 +512,24 @@ a {
   box-shadow: 0 0 0 3px var(--border-focus-ring);
 }
 
+.input-field:disabled {
+  background: var(--input-disabled-bg, #1c232d);
+  color: var(--input-disabled-text, #6b7280);
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.input-field[readonly] {
+  background: var(--surface-panel);
+  color: var(--text-secondary);
+  cursor: default;
+}
+
 .input-field.input-error,
 .input-affix-wrapper.has-error .input-field,
 .select-control-wrapper.has-error .input-field {
   border-color: var(--status-danger);
-  background: rgba(239, 68, 68, 0.05);
+  background: var(--status-danger-subtle, rgba(239, 68, 68, 0.05));
 }
 
 .input-field.input-error:focus,
@@ -522,7 +538,7 @@ a {
 }
 
 .input-field::placeholder {
-  color: #6b7280;
+  color: var(--input-placeholder, #6b7280);
 }
 
 .textarea-field {
@@ -2257,4 +2273,62 @@ a {
   letter-spacing: 0.05em;
   color: var(--text-primary);
   font-weight: 700;
+}
+
+/* ==========================================================================
+   Design System Standard Utility Classes
+   ========================================================================== */
+.inline-code {
+  background: var(--surface-subtle);
+  padding: 3px 8px;
+  border-radius: var(--radius-xs, 4px);
+  font-family: var(--font-mono, monospace);
+}
+
+.modal-section-divider {
+  border-top: 1px solid var(--surface-subtle-border, rgba(255, 255, 255, 0.06));
+  padding-top: var(--space-5, 20px);
+}
+
+.panel-filter-bar {
+  border-bottom: 1px solid var(--border-default);
+}
+
+.input-w-md {
+  width: 220px;
+}
+
+.input-w-lg {
+  width: 300px;
+}
+
+.col-w-actions {
+  width: 120px;
+}
+
+.table-skeleton-container {
+  padding: 0 var(--space-5, 20px) var(--space-5, 20px) var(--space-5, 20px);
+}
+
+.form-group.no-margin {
+  margin: 0;
+}
+
+.notice-card--left {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.status-danger-text {
+  color: var(--status-danger);
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.max-w-300 {
+  max-width: 300px;
 }

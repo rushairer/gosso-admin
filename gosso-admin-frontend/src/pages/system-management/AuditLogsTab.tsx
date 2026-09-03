@@ -38,8 +38,8 @@ export default function AuditLogsTab() {
   return (
     <div>
       <PanelHeader title={t('audit.title')} description={t('audit.description')} />
-      <div className="panel-body" style={{ borderBottom: '1px solid var(--border-color)' }}>
-        <div className="flex-row flex-wrap gap-lg" style={{ alignItems: 'flex-end' }}>
+      <div className="panel-body panel-filter-bar">
+        <div className="flex-row flex-wrap gap-lg items-end">
           <div className="flex-col gap-xs">
             <FormField label={t('audit.eventTypeLabel')} noMargin>
               <Input
@@ -47,7 +47,7 @@ export default function AuditLogsTab() {
                 placeholder={t('audit.eventTypePlaceholder')}
                 value={filterEventType}
                 onChange={(e) => setFilterEventType(e.target.value)}
-                style={{ width: '220px' }}
+                className="input-w-md"
               />
             </FormField>
           </div>
@@ -58,7 +58,7 @@ export default function AuditLogsTab() {
                 placeholder={t('audit.accountIdPlaceholder')}
                 value={filterAccountID}
                 onChange={(e) => setFilterAccountID(e.target.value)}
-                style={{ width: '300px' }}
+                className="input-w-lg"
               />
             </FormField>
           </div>
@@ -76,7 +76,7 @@ export default function AuditLogsTab() {
       <AsyncState
         loading={auditLoading}
         skeleton={
-          <div style={{ padding: '0 20px 20px 20px' }}>
+          <div className="table-skeleton-container">
             <TableSkeleton rows={5} columns={5} />
           </div>
         }
@@ -96,7 +96,7 @@ export default function AuditLogsTab() {
                 <th>{t('audit.colAction')}</th>
                 <th>{t('audit.colActor')}</th>
                 <th>{t('audit.colTargetUser')}</th>
-                <th style={{ width: '120px' }}>{t('audit.colDetails')}</th>
+                <th className="col-w-actions">{t('audit.colDetails')}</th>
               </tr>
             </thead>
             <tbody>
