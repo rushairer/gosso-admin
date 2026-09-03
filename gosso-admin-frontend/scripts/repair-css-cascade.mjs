@@ -76,35 +76,38 @@ function splitLeadingImports(source) {
 async function migrateIndex() {
   const file = fromRoot("src/index.css");
   const original = await readFile(file, "utf8");
-  if (original.includes("@layer components")) return;
+  let migrated = original;
 
-  const { imports, remaining } = splitLeadingImports(original);
-  const rootStart = remaining.indexOf(":root");
-  if (rootStart !== 0) throw new Error("Expected :root at the start of src/index.css");
-  const rootEnd = findBlockEnd(remaining, rootStart);
-  const theme = remaining.slice(rootStart, rootEnd);
-  let rest = remaining.slice(rootEnd).trimStart();
+  if (!original.includes("@layer components")) {
+    const { imports, remaining } = splitLeadingImports(original);
+    const rootStart = remaining.indexOf(":root");
+    if (rootStart !== 0) throw new Error("Expected :root at the start of src/index.css");
+    const rootEnd = findBlockEnd(remaining, rootStart);
+    const theme = remaining.slice(rootStart, rootEnd);
+    let rest = remaining.slice(rootEnd).trimStart();
 
-  rest = rest.replace(
-    /^\*\s*\{\s*box-sizing:\s*border-box;\s*margin:\s*0;\s*padding:\s*0;\s*\}\s*/,
-    "",
-  );
+    rest = rest.replace(
+      /^\*\s*\{\s*box-sizing:\s*border-box;\s*margin:\s*0;\s*padding:\s*0;\s*\}\s*/,
+      "",
+    );
 
-  const componentMarker = rest.indexOf(".shell {");
-  if (componentMarker < 0) throw new Error("Unable to locate .shell component boundary");
-  const base = rest.slice(0, componentMarker);
-  const components = rest.slice(componentMarker);
+    const componentMarker = rest.indexOf(".shell {");
+    if (componentMarker < 0) throw new Error("Unable to locate .shell component boundary");
+    const base = rest.slice(0, componentMarker);
+    const components = rest.slice(componentMarker);
 
-  const migrated = [
-    imports.join("\n"),
-    `@layer theme {\n${indent(theme)}\n}`,
-    `@layer base {\n${indent(base)}\n}`,
-    `@layer components {\n${indent(components)}\n}`,
-  ]
-    .filter(Boolean)
-    .join("\n\n");
+    migrated = [
+      imports.join("\n"),
+      `@layer theme {\n${indent(theme)}\n}`,
+      `@layer base {\n${indent(base)}\n}`,
+      `@layer components {\n${indent(components)}\n}`,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+  }
 
-  await writeFile(file, `${migrated}\n`);
+  migrated = migrated.replace("color: #93c5fd !important;", "color: #93c5fd;");
+  if (migrated !== original) await writeFile(file, `${migrated.trimEnd()}\n`);
 }
 
 async function wrapFile(relativePath, layer) {
@@ -141,12 +144,24 @@ async function updatePackage() {
 async function updateDesignSystem() {
   const file = fromRoot("DESIGN_SYSTEM.md");
   let source = await readFile(file, "utf8");
-  if (source.includes("## CSS cascade isolation")) return;
 
-  source = source.replace(
-    "## Verification",
-    `## CSS cascade isolation\n\n- Tailwind is imported exactly once from \`src/styles/tailwind.css\`, which must be the first CSS entry loaded by \`main.tsx\`.\n- Global document defaults live in \`@layer base\`; reusable product styles live in \`@layer components\`; semantic variables live in \`@layer theme\`.\n- Accessibility overrides that must outrank utilities live in the final \`overrides\` layer.\n- Unlayered source rules and standalone universal spacing resets are rejected by \`npm run lint:css\`.\n\n## Verification`,
-  );
+  if (!source.includes("## CSS cascade isolation")) {
+    source = source.replace(
+      "## Verification",
+      `## CSS cascade isolation\n\n- Tailwind is imported exactly once from \`src/styles/tailwind.css\`, which must be the first CSS entry loaded by \`main.tsx\`.\n- Global document defaults live in \`@layer base\`; reusable product styles live in \`@layer components\`; semantic variables live in \`@layer theme\`.\n- Accessibility overrides that must outrank utilities live in the final \`overrides\` layer and are loaded last.\n- Every source stylesheet must place style rules inside an explicit cascade layer; \`npm run lint:css\` rejects unlayered top-level rules, \`!important\`, and invalid entry ordering.\n\n## Verification`,
+    );
+  } else {
+    source = source
+      .replace(
+        "- Accessibility overrides that must outrank utilities live in the final `overrides` layer.",
+        "- Accessibility overrides that must outrank utilities live in the final `overrides` layer and are loaded last.",
+      )
+      .replace(
+        "- Unlayered source rules and standalone universal spacing resets are rejected by `npm run lint:css`.",
+        "- Every source stylesheet must place style rules inside an explicit cascade layer; `npm run lint:css` rejects unlayered top-level rules, `!important`, and invalid entry ordering.",
+      );
+  }
+
   await writeFile(file, source);
 }
 
@@ -156,7 +171,7 @@ await writeFile(
 );
 await writeFile(
   fromRoot("src/styles/accessibility.css"),
-  `@layer overrides {\n  @media (prefers-reduced-motion: reduce) {\n    *,\n    *::before,\n    *::after {\n      scroll-behavior: auto !important;\n      animation-duration: 0.01ms !important;\n      animation-iteration-count: 1 !important;\n      transition-duration: 0.01ms !important;\n    }\n  }\n}\n`,
+  `@layer overrides {\n  @media (prefers-reduced-motion: reduce) {\n    *,\n    *::before,\n    *::after {\n      scroll-behavior: auto;\n      animation-duration: 0.01ms;\n      animation-iteration-count: 1;\n      transition-duration: 0.01ms;\n    }\n  }\n}\n`,
 );
 
 await migrateIndex();
