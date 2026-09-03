@@ -69,19 +69,21 @@ export default function SessionsPanel() {
                 return (
                   <tr key={session.id}>
                     <td>
-                      <div className="flex-row items-center gap-sm">
-                        <Laptop size={16} color={isCurrent ? 'var(--action-primary)' : 'var(--text-secondary)'} />
-                        <div className="flex-row items-center gap-sm">
-                          <span className="text-sm font-semibold">{parseUserAgent(session.user_agent)}</span>
-                          {isCurrent && <Badge tone="primary">{t('sessions.currentSession')}</Badge>}
-                        </div>
+                      <div className="flex items-center gap-2.5">
+                        <Laptop
+                          size={16}
+                          className="shrink-0"
+                          color={isCurrent ? 'var(--action-primary)' : 'var(--text-secondary)'}
+                        />
+                        <span className="text-sm font-semibold">{parseUserAgent(session.user_agent)}</span>
+                        {isCurrent && <Badge tone="primary">{t('sessions.currentSession')}</Badge>}
                       </div>
                     </td>
                     <td className="text-sm text-dark">
-                      <span className="flex-row items-center gap-xs">
-                        <MapPin size={12} color="var(--text-tertiary)" />
-                        {session.ip}
-                      </span>
+                      <div className="flex items-center gap-1.5 font-mono">
+                        <MapPin size={13} className="shrink-0" color="var(--text-tertiary)" />
+                        <span>{session.ip}</span>
+                      </div>
                     </td>
                     <td className="text-muted text-sm">{new Date(session.last_active_at).toLocaleString()}</td>
                     <td className="text-right">
