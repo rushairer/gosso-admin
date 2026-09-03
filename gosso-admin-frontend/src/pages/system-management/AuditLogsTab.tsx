@@ -122,12 +122,15 @@ export default function AuditLogsTab() {
 
           {/* Pagination */}
           <div className="table-pagination">
-            <div className="text-muted text-sm">{t('audit.totalLogs', { count: auditTotal })}</div>
+            <div className="table-pagination-info">
+              {t('audit.totalLogs', { count: auditTotal })}
+              <span>·</span>
+              <span>{t('audit.pageLabel', { page: auditPage })}</span>
+            </div>
             <ButtonGroup compact>
               <Button variant="secondary" size="sm" disabled={auditPage <= 1} onClick={() => goToPage(auditPage - 1)}>
                 {t('common.previous')}
               </Button>
-              <span className="text-sm text-dark">{t('audit.pageLabel', { page: auditPage })}</span>
               <Button
                 variant="secondary"
                 size="sm"

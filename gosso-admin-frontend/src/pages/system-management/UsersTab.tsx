@@ -9,6 +9,7 @@ import {
   Lock as LockIcon,
   Unlock as UnlockIcon,
   CheckSquare as ConsentIcon,
+  RotateCcw as ResetMfaIcon,
 } from 'lucide-react';
 import { useUserProfile } from '@gosso/client/react';
 import {
@@ -291,42 +292,36 @@ export default function UsersTab() {
                 </td>
                 <td>
                   <ButtonGroup compact>
-                    <Button
+                    <IconButton
                       variant="secondary"
                       size="sm"
-                      icon={<ShieldIcon size={13} />}
+                      icon={<ShieldIcon size={14} />}
+                      label={t('users.manageRoles')}
                       onClick={() => handleOpenRoleModal(acc)}
-                      title={t('users.manageRoles')}
-                    >
-                      {t('users.rolesButton')}
-                    </Button>
-                    <Button
+                    />
+                    <IconButton
                       variant="secondary"
                       size="sm"
-                      icon={<ConsentIcon size={13} />}
+                      icon={<ConsentIcon size={14} />}
+                      label={t('users.manageConsents')}
                       onClick={() => handleOpenConsentModal(acc)}
-                      title={t('users.manageConsents')}
-                    >
-                      {t('users.consentsButton')}
-                    </Button>
-                    <Button
+                    />
+                    <IconButton
                       variant="secondary"
                       size="sm"
-                      icon={<KeyIcon size={13} />}
+                      icon={<KeyIcon size={14} />}
+                      label={t('users.changePassword')}
                       onClick={() => handleOpenPasswordModal(acc)}
-                      title={t('users.changePassword')}
                       disabled={acc.id === currentAdmin?.sub}
-                    >
-                      {t('users.passwordButton')}
-                    </Button>
+                    />
                     <IconButton
                       variant="secondary"
                       size="sm"
                       icon={
                         acc.status === 'active' ? (
-                          <LockIcon size={13} className="text-danger" />
+                          <LockIcon size={14} className="text-warning" />
                         ) : (
-                          <UnlockIcon size={13} className="text-success" />
+                          <UnlockIcon size={14} className="text-success" />
                         )
                       }
                       label={acc.status === 'active' ? t('users.suspendUser') : t('users.activateUser')}
@@ -336,25 +331,23 @@ export default function UsersTab() {
                     <IconButton
                       variant="secondary"
                       size="sm"
-                      icon={<UnlockIcon size={13} className="text-warning" />}
+                      icon={<UnlockIcon size={14} />}
                       label={t('users.unlockAccount')}
                       onClick={() => handleClearLockout(acc.id)}
                       disabled={acc.id === currentAdmin?.sub}
                     />
-                    <Button
+                    <IconButton
                       variant="secondary"
                       size="sm"
-                      icon={<ShieldIcon size={13} className="text-warning" />}
+                      icon={<ResetMfaIcon size={14} />}
+                      label={t('users.resetMfaButton')}
                       onClick={() => handleResetUserMFA(acc)}
-                      title={t('users.resetMfaButton')}
                       disabled={acc.id === currentAdmin?.sub}
-                    >
-                      {t('users.resetMfaButton')}
-                    </Button>
+                    />
                     <IconButton
                       variant="danger"
                       size="sm"
-                      icon={<TrashIcon size={13} />}
+                      icon={<TrashIcon size={14} />}
                       label={t('users.deleteUser')}
                       onClick={() => handleDeleteUser(acc.id)}
                       disabled={acc.id === currentAdmin?.sub}
@@ -365,19 +358,21 @@ export default function UsersTab() {
             ))}
           </tbody>
         </DataTable>
-        <div className="flex-row items-center gap-sm pagination-row">
-          <span className="text-sm text-dark">{t('users.paginationSummary', { page, total: totalAccounts })}</span>
-          <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-            {t('common.previous')}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={page * pageSize >= totalAccounts}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            {t('common.next')}
-          </Button>
+        <div className="table-pagination">
+          <div className="table-pagination-info">{t('users.paginationSummary', { page, total: totalAccounts })}</div>
+          <ButtonGroup compact>
+            <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+              {t('common.previous')}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={page * pageSize >= totalAccounts}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              {t('common.next')}
+            </Button>
+          </ButtonGroup>
         </div>
       </AsyncState>
 

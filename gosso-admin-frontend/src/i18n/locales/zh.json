@@ -19,7 +19,10 @@
     "loading": "加载中...",
     "loadingLabel": "加载中",
     "notAvailable": "不可用",
-    "dialog": "对话框"
+    "dialog": "对话框",
+    "copy": "复制",
+    "copied": "已复制到剪贴板",
+    "copyFailed": "复制失败"
   },
   "nav": {
     "brandName": "GOSSO",

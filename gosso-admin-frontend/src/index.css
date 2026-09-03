@@ -2418,3 +2418,99 @@ a {
 .system-link:hover {
   text-decoration: underline;
 }
+
+/* Table Pagination Standard */
+.table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4, 16px) var(--space-5, 20px);
+  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  background: var(--surface-panel, #171c24);
+  border-bottom-left-radius: var(--radius-md, 8px);
+  border-bottom-right-radius: var(--radius-md, 8px);
+}
+
+.table-pagination-info {
+  font-size: var(--font-size-sm, 13px);
+  color: var(--text-secondary, #9ca3af);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+}
+
+/* Client Table Hierarchy */
+.client-name {
+  font-size: var(--font-size-base, 14px);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.client-id-code {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 6px;
+  background: var(--surface-subtle, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-sm, 4px);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs, 12px);
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+.client-desc {
+  margin-top: 4px;
+  font-size: var(--font-size-xs, 12px);
+  color: var(--text-tertiary);
+  line-height: 1.4;
+}
+
+/* URI Copy Chip */
+.uri-copy-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 6px 3px 10px;
+  background: var(--surface-card, #151b24);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-sm, 4px);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs, 12px);
+  color: var(--text-secondary, #9ca3af);
+  max-width: 280px;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.uri-copy-chip:hover {
+  border-color: var(--border-hover, #3d4a5d);
+  background: var(--surface-card-hover, #1d2632);
+  color: var(--text-primary, #e5e7eb);
+}
+
+.uri-copy-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.uri-copy-btn {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.uri-copy-btn:hover {
+  color: var(--action-primary-hover);
+  background: var(--surface-hover);
+}

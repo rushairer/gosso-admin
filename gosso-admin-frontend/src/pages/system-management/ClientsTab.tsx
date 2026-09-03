@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus as PlusIcon, Edit2 as EditIcon, Trash2 as TrashIcon, Key as KeyIcon } from 'lucide-react';
+import {
+  Plus as PlusIcon,
+  Edit2 as EditIcon,
+  Trash2 as TrashIcon,
+  Key as KeyIcon,
+  Copy as CopyIcon,
+} from 'lucide-react';
 import { clientService } from '../../services';
 import type { OAuth2Client } from '../../types/api';
 import {
@@ -53,6 +59,15 @@ export default function ClientsTab() {
     name: string;
   } | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const handleCopyUri = async (uri: string) => {
+    try {
+      await navigator.clipboard.writeText(uri);
+      showSuccess(t('common.copied', { defaultValue: '已复制到剪贴板' }));
+    } catch {
+      showError(t('common.copyFailed', { defaultValue: '复制失败' }));
+    }
+  };
 
   const handleOpenClientModal = (client: OAuth2Client | null = null) => {
     if (client) {
@@ -182,9 +197,9 @@ export default function ClientsTab() {
             {clients.map((client) => (
               <tr key={client.client_id}>
                 <td>
-                  <div className="text-sm text-dark">{client.name}</div>
-                  <div className="text-xs text-dark text-mono">{client.client_id}</div>
-                  {client.description && <div className="text-sm text-muted mt-xs">{client.description}</div>}
+                  <div className="client-name">{client.name}</div>
+                  <code className="client-id-code">{client.client_id}</code>
+                  {client.description && <div className="client-desc">{client.description}</div>}
                 </td>
                 <td>
                   {client.is_confidential ? (
@@ -200,9 +215,17 @@ export default function ClientsTab() {
                 <td>
                   <div className="flex-col gap-xs max-w-300">
                     {client.redirect_uris.map((uri, idx) => (
-                      <span key={idx} className="text-sm text-mono truncate" title={uri}>
-                        {uri}
-                      </span>
+                      <div key={idx} className="uri-copy-chip" title={uri}>
+                        <span className="uri-copy-text">{uri}</span>
+                        <IconButton
+                          label={t('common.copy', { defaultValue: '复制' })}
+                          icon={<CopyIcon size={12} />}
+                          variant="secondary"
+                          size="sm"
+                          className="uri-copy-btn"
+                          onClick={() => void handleCopyUri(uri)}
+                        />
+                      </div>
                     ))}
                   </div>
                 </td>
@@ -217,15 +240,11 @@ export default function ClientsTab() {
                 </td>
                 <td>
                   <div className="flex-row flex-wrap gap-xs">
-                    {client.scopes.map((s) =>
-                      isAdminScope(s) ? (
-                        <StatusBadge key={s} tone="warning" compact>
-                          {s}
-                        </StatusBadge>
-                      ) : (
-                        <Tag key={s}>{s}</Tag>
-                      )
-                    )}
+                    {client.scopes.map((s) => (
+                      <Tag key={s} tone={isAdminScope(s) ? 'warning' : 'primary'}>
+                        {s.toLowerCase()}
+                      </Tag>
+                    ))}
                   </div>
                 </td>
                 <td>

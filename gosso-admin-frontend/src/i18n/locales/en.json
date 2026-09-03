@@ -19,7 +19,10 @@
     "loading": "Loading...",
     "loadingLabel": "Loading",
     "notAvailable": "n/a",
-    "dialog": "Dialog"
+    "dialog": "Dialog",
+    "copy": "Copy",
+    "copied": "Copied to clipboard",
+    "copyFailed": "Failed to copy"
   },
   "nav": {
     "brandName": "GOSSO",
