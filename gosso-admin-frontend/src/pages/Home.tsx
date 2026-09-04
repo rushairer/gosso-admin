@@ -24,9 +24,9 @@ function QuickCard({ link, onOpen }: { link: QuickLink; onOpen: () => void }) {
 
   return (
     <Card
+      interactive
       className="home-nav-card flex items-center gap-4"
       role="button"
-      tabIndex={0}
       onClick={onOpen}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -110,7 +110,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
-      <Card className="home-hero p-8">
+      <Card className="home-hero" padding="lg">
         <div className="home-hero__glow" aria-hidden="true" />
 
         <div className="relative flex flex-col items-start gap-6">
