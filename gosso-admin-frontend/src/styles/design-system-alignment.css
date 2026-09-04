@@ -170,6 +170,32 @@
     box-shadow: var(--ds-panel-shadow);
   }
 
+  .glass-card--padding-none {
+    padding: 0;
+  }
+
+  .glass-card--padding-sm {
+    padding: 12px;
+  }
+
+  .glass-card--padding-base {
+    padding: 24px;
+  }
+
+  .glass-card--padding-lg {
+    padding: 32px;
+  }
+
+  .glass-card--subtle {
+    background: var(--surface-panel-soft);
+    box-shadow: none;
+  }
+
+  .glass-card--elevated {
+    background: var(--ds-surface-elevated);
+    box-shadow: var(--ds-panel-shadow-hover);
+  }
+
   .glass-card--interactive:hover {
     transform: translateY(-1px);
     box-shadow: var(--ds-panel-shadow-hover);
