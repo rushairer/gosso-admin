@@ -136,18 +136,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           {session.loggedIn ? (
-            <Button
-              variant="secondary"
-              className="sidebar-action"
-              icon={<LogOut size={16} />}
-              onClick={() => logout('/')}
-            >
+            <Button variant="secondary" icon={<LogOut size={16} />} onClick={() => logout('/')}>
               {t('nav.signOut')}
             </Button>
           ) : (
             <Button
               variant="primary"
-              className="sidebar-action primary"
               icon={<LogIn size={16} />}
               onClick={() => redirectToAuthorize('/system-management/clients')}
             >
