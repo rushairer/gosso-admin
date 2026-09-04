@@ -70,6 +70,12 @@
     "passkeyLoading": "正在验证通行密钥...",
     "mfaRequired": "需要进行多因素认证。请输入身份验证器应用中的验证码。",
     "strongAuthenticationUnavailable": "此授权请求要求强认证。请使用已注册的通行密钥，或先启用多因素认证后再继续。",
+    "sudoModeTitle": "安全提权验证 (Sudo Mode)",
+    "sudoModeNotice": "您正在执行敏感管理操作。当前操作账号：{{user}}。请输入身份验证器动态码或使用通行密钥完成验证。",
+    "passkeyStepUpButton": "使用通行密钥快捷验证",
+    "switchAccount": "切换账号 / 重新登录",
+    "sudoVerifiedSuccess": "安全提权验证成功",
+    "sudoActive": "安全提权已生效",
     "verificationCodeLabel": "验证码",
     "verificationCodePlaceholder": "请输入6位验证码",
     "verifyButton": "验证",
@@ -250,9 +256,12 @@
     "secretWarning": "请复制客户端密钥凭据。出于安全考虑，密钥不会再次显示。",
     "clientIdLabel": "客户端 ID",
     "clientSecretLabel": "客户端密钥",
-    "copySecret": "复制密钥"
+    "copySecret": "复制密钥",
+    "secretRotatedSuccess": "客户端密钥已成功轮转。",
+    "errorRotatingSecret": "轮转客户端密钥时出错"
   },
   "users": {
+    "resetPasswordTitle": "重置成员密码",
     "paginationSummary": "第 {{page}} 页 · 共 {{total}} 位用户",
     "title": "用户账户",
     "description": "创建账户、管理状态、分配角色及查看已授权的应用。",

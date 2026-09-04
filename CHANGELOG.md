@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.7] - 2026-09-04
+
+### Added
+- Introduce in-app Sudo Mode (`useSudo` / `SudoModal`) with 15-minute verification grace period (`sessionStorage`) for sensitive operations.
+- Add Sudo Mode view in `LoginSurface` and `Login.tsx` that skips username/password re-entry for active sessions, verifying TOTP/Passkey directly before returning.
+- Protect Site Settings modification (`SiteSettingsTab`), Role Assignment/Revocation, Reset User MFA, Reset User Password (`UsersTab`), and Client Secret Rotation / Deletion (`ClientsTab`) with unified Sudo MFA challenge.
+
 ## [0.7.6] - 2026-09-03
 
 ### Changed

@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { gossoClient, redirectToAuthorize } from '../auth';
+import { useSession } from '@gosso/client/react';
+import { gossoClient, logout, redirectToAuthorize } from '../auth';
 import LoginSurface from '../components/auth/LoginSurface';
 import { logger } from '../utils/logger';
 import { appPath } from '../config/appPaths';
@@ -62,6 +63,9 @@ export default function Login() {
   const hasAuthorizeRedirect = searchParams.has('redirect_uri');
   const redirectUri = searchParams.get('redirect_uri') || '/system-management';
   const requiresStrongAuth = searchParams.get('reason') === 'mfa';
+  const session = useSession();
+  const isSudoMode = requiresStrongAuth && session.loggedIn;
+  const sudoAccountName = session.profile?.preferred_username || session.profile?.name || session.profile?.sub || '';
 
   const doRedirect = () => {
     window.location.href = safeLocalPath(redirectUri, appPath('/system-management'));
@@ -129,7 +133,11 @@ export default function Login() {
     setLoading(true);
     setError(null);
     try {
-      await gossoClient.verifyMfa(mfaToken, mfaCode.trim());
+      if (isSudoMode) {
+        await gossoClient.stepUpMfa(mfaCode.trim());
+      } else {
+        await gossoClient.verifyMfa(mfaToken, mfaCode.trim());
+      }
       await storeTokensAndRedirect();
     } catch (reason: unknown) {
       logger.error('MFA verification error', reason);
@@ -137,6 +145,10 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSwitchAccount = () => {
+    logout(appPath('/login'));
   };
 
   const handleBackToLogin = () => {
@@ -155,6 +167,8 @@ export default function Login() {
       passkeyLoading={passkeyLoading}
       mfaRequired={mfaRequired}
       mfaCode={mfaCode}
+      isSudoMode={isSudoMode}
+      sudoAccountName={sudoAccountName}
       showDevCredentials={showDevCredentials}
       onUsernameChange={setUsername}
       onPasswordChange={setPassword}
@@ -163,6 +177,7 @@ export default function Login() {
       onMfaSubmit={handleMfaVerify}
       onPasskeyLogin={() => void handlePasskeyLogin()}
       onBackToLogin={handleBackToLogin}
+      onSwitchAccount={handleSwitchAccount}
     />
   );
 }

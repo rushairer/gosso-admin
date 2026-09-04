@@ -33,6 +33,7 @@ import {
   toggleClientFormSelection,
 } from '../../features/clients/clientForm';
 import { useClients } from '../../features/clients/useClients';
+import { useSudo } from '../../components/auth/SudoContext';
 
 const clientScopeOptions = ['openid', 'profile', 'email', 'admin'];
 
@@ -43,6 +44,7 @@ function isAdminScope(scope: string) {
 export default function ClientsTab() {
   const { t } = useTranslation();
   const { showSuccess, showError } = useToast();
+  const { requireSudo } = useSudo();
   const { clients, loading, error, refresh: fetchClients } = useClients(t('clients.errorLoadingClients'));
   const { confirm, confirmDialog } = useConfirm();
 
@@ -118,25 +120,38 @@ export default function ClientsTab() {
   const handleDeleteClient = async (clientId: string) => {
     if (!(await confirm({ title: t('clients.deleteConfirmTitle'), message: t('clients.deleteConfirmMessage') })))
       return;
-    try {
-      await clientService.deleteClient(clientId);
-      fetchClients();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('clients.errorDeletingClient');
-      showError(message);
-    }
+    await requireSudo({
+      actionTitle: t('clients.deleteConfirmTitle'),
+      onSuccess: async () => {
+        try {
+          await clientService.deleteClient(clientId);
+          fetchClients();
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : t('clients.errorDeletingClient');
+          showError(message);
+        }
+      },
+    });
   };
 
   const handleRotateSecret = async (client: OAuth2Client) => {
     if (!client.is_confidential) return;
     if (!(await confirm({ title: t('clients.rotateSecretTitle'), message: t('clients.rotateSecretMessage') }))) return;
-    try {
-      const result = await clientService.rotateSecret(client.client_id);
-      setNewClientDetails({ client_id: result.client_id, client_secret: result.client_secret, name: client.name });
-      setShowSecretModal(true);
-    } catch (err: unknown) {
-      showError(err instanceof Error ? err.message : t('clients.errorSavingClient'));
-    }
+    await requireSudo({
+      actionTitle: t('clients.rotateSecretTitle'),
+      onSuccess: async () => {
+        try {
+          const result = await clientService.rotateSecret(client.client_id);
+          setNewClientDetails({ client_id: result.client_id, client_secret: result.client_secret, name: client.name });
+          setShowSecretModal(true);
+          showSuccess(t('clients.secretRotatedSuccess'));
+          fetchClients();
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : t('clients.errorRotatingSecret');
+          showError(message);
+        }
+      },
+    });
   };
 
   const copySecret = () => {

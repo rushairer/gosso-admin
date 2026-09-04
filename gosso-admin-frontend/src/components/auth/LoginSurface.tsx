@@ -1,5 +1,5 @@
 import type { CSSProperties, FormEventHandler } from 'react';
-import { Key } from 'lucide-react';
+import { Key, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { PublicSiteBranding } from '../../types/api';
@@ -14,6 +14,8 @@ interface LoginSurfaceProps {
   passkeyLoading: boolean;
   mfaRequired: boolean;
   mfaCode: string;
+  isSudoMode?: boolean;
+  sudoAccountName?: string;
   showDevCredentials?: boolean;
   preview?: boolean;
   onUsernameChange: (value: string) => void;
@@ -23,6 +25,7 @@ interface LoginSurfaceProps {
   onMfaSubmit: FormEventHandler<HTMLFormElement>;
   onPasskeyLogin: () => void;
   onBackToLogin: () => void;
+  onSwitchAccount?: () => void;
 }
 
 export default function LoginSurface({
@@ -34,6 +37,8 @@ export default function LoginSurface({
   passkeyLoading,
   mfaRequired,
   mfaCode,
+  isSudoMode = false,
+  sudoAccountName = '',
   showDevCredentials = false,
   preview = false,
   onUsernameChange,
@@ -43,6 +48,7 @@ export default function LoginSurface({
   onMfaSubmit,
   onPasskeyLogin,
   onBackToLogin,
+  onSwitchAccount,
 }: LoginSurfaceProps) {
   const { t } = useTranslation();
   const backgroundImage = branding.login_background_url
@@ -71,7 +77,68 @@ export default function LoginSurface({
           </div>
         ) : null}
 
-        {!mfaRequired ? (
+        {isSudoMode ? (
+          <form onSubmit={onMfaSubmit}>
+            <div className="notice-card notice-card--info mb-md">
+              <div className="flex-row items-center gap-sm mb-xs">
+                <Shield size={16} />
+                <strong>{t('login.sudoModeTitle')}</strong>
+              </div>
+              <p className="text-sm m-0">
+                {t('login.sudoModeNotice', {
+                  user: sudoAccountName,
+                  defaultValue: `您正在执行敏感管理操作。当前操作账号：${sudoAccountName}。请输入身份验证器动态码或使用通行密钥完成验证。`,
+                })}
+              </p>
+            </div>
+
+            <FormField label={t('login.verificationCodeLabel')}>
+              <Input
+                type="text"
+                maxLength={8}
+                className="login-card__mfa-code"
+                placeholder={t('login.verificationCodePlaceholder')}
+                value={mfaCode}
+                onChange={(event) => onMfaCodeChange(event.target.value.replace(/\D/g, ''))}
+                disabled={loading}
+                autoFocus={!preview}
+              />
+            </FormField>
+
+            <Button type="submit" variant="primary" className="login-card__action" loading={loading}>
+              {loading ? t('login.verifyLoading') : t('login.verifyButton')}
+            </Button>
+
+            <div className="login-card__separator flex-row items-center gap-md">
+              <hr />
+              <span className="text-sm text-muted">{t('common.or')}</span>
+              <hr />
+            </div>
+
+            <Button
+              type="button"
+              variant="secondary"
+              className="login-card__action flex-row items-center justify-center gap-sm"
+              onClick={onPasskeyLogin}
+              loading={passkeyLoading}
+              icon={<Key size={16} />}
+            >
+              {passkeyLoading ? t('login.passkeyLoading') : t('login.passkeyStepUpButton')}
+            </Button>
+
+            {onSwitchAccount && (
+              <Button
+                type="button"
+                variant="ghost"
+                className="login-card__action login-card__back mt-sm"
+                onClick={onSwitchAccount}
+                disabled={loading}
+              >
+                {t('login.switchAccount')}
+              </Button>
+            )}
+          </form>
+        ) : !mfaRequired ? (
           <form onSubmit={onLoginSubmit}>
             <FormField label={t('login.usernameLabel')}>
               <Input

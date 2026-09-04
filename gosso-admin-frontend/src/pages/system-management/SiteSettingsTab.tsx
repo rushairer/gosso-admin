@@ -17,12 +17,14 @@ import { siteSettingsService } from '../../services';
 import { DEFAULT_SITE_SETTINGS, mergeSiteSettings } from '../../config/site-defaults';
 import type { SiteSettings } from '../../types/api';
 import LoginPreview from '../../components/auth/LoginPreview';
+import { useSudo } from '../../components/auth/SudoContext';
 
 const MAX_LOGIN_BACKGROUND_SOURCE_LENGTH = 8 * 1024 * 1024;
 
 export default function SiteSettingsTab() {
   const { t } = useTranslation();
   const { showSuccess, showError } = useToast();
+  const { requireSudo } = useSudo();
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -55,17 +57,22 @@ export default function SiteSettingsTab() {
 
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
-    try {
-      setSaving(true);
-      const updated = mergeSiteSettings(await siteSettingsService.updateSiteSettings(settings));
-      setSettings(updated);
-      setBaseline(JSON.stringify(updated));
-      showSuccess(t('site.saved'));
-    } catch (reason: unknown) {
-      showError(reason instanceof Error ? reason.message : t('site.saveFailed'));
-    } finally {
-      setSaving(false);
-    }
+    await requireSudo({
+      actionTitle: t('site.title'),
+      onSuccess: async () => {
+        try {
+          setSaving(true);
+          const updated = mergeSiteSettings(await siteSettingsService.updateSiteSettings(settings));
+          setSettings(updated);
+          setBaseline(JSON.stringify(updated));
+          showSuccess(t('site.saved'));
+        } catch (reason: unknown) {
+          showError(reason instanceof Error ? reason.message : t('site.saveFailed'));
+        } finally {
+          setSaving(false);
+        }
+      },
+    });
   };
 
   return (

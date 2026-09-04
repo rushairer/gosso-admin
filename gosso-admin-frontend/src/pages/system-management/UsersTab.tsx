@@ -35,10 +35,12 @@ import { CreateUserModal } from './users/CreateUserModal';
 import { AssignRolesModal } from './users/AssignRolesModal';
 import { ResetPasswordModal } from './users/ResetPasswordModal';
 import { UserConsentsModal } from './users/UserConsentsModal';
+import { useSudo } from '../../components/auth/SudoContext';
 
 export default function UsersTab() {
   const { t } = useTranslation();
   const { showSuccess, showError } = useToast();
+  const { requireSudo } = useSudo();
   const {
     accounts,
     roles: discoveredRoles,
@@ -141,14 +143,19 @@ export default function UsersTab() {
       }))
     )
       return;
-    try {
-      await accountService.resetMfa(acc.id);
-      showSuccess(t('users.mfaResetSuccess', { username: acc.display_name || acc.username }));
-      fetchAccounts();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('users.resetMfaFailed');
-      showError(message);
-    }
+    await requireSudo({
+      actionTitle: t('users.resetMfaButton'),
+      onSuccess: async () => {
+        try {
+          await accountService.resetMfa(acc.id);
+          showSuccess(t('users.mfaResetSuccess', { username: acc.display_name || acc.username }));
+          fetchAccounts();
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : t('users.resetMfaFailed');
+          showError(message);
+        }
+      },
+    });
   };
 
   const handleOpenRoleModal = (acc: Account) => {
@@ -158,29 +165,43 @@ export default function UsersTab() {
 
   const handleAssignRole = async (roleId: string) => {
     if (!selectedAccount) return;
-    try {
-      await accountService.assignRole(selectedAccount.id, roleId);
-      showSuccess(t('users.roleAssignedSuccess'));
-      const updatedRoles = await accountService.fetchAccountRoles(selectedAccount.id);
-      setSelectedAccount((prev) => (prev ? { ...prev, roles: updatedRoles } : null));
-      fetchAccounts();
-    } catch (err: unknown) {
-      showError(err instanceof Error ? err.message : t('users.assignRoleFailed'));
-      throw err;
-    }
+    await requireSudo({
+      actionTitle: t('users.rolesModalTitle', {
+        name: selectedAccount.display_name || selectedAccount.username,
+      }),
+      onSuccess: async () => {
+        try {
+          await accountService.assignRole(selectedAccount.id, roleId);
+          showSuccess(t('users.roleAssignedSuccess'));
+          const updatedRoles = await accountService.fetchAccountRoles(selectedAccount.id);
+          setSelectedAccount((prev) => (prev ? { ...prev, roles: updatedRoles } : null));
+          fetchAccounts();
+        } catch (err: unknown) {
+          showError(err instanceof Error ? err.message : t('users.assignRoleFailed'));
+          throw err;
+        }
+      },
+    });
   };
 
   const handleRemoveRole = async (roleId: string) => {
     if (!selectedAccount) return;
-    try {
-      await accountService.removeRole(selectedAccount.id, roleId);
-      showSuccess(t('users.roleRemovedSuccess'));
-      const updatedRoles = await accountService.fetchAccountRoles(selectedAccount.id);
-      setSelectedAccount((prev) => (prev ? { ...prev, roles: updatedRoles } : null));
-      fetchAccounts();
-    } catch (err: unknown) {
-      showError(err instanceof Error ? err.message : t('users.removeRoleFailed'));
-    }
+    await requireSudo({
+      actionTitle: t('users.rolesModalTitle', {
+        name: selectedAccount.display_name || selectedAccount.username,
+      }),
+      onSuccess: async () => {
+        try {
+          await accountService.removeRole(selectedAccount.id, roleId);
+          showSuccess(t('users.roleRemovedSuccess'));
+          const updatedRoles = await accountService.fetchAccountRoles(selectedAccount.id);
+          setSelectedAccount((prev) => (prev ? { ...prev, roles: updatedRoles } : null));
+          fetchAccounts();
+        } catch (err: unknown) {
+          showError(err instanceof Error ? err.message : t('users.removeRoleFailed'));
+        }
+      },
+    });
   };
 
   const handleOpenPasswordModal = (acc: Account) => {
@@ -190,8 +211,13 @@ export default function UsersTab() {
 
   const handleResetPassword = async (password: string) => {
     if (!selectedAccount) return;
-    await accountService.resetPassword(selectedAccount.id, password);
-    showSuccess(t('users.passwordUpdatedSuccess'));
+    await requireSudo({
+      actionTitle: t('users.resetPasswordTitle', { defaultValue: '重置成员密码' }),
+      onSuccess: async () => {
+        await accountService.resetPassword(selectedAccount.id, password);
+        showSuccess(t('users.passwordUpdatedSuccess'));
+      },
+    });
   };
 
   const handleOpenConsentModal = async (acc: Account) => {

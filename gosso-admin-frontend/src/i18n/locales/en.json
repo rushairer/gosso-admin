@@ -70,6 +70,12 @@
     "passkeyLoading": "Verifying passkey...",
     "mfaRequired": "Multi-factor authentication required. Enter the code from your authenticator app.",
     "strongAuthenticationUnavailable": "This authorization request requires strong authentication. Use a registered passkey or enroll MFA before continuing.",
+    "sudoModeTitle": "Security Verification (Sudo Mode)",
+    "sudoModeNotice": "You are performing a sensitive administrative operation. Account: {{user}}. Enter the verification code from your authenticator app or use a Passkey.",
+    "passkeyStepUpButton": "Verify with Passkey",
+    "switchAccount": "Sign in with different account",
+    "sudoVerifiedSuccess": "Security verification successful",
+    "sudoActive": "Sudo active",
     "verificationCodeLabel": "Verification Code",
     "verificationCodePlaceholder": "Enter 6-digit code",
     "verifyButton": "Verify",
@@ -250,9 +256,12 @@
     "secretWarning": "Please copy the client secret credential. It will NOT be displayed again for security reasons.",
     "clientIdLabel": "Client ID",
     "clientSecretLabel": "Client Secret",
-    "copySecret": "Copy Secret"
+    "copySecret": "Copy Secret",
+    "secretRotatedSuccess": "Client secret rotated successfully.",
+    "errorRotatingSecret": "Error rotating client secret"
   },
   "users": {
+    "resetPasswordTitle": "Reset Member Password",
     "paginationSummary": "Page {{page}} · {{total}} users",
     "title": "User Accounts",
     "description": "Create accounts, manage status, assign roles, and inspect authorized applications.",
