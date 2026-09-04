@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.11] - 2026-09-04
+
+### Changed
+- Align UI/UX design system with Gouno Blog: standardize table pagination bar layout (`.table-pagination`, `.pagination`, `.pagination-compact`, `.pagination__info`, `.table-pagination-info`).
+- Align table filter bars and search field wrappers (`.table-filter-bar`, `.filter-bar`, `.table-filter-actions`, `.filter-bar__actions`, `.search-field`).
+- Standardize skeleton and shimmer placeholder variants (`.skeleton--text`, `.skeleton-text`, `.skeleton--circular`, `.skeleton-circular`, `.skeleton--rectangular`, `.skeleton-rectangular`, `.skeleton--card`, `.skeleton-card`, `.table-skeleton-wrap`).
+
 ## [0.7.10] - 2026-09-04
 
 ### Changed
