@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.20] - 2026-09-04
+
+### Changed
+- Align UI/UX design system with Gouno Blog: redesign table filter bar to a single-row horizontal layout with unified 36px control height (search input, select dropdowns, clear button and actions).
+- Fix sidebar section heading spacing and indentation alignment (`padding: 10px 12px 6px`, consistent rhythm with nav links).
+- Add floating bulk action bar styling (`.bulk-action-bar`, `.table-bulk-actions`) and empty state normalization (`.filter-empty-state`, `.data-table-empty-wrap`).
+
 ## [0.7.19] - 2026-09-04
 
 ### Changed
