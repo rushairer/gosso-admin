@@ -1,7 +1,7 @@
 import type { CSSProperties, FormEventHandler } from 'react';
 import { Key, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import type { PublicSiteBranding } from '../../types/api';
 import { Badge, Button, Feedback, FormField, Input } from '../ui';
 
@@ -16,6 +16,7 @@ interface LoginSurfaceProps {
   mfaCode: string;
   isSudoMode?: boolean;
   sudoAccountName?: string;
+  accountMismatch?: { target: string; current: string };
   showDevCredentials?: boolean;
   preview?: boolean;
   onUsernameChange: (value: string) => void;
@@ -39,6 +40,7 @@ export default function LoginSurface({
   mfaCode,
   isSudoMode = false,
   sudoAccountName = '',
+  accountMismatch,
   showDevCredentials = false,
   preview = false,
   onUsernameChange,
@@ -152,6 +154,42 @@ export default function LoginSurface({
           </form>
         ) : !mfaRequired ? (
           <form onSubmit={onLoginSubmit}>
+            {accountMismatch && (
+              <div className="notice-card notice-card--warning notice-card--stacked mb-md">
+                <div className="flex-row items-center justify-between gap-sm">
+                  <div className="flex-row items-center gap-sm">
+                    <Shield size={16} className="shrink-0" style={{ color: 'var(--status-warning, #f59e0b)' }} />
+                    <strong className="text-sm">{t('login.accountMismatchTitle')}</strong>
+                  </div>
+                  <Badge
+                    tone="warning"
+                    className="text-xs truncate"
+                    style={{ maxWidth: '160px' }}
+                    title={accountMismatch.target}
+                  >
+                    {accountMismatch.target}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted m-0 leading-relaxed">
+                  <Trans
+                    i18nKey="login.accountMismatchNotice"
+                    values={{
+                      target: accountMismatch.target,
+                      current: accountMismatch.current,
+                    }}
+                    components={{ strong: <strong /> }}
+                  />
+                </p>
+                {onSwitchAccount && (
+                  <div className="mt-xs">
+                    <Button type="button" variant="secondary" size="sm" onClick={onSwitchAccount} disabled={loading}>
+                      {t('login.switchAccount')}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
             <FormField label={t('login.usernameLabel')}>
               <Input
                 type="text"

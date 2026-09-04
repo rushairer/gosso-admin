@@ -73,6 +73,8 @@
     "sudoModeTitle": "安全提权验证 (Sudo Mode)",
     "sudoModeNotice": "您正在执行敏感管理操作，请输入身份验证器动态码或使用通行密钥完成验证。",
     "sudoModeNoticeWithAction": "您正在执行敏感操作「{{action}}」，请输入身份验证器动态码或使用通行密钥完成验证。",
+    "accountMismatchTitle": "安全提权账号不符",
+    "accountMismatchNotice": "当前安全提权操作需要验证目标账号 <strong>{{target}}</strong>。您当前在 SSO 登录的是 <strong>{{current}}</strong>，请登录或切换为目标账号。",
     "passkeyStepUpButton": "使用通行密钥快捷验证",
     "switchAccount": "切换账号 / 重新登录",
     "sudoVerifiedSuccess": "安全提权验证成功",

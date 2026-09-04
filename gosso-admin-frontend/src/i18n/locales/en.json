@@ -73,6 +73,8 @@
     "sudoModeTitle": "Security Verification (Sudo Mode)",
     "sudoModeNotice": "You are performing a sensitive administrative operation. Enter the verification code from your authenticator app or use a Passkey.",
     "sudoModeNoticeWithAction": "You are performing \"{{action}}\". Enter the verification code from your authenticator app or use a Passkey.",
+    "accountMismatchTitle": "Account Mismatch for Step-Up",
+    "accountMismatchNotice": "This operation requires verifying target account <strong>{{target}}</strong>. You are currently signed in as <strong>{{current}}</strong>. Please sign in or switch to the target account.",
     "passkeyStepUpButton": "Verify with Passkey",
     "switchAccount": "Sign in with different account",
     "sudoVerifiedSuccess": "Security verification successful",

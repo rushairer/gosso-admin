@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.8] - 2026-09-04
+
+### Added
+- Add `login_hint` cross-account step-up alignment: detect identity mismatch between active SSO session and requested `login_hint`.
+- Display account mismatch warning notice (`LoginSurface`) informing user of the target account vs. active session, prefill target username, and prompt account switch or target authentication instead of invalid Sudo Mode elevation.
+- Preserve redirect and query parameters when switching accounts on logout (`Login.tsx`).
+
 ## [0.7.7] - 2026-09-04
 
 ### Added

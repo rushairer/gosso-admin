@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Login from '../Login';
 import { AuthenticationError } from '@gosso/client';
-import { gossoClient, logout, redirectToAuthorize } from '../../auth';
+import { gossoClient, redirectToAuthorize } from '../../auth';
 import { siteSettingsService } from '../../services';
 
 const mockSession = vi.hoisted(() => ({
@@ -180,5 +180,50 @@ describe('Login', () => {
     await waitFor(() => {
       expect(gossoClient.stepUpPasskey).toHaveBeenCalled();
     });
+  });
+
+  it('renders account mismatch notice and standard login form when login_hint differs from active session', async () => {
+    mockSession.value = {
+      loggedIn: true,
+      profile: { sub: 'admin-1', preferred_username: 'superadmin', roles: ['admin'] },
+      isAdmin: true,
+    };
+
+    render(
+      <MemoryRouter
+        initialEntries={['/login?reason=mfa&login_hint=targetuser&redirect_uri=%2Fsystem-management%2Fusers']}
+      >
+        <Login />
+      </MemoryRouter>
+    );
+
+    // Sudo mode is blocked for wrong user
+    expect(screen.queryByText(/^安全提权验证/)).not.toBeInTheDocument();
+    // Account mismatch notice is shown
+    expect(screen.getByText(/安全提权账号不符|Account Mismatch/i)).toBeInTheDocument();
+    expect(screen.getByTitle('targetuser')).toBeInTheDocument();
+    // Normal login form is rendered with targetuser prefilled
+    expect(screen.getByPlaceholderText(/username|用户名/i)).toHaveValue('targetuser');
+    expect(screen.getByPlaceholderText(/password|密码/i)).toBeInTheDocument();
+  });
+
+  it('renders Sudo Mode when reason=mfa and login_hint matches active session', async () => {
+    mockSession.value = {
+      loggedIn: true,
+      profile: { sub: 'admin-1', preferred_username: 'superadmin', roles: ['admin'] },
+      isAdmin: true,
+    };
+
+    render(
+      <MemoryRouter
+        initialEntries={['/login?reason=mfa&login_hint=superadmin&redirect_uri=%2Fsystem-management%2Fusers']}
+      >
+        <Login />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText(/sudo mode|安全提权验证/i)).toBeInTheDocument();
+    expect(screen.getByText(/superadmin/)).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/password|密码/i)).not.toBeInTheDocument();
   });
 });

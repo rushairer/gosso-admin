@@ -60,12 +60,28 @@ export default function Login() {
     };
   }, [t]);
 
+  const loginHint = searchParams.get('login_hint') || '';
   const hasAuthorizeRedirect = searchParams.has('redirect_uri');
   const redirectUri = searchParams.get('redirect_uri') || '/system-management';
   const requiresStrongAuth = searchParams.get('reason') === 'mfa';
   const session = useSession();
-  const isSudoMode = requiresStrongAuth && session.loggedIn;
   const sudoAccountName = session.profile?.preferred_username || session.profile?.name || session.profile?.sub || '';
+  const matchesHint =
+    !loginHint ||
+    Boolean(
+      session.profile?.preferred_username &&
+      session.profile.preferred_username.toLowerCase() === loginHint.toLowerCase()
+    ) ||
+    session.profile?.sub === loginHint ||
+    Boolean(session.profile?.email && session.profile.email.toLowerCase() === loginHint.toLowerCase());
+  const isSudoMode = Boolean(requiresStrongAuth && session.loggedIn && matchesHint);
+  const isAccountMismatch = Boolean(requiresStrongAuth && session.loggedIn && !matchesHint);
+
+  useEffect(() => {
+    if (loginHint && !username) {
+      setUsername(loginHint);
+    }
+  }, [loginHint]);
 
   const doRedirect = () => {
     window.location.href = safeLocalPath(redirectUri, appPath('/system-management'));
@@ -152,7 +168,7 @@ export default function Login() {
   };
 
   const handleSwitchAccount = () => {
-    logout(appPath('/login'));
+    logout(appPath(`/login${window.location.search}`));
   };
 
   const handleBackToLogin = () => {
@@ -173,6 +189,7 @@ export default function Login() {
       mfaCode={mfaCode}
       isSudoMode={isSudoMode}
       sudoAccountName={sudoAccountName}
+      accountMismatch={isAccountMismatch ? { target: loginHint, current: sudoAccountName } : undefined}
       showDevCredentials={showDevCredentials}
       onUsernameChange={setUsername}
       onPasswordChange={setPassword}
