@@ -19,35 +19,66 @@ import {
   PanelHeader,
   useConfirm,
 } from '../../components/ui';
-
+import { useSudo } from '../../components/auth/SudoContext';
 import { logger } from '../../utils/logger';
 
 export default function PasskeysPanel() {
   const { t } = useTranslation();
   const { passkeys, loading, error, register, remove } = usePasskeys();
+  const { requireSudo, clearSudo } = useSudo();
   const [validationError, setValidationError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showPasskeyModal, setShowPasskeyModal] = useState(false);
   const [newPasskeyName, setNewPasskeyName] = useState('');
   const { confirm, confirmDialog } = useConfirm();
 
+  const handleOpenAddPasskey = async () => {
+    setValidationError(null);
+    setSuccess(null);
+    await requireSudo({
+      actionTitle: t('passkeys.addPasskey'),
+      onSuccess: () => {
+        setShowPasskeyModal(true);
+      },
+    });
+  };
+
   const handleRegisterPasskey = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError(null);
     setSuccess(null);
-    if (!newPasskeyName.trim()) {
+    const trimmedName = newPasskeyName.trim();
+    if (!trimmedName) {
       setValidationError(t('passkeys.passkeyNameRequired'));
       return;
     }
 
-    try {
-      await register(newPasskeyName.trim());
-      setSuccess(t('passkeys.passkeyRegisteredSuccess', { name: newPasskeyName }));
-      setShowPasskeyModal(false);
-      setNewPasskeyName('');
-    } catch (err: unknown) {
-      logger.error('WebAuthn registration failed', err);
-    }
+    const doRegister = async () => {
+      try {
+        await register(trimmedName);
+        setSuccess(t('passkeys.passkeyRegisteredSuccess', { name: trimmedName }));
+        setShowPasskeyModal(false);
+        setNewPasskeyName('');
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (message.includes('recent strong authentication required')) {
+          clearSudo();
+          await requireSudo({
+            actionTitle: t('passkeys.addPasskey'),
+            onSuccess: async () => {
+              await doRegister();
+            },
+          });
+          return;
+        }
+        logger.error('WebAuthn registration failed', err);
+      }
+    };
+
+    await requireSudo({
+      actionTitle: t('passkeys.addPasskey'),
+      onSuccess: doRegister,
+    });
   };
 
   const handleDeletePasskey = async (id: string, name: string) => {
@@ -59,10 +90,18 @@ export default function PasskeysPanel() {
       confirmLabel: t('common.remove'),
     });
     if (!confirmed) return;
-    try {
-      await remove(id);
-      setSuccess(t('passkeys.passkeyRemovedSuccess'));
-    } catch {}
+
+    await requireSudo({
+      actionTitle: t('passkeys.removePasskey'),
+      onSuccess: async () => {
+        try {
+          await remove(id);
+          setSuccess(t('passkeys.passkeyRemovedSuccess'));
+        } catch (err: unknown) {
+          logger.error('Failed to remove passkey', err);
+        }
+      },
+    });
   };
 
   if (loading) {
@@ -76,7 +115,7 @@ export default function PasskeysPanel() {
           title={t('passkeys.title')}
           description={t('passkeys.description')}
           action={
-            <Button variant="primary" icon={<Plus size={16} />} onClick={() => setShowPasskeyModal(true)}>
+            <Button variant="primary" icon={<Plus size={16} />} onClick={() => void handleOpenAddPasskey()}>
               {t('passkeys.addPasskey')}
             </Button>
           }
@@ -107,11 +146,13 @@ export default function PasskeysPanel() {
             </div>
           </PanelBody>
         ) : passkeys.length === 0 ? (
-          <EmptyState
-            icon={<Key />}
-            title={t('passkeys.noPasskeysTitle')}
-            description={t('passkeys.noPasskeysDescription')}
-          />
+          <PanelBody>
+            <EmptyState
+              icon={<Key />}
+              title={t('passkeys.noPasskeysTitle')}
+              description={t('passkeys.noPasskeysDescription')}
+            />
+          </PanelBody>
         ) : (
           <PanelBody>
             <ListStack>

@@ -7,10 +7,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [0.7.7] - 2026-09-04
 
 ### Added
-- Introduce in-app Sudo Mode (`useSudo` / `SudoModal`) with 15-minute verification grace period (`sessionStorage`) for sensitive operations.
+- Introduce in-app Sudo Mode (`useSudo` / `SudoModal`) with 5-minute verification grace period (`sessionStorage`, aligned with backend strong-auth TTL) for sensitive operations.
 - Add Sudo Mode view in `LoginSurface` and `Login.tsx` that skips username/password re-entry for active sessions, verifying TOTP/Passkey directly before returning.
-- Protect Site Settings modification (`SiteSettingsTab`), Role Assignment/Revocation, Reset User MFA, Reset User Password (`UsersTab`), and Client Secret Rotation / Deletion (`ClientsTab`) with unified Sudo MFA challenge.
+- Protect Site Settings modification (`SiteSettingsTab`), Role Assignment/Revocation, Reset User MFA, Reset User Password (`UsersTab`), Client Secret Rotation / Deletion (`ClientsTab`), Passkey registration and removal (`PasskeysPanel`), and MFA backup code regeneration (`MFAPanel`) with unified Sudo MFA challenge.
+- Auto-catch stale strong authentication errors on passkey registration and prompt Sudo step-up modal immediately.
+
+### Fixed
 - Fix Radix Dialog overlay and content z-index hierarchy by removing conflicting `z-50` utility classes, ensuring dialog overlay (`z-index: 1000`) and content (`z-index: 1001`) reliably cover background elements and sticky bars.
+- Fix `EmptyState` visual alignment across all pages by setting `.empty-state` as a centered flex column and centering `.empty-state-icon svg`, eliminating leftward icon drift.
+- Wrap `EmptyState` in `PasskeysPanel` inside `PanelBody` to conform to panel container standards.
 
 ## [0.7.6] - 2026-09-03
 

@@ -19,10 +19,12 @@ import {
   useConfirm,
   useToast,
 } from '../../components/ui';
+import { useSudo } from '../../components/auth/SudoContext';
 
 export default function MFAPanel() {
   const { t } = useTranslation();
   const { showSuccess } = useToast();
+  const { requireSudo } = useSudo();
   const {
     status: mfaStatus,
     enrollment: mfaEnrollment,
@@ -78,10 +80,15 @@ export default function MFAPanel() {
       confirmVariant: 'primary',
     });
     if (!confirmed) return;
-    try {
-      await regenerateBackupCodes();
-      setSuccess(t('mfa.backupCodesGenerated'));
-    } catch {}
+    await requireSudo({
+      actionTitle: t('mfa.regenerateConfirmTitle'),
+      onSuccess: async () => {
+        try {
+          await regenerateBackupCodes();
+          setSuccess(t('mfa.backupCodesGenerated'));
+        } catch {}
+      },
+    });
   };
 
   if (loading && !mfaStatus.enabled && !mfaEnrollment) {

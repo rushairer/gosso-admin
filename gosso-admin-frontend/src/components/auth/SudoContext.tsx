@@ -7,7 +7,7 @@ import { Badge, Button, Feedback, FormField, Input, Modal, useToast } from '../u
 import { logger } from '../../utils/logger';
 
 const SUDO_STORAGE_KEY = 'gosso-admin:sudo_active_until';
-const DEFAULT_SUDO_GRACE_PERIOD_MS = 15 * 60 * 1000; // 15 minutes
+const DEFAULT_SUDO_GRACE_PERIOD_MS = 5 * 60 * 1000; // 5 minutes, aligns with backend strong-auth max age
 
 export interface RequireSudoOptions {
   actionTitle?: string;
