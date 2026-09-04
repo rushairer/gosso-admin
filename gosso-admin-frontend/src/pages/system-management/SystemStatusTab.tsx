@@ -78,6 +78,7 @@ export default function SystemStatusTab() {
         action={
           <Button
             variant="secondary"
+            size="sm"
             onClick={() => void refresh()}
             loading={loading}
             icon={<RefreshCw size={16} />}
