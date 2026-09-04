@@ -194,24 +194,32 @@ export default function MFAPanel() {
 
           {/* MFA Active */}
           {mfaStatus.enabled && (
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+            <div className="flex-col gap-lg">
+              <div className="inline-status-row">
+                <div className="inline-icon inline-icon--success">
                   <Shield size={20} />
                 </div>
-                <div className="flex flex-col gap-0.5">
-                  <div className="font-semibold text-base text-[var(--color-text-main)]">
-                    {t('mfa.accountProtected')}
-                  </div>
-                  <div className="text-sm text-[var(--color-text-muted)]">{t('mfa.totpRegistered')}</div>
+                <div>
+                  <div className="inline-status-title">{t('mfa.accountProtected')}</div>
+                  <div className="inline-status-value inline-status-value--success">{t('mfa.totpRegistered')}</div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <Button variant="secondary" icon={<RefreshCw size={14} />} onClick={handleGenerateBackupCodes}>
+              <div className="flex-row flex-wrap items-center gap-md">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<RefreshCw size={14} />}
+                  onClick={handleGenerateBackupCodes}
+                >
                   {t('mfa.regenerateBackupCodes')}
                 </Button>
-                <Button variant="danger" icon={<Unlock size={14} />} onClick={() => setShowDisableModal(true)}>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  icon={<Unlock size={14} />}
+                  onClick={() => setShowDisableModal(true)}
+                >
                   {t('mfa.disableTwoFactorAuth')}
                 </Button>
               </div>
@@ -220,8 +228,8 @@ export default function MFAPanel() {
 
           {/* Backup Codes */}
           {backupCodes.length > 0 && (
-            <div className="flex flex-col gap-4 mt-6 pt-6 border-t border-[var(--border-default)]">
-              <div className="flex items-center gap-2 text-warning">
+            <div className="flex-col gap-md mt-lg pt-lg border-t border-[var(--border-default)]">
+              <div className="flex-row items-center gap-xs text-warning">
                 <AlertTriangle size={16} />
                 <h4 className="font-bold text-base m-0">{t('mfa.recoveryBackupCodesTitle')}</h4>
               </div>
