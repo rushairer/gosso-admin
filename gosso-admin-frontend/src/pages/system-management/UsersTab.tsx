@@ -104,14 +104,19 @@ export default function UsersTab() {
       }))
     )
       return;
-    try {
-      await accountService.deleteAccount(accountId);
-      showSuccess(t('users.userDeletedSuccess'));
-      fetchAccounts();
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('users.deleteUserFailed');
-      showError(message);
-    }
+    await requireSudo({
+      actionTitle: t('users.deleteUserConfirmTitle'),
+      onSuccess: async () => {
+        try {
+          await accountService.deleteAccount(accountId);
+          showSuccess(t('users.userDeletedSuccess'));
+          fetchAccounts();
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : t('users.deleteUserFailed');
+          showError(message);
+        }
+      },
+    });
   };
 
   const handleClearLockout = async (accountId: string) => {
