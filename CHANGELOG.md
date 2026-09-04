@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Add Sudo Mode view in `LoginSurface` and `Login.tsx` that skips username/password re-entry for active sessions, verifying TOTP/Passkey directly before returning.
 - Protect Site Settings modification (`SiteSettingsTab`), Role Assignment/Revocation, Reset User MFA, Reset User Password (`UsersTab`), Client Secret Rotation / Deletion (`ClientsTab`), Passkey registration and removal (`PasskeysPanel`), and MFA backup code regeneration (`MFAPanel`) with unified Sudo MFA challenge.
 - Auto-catch stale strong authentication errors on passkey registration and prompt Sudo step-up modal immediately.
+- Integrate `@gosso/client` v0.9.3 with `stepUpPasskey` in `Login.tsx` to handle in-session Passkey step-up authentication during Sudo Mode without replacing existing sessions.
 
 ### Fixed
 - Fix Radix Dialog overlay and content z-index hierarchy by removing conflicting `z-50` utility classes, ensuring dialog overlay (`z-index: 1000`) and content (`z-index: 1001`) reliably cover background elements and sticky bars.

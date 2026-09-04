@@ -16,6 +16,7 @@ const authMethods = vi.hoisted(() => ({
   loginWithPasskey: vi.fn(),
   verifyMfa: vi.fn(),
   stepUpMfa: vi.fn(),
+  stepUpPasskey: vi.fn(),
 }));
 
 vi.mock('@gosso/client/react', async () => {
@@ -161,10 +162,10 @@ describe('Login', () => {
       profile: { sub: 'admin-1', preferred_username: 'superadmin', roles: ['admin'] },
       isAdmin: true,
     };
-    vi.mocked(gossoClient.loginWithPasskey).mockResolvedValue({
+    vi.mocked(gossoClient.stepUpPasskey).mockResolvedValue({
       access_token: 'step-up-passkey-token',
-      refresh_token: 'refresh',
-      expires_in: 900,
+      auth_time: 1700000000,
+      amr: ['swk'],
     });
 
     render(
@@ -177,7 +178,7 @@ describe('Login', () => {
     await userEvent.click(passkeyBtn);
 
     await waitFor(() => {
-      expect(gossoClient.loginWithPasskey).toHaveBeenCalled();
+      expect(gossoClient.stepUpPasskey).toHaveBeenCalled();
     });
   });
 });

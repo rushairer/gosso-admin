@@ -83,7 +83,11 @@ export default function Login() {
     setPasskeyLoading(true);
     setError(null);
     try {
-      await gossoClient.loginWithPasskey();
+      if (isSudoMode) {
+        await gossoClient.stepUpPasskey();
+      } else {
+        await gossoClient.loginWithPasskey();
+      }
       await storeTokensAndRedirect();
     } catch (reason: unknown) {
       logger.error('Passkey login error', reason);
