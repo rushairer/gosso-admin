@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.9] - 2026-09-04
+
+### Changed
+- Align UI/UX design system with Gouno Blog: add cross-project component class aliases (`.icon-button`, `.modal-actions`, `.ui-card`).
+- Standardize table action button dimensions to 34px (`--control-h-sm`) and 8px gap (`gap-2`), right-aligned with nowrap.
+- Enforce single-line nowrap on `.client-name-row` and ensure `shrink-0` on code chips and role icons to prevent unexpected table cell wrapping.
+
 ## [0.7.8] - 2026-09-04
 
 ### Added

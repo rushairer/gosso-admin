@@ -2595,10 +2595,11 @@
   /* Client Table Hierarchy */
   .client-name-row {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 8px;
-    max-width: 320px;
+    max-width: 360px;
+    white-space: nowrap;
   }
 
   .client-name {
@@ -2606,10 +2607,14 @@
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .client-id-code {
     display: inline-block;
+    flex-shrink: 0;
     max-width: 100%;
     overflow: hidden;
     padding: 2px 6px;

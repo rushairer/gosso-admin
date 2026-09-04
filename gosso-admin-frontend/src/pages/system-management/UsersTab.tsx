@@ -313,7 +313,7 @@ export default function UsersTab() {
                     {acc.roles && acc.roles.length > 0 ? (
                       acc.roles.map((role) => (
                         <Tag key={role.id} title={role.description}>
-                          <ShieldIcon size={10} className="mr-1 inline" />
+                          <ShieldIcon size={10} className="mr-1 inline shrink-0" />
                           {role.name}
                         </Tag>
                       ))
