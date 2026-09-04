@@ -18,6 +18,8 @@ import { DEFAULT_SITE_SETTINGS, mergeSiteSettings } from '../../config/site-defa
 import type { SiteSettings } from '../../types/api';
 import LoginPreview from '../../components/auth/LoginPreview';
 
+const MAX_LOGIN_BACKGROUND_SOURCE_LENGTH = 8 * 1024 * 1024;
+
 export default function SiteSettingsTab() {
   const { t } = useTranslation();
   const { showSuccess, showError } = useToast();
@@ -125,12 +127,17 @@ export default function SiteSettingsTab() {
                   }
                 />
               </FormField>
-              <FormField label={t('site.loginBackgroundUrl')}>
-                <Input
-                  type="text"
-                  placeholder={t('site.loginBackgroundUrlPlaceholder')}
+              <FormField
+                label={`${t('site.loginBackgroundUrl')} / Base64`}
+                hint="PNG · JPEG · GIF · WebP · Base64 ≤ 8 MiB"
+              >
+                <Textarea
+                  rows={5}
+                  maxLength={MAX_LOGIN_BACKGROUND_SOURCE_LENGTH}
+                  spellCheck={false}
+                  placeholder={`${t('site.loginBackgroundUrlPlaceholder')} · https://… / data:image/png;base64,…`}
                   value={settings.login_background_url}
-                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
                     update('login_background_url', event.target.value)
                   }
                 />
