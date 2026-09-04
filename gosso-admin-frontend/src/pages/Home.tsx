@@ -4,11 +4,11 @@ import { ArrowRight, Info, Key, Laptop, LogOut, Settings, Shield, ShieldCheck, U
 import type { ComponentType } from 'react';
 import { useSession } from '@gosso/client/react';
 import { logout } from '../auth';
-import { Button, Card } from '../components/ui';
+import { Badge, Button, Card } from '../components/ui';
 
 const iconTileTones = {
-  primary: 'bg-blue-500/10 border border-blue-500/20 text-blue-400',
-  neutral: 'bg-slate-500/10 border border-slate-500/20 text-slate-300',
+  primary: 'home-nav-card__icon-tile--primary',
+  neutral: 'home-nav-card__icon-tile--neutral',
 } as const;
 
 interface QuickLink {
@@ -24,19 +24,24 @@ function QuickCard({ link, onOpen }: { link: QuickLink; onOpen: () => void }) {
 
   return (
     <Card
-      className="home-nav-card flex items-center gap-4 p-5"
+      className="home-nav-card flex items-center gap-4"
       role="button"
       tabIndex={0}
       onClick={onOpen}
-      onKeyDown={(e) => e.key === 'Enter' && onOpen()}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onOpen();
+        }
+      }}
     >
-      <div className={`w-11 h-11 rounded-xl border flex items-center justify-center shrink-0 ${iconTileTones[tone]}`}>
+      <div className={`home-nav-card__icon-tile ${iconTileTones[tone]}`}>
         <Icon size={20} />
       </div>
 
-      <div className="flex flex-col gap-1 min-w-0 flex-1">
-        <h3 className="home-nav-card__title text-base font-semibold m-0">{title}</h3>
-        <p className="text-muted text-xs leading-relaxed m-0">{description}</p>
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <h3 className="home-nav-card__title m-0 text-base font-semibold">{title}</h3>
+        <p className="text-muted m-0 text-xs leading-relaxed">{description}</p>
       </div>
 
       <span className="home-nav-card__arrow" aria-hidden="true">
@@ -105,7 +110,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
-      <Card className="home-hero p-7 sm:p-9">
+      <Card className="home-hero p-8">
         <div className="home-hero__glow" aria-hidden="true" />
 
         <div className="relative flex flex-col items-start gap-6">
@@ -119,31 +124,30 @@ export default function Home() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-              <h2 className="home-hero-title text-2xl sm:text-3xl font-bold tracking-tight m-0">
+              <h2 className="home-hero-title m-0 text-2xl font-bold tracking-tight sm:text-3xl">
                 {userAdmin ? t('home.title') : t('home.userTitle')}
               </h2>
-              <span className="inline-flex items-center gap-2 pl-3.5 pr-4 py-1 rounded-md text-xs font-medium border border-emerald-500/25 bg-emerald-500/10 text-emerald-400 shrink-0">
-                <span className="status-dot" />
+              <Badge tone="success">
+                <span className="status-dot" aria-hidden="true" />
                 <span>
                   {userAdmin
                     ? t('home.loggedInAsAdmin', { name: userName })
                     : t('home.loggedInAsUser', { name: userName })}
                 </span>
-              </span>
+              </Badge>
             </div>
           </div>
 
-          <p className="home-hero-desc text-sm sm:text-base leading-relaxed text-[var(--color-text-muted)] m-0 max-w-3xl">
+          <p className="home-hero-desc m-0 max-w-3xl text-sm leading-relaxed text-[var(--color-text-muted)] sm:text-base">
             {userAdmin ? t('home.description') : t('home.userDescription')}
           </p>
 
           <div className="pt-2">
             <Button
               variant="primary"
-              size="base"
+              size="default"
               icon={<ArrowRight size={16} />}
               iconPosition="right"
-              className="px-5 py-2.5 shadow-md shadow-blue-500/15"
               onClick={() => navigate(userAdmin ? '/system-management' : '/account-settings/profile')}
             >
               {userAdmin ? t('home.enterDashboard') : t('home.goToAccountSettings')}
@@ -153,10 +157,10 @@ export default function Home() {
       </Card>
 
       {!userAdmin && (
-        <Card className="home-admin-notice flex flex-row items-center justify-between flex-wrap gap-4 p-4 sm:p-5">
-          <div className="flex items-center gap-3 flex-1">
+        <Card className="home-admin-notice flex flex-row flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-1 items-center gap-3">
             <Info size={20} color="var(--action-primary)" className="shrink-0" />
-            <p className="text-muted text-sm m-0">{t('home.adminNotice')}</p>
+            <p className="text-muted m-0 text-sm">{t('home.adminNotice')}</p>
           </div>
           <Button variant="secondary" size="sm" icon={<LogOut size={14} />} onClick={() => logout('/')}>
             {t('home.switchAccount')}
@@ -164,10 +168,10 @@ export default function Home() {
         </Card>
       )}
 
-      <div className="flex flex-col gap-5 lg:gap-6">
+      <div className="flex flex-col gap-6">
         <div className="home-section-label">{t('home.quickNavigation')}</div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {quickLinks.map((link) => (
             <QuickCard key={link.to} link={link} onOpen={() => navigate(link.to)} />
           ))}
