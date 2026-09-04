@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Introduce in-app Sudo Mode (`useSudo` / `SudoModal`) with 15-minute verification grace period (`sessionStorage`) for sensitive operations.
 - Add Sudo Mode view in `LoginSurface` and `Login.tsx` that skips username/password re-entry for active sessions, verifying TOTP/Passkey directly before returning.
 - Protect Site Settings modification (`SiteSettingsTab`), Role Assignment/Revocation, Reset User MFA, Reset User Password (`UsersTab`), and Client Secret Rotation / Deletion (`ClientsTab`) with unified Sudo MFA challenge.
+- Fix Radix Dialog overlay and content z-index hierarchy by removing conflicting `z-50` utility classes, ensuring dialog overlay (`z-index: 1000`) and content (`z-index: 1001`) reliably cover background elements and sticky bars.
 
 ## [0.7.6] - 2026-09-03
 
