@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.19] - 2026-09-04
+
+### Changed
+- Align UI/UX design system with Gouno Blog: standardize 404 / Not Found page layout and card (`.not-found-page`, `.not-found-card`, `.not-found-title`, `.not-found-subtitle`).
+- Normalize 2-column form grid (`.form-grid-2`) and card grid (`.card-grid`) with mobile breakpoints.
+- Standardize semantic status dots (`.status-dot`, `--success`, `--warning`, `--danger`, `--brand`).
+- Normalize section and modal dividers (`.modal-section-divider`, `.section-divider`).
+- Standardize security MFA secret boxes and backup codes grid (`.mfa-secret-box`, `.mfa-secret-code`, `.mfa-backup-codes-grid`, `.mfa-backup-code`).
+
 ## [0.7.18] - 2026-09-04
 
 ### Changed
