@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.15] - 2026-09-04
+
+### Changed
+- Align UI/UX design system with Gouno Blog: normalize loading spinner geometry and animation (`.loading-spinner`, `.spinner`, `--sm/md/lg` variants, `.page-loader`).
+- Align sidebar nav link geometry (`.sidebar-link`, `.admin-nav-link`): 40px min-height, 12px padding, token-based hover/active colors.
+- Align sidebar section label (`.sidebar-section-title`, `.admin-nav-section-title`): uppercase, 12px, 0.08em tracking.
+- Align avatar component (`.avatar`, `.admin-avatar`, `--circle`, `--sm`, `--lg`): 34px, 8px radius, brand background.
+- Normalize session card and profile strip (`.session-card`, `.session-meta`).
+- Add breadcrumb alignment (`.breadcrumb`, `.page-breadcrumb`).
+- Normalize `:focus-visible` ring across buttons, nav links and tabs.
+
 ## [0.7.14] - 2026-09-04
 
 ### Changed
