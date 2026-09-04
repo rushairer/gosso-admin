@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Info as InfoIcon } from 'lucide-react';
-import { Button, CheckboxField, CheckboxGroup, FormField, Input, Modal } from '../../../components/ui';
+import { Button, CheckboxField, CheckboxGroup, Feedback, FormField, Input, Modal } from '../../../components/ui';
 import type { OAuth2Client } from '../../../types/api';
 import type { ClientFormData } from '../../../features/clients/clientForm';
 
@@ -119,9 +118,8 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
           ))}
         </CheckboxGroup>
         {clientForm.scopes.some(isAdminScope) && (
-          <div className="notice-card notice-card--warning flex items-start gap-3 p-3.5 rounded-lg border border-amber-500/25 bg-amber-500/5">
-            <InfoIcon className="text-amber-400 shrink-0 mt-0.5" size={16} />
-            <p className="text-xs sm:text-sm leading-relaxed text-amber-200/90 m-0">{t('clients.adminScopeWarning')}</p>
+          <div className="mb-md">
+            <Feedback type="warning">{t('clients.adminScopeWarning')}</Feedback>
           </div>
         )}
         <div className="modal-footer modal-footer--embedded">
