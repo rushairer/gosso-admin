@@ -141,7 +141,7 @@ export default function ProfilePanel() {
           </DefinitionRow>
 
           <DefinitionRow label={t('profile.subjectIdLabel')}>
-            <div className="flex items-center justify-between gap-4 max-w-xl w-full">
+            <div className="flex-row items-center justify-between gap-md max-w-xl w-full">
               <code className="text-mono text-xs inline-code">{profile?.sub || '-'}</code>
               {profile?.sub && (
                 <Button
@@ -160,7 +160,7 @@ export default function ProfilePanel() {
           </DefinitionRow>
 
           <DefinitionRow label={t('profile.ssoIssuerLabel')}>
-            <div className="flex items-center justify-between gap-4 max-w-xl w-full">
+            <div className="flex-row items-center justify-between gap-md max-w-xl w-full">
               <code className="text-mono text-xs inline-code">{window.location.origin}</code>
               <Button
                 variant="secondary"

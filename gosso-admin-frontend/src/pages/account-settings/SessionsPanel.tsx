@@ -69,7 +69,7 @@ export default function SessionsPanel() {
                 return (
                   <tr key={session.id}>
                     <td>
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex-row items-center gap-sm">
                         <Laptop
                           size={16}
                           className="shrink-0"
@@ -80,7 +80,7 @@ export default function SessionsPanel() {
                       </div>
                     </td>
                     <td className="text-sm text-dark">
-                      <div className="flex items-center gap-1.5 font-mono">
+                      <div className="flex-row items-center gap-xs font-mono">
                         <MapPin size={13} className="shrink-0" color="var(--text-tertiary)" />
                         <span>{session.ip}</span>
                       </div>
