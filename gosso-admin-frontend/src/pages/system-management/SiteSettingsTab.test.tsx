@@ -73,4 +73,29 @@ describe('SiteSettingsTab', () => {
     expect(screen.getByText('390 × 844')).toBeInTheDocument();
     expect(productName).toHaveValue('Acme Identity');
   });
+
+  it('previews and saves a base64 login background image', async () => {
+    render(
+      <MemoryRouter>
+        <ToastProvider>
+          <SiteSettingsTab />
+        </ToastProvider>
+      </MemoryRouter>
+    );
+
+    await screen.findByDisplayValue('Acme Identity');
+    const dataUrl = 'data:image/png;base64,iVBORw0KGgo=';
+    const backgroundField = screen.getByLabelText(/login background url/i);
+    await userEvent.type(backgroundField, dataUrl);
+
+    const loginSurface = document.querySelector('.login-preview .login-surface') as HTMLElement | null;
+    expect(loginSurface?.style.backgroundImage).toContain(dataUrl);
+
+    await userEvent.click(screen.getByRole('button', { name: /save settings/i }));
+    await waitFor(() =>
+      expect(siteSettingsService.updateSiteSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ login_background_url: dataUrl })
+      )
+    );
+  });
 });

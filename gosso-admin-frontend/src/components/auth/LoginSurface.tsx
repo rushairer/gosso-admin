@@ -45,19 +45,16 @@ export default function LoginSurface({
   onBackToLogin,
 }: LoginSurfaceProps) {
   const { t } = useTranslation();
+  const backgroundImage = branding.login_background_url
+    ? `linear-gradient(rgba(15,18,23,.72), rgba(15,18,23,.88)), url(${JSON.stringify(branding.login_background_url)})`
+    : undefined;
 
   return (
     <div
       className="login-surface flex-row items-center justify-center"
       inert={preview}
       aria-hidden={preview || undefined}
-      style={
-        {
-          backgroundImage: branding.login_background_url
-            ? `linear-gradient(rgba(15,18,23,.72), rgba(15,18,23,.88)), url(${branding.login_background_url})`
-            : undefined,
-        } as CSSProperties
-      }
+      style={{ backgroundImage } as CSSProperties}
     >
       <div className="glass-card login-card">
         <div className="text-center login-card__header">
