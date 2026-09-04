@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.10] - 2026-09-04
+
+### Changed
+- Align UI/UX design system with Gouno Blog: normalize form controls (`.input-field`, `.ui-control`), compact control variants, and select wrapper chevrons.
+- Standardize Switch and Checkbox component styling (`.switch-field`, `.ui-switch-label`, `.ui-switch__text`, `.ui-switch__label`).
+- Harmonize Empty and Error states (`.empty-state`, `.state`, `.empty-state-actions`, `.state__actions`) with unified 40px icon sizing, typography, and spacing.
+- Align Feedback banner styles (`.feedback-error`, `.feedback--error`, `.feedback-success`, `.feedback--success`).
+- Standardize Tab button height (34px), active states, and Toast notification container/item cross-project aliases.
+
 ## [0.7.9] - 2026-09-04
 
 ### Changed
