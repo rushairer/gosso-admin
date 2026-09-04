@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.16] - 2026-09-04
+
+### Changed
+- Align UI/UX design system with Gouno Blog: normalize panel/card header anatomy (`.panel-header`, `.card-header`, `.panel-heading`, `.card-title`, `.card-description`, `.panel-header__action`, `.card-header__action`).
+- Align panel body and card content (`.panel-body`, `.card-content`, `.flush` modifier) and card footer (`.card-footer`).
+- Add definition list alignment (`.definition-list`, `.definition-row`, `.definition-label`, `.definition-value`) with cross-alias `.detail-*` variants.
+- Add form action bar alignment (`.form-action-bar`, `.is-sticky` modifier, `.form-action-bar__status`) with cross-alias `.form-submit-bar`.
+
 ## [0.7.15] - 2026-09-04
 
 ### Changed
