@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.18] - 2026-09-04
+
+### Changed
+- Align UI/UX design system with Gouno Blog: standardize list stacks and item rows (`.list-stack`, `.list-row`, `.list-row-main`, `.list-icon`, `.list-title`, `.list-meta`).
+- Align data table header and row hover states across `.admin-table`, `.content-table`, and `.dashboard-table` (uppercase tracking headers, hover row highlighting, text-right action columns, nested strong/small typography).
+- Standardize plain sections (`.plain-section`, `.plain-section-title`).
+- Normalize button group alignment variants (`.button-group-left`, `.button-group-right`, `.button-group-between`) and link buttons (`.btn-link`).
+
 ## [0.7.17] - 2026-09-04
 
 ### Changed
