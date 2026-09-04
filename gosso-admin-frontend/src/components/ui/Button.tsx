@@ -14,7 +14,7 @@ export type ButtonVariant =
 export type ButtonSize = 'sm' | 'default' | 'lg' | 'icon' | 'base' | 'regular' | 'compact';
 
 export const buttonVariants = cva(
-  'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer',
+  'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-control)] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer',
   {
     variants: {
       variant: {
@@ -33,7 +33,7 @@ export const buttonVariants = cva(
         regular: 'btn-base',
         sm: 'btn-sm',
         compact: 'btn-sm',
-        lg: 'btn-lg',
+        lg: 'btn-lg rounded-lg',
         icon: 'btn-icon',
       },
     },

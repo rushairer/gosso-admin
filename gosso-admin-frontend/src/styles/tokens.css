@@ -72,11 +72,12 @@
 
     /* Border Radii */
     --radius-xs: 4px;
-    --radius-sm: 6px;
-    --radius-md: 8px;
-    --radius-control: 8px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-control: 6px;
     --radius-panel: 10px;
-    --radius-lg: 12px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
     --radius-full: 9999px;
 
     /* Component Heights */

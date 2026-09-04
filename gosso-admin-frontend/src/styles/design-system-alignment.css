@@ -29,9 +29,10 @@
     --control-h-lg: 46px;
     --control-height: 38px;
     --control-height-compact: 34px;
-    --radius-control: 8px;
+    --radius-control: 6px;
     --radius-panel: 12px;
-    --radius-lg: 12px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
   }
 
   .topbar {
@@ -63,6 +64,7 @@
 
   .btn-lg {
     min-height: var(--control-h-lg);
+    border-radius: 8px;
     padding-inline: 18px;
     font-size: var(--font-size-md);
   }
@@ -72,6 +74,7 @@
     width: var(--control-h-base);
     height: var(--control-h-base);
     min-height: var(--control-h-base);
+    border-radius: var(--radius-control);
     padding: 0;
   }
 
@@ -79,12 +82,14 @@
     width: var(--control-h-sm);
     height: var(--control-h-sm);
     min-height: var(--control-h-sm);
+    border-radius: var(--radius-control);
   }
 
   .icon-btn.btn-lg {
     width: var(--control-h-lg);
     height: var(--control-h-lg);
     min-height: var(--control-h-lg);
+    border-radius: 8px;
   }
 
   .btn > .btn-icon,

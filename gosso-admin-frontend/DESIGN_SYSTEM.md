@@ -16,7 +16,7 @@ This frontend follows the same interaction and layout contract as `gouno-blog/bl
 | `default` | 38px | 14px | 38 x 38px |
 | `lg` | 46px | 18px | 46 x 46px |
 
-Buttons use an 8px radius. Small controls use a 6px icon/label gap; default and large controls use 8px. Icons always render in a fixed 16px, non-shrinking slot.
+Controls use a 6px radius (`--radius-control: 6px`; large controls scale to 8px). Small controls use a 6px icon/label gap; default and large controls use 8px. Icons always render in a fixed 16px, non-shrinking slot.
 
 Canonical action variants are `primary`, `secondary`, `destructive`/`danger`, `ghost`, and `outline`. `default`, `base`, `regular`, and `compact` are compatibility aliases only.
 
