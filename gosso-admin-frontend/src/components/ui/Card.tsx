@@ -1,14 +1,40 @@
 import React from 'react';
+import { cn } from '../../lib/utils';
+
+export type CardVariant = 'default' | 'subtle' | 'elevated';
+export type CardPadding = 'none' | 'sm' | 'base' | 'lg';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
+  variant?: CardVariant;
+  padding?: CardPadding;
+  interactive?: boolean;
+  as?: React.ElementType;
 }
 
-export function Card({ children, className = '', ...props }: CardProps) {
+export function Card({
+  children,
+  className = '',
+  variant = 'default',
+  padding = 'base',
+  interactive = false,
+  as: Component = 'div',
+  ...props
+}: CardProps) {
   return (
-    <div className={`glass-card ${className}`} {...props}>
+    <Component
+      className={cn(
+        'glass-card',
+        variant !== 'default' && `glass-card--${variant}`,
+        `glass-card--padding-${padding}`,
+        interactive && 'glass-card--interactive',
+        className
+      )}
+      tabIndex={interactive ? 0 : undefined}
+      {...props}
+    >
       {children}
-    </div>
+    </Component>
   );
 }
 
@@ -26,11 +52,11 @@ export function CardHeader({
   className?: string;
 }) {
   if (children) {
-    return <div className={`card-header ${className}`}>{children}</div>;
+    return <div className={cn('card-header', className)}>{children}</div>;
   }
 
   return (
-    <div className={`card-header ${className}`}>
+    <div className={cn('card-header', className)}>
       <div className="card-title-group">
         {title && <h3 className="card-title">{title}</h3>}
         {description && <p className="card-description">{description}</p>}
@@ -49,9 +75,9 @@ export function CardContent({
   className?: string;
   flush?: boolean;
 }) {
-  return <div className={`card-content ${flush ? 'flush' : ''} ${className}`}>{children}</div>;
+  return <div className={cn('card-content', flush && 'flush', className)}>{children}</div>;
 }
 
 export function CardFooter({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`card-footer ${className}`}>{children}</div>;
+  return <div className={cn('card-footer', className)}>{children}</div>;
 }
