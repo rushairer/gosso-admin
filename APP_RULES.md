@@ -55,11 +55,11 @@ If the primary action already exists in the panel header, do not duplicate it in
 
 Use the shared CSS primitives instead of inline spacing:
 
-- panel header: `18px 20px`
-- panel body: `20px`
-- section separator: `20px` padding with top border
+- panel header: `24px` on desktop, `16px` on compact viewports
+- panel body: `24px` on desktop, `16px` on compact viewports; flush table/list bodies remain `0`
+- section separator: `24px` padding with top border on desktop, `16px` on compact viewports
 - row vertical rhythm: `14px`
-- compact action buttons: `36px` height
+- compact action buttons: `34px` height
 
 Use `8 / 12 / 16 / 20 / 24 / 32` as the spacing scale. Avoid one-off values unless required by a fixed external asset.
 

@@ -201,6 +201,16 @@
     box-shadow: var(--ds-panel-shadow-hover);
   }
 
+  .admin-panel .panel-header,
+  .admin-panel .panel-body,
+  .admin-panel .plain-section {
+    padding: 24px;
+  }
+
+  .admin-panel .panel-body.flush {
+    padding: 0;
+  }
+
   .panel-stack {
     gap: 16px;
   }
@@ -333,6 +343,16 @@
     .topbar,
     .workspace {
       padding-inline: 20px;
+    }
+
+    .admin-panel .panel-header,
+    .admin-panel .panel-body,
+    .admin-panel .plain-section {
+      padding: 16px;
+    }
+
+    .admin-panel .panel-body.flush {
+      padding: 0;
     }
 
     .ds-dialog-content {
