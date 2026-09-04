@@ -59,6 +59,8 @@ export function StatusBadge({
   className?: string;
 }) {
   return (
-    <span className={cn('status-pill', tone, compact && 'compact text-[11px] px-2 py-0.5', className)}>{children}</span>
+    <Badge tone={tone} className={cn('status-pill', tone, compact && 'compact', className)}>
+      {children}
+    </Badge>
   );
 }
