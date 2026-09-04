@@ -40,7 +40,7 @@ export function UserConsentsModal({
         </Button>
       }
     >
-      <p className="mb-md text-dark text-sm">{t('users.consentsDescription')}</p>
+      <p className="text-muted text-sm mb-md">{t('users.consentsDescription')}</p>
 
       {loading ? (
         <div className="text-center py-xl">
@@ -74,7 +74,7 @@ export function UserConsentsModal({
                     </Tag>
                   ))}
                 </div>
-                <div className="text-xs text-dark mt-sm">
+                <div className="text-xs text-muted mt-sm">
                   {t('users.authorizedAt')} {consent.granted_at ? new Date(consent.granted_at).toLocaleString() : '-'}
                 </div>
               </div>

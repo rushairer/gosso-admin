@@ -69,7 +69,7 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
       }
     >
       <form id="create-user-form" onSubmit={handleSubmit}>
-        <p className="mb-md text-dark text-sm">{t('users.createModalDescription')}</p>
+        <p className="text-muted text-sm mb-md">{t('users.createModalDescription')}</p>
 
         {error && (
           <div className="mb-md">

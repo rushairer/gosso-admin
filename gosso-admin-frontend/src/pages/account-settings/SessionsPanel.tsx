@@ -79,7 +79,7 @@ export default function SessionsPanel() {
                         {isCurrent && <Badge tone="primary">{t('sessions.currentSession')}</Badge>}
                       </div>
                     </td>
-                    <td className="text-sm text-dark">
+                    <td className="text-sm text-muted">
                       <div className="flex-row items-center gap-xs font-mono">
                         <MapPin size={13} className="shrink-0" color="var(--text-tertiary)" />
                         <span>{session.ip}</span>

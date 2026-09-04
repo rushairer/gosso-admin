@@ -63,7 +63,7 @@ export function ResetPasswordModal({ isOpen, onClose, account, onSubmit }: Reset
       }
     >
       <form id="reset-password-form" onSubmit={handleSubmit}>
-        <p className="mb-md text-dark text-sm">
+        <p className="text-muted text-sm mb-md">
           {t('users.changePasswordDescription', {
             name: account.display_name || account.username,
           })}
