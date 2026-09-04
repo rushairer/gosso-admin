@@ -69,10 +69,10 @@ export default function AuditLogsTab() {
             </FormField>
           </div>
           <div className="table-filter-actions">
-            <Button variant="primary" type="submit">
+            <Button variant="primary" size="sm" type="submit">
               {t('common.search')}
             </Button>
-            <Button variant="secondary" type="button" onClick={clearFilters}>
+            <Button variant="secondary" size="sm" type="button" onClick={clearFilters}>
               {t('common.clear')}
             </Button>
           </div>
