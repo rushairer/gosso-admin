@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.24] - 2026-09-04
+
+### Changed
+- Align UI/UX design system with Gouno Blog: standardize inline status list and rows (`.inline-status-list`, `.inline-status-row`).
+- Standardize semantic inline icon badges (`.inline-icon`, `--success`, `--danger`, `--warning`, `--info`).
+- Standardize setup cards and health status cards (`.setup-card`, `.health-card`, `.setup-title`, `.health-icon`).
+
 ## [0.7.23] - 2026-09-04
 
 ### Changed
