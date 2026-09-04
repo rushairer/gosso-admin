@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.21] - 2026-09-04
+
+### Changed
+- Align UI/UX design system with Gouno Blog: standardize page header anatomy (`.admin-page-header`, `.page-header`, `.admin-page-heading`, `.admin-page-actions`, `.admin-page-count`).
+- Standardize taxonomy and tag admin cards grid (`.tag-admin-grid`, `.tag-admin-card`, `.tag-admin-card__content`, `.tag-admin-card__actions`).
+- Standardize media grid and media cards (`.media-grid`, `.media-card`, hover elevation and action layout).
+- Standardize editor AI prompt box, result container, and candidate preview (`.editor-ai-prompt-box`, `.editor-ai-result-box`, `.editor-ai-result-header`, `.editor-ai-result-preview`).
+
 ## [0.7.20] - 2026-09-04
 
 ### Changed
