@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Key, Shield } from 'lucide-react';
 import { useSession } from '@gosso/client/react';
 import { gossoClient } from '../../auth';
-import { Button, Feedback, FormField, Input, Modal, useToast } from '../ui';
+import { Badge, Button, Feedback, FormField, Input, Modal, useToast } from '../ui';
 import { logger } from '../../utils/logger';
 
 const SUDO_STORAGE_KEY = 'gosso-admin:sudo_active_until';
@@ -160,16 +160,29 @@ export function SudoProvider({ children }: { children: ReactNode }) {
           </Button>
         }
       >
-        <div className="notice-card notice-card--info mb-md">
-          <div className="flex-row items-center gap-sm mb-xs">
-            <Shield size={16} />
-            <strong>{pendingAction?.actionTitle || t('login.sudoModeTitle')}</strong>
+        <div className="notice-card notice-card--info notice-card--stacked mb-md">
+          <div className="flex-row items-center justify-between gap-sm">
+            <div className="flex-row items-center gap-sm">
+              <Shield size={16} className="shrink-0" style={{ color: 'var(--status-info, #38bdf8)' }} />
+              <strong className="text-sm">{pendingAction?.actionTitle || t('login.sudoModeTitle')}</strong>
+            </div>
+            {accountName && (
+              <Badge tone="neutral" className="text-xs truncate" style={{ maxWidth: '160px' }} title={accountName}>
+                {accountName}
+              </Badge>
+            )}
           </div>
-          <p className="text-sm m-0">
-            {t('login.sudoModeNotice', {
-              user: accountName,
-              defaultValue: `您正在执行敏感管理操作。当前操作账号：${accountName}。请输入身份验证器动态码或使用通行密钥完成验证。`,
-            })}
+          <p className="text-sm text-muted m-0 leading-relaxed">
+            {pendingAction?.actionTitle
+              ? t('login.sudoModeNoticeWithAction', {
+                  action: pendingAction.actionTitle,
+                  user: accountName,
+                  defaultValue: `您正在执行敏感操作「${pendingAction.actionTitle}」，请输入身份验证器动态码或使用通行密钥完成验证。`,
+                })
+              : t('login.sudoModeNotice', {
+                  user: accountName,
+                  defaultValue: '您正在执行敏感管理操作，请输入身份验证器动态码或使用通行密钥完成验证。',
+                })}
           </p>
         </div>
 

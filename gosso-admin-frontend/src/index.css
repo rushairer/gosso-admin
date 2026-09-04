@@ -1085,6 +1085,18 @@
     background: var(--bg-panel-soft);
   }
 
+  .notice-card--stacked {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .notice-card--info {
+    border-color: var(--status-info-border, rgba(56, 189, 248, 0.28));
+    background: var(--status-info-subtle, rgba(56, 189, 248, 0.08));
+  }
+
   .notice-card.success {
     border-color: var(--status-success-border, rgba(34, 197, 94, 0.2));
     background: var(--status-success-subtle, rgba(34, 197, 94, 0.08));

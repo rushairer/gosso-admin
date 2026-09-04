@@ -3,7 +3,7 @@ import { Key, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { PublicSiteBranding } from '../../types/api';
-import { Button, Feedback, FormField, Input } from '../ui';
+import { Badge, Button, Feedback, FormField, Input } from '../ui';
 
 interface LoginSurfaceProps {
   branding: PublicSiteBranding;
@@ -79,15 +79,27 @@ export default function LoginSurface({
 
         {isSudoMode ? (
           <form onSubmit={onMfaSubmit}>
-            <div className="notice-card notice-card--info mb-md">
-              <div className="flex-row items-center gap-sm mb-xs">
-                <Shield size={16} />
-                <strong>{t('login.sudoModeTitle')}</strong>
+            <div className="notice-card notice-card--info notice-card--stacked mb-md">
+              <div className="flex-row items-center justify-between gap-sm">
+                <div className="flex-row items-center gap-sm">
+                  <Shield size={16} className="shrink-0" style={{ color: 'var(--status-info, #38bdf8)' }} />
+                  <strong className="text-sm">{t('login.sudoModeTitle')}</strong>
+                </div>
+                {sudoAccountName && (
+                  <Badge
+                    tone="neutral"
+                    className="text-xs truncate"
+                    style={{ maxWidth: '160px' }}
+                    title={sudoAccountName}
+                  >
+                    {sudoAccountName}
+                  </Badge>
+                )}
               </div>
-              <p className="text-sm m-0">
+              <p className="text-sm text-muted m-0 leading-relaxed">
                 {t('login.sudoModeNotice', {
                   user: sudoAccountName,
-                  defaultValue: `您正在执行敏感管理操作。当前操作账号：${sudoAccountName}。请输入身份验证器动态码或使用通行密钥完成验证。`,
+                  defaultValue: '您正在执行敏感管理操作，请输入身份验证器动态码或使用通行密钥完成验证。',
                 })}
               </p>
             </div>
