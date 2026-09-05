@@ -4,6 +4,7 @@ WORKDIR /app
 ARG VITE_APP_BASE_PATH=/
 ENV VITE_APP_BASE_PATH=${VITE_APP_BASE_PATH}
 COPY package*.json ./
+COPY vendor/gouno-ui-0.1.0.tgz ./vendor/
 RUN npm ci --legacy-peer-deps
 COPY . .
 RUN npm run build
