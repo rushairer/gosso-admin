@@ -3,7 +3,7 @@ import { Key, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 import type { PublicSiteBranding } from '../../types/api';
-import { Badge, Button, Feedback, FormField, Input } from '../ui';
+import { Badge, Button, Feedback, FormField, Input } from '@gouno/ui';
 
 interface LoginSurfaceProps {
   branding: PublicSiteBranding;

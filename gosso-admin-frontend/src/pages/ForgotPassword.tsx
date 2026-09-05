@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Mail } from 'lucide-react';
-import { Button, Card, Feedback, FormField, Input } from '../components/ui';
+import { Button, Card, Feedback, FormField, Input } from '@gouno/ui';
 import { gossoClient } from '../auth';
 import { logger } from '../utils/logger';
 

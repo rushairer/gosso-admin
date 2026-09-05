@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState, type FormEventHandler } from 'react'
 import { Monitor, Smartphone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { PublicSiteBranding } from '../../types/api';
-import { Button } from '../ui';
+import { Button } from '@gouno/ui';
 import LoginSurface from './LoginSurface';
 
 const VIEWPORTS = {

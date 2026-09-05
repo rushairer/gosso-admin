@@ -12,7 +12,7 @@ import {
   PlainSection,
   Textarea,
   useToast,
-} from '../../components/ui';
+} from '@gouno/ui';
 import { siteSettingsService } from '../../services';
 import { DEFAULT_SITE_SETTINGS, mergeSiteSettings } from '../../config/site-defaults';
 import type { SiteSettings } from '../../types/api';

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Eye, EyeOff, Mail } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProfileManager } from '@gosso/client/react';
-import { Button, Feedback, FormField, IconButton, Input, Modal } from '../../components/ui';
+import { Button, Feedback, FormField, IconButton, Input, Modal } from '@gouno/ui';
 import type { UserProfile } from '../../auth';
 
 interface EmailChangeModalProps {

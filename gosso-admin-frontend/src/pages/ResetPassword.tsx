@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, Lock } from 'lucide-react';
-import { Button, Card, Feedback, FormField, IconButton, Input } from '../components/ui';
+import { Button, Card, Feedback, FormField, IconButton, Input } from '@gouno/ui';
 import { gossoClient } from '../auth';
 import { logger } from '../utils/logger';
 

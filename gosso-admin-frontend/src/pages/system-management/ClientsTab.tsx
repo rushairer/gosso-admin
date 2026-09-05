@@ -22,7 +22,7 @@ import {
   Tag,
   useConfirm,
   useToast,
-} from '../../components/ui';
+} from '@gouno/ui';
 
 import { ClientEditorModal } from './clients/ClientEditorModal';
 import { ClientSecretModal } from './clients/ClientSecretModal';
@@ -255,7 +255,7 @@ export default function ClientsTab() {
                 <td>
                   <div className="flex flex-row flex-wrap gap-1.5">
                     {client.grant_types.map((g) => (
-                      <Tag key={g} tone="secondary">
+                      <Tag key={g} tone="neutral">
                         {g.replace('_', ' ')}
                       </Tag>
                     ))}

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { CheckSquare as ConsentIcon } from 'lucide-react';
-import { Button, EmptyState, ListRow, ListStack, LoadingSpinner, Modal, Tag } from '../../../components/ui';
+import { Button, EmptyState, ListRow, ListStack, LoadingSpinner, Modal, Tag } from '@gouno/ui';
 import type { Account, Consent } from '../../../types/api';
 
 interface UserConsentsModalProps {
@@ -68,7 +68,7 @@ export function UserConsentsModal({
                 </div>
                 <div className="flex-row flex-wrap gap-xs mt-sm">
                   {consent.scopes?.map((scope: string) => (
-                    <Tag key={scope} tone="secondary">
+                    <Tag key={scope} tone="neutral">
                       {scope}
                     </Tag>
                   ))}

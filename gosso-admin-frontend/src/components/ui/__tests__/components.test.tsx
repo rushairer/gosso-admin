@@ -1,23 +1,23 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useState } from 'react';
-import { Feedback } from '../Feedback';
-import { StatusBadge } from '../Badge';
-import { EmptyState } from '../EmptyState';
-import { ConfirmDialog } from '../ConfirmDialog';
-import { ToastProvider, useToast } from '../Toast';
-import { LoadingSpinner, PageLoader } from '../LoadingSpinner';
-import { Modal } from '../Modal';
-import { FormField } from '../Form';
-import { Tabs } from '../Tabs';
-import { useConfirm } from '../useConfirm';
-import { AsyncState } from '../AsyncState';
-import { Button, IconButton } from '../Button';
-import { Input, Textarea, Select } from '../Input';
-import { Skeleton, TableSkeleton } from '../Skeleton';
-import { Drawer } from '../Drawer';
-import { Card, CardHeader, CardContent } from '../Card';
-import { DataTable } from '../DataTable';
+import { Feedback } from '@gouno/ui';
+import { StatusBadge } from '@gouno/ui';
+import { EmptyState } from '@gouno/ui';
+import { ConfirmDialog } from '@gouno/ui';
+import { ToastProvider, useToast } from '@gouno/ui';
+import { LoadingSpinner, PageLoader } from '@gouno/ui';
+import { Modal } from '@gouno/ui';
+import { FormField } from '@gouno/ui';
+import { Tabs } from '@gouno/ui';
+import { useConfirm } from '@gouno/ui';
+import { AsyncState } from '@gouno/ui';
+import { Button, IconButton } from '@gouno/ui';
+import { Input, Textarea, Select } from '@gouno/ui';
+import { Skeleton, TableSkeleton } from '@gouno/ui';
+import { Drawer } from '@gouno/ui';
+import { Card, CardHeader, CardContent } from '@gouno/ui';
+import { DataTable } from '@gouno/ui';
 
 describe('Feedback', () => {
   it('renders error type with message', () => {

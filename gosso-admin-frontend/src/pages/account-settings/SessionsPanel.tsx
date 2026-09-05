@@ -13,7 +13,7 @@ import {
   PanelHeader,
   TableSkeleton,
   useConfirm,
-} from '../../components/ui';
+} from '@gouno/ui';
 import { parseUserAgent } from '../../utils/format';
 
 export default function SessionsPanel() {
@@ -76,7 +76,7 @@ export default function SessionsPanel() {
                           color={isCurrent ? 'var(--action-primary)' : 'var(--text-secondary)'}
                         />
                         <span className="text-sm font-semibold">{parseUserAgent(session.user_agent)}</span>
-                        {isCurrent && <Badge tone="primary">{t('sessions.currentSession')}</Badge>}
+                        {isCurrent && <Badge tone="brand">{t('sessions.currentSession')}</Badge>}
                       </div>
                     </td>
                     <td className="text-sm text-muted">

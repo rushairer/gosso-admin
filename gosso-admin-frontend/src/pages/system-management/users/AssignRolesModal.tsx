@@ -11,7 +11,7 @@ import {
   ListStack,
   Modal,
   Select,
-} from '../../../components/ui';
+} from '@gouno/ui';
 import type { Account, Role } from '../../../types/api';
 
 interface AssignRolesModalProps {

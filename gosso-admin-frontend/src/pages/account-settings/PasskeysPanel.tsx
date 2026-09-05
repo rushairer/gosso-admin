@@ -17,7 +17,7 @@ import {
   PanelBody,
   PanelHeader,
   useConfirm,
-} from '../../components/ui';
+} from '@gouno/ui';
 import { useSudo } from '../../components/auth/SudoContext';
 import { logger } from '../../utils/logger';
 

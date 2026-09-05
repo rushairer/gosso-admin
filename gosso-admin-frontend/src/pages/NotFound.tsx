@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { HelpCircle } from 'lucide-react';
-import { Button, Card } from '../components/ui';
+import { Button, Card } from '@gouno/ui';
 
 export default function NotFound() {
   const { t } = useTranslation();

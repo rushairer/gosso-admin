@@ -25,7 +25,7 @@ import {
   Tag,
   useConfirm,
   useToast,
-} from '../../components/ui';
+} from '@gouno/ui';
 
 import { accountService } from '../../services';
 import type { Account, Consent } from '../../types/api';

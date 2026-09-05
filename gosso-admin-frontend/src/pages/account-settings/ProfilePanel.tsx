@@ -13,7 +13,7 @@ import {
   DefinitionList,
   DefinitionRow,
   Tag,
-} from '../../components/ui';
+} from '@gouno/ui';
 import { EmailChangeModal } from './EmailChangeModal';
 
 export default function ProfilePanel() {
@@ -135,7 +135,7 @@ export default function ProfilePanel() {
           <DefinitionRow label={t('profile.securityRoleLabel')}>
             <div className="flex items-center gap-2">
               {profile?.roles?.map((role) => <Tag key={role}>{role}</Tag>) || (
-                <Tag tone="secondary">{t('profile.standardUser')}</Tag>
+                <Tag tone="neutral">{t('profile.standardUser')}</Tag>
               )}
             </div>
           </DefinitionRow>

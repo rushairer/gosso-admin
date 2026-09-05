@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthCallback } from '@gosso/client/react';
 import { routerPath } from '../config/appPaths';
-import { ButtonLink, Card, LoadingSpinner } from '../components/ui';
+import { ButtonLink, Card, LoadingSpinner } from '@gouno/ui';
 
 export default function Callback() {
   const { t } = useTranslation();

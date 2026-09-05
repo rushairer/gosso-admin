@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Feedback, FormField, Input, Modal } from '../../../components/ui';
+import { Button, Feedback, FormField, Input, Modal } from '@gouno/ui';
 import type { CreateAccountPayload } from '../../../services';
 
 interface CreateUserModalProps {

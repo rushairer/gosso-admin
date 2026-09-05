@@ -18,7 +18,7 @@ import {
   StatusBadge,
   useConfirm,
   useToast,
-} from '../../components/ui';
+} from '@gouno/ui';
 import { useSudo } from '../../components/auth/SudoContext';
 
 export default function MFAPanel() {

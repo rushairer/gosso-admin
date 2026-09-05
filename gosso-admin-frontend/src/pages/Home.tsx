@@ -4,7 +4,7 @@ import { ArrowRight, Info, Key, Laptop, LogOut, Settings, Shield, ShieldCheck, U
 import type { ComponentType } from 'react';
 import { useSession } from '@gosso/client/react';
 import { logout } from '../auth';
-import { Badge, Button, Card } from '../components/ui';
+import { Badge, Button, Card } from '@gouno/ui';
 
 const iconTileTones = {
   primary: 'home-nav-card__icon-tile--primary',

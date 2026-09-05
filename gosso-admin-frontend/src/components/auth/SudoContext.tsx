@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Key, Shield } from 'lucide-react';
 import { useSession } from '@gosso/client/react';
 import { gossoClient } from '../../auth';
-import { Badge, Button, Feedback, FormField, Input, Modal, useToast } from '../ui';
+import { Badge, Button, Feedback, FormField, Input, Modal, useToast } from '@gouno/ui';
 import { logger } from '../../utils/logger';
 
 const SUDO_STORAGE_KEY = 'gosso-admin:sudo_active_until';

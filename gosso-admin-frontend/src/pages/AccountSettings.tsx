@@ -1,7 +1,7 @@
 import { Shield, Key, Laptop, Lock, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { Tabs } from '../components/ui';
+import { Tabs } from '@gouno/ui';
 import ProfilePanel from './account-settings/ProfilePanel';
 import PasswordPanel from './account-settings/PasswordPanel';
 import MFAPanel from './account-settings/MFAPanel';

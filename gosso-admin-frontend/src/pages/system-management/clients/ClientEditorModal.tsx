@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, CheckboxField, CheckboxGroup, Feedback, FormField, Input, Modal } from '../../../components/ui';
+import { Button, Checkbox, CheckboxGroup, Feedback, FormField, Input, Modal } from '@gouno/ui';
 import type { OAuth2Client } from '../../../types/api';
 import type { ClientFormData } from '../../../features/clients/clientForm';
 
@@ -103,18 +103,18 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
         </FormField>
 
         <FormField label={t('clients.clientTypeLabel')}>
-          <CheckboxField
+          <Checkbox
             id="is_confidential"
             label={t('clients.confidentialClientLabel')}
             checked={clientForm.is_confidential}
-            onChange={(checked) => setClientForm((p) => ({ ...p, is_confidential: checked }))}
+            onChange={(event) => setClientForm((p) => ({ ...p, is_confidential: event.target.checked }))}
             disabled={!!editingClient}
           />
         </FormField>
 
         <CheckboxGroup label={t('clients.grantTypesLabel')}>
           {['authorization_code', 'client_credentials', 'refresh_token', 'device_code'].map((gt) => (
-            <CheckboxField
+            <Checkbox
               key={gt}
               id={`grant-type-${gt}`}
               label={gt.replace('_', ' ')}
@@ -126,7 +126,7 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
 
         <CheckboxGroup label={t('clients.scopesLabel')}>
           {clientScopeOptions.map((sc) => (
-            <CheckboxField
+            <Checkbox
               key={sc}
               id={`scope-${sc}`}
               label={sc}

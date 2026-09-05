@@ -3,7 +3,7 @@ import type { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import i18n from '../i18n';
 import { logger } from '../utils/logger';
-import { Button } from './ui';
+import { Button } from '@gouno/ui';
 
 interface Props {
   children: ReactNode;

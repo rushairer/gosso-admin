@@ -7,7 +7,7 @@ import {
   FileText as AuditIcon,
   SlidersHorizontal,
 } from 'lucide-react';
-import { Panel, Tabs } from '../components/ui';
+import { Panel, Tabs } from '@gouno/ui';
 import ClientsTab from './system-management/ClientsTab';
 import UsersTab from './system-management/UsersTab';
 import AuditLogsTab from './system-management/AuditLogsTab';

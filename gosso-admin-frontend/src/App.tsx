@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { ToastProvider, PageLoader } from './components/ui';
+import { ToastProvider, PageLoader } from '@gouno/ui';
 import { SudoProvider } from './components/auth/SudoContext';
 import { routerBasename } from './config/appPaths';
 import { GossoProvider, RequireAdmin, RequireAuth } from '@gosso/client/react';

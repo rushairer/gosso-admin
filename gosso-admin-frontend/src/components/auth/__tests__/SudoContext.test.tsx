@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SudoProvider, useSudo } from '../SudoContext';
-import { ToastProvider } from '../../ui';
+import { ToastProvider } from '@gouno/ui';
 import { gossoClient } from '../../../auth';
 
 const authMethods = vi.hoisted(() => ({

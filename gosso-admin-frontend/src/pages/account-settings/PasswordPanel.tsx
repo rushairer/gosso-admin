@@ -13,7 +13,7 @@ import {
   PanelBody,
   PanelHeader,
   PlainSection,
-} from '../../components/ui';
+} from '@gouno/ui';
 
 export default function PasswordPanel() {
   const { t } = useTranslation();

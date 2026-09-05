@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-import { ToastProvider } from '../../components/ui';
+import { ToastProvider } from '@gouno/ui';
 import { siteSettingsService } from '../../services';
 import SiteSettingsTab from './SiteSettingsTab';
 

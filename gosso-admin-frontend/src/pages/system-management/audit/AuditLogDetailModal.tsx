@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, DefinitionList, DefinitionRow, Modal } from '../../../components/ui';
+import { Button, DefinitionList, DefinitionRow, Modal } from '@gouno/ui';
 import type { AuditLog } from '../../../types/api';
 
 interface AuditLogDetailModalProps {

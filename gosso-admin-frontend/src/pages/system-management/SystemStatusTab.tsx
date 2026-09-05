@@ -9,7 +9,7 @@ import {
   PanelHeader,
   PlainSection,
   Skeleton,
-} from '../../components/ui';
+} from '@gouno/ui';
 import { useSystemStatus } from '../../features/system/useSystemStatus';
 import { dependencyLabel, dependencyIsHealthy, formatHealthTimestamp } from '../../utils/format';
 
@@ -192,7 +192,7 @@ export default function SystemStatusTab() {
             <DefinitionRow label={t('system.supportedScopes')}>
               <div className="flex-row flex-wrap gap-xs">
                 {oidcConfig.scopes_supported?.map((scope: string) => (
-                  <Badge key={scope} tone="secondary">
+                  <Badge key={scope} tone="neutral">
                     {scope}
                   </Badge>
                 ))}
@@ -202,7 +202,7 @@ export default function SystemStatusTab() {
             <DefinitionRow label={t('system.grantTypesSupported')}>
               <div className="flex-row flex-wrap gap-xs">
                 {oidcConfig.grant_types_supported?.map((gt: string) => (
-                  <Badge key={gt} tone="secondary">
+                  <Badge key={gt} tone="neutral">
                     {gt}
                   </Badge>
                 ))}

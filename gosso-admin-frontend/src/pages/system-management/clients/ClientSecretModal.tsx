@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Info as InfoIcon, Copy as CopyIcon, Check as CheckIcon } from 'lucide-react';
-import { Button, ButtonGroup, FormField, Modal } from '../../../components/ui';
+import { Button, ButtonGroup, FormField, Modal } from '@gouno/ui';
 
 interface ClientSecretModalProps {
   isOpen: boolean;

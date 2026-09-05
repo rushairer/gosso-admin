@@ -11,7 +11,7 @@ import {
   Input,
   PanelHeader,
   TableSkeleton,
-} from '../../components/ui';
+} from '@gouno/ui';
 import { AuditLogDetailModal } from './audit/AuditLogDetailModal';
 import type { AuditLog } from '../../types/api';
 import { useAuditLogs } from '../../features/audit/useAuditLogs';
