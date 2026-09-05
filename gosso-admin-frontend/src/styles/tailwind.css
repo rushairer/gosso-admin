@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "@gouno/ui/tokens.css";
-@import "@gouno/ui/base.css";
-@import "./app.css";
+@import 'tailwindcss';
+@import '@gouno/ui/tokens.css';
+@import '@gouno/ui/base.css';
+@import './app.css';
 @source "../../node_modules/@gouno/ui/dist";

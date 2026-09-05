@@ -1,15 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Shield as ShieldIcon, RefreshCw } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  DefinitionList,
-  DefinitionRow,
-  Feedback,
-  PanelHeader,
-  PlainSection,
-  Skeleton,
-} from '@gouno/ui';
+import { Badge, Button, DefinitionList, DefinitionRow, Feedback, PanelHeader, PlainSection, Skeleton } from '@gouno/ui';
 import { useSystemStatus } from '../../features/system/useSystemStatus';
 import { dependencyLabel, dependencyIsHealthy, formatHealthTimestamp } from '../../utils/format';
 

@@ -264,7 +264,7 @@ export default function ClientsTab() {
                 <td>
                   <div className="flex flex-row flex-wrap gap-1.5">
                     {client.scopes.map((s) => (
-                      <Tag key={s} tone={isAdminScope(s) ? 'warning' : 'primary'}>
+                      <Tag key={s} tone={isAdminScope(s) ? 'warning' : 'brand'}>
                         {s.toLowerCase()}
                       </Tag>
                     ))}

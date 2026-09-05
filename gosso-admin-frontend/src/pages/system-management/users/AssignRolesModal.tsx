@@ -1,17 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Shield as ShieldIcon } from 'lucide-react';
-import {
-  Button,
-  ButtonGroup,
-  EmptyState,
-  FormField,
-  Input,
-  ListRow,
-  ListStack,
-  Modal,
-  Select,
-} from '@gouno/ui';
+import { Button, ButtonGroup, EmptyState, FormField, Input, ListRow, ListStack, Modal, Select } from '@gouno/ui';
 import type { Account, Role } from '../../../types/api';
 
 interface AssignRolesModalProps {

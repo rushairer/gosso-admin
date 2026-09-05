@@ -87,12 +87,83 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   const userName = session.profile?.preferred_username || session.profile?.name || t('nav.notSignedIn');
 
-  const systemItems = [['clients',t('systemManagement.tabClients')],['users',t('systemManagement.tabUsers')],['audit-logs',t('systemManagement.tabAuditLogs')],['site-settings',t('site.tabLabel')],['system',t('systemManagement.tabSystemStatus')]];
-  const accountItems = [['profile',t('accountSettings.tabProfile')],['password',t('accountSettings.tabPassword')],['mfa',t('accountSettings.tabMFA')],['passkeys',t('accountSettings.tabPasskeys')],['sessions',t('accountSettings.tabSessions')]];
-  return <AdminShell brand={<Link to="/">{productName}</Link>} breadcrumbs={pageLabel} navigationLabel={t('nav.primaryNavigation')}
-    navigation={close => <><NavLink to="/" end className={navigationItemClass} onClick={close}><Home/><span>{t('nav.overview')}</span></NavLink>{session.loggedIn && session.isAdmin ? <NavigationGroup label={t('nav.systemManagement')}>{systemItems.map(([key,label]) => <NavLink key={key} to={`/system-management/${key}`} className={navigationItemClass} onClick={close}><LayoutDashboard/><span>{label}</span></NavLink>)}</NavigationGroup> : null}{session.loggedIn ? <NavigationGroup label={t('nav.accountSettings')}>{accountItems.map(([key,label]) => <NavLink key={key} to={`/account-settings/${key}`} className={navigationItemClass} onClick={close}><Settings/><span>{label}</span></NavLink>)}</NavigationGroup> : null}</>}
-    toolbar={<ThemeToggle label="Theme / 主题" labels={{light:'Light / 浅色',dark:'Dark / 深色',system:'System / 跟随系统'}}/>}
-    account={session.loggedIn ? <IconButton label={t('nav.signOut')} icon={<LogOut/>} onClick={() => logout('/')}/> : <Button variant="primary" icon={<LogIn/>} onClick={() => redirectToAuthorize('/system-management/clients')}>{t('nav.signIn')}</Button>}
-    footer={<div className="flex items-center gap-3 px-3"><span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent text-xs font-medium text-primary">{session.loggedIn ? initials(session) : <User/>}</span><div className="min-w-0"><strong className="block truncate text-sm">{userName}</strong><p className="text-xs text-muted-foreground">{session.loggedIn ? session.isAdmin ? t('nav.administrator') : t('nav.user') : t('nav.anonymous')}</p></div></div>}
-  >{children}</AdminShell>;
+  const systemItems = [
+    ['clients', t('systemManagement.tabClients')],
+    ['users', t('systemManagement.tabUsers')],
+    ['audit-logs', t('systemManagement.tabAuditLogs')],
+    ['site-settings', t('site.tabLabel')],
+    ['system', t('systemManagement.tabSystemStatus')],
+  ];
+  const accountItems = [
+    ['profile', t('accountSettings.tabProfile')],
+    ['password', t('accountSettings.tabPassword')],
+    ['mfa', t('accountSettings.tabMFA')],
+    ['passkeys', t('accountSettings.tabPasskeys')],
+    ['sessions', t('accountSettings.tabSessions')],
+  ];
+  return (
+    <AdminShell
+      brand={<Link to="/">{productName}</Link>}
+      breadcrumbs={pageLabel}
+      navigationLabel={t('nav.primaryNavigation')}
+      navigation={(close) => (
+        <>
+          <NavLink to="/" end className={navigationItemClass} onClick={close}>
+            <Home />
+            <span>{t('nav.overview')}</span>
+          </NavLink>
+          {session.loggedIn && session.isAdmin ? (
+            <NavigationGroup label={t('nav.systemManagement')}>
+              {systemItems.map(([key, label]) => (
+                <NavLink key={key} to={`/system-management/${key}`} className={navigationItemClass} onClick={close}>
+                  <LayoutDashboard />
+                  <span>{label}</span>
+                </NavLink>
+              ))}
+            </NavigationGroup>
+          ) : null}
+          {session.loggedIn ? (
+            <NavigationGroup label={t('nav.accountSettings')}>
+              {accountItems.map(([key, label]) => (
+                <NavLink key={key} to={`/account-settings/${key}`} className={navigationItemClass} onClick={close}>
+                  <Settings />
+                  <span>{label}</span>
+                </NavLink>
+              ))}
+            </NavigationGroup>
+          ) : null}
+        </>
+      )}
+      toolbar={
+        <ThemeToggle
+          label="Theme / 主题"
+          labels={{ light: 'Light / 浅色', dark: 'Dark / 深色', system: 'System / 跟随系统' }}
+        />
+      }
+      account={
+        session.loggedIn ? (
+          <IconButton label={t('nav.signOut')} icon={<LogOut />} onClick={() => logout('/')} />
+        ) : (
+          <Button variant="primary" icon={<LogIn />} onClick={() => redirectToAuthorize('/system-management/clients')}>
+            {t('nav.signIn')}
+          </Button>
+        )
+      }
+      footer={
+        <div className="flex items-center gap-3 px-3">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent text-xs font-medium text-primary">
+            {session.loggedIn ? initials(session) : <User />}
+          </span>
+          <div className="min-w-0">
+            <strong className="block truncate text-sm">{userName}</strong>
+            <p className="text-xs text-muted-foreground">
+              {session.loggedIn ? (session.isAdmin ? t('nav.administrator') : t('nav.user')) : t('nav.anonymous')}
+            </p>
+          </div>
+        </div>
+      }
+    >
+      {children}
+    </AdminShell>
+  );
 }
