@@ -34,6 +34,12 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={editingClient ? t('clients.editModalTitle') : t('clients.registerModalTitle')}
+      description={
+        editingClient
+          ? t('clients.editModalDescription', { defaultValue: '配置客户端的重定向 URI、授权类型与访问范围。' })
+          : t('clients.registerModalDescription', { defaultValue: '向 GOSSO 身份中心注册新的 OAuth 2.0 / OIDC 客户端应用。' })
+      }
+      maxWidth="620px"
       footer={
         <>
           <Button variant="secondary" onClick={onClose} type="button">
