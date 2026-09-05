@@ -480,9 +480,15 @@
     }
   }
 
-  .admin-panel {
-    padding: 0;
-    overflow: hidden;
+  .admin-panel,
+  .panel,
+  .workspace-panel {
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-panel, 12px);
+    background: var(--surface-panel);
+    color: var(--text-primary);
+    padding: 24px;
+    box-sizing: border-box;
   }
 
   .input-field {

@@ -177,9 +177,13 @@
   .glass-card,
   .ui-card,
   .admin-panel,
-  .panel {
-    border-color: var(--ds-border-subtle);
+  .panel,
+  .workspace-panel {
+    border: 1px solid var(--ds-border-default);
     border-radius: var(--radius-panel);
+    background: var(--ds-surface-panel);
+    color: var(--ds-text-primary);
+    padding: 24px;
     box-shadow: var(--ds-panel-shadow);
   }
 
@@ -1153,6 +1157,14 @@
     .topbar,
     .workspace {
       padding-inline: 20px;
+    }
+
+    .glass-card,
+    .ui-card,
+    .admin-panel,
+    .panel,
+    .workspace-panel {
+      padding: 16px;
     }
 
     .admin-panel .panel-header,
