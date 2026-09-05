@@ -1982,23 +1982,43 @@
     height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
-    background: var(--ds-text-secondary);
+    background: currentColor;
+    opacity: 0.85;
   }
 
+  .badge--success .status-dot,
+  .badge-success .status-dot,
   .status-dot--success {
-    background: var(--ds-success);
+    background: var(--ds-success, #10b981);
+    opacity: 1;
   }
 
+  .badge--warning .status-dot,
+  .badge-warning .status-dot,
   .status-dot--warning {
-    background: var(--ds-warning);
+    background: var(--ds-warning, #f59e0b);
+    opacity: 1;
   }
 
+  .badge--danger .status-dot,
+  .badge-danger .status-dot,
+  .badge--destructive .status-dot,
   .status-dot--danger {
-    background: var(--ds-danger);
+    background: var(--ds-danger, #ef4444);
+    opacity: 1;
   }
 
+  .badge--brand .status-dot,
+  .badge-brand .status-dot,
   .status-dot--brand {
-    background: var(--ds-brand);
+    background: var(--ds-brand, #3b82f6);
+    opacity: 1;
+  }
+
+  .badge--neutral .status-dot,
+  .badge-secondary .status-dot,
+  .status-dot--neutral {
+    background: var(--ds-text-secondary);
   }
 
   /* Section & Modal Dividers */

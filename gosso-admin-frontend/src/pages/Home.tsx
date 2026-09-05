@@ -128,12 +128,9 @@ export default function Home() {
                 {userAdmin ? t('home.title') : t('home.userTitle')}
               </h2>
               <Badge tone="success">
-                <span className="status-dot" aria-hidden="true" />
-                <span>
-                  {userAdmin
-                    ? t('home.loggedInAsAdmin', { name: userName })
-                    : t('home.loggedInAsUser', { name: userName })}
-                </span>
+                {userAdmin
+                  ? t('home.loggedInAsAdmin', { name: userName })
+                  : t('home.loggedInAsUser', { name: userName })}
               </Badge>
             </div>
           </div>
