@@ -54,51 +54,53 @@ export default function LoginSurface({
 }: LoginSurfaceProps) {
   const { t } = useTranslation();
   const backgroundImage = branding.login_background_url
-    ? `linear-gradient(rgba(15,18,23,.72), rgba(15,18,23,.88)), url(${JSON.stringify(branding.login_background_url)})`
+    ? `linear-gradient(rgba(15,18,23,.75), rgba(15,18,23,.90)), url(${JSON.stringify(branding.login_background_url)})`
     : undefined;
 
   return (
     <div
-      className="login-surface flex-row items-center justify-center"
+      className="login-surface flex min-h-screen w-full items-center justify-center bg-background bg-cover bg-center p-4 md:p-8"
       inert={preview}
       aria-hidden={preview || undefined}
       style={{ backgroundImage } as CSSProperties}
     >
-      <div className="glass-card login-card">
-        <div className="text-center login-card__header">
+      <div className="login-card w-full max-w-md rounded-2xl border border-border bg-card/90 p-8 shadow-2xl backdrop-blur-xl transition-all">
+        {/* Header */}
+        <div className="text-center mb-8">
           {branding.logo_url ? (
-            <img className="login-card__logo" src={branding.logo_url} alt={branding.product_name} />
+            <img
+              className="mx-auto mb-4 max-h-14 max-w-[160px] object-contain"
+              src={branding.logo_url}
+              alt={branding.product_name}
+            />
           ) : null}
-          <h1 className="login-card__title">{branding.login_title || branding.product_name || t('login.title')}</h1>
-          <p className="text-muted login-card__description">{branding.login_description || t('login.subtitle')}</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            {branding.login_title || branding.product_name || t('login.title')}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">{branding.login_description || t('login.subtitle')}</p>
         </div>
 
         {error ? (
-          <div className="mb-md">
+          <div className="mb-6">
             <Feedback type="error">{error}</Feedback>
           </div>
         ) : null}
 
         {isSudoMode ? (
-          <form onSubmit={onMfaSubmit}>
-            <div className="notice-card notice-card--info notice-card--stacked mb-md">
-              <div className="flex-row items-center justify-between gap-sm">
-                <div className="flex-row items-center gap-sm">
-                  <Shield size={16} className="shrink-0" style={{ color: 'var(--status-info, #38bdf8)' }} />
-                  <strong className="text-sm">{t('login.sudoModeTitle')}</strong>
+          <form onSubmit={onMfaSubmit} className="space-y-4">
+            <div className="rounded-lg border border-sky-500/30 bg-sky-950/20 p-4 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Shield size={16} className="shrink-0 text-sky-400" />
+                  <strong className="text-sm font-semibold text-foreground">{t('login.sudoModeTitle')}</strong>
                 </div>
                 {sudoAccountName && (
-                  <Badge
-                    tone="neutral"
-                    className="text-xs truncate"
-                    style={{ maxWidth: '160px' }}
-                    title={sudoAccountName}
-                  >
+                  <Badge tone="neutral" className="text-xs truncate max-w-[160px]" title={sudoAccountName}>
                     {sudoAccountName}
                   </Badge>
                 )}
               </div>
-              <p className="text-sm text-muted m-0 leading-relaxed">
+              <p className="text-sm text-muted-foreground m-0 leading-relaxed">
                 {t('login.sudoModeNotice', {
                   user: sudoAccountName,
                   defaultValue: '您正在执行敏感管理操作，请输入身份验证器动态码或使用通行密钥完成验证。',
@@ -110,7 +112,7 @@ export default function LoginSurface({
               <Input
                 type="text"
                 maxLength={8}
-                className="login-card__mfa-code"
+                className="text-center text-xl font-bold tracking-widest"
                 placeholder={t('login.verificationCodePlaceholder')}
                 value={mfaCode}
                 onChange={(event) => onMfaCodeChange(event.target.value.replace(/\D/g, ''))}
@@ -119,20 +121,23 @@ export default function LoginSurface({
               />
             </FormField>
 
-            <Button type="submit" variant="primary" className="login-card__action" loading={loading}>
+            <Button type="submit" variant="primary" className="w-full" loading={loading}>
               {loading ? t('login.verifyLoading') : t('login.verifyButton')}
             </Button>
 
-            <div className="login-card__separator flex-row items-center gap-md">
-              <hr />
-              <span className="text-sm text-muted">{t('common.or')}</span>
-              <hr />
+            <div className="relative flex items-center justify-center my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase bg-card px-2 text-muted-foreground font-medium">
+                {t('common.or')}
+              </div>
             </div>
 
             <Button
               type="button"
               variant="secondary"
-              className="login-card__action flex-row items-center justify-center gap-sm"
+              className="w-full flex items-center justify-center gap-2"
               onClick={onPasskeyLogin}
               loading={passkeyLoading}
               icon={<Key size={16} />}
@@ -144,7 +149,7 @@ export default function LoginSurface({
               <Button
                 type="button"
                 variant="ghost"
-                className="login-card__action login-card__back mt-sm"
+                className="w-full mt-2"
                 onClick={onSwitchAccount}
                 disabled={loading}
               >
@@ -153,24 +158,19 @@ export default function LoginSurface({
             )}
           </form>
         ) : !mfaRequired ? (
-          <form onSubmit={onLoginSubmit}>
+          <form onSubmit={onLoginSubmit} className="space-y-4">
             {accountMismatch && (
-              <div className="notice-card notice-card--warning notice-card--stacked mb-md">
-                <div className="flex-row items-center justify-between gap-sm">
-                  <div className="flex-row items-center gap-sm">
-                    <Shield size={16} className="shrink-0" style={{ color: 'var(--status-warning, #f59e0b)' }} />
-                    <strong className="text-sm">{t('login.accountMismatchTitle')}</strong>
+              <div className="rounded-lg border border-amber-500/30 bg-amber-950/20 p-4 space-y-2 mb-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Shield size={16} className="shrink-0 text-amber-400" />
+                    <strong className="text-sm font-semibold text-foreground">{t('login.accountMismatchTitle')}</strong>
                   </div>
-                  <Badge
-                    tone="warning"
-                    className="text-xs truncate"
-                    style={{ maxWidth: '160px' }}
-                    title={accountMismatch.target}
-                  >
+                  <Badge tone="warning" className="text-xs truncate max-w-[160px]" title={accountMismatch.target}>
                     {accountMismatch.target}
                   </Badge>
                 </div>
-                <p className="text-sm text-muted m-0 leading-relaxed">
+                <p className="text-sm text-muted-foreground m-0 leading-relaxed">
                   <Trans
                     i18nKey="login.accountMismatchNotice"
                     values={{
@@ -181,7 +181,7 @@ export default function LoginSurface({
                   />
                 </p>
                 {onSwitchAccount && (
-                  <div className="mt-xs">
+                  <div className="mt-2">
                     <Button type="button" variant="secondary" size="sm" onClick={onSwitchAccount} disabled={loading}>
                       {t('login.switchAccount')}
                     </Button>
@@ -211,31 +211,37 @@ export default function LoginSurface({
               />
             </FormField>
 
-            <div className="login-card__forgot-password">
-              <Link to="/forgot-password">{t('login.forgotPasswordLink')}</Link>
+            <div className="text-right text-xs -mt-2 mb-4">
+              <Link to="/forgot-password" className="text-primary hover:underline font-medium">
+                {t('login.forgotPasswordLink')}
+              </Link>
             </div>
 
             {showDevCredentials && !username && !password ? (
-              <div className="login-card__dev-credentials">
-                <strong>{t('login.devCredentialsTitle')}</strong> {t('login.devCredentialsPrefix')} <code>admin</code> /{' '}
-                <code>admin123</code>. {t('login.devCredentialsSuffix')}
+              <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-3 text-xs text-muted-foreground leading-relaxed">
+                <strong className="text-primary">{t('login.devCredentialsTitle')}</strong>{' '}
+                {t('login.devCredentialsPrefix')} <code className="text-primary font-mono">admin</code> /{' '}
+                <code className="text-sky-300 font-mono">admin123</code>. {t('login.devCredentialsSuffix')}
               </div>
             ) : null}
 
-            <Button type="submit" variant="primary" className="login-card__action" loading={loading}>
+            <Button type="submit" variant="primary" className="w-full" loading={loading}>
               {loading ? t('login.signInLoading') : t('login.signInButton')}
             </Button>
 
-            <div className="login-card__separator flex-row items-center gap-md">
-              <hr />
-              <span className="text-sm text-muted">{t('common.or')}</span>
-              <hr />
+            <div className="relative flex items-center justify-center my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase bg-card px-2 text-muted-foreground font-medium">
+                {t('common.or')}
+              </div>
             </div>
 
             <Button
               type="button"
               variant="secondary"
-              className="login-card__action flex-row items-center justify-center gap-sm"
+              className="w-full flex items-center justify-center gap-2"
               onClick={onPasskeyLogin}
               loading={passkeyLoading}
               icon={<Key size={16} />}
@@ -244,14 +250,16 @@ export default function LoginSurface({
             </Button>
           </form>
         ) : (
-          <form onSubmit={onMfaSubmit}>
-            <div className="notice-card login-card__mfa-notice">{t('login.mfaRequired')}</div>
+          <form onSubmit={onMfaSubmit} className="space-y-4">
+            <div className="rounded-lg border border-blue-500/30 bg-blue-950/20 p-4 text-sm text-primary font-medium">
+              {t('login.mfaRequired')}
+            </div>
 
             <FormField label={t('login.verificationCodeLabel')}>
               <Input
                 type="text"
                 maxLength={8}
-                className="login-card__mfa-code"
+                className="text-center text-xl font-bold tracking-widest"
                 placeholder={t('login.verificationCodePlaceholder')}
                 value={mfaCode}
                 onChange={(event) => onMfaCodeChange(event.target.value.replace(/\D/g, ''))}
@@ -260,17 +268,11 @@ export default function LoginSurface({
               />
             </FormField>
 
-            <Button type="submit" variant="primary" className="login-card__action" loading={loading}>
+            <Button type="submit" variant="primary" className="w-full" loading={loading}>
               {loading ? t('login.verifyLoading') : t('login.verifyButton')}
             </Button>
 
-            <Button
-              type="button"
-              variant="secondary"
-              className="login-card__action login-card__back"
-              onClick={onBackToLogin}
-              disabled={loading}
-            >
+            <Button type="button" variant="secondary" className="w-full" onClick={onBackToLogin} disabled={loading}>
               {t('login.backToLogin')}
             </Button>
           </form>

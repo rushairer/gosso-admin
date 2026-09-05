@@ -207,7 +207,13 @@ export default function PasskeysPanel() {
             >
               {t('common.cancel')}
             </Button>
-            <Button form="register-passkey-form" variant="primary" type="submit" loading={loading} disabled={!newPasskeyName.trim()}>
+            <Button
+              form="register-passkey-form"
+              variant="primary"
+              type="submit"
+              loading={loading}
+              disabled={!newPasskeyName.trim()}
+            >
               {t('passkeys.registerDeviceButton')}
             </Button>
           </>

@@ -16,7 +16,7 @@ import { Button, IconButton } from '../Button';
 import { Input, Textarea, Select } from '../Input';
 import { Skeleton, TableSkeleton } from '../Skeleton';
 import { Drawer } from '../Drawer';
-import { Card, CardHeader, CardContent, CardFooter } from '../Card';
+import { Card, CardHeader, CardContent } from '../Card';
 import { DataTable } from '../DataTable';
 
 describe('Feedback', () => {

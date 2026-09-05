@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../../lib/utils';
 
 export function ButtonGroup({
   children,
@@ -11,8 +12,17 @@ export function ButtonGroup({
   compact?: boolean;
   className?: string;
 }) {
-  const classes = ['button-group', `button-group-${align}`, compact ? 'compact' : '', className]
-    .filter(Boolean)
-    .join(' ');
-  return <div className={classes}>{children}</div>;
+  return (
+    <div
+      className={cn(
+        'flex flex-wrap items-center gap-3',
+        align === 'right' && 'justify-end',
+        align === 'between' && 'justify-between',
+        compact && 'gap-1.5',
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { TableSkeleton } from './Skeleton';
+import { cn } from '../../lib/utils';
 
 export interface DataTableProps {
   children?: React.ReactNode;
@@ -25,12 +26,12 @@ export function DataTable({
   }
 
   if (empty && emptyState) {
-    return <div className="data-table-empty-wrap">{emptyState}</div>;
+    return <div className="p-8 text-center text-muted-foreground">{emptyState}</div>;
   }
 
   return (
-    <div className={`data-table-wrap ${className}`}>
-      <table className="admin-table">{children}</table>
+    <div className={cn('relative w-full overflow-auto rounded-lg border border-border bg-card', className)}>
+      <table className="w-full caption-bottom text-sm">{children}</table>
     </div>
   );
 }

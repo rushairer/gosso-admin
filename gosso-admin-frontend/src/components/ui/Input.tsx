@@ -1,5 +1,6 @@
 import React, { forwardRef } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { cn } from '../../lib/utils';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   prefixIcon?: React.ReactNode;
@@ -13,17 +14,30 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   ref
 ) {
   const hasError = invalid ?? isError;
+
   if (prefixIcon || suffixIcon) {
     return (
-      <div className={`input-affix-wrapper ${hasError ? 'has-error' : ''}`}>
-        {prefixIcon && <span className="input-prefix-icon">{prefixIcon}</span>}
+      <div className="relative flex items-center w-full">
+        {prefixIcon && (
+          <span className="absolute left-3 flex items-center justify-center text-muted-foreground pointer-events-none">
+            {prefixIcon}
+          </span>
+        )}
         <input
           ref={ref}
-          className={`input-field ${prefixIcon ? 'has-prefix' : ''} ${suffixIcon ? 'has-suffix' : ''} ${className}`}
+          className={cn(
+            'flex h-9 w-full rounded-[var(--radius-control,6px)] border border-border bg-input px-3 py-1.5 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50',
+            prefixIcon && 'pl-9',
+            suffixIcon && 'pr-9',
+            hasError && 'border-destructive focus-visible:ring-destructive/30',
+            className
+          )}
           aria-invalid={hasError ? true : undefined}
           {...props}
         />
-        {suffixIcon && <span className="input-suffix-icon">{suffixIcon}</span>}
+        {suffixIcon && (
+          <span className="absolute right-3 flex items-center justify-center text-muted-foreground">{suffixIcon}</span>
+        )}
       </div>
     );
   }
@@ -31,7 +45,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   return (
     <input
       ref={ref}
-      className={`input-field ${hasError ? 'input-error' : ''} ${className}`}
+      className={cn(
+        'flex h-9 w-full rounded-[var(--radius-control,6px)] border border-border bg-input px-3 py-1.5 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50',
+        hasError && 'border-destructive focus-visible:ring-destructive/30',
+        className
+      )}
       aria-invalid={hasError ? true : undefined}
       {...props}
     />
@@ -52,7 +70,11 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
     <textarea
       ref={ref}
       rows={rows}
-      className={`input-field textarea-field ${hasError ? 'input-error' : ''} ${className}`}
+      className={cn(
+        'flex min-h-[80px] w-full rounded-[var(--radius-control,6px)] border border-border bg-input px-3 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50',
+        hasError && 'border-destructive focus-visible:ring-destructive/30',
+        className
+      )}
       aria-invalid={hasError ? true : undefined}
       {...props}
     />
@@ -70,16 +92,20 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
 ) {
   const hasError = invalid ?? isError;
   return (
-    <div className={`select-control-wrapper ${hasError ? 'has-error' : ''}`}>
+    <div className="relative flex items-center w-full">
       <select
         ref={ref}
-        className={`input-field select-field ${className}`}
+        className={cn(
+          'flex h-9 w-full appearance-none rounded-[var(--radius-control,6px)] border border-border bg-input px-3 py-1.5 pr-8 text-sm text-foreground shadow-sm transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50',
+          hasError && 'border-destructive focus-visible:ring-destructive/30',
+          className
+        )}
         aria-invalid={hasError ? true : undefined}
         {...props}
       >
         {children}
       </select>
-      <ChevronDown className="select-arrow" aria-hidden="true" />
+      <ChevronDown className="pointer-events-none absolute right-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
     </div>
   );
 });

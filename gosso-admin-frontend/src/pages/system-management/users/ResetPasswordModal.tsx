@@ -66,7 +66,6 @@ export function ResetPasswordModal({ isOpen, onClose, account, onSubmit }: Reset
       }
     >
       <form id="reset-password-form" onSubmit={handleSubmit}>
-
         {error && (
           <div className="mb-md">
             <Feedback type="error">{error}</Feedback>

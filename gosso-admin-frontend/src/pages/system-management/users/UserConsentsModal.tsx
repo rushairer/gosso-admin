@@ -41,7 +41,6 @@ export function UserConsentsModal({
         </Button>
       }
     >
-
       {loading ? (
         <div className="text-center py-xl">
           <LoadingSpinner size="sm" className="mx-auto mb-sm" />

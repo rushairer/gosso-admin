@@ -1,6 +1,7 @@
 import React, { useEffect, useId, useRef } from 'react';
 import { X } from 'lucide-react';
 import { IconButton } from './Button';
+import { cn } from '../../lib/utils';
 
 export interface DrawerProps {
   isOpen?: boolean;
@@ -94,7 +95,7 @@ export function Drawer({
 
   return (
     <div
-      className="drawer-overlay"
+      className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs transition-opacity"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -103,26 +104,35 @@ export function Drawer({
     >
       <div
         ref={drawerRef}
-        className={`drawer-panel ${className}`}
+        className={cn(
+          'relative z-10 flex h-full w-full max-w-lg flex-col border-l border-border bg-card p-6 text-card-foreground shadow-2xl transition-transform',
+          className
+        )}
         style={{ width: typeof width === 'number' ? `${width}px` : width }}
         onClick={(e) => e.stopPropagation()}
         tabIndex={-1}
       >
-        <div className="drawer-header">
-          <div className="drawer-title-group">
-            <h3 id={titleId} className="drawer-title">
+        <div className="flex items-start justify-between pb-4 border-b border-border">
+          <div className="space-y-1">
+            <h3 id={titleId} className="text-lg font-bold text-foreground">
               {title}
             </h3>
             {description && (
-              <p id={descriptionId} className="drawer-description">
+              <p id={descriptionId} className="text-sm text-muted-foreground">
                 {description}
               </p>
             )}
           </div>
-          <IconButton label="Close drawer" icon={<X size={18} />} variant="ghost" size="sm" onClick={onClose} />
+          <IconButton
+            label="Close drawer"
+            icon={<X className="h-4 w-4" />}
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+          />
         </div>
-        <div className="drawer-body">{children}</div>
-        {footer && <div className="drawer-footer">{footer}</div>}
+        <div className="flex-1 overflow-y-auto py-4">{children}</div>
+        {footer && <div className="flex items-center justify-end gap-2 pt-4 border-t border-border">{footer}</div>}
       </div>
     </div>
   );

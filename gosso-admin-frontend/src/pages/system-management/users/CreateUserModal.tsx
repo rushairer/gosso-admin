@@ -70,7 +70,6 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
       }
     >
       <form id="create-user-form" onSubmit={handleSubmit}>
-
         {error && (
           <div className="mb-md">
             <Feedback type="error">{error}</Feedback>

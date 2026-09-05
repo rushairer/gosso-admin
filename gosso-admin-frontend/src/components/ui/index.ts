@@ -20,3 +20,5 @@ export * from './Tabs';
 export * from './useConfirm';
 export * from './AsyncState';
 export * from './Dialog';
+export * from './DropdownMenu';
+export * from './Table';

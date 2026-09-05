@@ -45,14 +45,12 @@ export function ConfirmDialog({
       open={open}
       onClose={handleCancel}
       title={
-        <span className="confirm-dialog-title">
-          <AlertTriangle
-            className={`confirm-dialog-icon ${isDanger ? 'confirm-dialog-icon--danger' : 'confirm-dialog-icon--primary'}`}
-          />
-          {title}
-        </span>
+        <div className="flex items-center gap-2.5">
+          <AlertTriangle className={`h-5 w-5 shrink-0 ${isDanger ? 'text-red-400' : 'text-primary'}`} />
+          <span>{title}</span>
+        </div>
       }
-      maxWidth="420px"
+      maxWidth="440px"
       closeOnBackdrop
       showCloseButton={false}
       footer={
@@ -66,7 +64,7 @@ export function ConfirmDialog({
         </>
       }
     >
-      <p className="confirm-dialog-message">{text}</p>
+      <p className="text-sm text-muted-foreground leading-relaxed">{text}</p>
     </Modal>
   );
 }

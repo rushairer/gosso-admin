@@ -7,34 +7,35 @@ import { cn } from '../../lib/utils';
 export type ButtonVariant =
   'primary' | 'secondary' | 'danger' | 'ghost' | 'link' | 'default' | 'destructive' | 'outline';
 
-/**
- * Canonical sizes are sm/default/lg/icon. The legacy base/regular/compact
- * aliases remain supported while feature code migrates to the shared contract.
- */
 export type ButtonSize = 'sm' | 'default' | 'lg' | 'icon' | 'base' | 'regular' | 'compact';
+export type ButtonIconPosition = 'left' | 'right';
 
 export const buttonVariants = cva(
-  'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-control)] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer',
+  'btn inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-control,6px)] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer active:scale-[0.985]',
   {
     variants: {
       variant: {
-        primary: 'btn btn-primary',
-        default: 'btn btn-primary',
-        secondary: 'btn btn-secondary',
-        danger: 'btn btn-danger',
-        destructive: 'btn btn-danger',
-        ghost: 'btn btn-ghost',
-        outline: 'btn btn-secondary',
-        link: 'btn btn-link',
+        default: 'btn-primary bg-primary text-primary-foreground shadow-sm hover:bg-blue-600 active:bg-blue-700',
+        primary: 'btn-primary bg-primary text-primary-foreground shadow-sm hover:bg-blue-600 active:bg-blue-700',
+        destructive:
+          'btn-danger border border-destructive/30 bg-destructive/15 text-red-200 hover:bg-destructive/25 active:bg-destructive/35',
+        danger:
+          'btn-danger border border-destructive/30 bg-destructive/15 text-red-200 hover:bg-destructive/25 active:bg-destructive/35',
+        outline:
+          'btn-secondary border border-border bg-secondary text-foreground hover:bg-zinc-800 hover:border-zinc-600 active:bg-zinc-900',
+        secondary:
+          'btn-secondary border border-border bg-secondary text-foreground hover:bg-zinc-800 hover:border-zinc-600 active:bg-zinc-900',
+        ghost: 'btn-ghost text-muted-foreground hover:bg-accent hover:text-accent-foreground active:bg-zinc-800',
+        link: 'btn-link text-primary underline-offset-4 hover:underline p-0 h-auto font-normal',
       },
       size: {
-        base: 'btn-base',
-        default: 'btn-base',
-        regular: 'btn-base',
-        sm: 'btn-sm',
-        compact: 'btn-sm',
-        lg: 'btn-lg rounded-lg',
-        icon: 'btn-icon',
+        default: 'btn-base h-9 px-4 py-2',
+        base: 'btn-base h-9 px-4 py-2',
+        regular: 'btn-base h-9 px-4 py-2',
+        sm: 'btn-sm h-8 rounded-[4px] px-3 text-xs',
+        compact: 'btn-sm h-8 rounded-[4px] px-3 text-xs',
+        lg: 'btn-lg h-11 rounded-lg px-8 text-base',
+        icon: 'btn-icon h-9 w-9 p-0',
       },
     },
     defaultVariants: {
@@ -50,7 +51,7 @@ export interface ButtonProps
   size?: ButtonSize;
   loading?: boolean;
   icon?: React.ReactNode;
-  iconPosition?: 'left' | 'right';
+  iconPosition?: ButtonIconPosition;
 }
 
 export interface ButtonLinkProps extends Omit<LinkProps, 'to'>, VariantProps<typeof buttonVariants> {
@@ -58,7 +59,7 @@ export interface ButtonLinkProps extends Omit<LinkProps, 'to'>, VariantProps<typ
   variant?: ButtonVariant;
   size?: ButtonSize;
   icon?: React.ReactNode;
-  iconPosition?: 'left' | 'right';
+  iconPosition?: ButtonIconPosition;
   disabled?: boolean;
 }
 
@@ -73,7 +74,7 @@ export function buttonClassNames({
   loading?: boolean;
   className?: string;
 } = {}): string {
-  return cn(buttonVariants({ variant, size }), loading && 'is-loading', className);
+  return cn(buttonVariants({ variant, size }), loading && 'is-loading cursor-wait opacity-80', className);
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
@@ -105,13 +106,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       {loading ? (
         <LoadingSpinner size="sm" className="btn-spinner shrink-0" />
       ) : icon && iconPosition === 'left' ? (
-        <span className="btn-icon shrink-0" aria-hidden="true">
+        <span className="btn-icon inline-flex shrink-0 items-center" aria-hidden="true">
           {icon}
         </span>
       ) : null}
       {children && <span className="btn-label min-w-0">{children}</span>}
       {!loading && icon && iconPosition === 'right' ? (
-        <span className="btn-icon shrink-0" aria-hidden="true">
+        <span className="btn-icon inline-flex shrink-0 items-center" aria-hidden="true">
           {icon}
         </span>
       ) : null}
@@ -141,7 +142,7 @@ export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(functio
       className={buttonClassNames({
         variant,
         size,
-        className: `${disabled ? 'is-disabled' : ''} ${className}`,
+        className: cn(disabled && 'is-disabled pointer-events-none opacity-50', className),
       })}
       aria-disabled={disabled ? 'true' : undefined}
       tabIndex={disabled ? -1 : undefined}
@@ -155,13 +156,13 @@ export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(functio
       {...props}
     >
       {icon && iconPosition === 'left' ? (
-        <span className="btn-icon shrink-0" aria-hidden="true">
+        <span className="btn-icon inline-flex shrink-0 items-center" aria-hidden="true">
           {icon}
         </span>
       ) : null}
       {children && <span className="btn-label min-w-0">{children}</span>}
       {icon && iconPosition === 'right' ? (
-        <span className="btn-icon shrink-0" aria-hidden="true">
+        <span className="btn-icon inline-flex shrink-0 items-center" aria-hidden="true">
           {icon}
         </span>
       ) : null}
@@ -182,7 +183,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
     label,
     icon,
     variant = 'ghost',
-    size = 'default',
+    size = 'icon',
     loading = false,
     className = '',
     children,
@@ -199,9 +200,9 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
       type={type}
       className={buttonClassNames({
         variant,
-        size,
+        size: size === 'sm' || size === 'compact' ? 'sm' : 'icon',
         loading,
-        className: `icon-btn ${className}`,
+        className: cn('icon-btn', className),
       })}
       aria-label={label}
       title={label}
@@ -212,7 +213,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
       {loading ? (
         <LoadingSpinner size="sm" className="btn-spinner shrink-0" />
       ) : icon ? (
-        <span className="icon-btn__icon shrink-0" aria-hidden="true">
+        <span className="icon-btn__icon inline-flex shrink-0 items-center justify-center" aria-hidden="true">
           {icon}
         </span>
       ) : (
@@ -232,18 +233,7 @@ export interface IconButtonLinkProps extends Omit<LinkProps, 'to'>, VariantProps
 }
 
 export const IconButtonLink = forwardRef<HTMLAnchorElement, IconButtonLinkProps>(function IconButtonLink(
-  {
-    to,
-    label,
-    icon,
-    variant = 'ghost',
-    size = 'default',
-    className = '',
-    disabled = false,
-    children,
-    onClick,
-    ...props
-  },
+  { to, label, icon, variant = 'ghost', size = 'icon', className = '', disabled = false, children, onClick, ...props },
   ref
 ) {
   return (
@@ -252,8 +242,8 @@ export const IconButtonLink = forwardRef<HTMLAnchorElement, IconButtonLinkProps>
       to={to}
       className={buttonClassNames({
         variant,
-        size,
-        className: `icon-btn ${disabled ? 'is-disabled' : ''} ${className}`,
+        size: size === 'sm' || size === 'compact' ? 'sm' : 'icon',
+        className: cn('icon-btn', disabled && 'is-disabled pointer-events-none opacity-50', className),
       })}
       aria-label={label}
       title={label}
@@ -269,7 +259,7 @@ export const IconButtonLink = forwardRef<HTMLAnchorElement, IconButtonLinkProps>
       {...props}
     >
       {icon ? (
-        <span className="icon-btn__icon shrink-0" aria-hidden="true">
+        <span className="icon-btn__icon inline-flex shrink-0 items-center justify-center" aria-hidden="true">
           {icon}
         </span>
       ) : (
@@ -278,3 +268,25 @@ export const IconButtonLink = forwardRef<HTMLAnchorElement, IconButtonLinkProps>
     </Link>
   );
 });
+
+export function ChoiceButton({
+  selected = false,
+  children,
+  className = '',
+  ...props
+}: Omit<ButtonProps, 'variant'> & { selected?: boolean }) {
+  return (
+    <Button
+      {...props}
+      variant={selected ? 'primary' : 'ghost'}
+      className={cn(
+        'choice-button justify-start font-normal',
+        selected && 'is-selected font-medium shadow-sm',
+        className
+      )}
+      aria-pressed={selected}
+    >
+      {children}
+    </Button>
+  );
+}

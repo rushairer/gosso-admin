@@ -160,19 +160,21 @@ export function SudoProvider({ children }: { children: ReactNode }) {
           </Button>
         }
       >
-        <div className="notice-card notice-card--info notice-card--stacked mb-md">
-          <div className="flex-row items-center justify-between gap-sm">
-            <div className="flex-row items-center gap-sm">
-              <Shield size={16} className="shrink-0" style={{ color: 'var(--status-info, #38bdf8)' }} />
-              <strong className="text-sm">{pendingAction?.actionTitle || t('login.sudoModeTitle')}</strong>
+        <div className="rounded-lg border border-sky-500/30 bg-sky-950/20 p-4 mb-4 space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Shield size={16} className="shrink-0 text-sky-400" />
+              <strong className="text-sm font-semibold text-foreground">
+                {pendingAction?.actionTitle || t('login.sudoModeTitle')}
+              </strong>
             </div>
             {accountName && (
-              <Badge tone="neutral" className="text-xs truncate" style={{ maxWidth: '160px' }} title={accountName}>
+              <Badge tone="neutral" className="text-xs truncate max-w-[160px]" title={accountName}>
                 {accountName}
               </Badge>
             )}
           </div>
-          <p className="text-sm text-muted m-0 leading-relaxed">
+          <p className="text-sm text-muted-foreground m-0 leading-relaxed">
             {pendingAction?.actionTitle
               ? t('login.sudoModeNoticeWithAction', {
                   action: pendingAction.actionTitle,
@@ -187,12 +189,12 @@ export function SudoProvider({ children }: { children: ReactNode }) {
         </div>
 
         {error && (
-          <div className="mb-md">
+          <div className="mb-4">
             <Feedback type="error">{error}</Feedback>
           </div>
         )}
 
-        <form onSubmit={handleMfaSubmit}>
+        <form onSubmit={handleMfaSubmit} className="space-y-4">
           <FormField label={t('login.verificationCodeLabel')}>
             <Input
               type="text"
@@ -205,21 +207,24 @@ export function SudoProvider({ children }: { children: ReactNode }) {
             />
           </FormField>
 
-          <Button type="submit" variant="primary" className="w-full mt-md" loading={loading} disabled={passkeyLoading}>
+          <Button type="submit" variant="primary" className="w-full" loading={loading} disabled={passkeyLoading}>
             {loading ? t('login.verifyLoading') : t('login.verifyButton')}
           </Button>
         </form>
 
-        <div className="login-card__separator flex-row items-center gap-md my-md">
-          <hr />
-          <span className="text-sm text-muted">{t('common.or')}</span>
-          <hr />
+        <div className="relative flex items-center justify-center my-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase bg-card px-2 text-muted-foreground font-medium">
+            {t('common.or')}
+          </div>
         </div>
 
         <Button
           type="button"
           variant="secondary"
-          className="w-full flex-row items-center justify-center gap-sm"
+          className="w-full flex items-center justify-center gap-2"
           onClick={() => void handlePasskeyStepUp()}
           loading={passkeyLoading}
           disabled={loading}

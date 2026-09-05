@@ -285,7 +285,13 @@ export default function MFAPanel() {
             >
               {t('common.cancel')}
             </Button>
-            <Button form="disable-mfa-form" variant="danger" type="submit" loading={loading} disabled={!confirmPasswordForMFA}>
+            <Button
+              form="disable-mfa-form"
+              variant="danger"
+              type="submit"
+              loading={loading}
+              disabled={!confirmPasswordForMFA}
+            >
               {t('mfa.confirmDisableButton')}
             </Button>
           </>

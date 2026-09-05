@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { cn } from '../../lib/utils';
 
 export interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -19,9 +20,13 @@ export function LoadingSpinner({ size = 'md', className = '', style }: LoadingSp
 
   return (
     <div
-      className={`loading-spinner loading-spinner--${size} ${className}`}
+      className={cn(
+        'loading-spinner inline-block animate-spin rounded-full border-2 border-primary border-t-transparent',
+        `loading-spinner--${size}`,
+        className
+      )}
       role="status"
-      aria-label={t('common.loadingLabel')}
+      aria-label={t('common.loadingLabel', { defaultValue: 'Loading' })}
       style={{ ...dimensions, ...style }}
     />
   );
@@ -35,11 +40,17 @@ export interface PageLoaderProps {
   className?: string;
 }
 
-export function PageLoader({ message, minHeight, size = 'md', padding, className = '' }: PageLoaderProps) {
+export function PageLoader({ message, minHeight = '240px', size = 'md', padding, className = '' }: PageLoaderProps) {
   return (
-    <div className={`page-loader ${className}`} style={minHeight || padding ? { minHeight, padding } : undefined}>
+    <div
+      className={cn(
+        'page-loader flex flex-col items-center justify-center gap-3 p-8 text-muted-foreground w-full',
+        className
+      )}
+      style={{ minHeight, padding }}
+    >
       <LoadingSpinner size={size} />
-      {message && <p className="page-loader__message">{message}</p>}
+      {message && <p className="page-loader__message text-sm font-medium">{message}</p>}
     </div>
   );
 }

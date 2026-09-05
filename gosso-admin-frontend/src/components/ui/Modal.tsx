@@ -74,7 +74,7 @@ export function Modal({
       }}
     >
       <DialogContent
-        className={cn('modal-content', className)}
+        className={cn('sm:max-w-lg', className)}
         style={{ maxWidth, ...contentStyle }}
         showCloseButton={showCloseButton}
         closeLabel={t('common.close')}
@@ -88,17 +88,15 @@ export function Modal({
         onPointerDownOutside={(event) => event.preventDefault()}
       >
         {title ? (
-          <DialogHeader className="modal-header">
-            <DialogTitle className="modal-title">{title}</DialogTitle>
-            {description ? (
-              <DialogDescription className="modal-description">{description}</DialogDescription>
-            ) : null}
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+            {description ? <DialogDescription>{description}</DialogDescription> : null}
           </DialogHeader>
         ) : (
           <DialogTitle className="sr-only">{accessibleLabel}</DialogTitle>
         )}
-        <div className="modal-body">{children}</div>
-        {footer ? <DialogFooter className="modal-footer">{footer}</DialogFooter> : null}
+        <div className="py-2">{children}</div>
+        {footer ? <DialogFooter>{footer}</DialogFooter> : null}
       </DialogContent>
     </Dialog>
   );

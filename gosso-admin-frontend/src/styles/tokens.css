@@ -1,76 +1,121 @@
 @layer theme {
-  /* Semantic tokens sit above the legacy palette in index.css. Feature code
-   * should use these names so the visual theme can change without API churn. */
   :root {
-    /* Surface hierarchy */
-    --surface-canvas: var(--bg-main);
-    --surface-navigation: var(--bg-sidebar);
-    --surface-panel: var(--bg-panel);
-    --surface-panel-soft: var(--bg-panel-soft, #1c232d);
-    --surface-elevated: var(--bg-elevated);
+    --background: #0f1217;
+    --foreground: #e5e7eb;
+
+    --card: #171c24;
+    --card-foreground: #e5e7eb;
+
+    --popover: #171c24;
+    --popover-foreground: #e5e7eb;
+
+    --primary: #3b82f6;
+    --primary-foreground: #ffffff;
+    --primary-hover: #2563eb;
+    --primary-active: #1d4ed8;
+
+    --secondary: #1b2330;
+    --secondary-foreground: #e5e7eb;
+    --secondary-hover: #242e3c;
+    --secondary-active: #151c27;
+
+    --muted: #1c232d;
+    --muted-foreground: #9ca3af;
+
+    --accent: #1e293b;
+    --accent-foreground: #f3f4f6;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --destructive-subtle: rgba(239, 68, 68, 0.12);
+    --destructive-border: rgba(239, 68, 68, 0.28);
+
+    --success: #22c55e;
+    --success-foreground: #ffffff;
+    --success-subtle: rgba(34, 197, 94, 0.12);
+    --success-border: rgba(34, 197, 94, 0.28);
+
+    --warning: #f59e0b;
+    --warning-foreground: #ffffff;
+    --warning-subtle: rgba(245, 158, 11, 0.12);
+    --warning-border: rgba(245, 158, 11, 0.28);
+
+    --info: #38bdf8;
+    --info-foreground: #ffffff;
+    --info-subtle: rgba(56, 189, 248, 0.12);
+    --info-border: rgba(56, 189, 248, 0.28);
+
+    --border: #2b3441;
+    --border-hover: #3d4a5d;
+    --input: #10151d;
+    --ring: #3b82f6;
+    --radius: 0.5rem;
+
+    /* Legacy semantic variable mappings for backward compatibility */
+    --surface-canvas: var(--background);
+    --surface-navigation: #11161d;
+    --surface-panel: var(--card);
+    --surface-panel-soft: var(--muted);
+    --surface-elevated: #202832;
     --surface-subtle: rgba(255, 255, 255, 0.04);
     --surface-hover: #18202a;
-    --surface-active: #1e293b;
+    --surface-active: var(--accent);
+    --surface-card: #151b24;
+    --surface-card-hover: #1a212b;
 
-    /* Borders */
-    --border-default: var(--border-color);
+    --border-default: var(--border);
     --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-hover: #3d4a5d;
+    --border-card: var(--border);
+    --border-focus: rgba(59, 130, 246, 0.28);
     --border-focus-ring: var(--border-focus);
 
-    /* Typography Colors */
-    --text-primary: var(--color-text-main);
-    --text-secondary: var(--color-text-muted);
-    --text-tertiary: var(--color-text-dark);
+    --text-primary: var(--foreground);
+    --text-secondary: var(--muted-foreground);
+    --text-tertiary: #6b7280;
     --text-inverse: #ffffff;
+    --color-text-main: var(--foreground);
+    --color-text-muted: var(--muted-foreground);
+    --color-text-dark: #6b7280;
 
-    /* Brand / Action Palette */
-    --action-primary: var(--color-primary);
-    --action-primary-hover: var(--color-primary-hover);
-    --action-primary-active: #1d4ed8;
+    --action-primary: var(--primary);
+    --action-primary-hover: var(--primary-hover);
+    --action-primary-active: var(--primary-active);
     --action-primary-subtle: rgba(59, 130, 246, 0.12);
+    --action-secondary-bg: var(--secondary);
+    --action-secondary-hover: var(--secondary-hover);
+    --action-secondary-active: var(--secondary-active);
+    --action-secondary-text: var(--foreground);
 
-    /* Status Colors */
-    --status-danger: var(--danger-color);
+    --status-danger: var(--destructive);
     --status-danger-hover: #dc2626;
     --status-danger-active: #b91c1c;
-    --status-danger-subtle: rgba(239, 68, 68, 0.12);
-    --status-danger-border: rgba(239, 68, 68, 0.28);
+    --status-danger-subtle: var(--destructive-subtle);
+    --status-danger-border: var(--destructive-border);
+    --danger-color: var(--destructive);
 
-    --status-success: var(--success-color);
+    --status-success: var(--success);
     --status-success-hover: #16a34a;
-    --status-success-subtle: rgba(34, 197, 94, 0.12);
-    --status-success-border: rgba(34, 197, 94, 0.28);
+    --status-success-subtle: var(--success-subtle);
+    --status-success-border: var(--success-border);
+    --success-color: var(--success);
 
-    --status-warning: var(--warning-color);
+    --status-warning: var(--warning);
     --status-warning-hover: #d97706;
-    --status-warning-subtle: rgba(245, 158, 11, 0.12);
-    --status-warning-border: rgba(245, 158, 11, 0.28);
+    --status-warning-subtle: var(--warning-subtle);
+    --status-warning-border: var(--warning-border);
+    --warning-color: var(--warning);
 
-    --status-info: #38bdf8;
-    --status-info-subtle: rgba(56, 189, 248, 0.12);
-    --status-info-border: rgba(56, 189, 248, 0.28);
+    --status-info: var(--info);
+    --status-info-subtle: var(--info-subtle);
+    --status-info-border: var(--info-border);
 
-    /* Status Text Accents */
     --status-primary-text: #bfdbfe;
     --status-success-text: #86efac;
     --status-warning-text: #fde68a;
     --status-info-text: #bae6fd;
     --status-danger-text: #fca5a5;
+    --text-danger-soft: #fca5a5;
 
-    /* Spacing Scale (4px/8px Grid) */
-    --space-0-5: 2px;
-    --space-1: 4px;
-    --space-2: 8px;
-    --space-3: 12px;
-    --space-4: 16px;
-    --space-5: 20px;
-    --space-6: 24px;
-    --space-8: 32px;
-    --space-10: 40px;
-    --space-12: 48px;
-
-    /* Border Radii */
     --radius-xs: 4px;
     --radius-sm: 4px;
     --radius-md: 6px;
@@ -80,14 +125,12 @@
     --radius-xl: 12px;
     --radius-full: 9999px;
 
-    /* Component Heights */
     --control-h-sm: 32px;
     --control-h-base: 40px;
     --control-h-lg: 46px;
     --control-height: 38px;
     --control-height-compact: 34px;
 
-    /* Typography Scale */
     --font-size-xs: 12px;
     --font-size-sm: 13px;
     --font-size-base: 14px;
@@ -102,38 +145,5 @@
     --line-height-snug: 1.35;
     --line-height-base: 1.5;
     --line-height-relaxed: 1.65;
-
-    /* Focus & Focus-Visible Ring */
-    --focus-ring: 0 0 0 2px var(--surface-canvas), 0 0 0 4px var(--action-primary);
-    --focus-ring-offset: 2px;
-    --focus-ring-width: 2px;
-
-    /* Secondary & Neutral Actions */
-    --action-secondary-bg: #1b2330;
-    --action-secondary-hover: #242e3c;
-    --action-secondary-active: #151c27;
-    --action-secondary-text: var(--text-primary);
-
-    /* Danger States & Surfaces */
-    --text-danger-soft: #fecaca;
-    --status-danger-hover-bg: rgba(239, 68, 68, 0.22);
-    --status-danger-active-bg: rgba(239, 68, 68, 0.32);
-
-    /* Form & Input Controls */
-    --input-bg: #10151d;
-    --input-placeholder: #6b7280;
-    --input-disabled-bg: var(--surface-panel-soft);
-    --input-disabled-text: var(--text-tertiary);
-
-    /* Surfaces & Separators */
-    --surface-card: #151b24;
-    --surface-card-hover: #1a212b;
-    --surface-subtle-border: rgba(255, 255, 255, 0.06);
-
-    /* Interactive Elements */
-    --active-scale: 0.985;
-    --duration-fast: 120ms;
-    --duration-normal: 180ms;
-    --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
   }
 }

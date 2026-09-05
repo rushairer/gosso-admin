@@ -43,8 +43,12 @@ export default function LoginPreview({ branding }: LoginPreviewProps) {
   }, [dimensions.width]);
 
   return (
-    <div className="login-preview">
-      <div className="login-preview__toolbar" role="group" aria-label={t('site.previewViewport')}>
+    <div className="login-preview overflow-hidden rounded-xl border border-border bg-black/40 shadow-inner">
+      <div
+        className="flex items-center gap-2 border-b border-border bg-card p-3"
+        role="group"
+        aria-label={t('site.previewViewport')}
+      >
         <Button
           variant={viewport === 'desktop' ? 'primary' : 'secondary'}
           size="sm"
@@ -65,18 +69,18 @@ export default function LoginPreview({ branding }: LoginPreviewProps) {
         >
           {t('site.previewMobile')}
         </Button>
-        <span className="text-muted">
+        <span className="ml-auto text-xs font-mono text-muted-foreground">
           {dimensions.width} × {dimensions.height}
         </span>
       </div>
 
       <div
         ref={stageRef}
-        className={`login-preview__stage login-preview__stage--${viewport}`}
+        className="relative w-full overflow-hidden bg-background transition-[height] duration-200"
         style={{ height: dimensions.height * scale }}
       >
         <div
-          className="login-preview__viewport"
+          className="absolute top-0 left-1/2 origin-top"
           style={{
             width: dimensions.width,
             height: dimensions.height,
