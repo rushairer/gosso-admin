@@ -432,13 +432,13 @@
     pointer-events: none;
   }
 
-  .toast-item,
-  .toast {
+  .toast,
+  .toast-item {
     pointer-events: auto;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 14px;
+    gap: 12px;
+    padding: 12px 16px;
     border-radius: var(--radius-control);
     border: 1px solid var(--ds-border-default);
     background: var(--ds-surface-panel);
@@ -450,26 +450,41 @@
   .toast > svg,
   .toast__icon,
   .toast-item__icon {
-    flex-shrink: 0;
-    width: 18px;
-    height: 18px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: inherit;
   }
 
-  .toast span,
+  .toast__icon svg,
+  .toast-item__icon svg,
+  .toast > svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
+
   .toast__message,
   .toast-item__message {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
     line-height: 1.4;
     word-break: break-word;
+    text-align: left;
   }
 
   .toast .icon-button,
   .toast__close,
   .toast-item__close,
   .toast button {
+    flex: 0 0 auto;
     margin-left: auto;
-    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Table Pagination alignment */
