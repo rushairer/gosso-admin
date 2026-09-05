@@ -50,6 +50,7 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
       isOpen={isOpen}
       onClose={onClose}
       title={t('users.createModalTitle')}
+      description={t('users.createModalDescription')}
       maxWidth="520px"
       footer={
         <>
@@ -69,7 +70,6 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
       }
     >
       <form id="create-user-form" onSubmit={handleSubmit}>
-        <p className="text-muted text-sm mb-md">{t('users.createModalDescription')}</p>
 
         {error && (
           <div className="mb-md">

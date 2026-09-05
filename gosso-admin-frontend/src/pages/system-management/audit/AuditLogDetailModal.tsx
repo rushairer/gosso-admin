@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText as AuditIcon } from 'lucide-react';
 import { Button, DefinitionList, DefinitionRow, Modal } from '../../../components/ui';
 import type { AuditLog } from '../../../types/api';
 
@@ -19,11 +18,7 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({ isOpen
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={
-        <>
-          <AuditIcon aria-hidden="true" size={18} /> {t('audit.detailModalTitle')}
-        </>
-      }
+      title={t('audit.detailModalTitle')}
       maxWidth="640px"
       footer={
         <Button variant="secondary" onClick={onClose}>

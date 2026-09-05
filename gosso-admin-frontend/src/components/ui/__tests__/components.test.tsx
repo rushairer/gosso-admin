@@ -223,13 +223,20 @@ describe('Modal', () => {
     expect(container.innerHTML).toBe('');
   });
 
-  it('renders title, content, and footer when isOpen is true', () => {
+  it('renders title, description, content, and footer when isOpen is true', () => {
     render(
-      <Modal isOpen={true} onClose={() => {}} title="Test Modal" footer={<button>Confirm</button>}>
+      <Modal
+        isOpen={true}
+        onClose={() => {}}
+        title="Test Modal"
+        description="Test Modal Description"
+        footer={<button>Confirm</button>}
+      >
         <p>Modal Body Text</p>
       </Modal>
     );
     expect(screen.getByText('Test Modal')).toBeInTheDocument();
+    expect(screen.getByText('Test Modal Description')).toBeInTheDocument();
     expect(screen.getByText('Modal Body Text')).toBeInTheDocument();
     expect(screen.getByText('Confirm')).toBeInTheDocument();
   });

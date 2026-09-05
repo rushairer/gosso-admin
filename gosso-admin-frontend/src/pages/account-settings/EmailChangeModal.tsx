@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Eye, EyeOff, Mail } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProfileManager } from '@gosso/client/react';
-import { Button, ButtonGroup, Feedback, FormField, IconButton, Input, Modal } from '../../components/ui';
+import { Button, Feedback, FormField, IconButton, Input, Modal } from '../../components/ui';
 import type { UserProfile } from '../../auth';
 
 interface EmailChangeModalProps {
@@ -53,9 +53,46 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
   };
 
   return (
-    <Modal isOpen={isOpen} title={t('profile.editEmailTitle')} maxWidth="460px" onClose={onClose}>
-      <p className="text-muted text-sm mb-md">{t('profile.editEmailDescription')}</p>
-
+    <Modal
+      isOpen={isOpen}
+      title={t('profile.editEmailTitle')}
+      description={t('profile.editEmailDescription')}
+      maxWidth="460px"
+      onClose={onClose}
+      footer={
+        step === 'input' ? (
+          <>
+            <Button variant="secondary" type="button" onClick={onClose} disabled={loading}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              form="email-change-request-form"
+              variant="primary"
+              type="submit"
+              loading={loading}
+              disabled={loading || !newEmail.trim() || !password}
+            >
+              {t('profile.sendCodeButton')}
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button variant="secondary" type="button" onClick={() => setStep('input')} disabled={loading}>
+              {t('common.previous') || 'Back'}
+            </Button>
+            <Button
+              form="email-change-confirm-form"
+              variant="primary"
+              type="submit"
+              loading={loading}
+              disabled={loading || !code.trim()}
+            >
+              {t('profile.confirmEmailButton')}
+            </Button>
+          </>
+        )
+      }
+    >
       {error && (
         <div className="mb-md">
           <Feedback type="error">{error}</Feedback>
@@ -63,7 +100,7 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
       )}
 
       {step === 'input' ? (
-        <form onSubmit={requestVerificationCode} className="flex-col gap-lg">
+        <form id="email-change-request-form" onSubmit={requestVerificationCode} className="flex-col gap-lg">
           <FormField label={t('profile.newEmailLabel')} noMargin>
             <Input
               type="email"
@@ -93,23 +130,9 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
               }
             />
           </FormField>
-
-          <ButtonGroup align="right">
-            <Button variant="secondary" type="button" onClick={onClose} disabled={loading}>
-              {t('common.cancel')}
-            </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              loading={loading}
-              disabled={loading || !newEmail.trim() || !password}
-            >
-              {t('profile.sendCodeButton')}
-            </Button>
-          </ButtonGroup>
         </form>
       ) : (
-        <form onSubmit={handleConfirmEmailChange} className="flex-col gap-lg">
+        <form id="email-change-confirm-form" onSubmit={handleConfirmEmailChange} className="flex-col gap-lg">
           <FormField label={t('profile.verificationCodeLabel')} noMargin>
             <Input
               type="text"
@@ -119,15 +142,6 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
               placeholder="123456"
             />
           </FormField>
-
-          <ButtonGroup align="right">
-            <Button variant="secondary" type="button" onClick={() => setStep('input')} disabled={loading}>
-              {t('common.previous') || 'Back'}
-            </Button>
-            <Button variant="primary" type="submit" loading={loading} disabled={loading || !code.trim()}>
-              {t('profile.confirmEmailButton')}
-            </Button>
-          </ButtonGroup>
         </form>
       )}
     </Modal>

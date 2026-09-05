@@ -4,7 +4,6 @@ import { Key, Calendar, Trash2, Plus } from 'lucide-react';
 import { usePasskeys } from '@gosso/client/react';
 import {
   Button,
-  ButtonGroup,
   EmptyState,
   Feedback,
   FormField,
@@ -189,15 +188,32 @@ export default function PasskeysPanel() {
       <Modal
         isOpen={showPasskeyModal}
         title={t('passkeys.registerModalTitle')}
+        description={t('passkeys.registerModalDescription')}
         maxWidth="400px"
         onClose={() => {
           setShowPasskeyModal(false);
           setNewPasskeyName('');
         }}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => {
+                setShowPasskeyModal(false);
+                setNewPasskeyName('');
+              }}
+              disabled={loading}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button form="register-passkey-form" variant="primary" type="submit" loading={loading} disabled={!newPasskeyName.trim()}>
+              {t('passkeys.registerDeviceButton')}
+            </Button>
+          </>
+        }
       >
-        <p className="text-muted text-sm">{t('passkeys.registerModalDescription')}</p>
-
-        <form onSubmit={handleRegisterPasskey} className="flex-col mt-md gap-md">
+        <form id="register-passkey-form" onSubmit={handleRegisterPasskey} className="flex-col gap-md">
           <FormField label={t('passkeys.passkeyNameLabel')} noMargin>
             <Input
               type="text"
@@ -207,22 +223,6 @@ export default function PasskeysPanel() {
               placeholder={t('passkeys.passkeyNamePlaceholder')}
             />
           </FormField>
-
-          <ButtonGroup align="right">
-            <Button variant="primary" type="submit" loading={loading}>
-              {t('passkeys.registerDeviceButton')}
-            </Button>
-            <Button
-              variant="secondary"
-              type="button"
-              onClick={() => {
-                setShowPasskeyModal(false);
-                setNewPasskeyName('');
-              }}
-            >
-              {t('common.cancel')}
-            </Button>
-          </ButtonGroup>
         </form>
       </Modal>
 

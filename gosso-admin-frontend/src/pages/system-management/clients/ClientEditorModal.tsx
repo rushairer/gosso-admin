@@ -34,8 +34,18 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={editingClient ? t('clients.editModalTitle') : t('clients.registerModalTitle')}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose} type="button">
+            {t('common.cancel')}
+          </Button>
+          <Button form="client-editor-form" type="submit" variant="primary">
+            {editingClient ? t('clients.saveChangesButton') : t('clients.registerClientButton')}
+          </Button>
+        </>
+      }
     >
-      <form onSubmit={onSubmit}>
+      <form id="client-editor-form" onSubmit={onSubmit}>
         <FormField label={t('clients.clientNameLabel')}>
           <Input
             type="text"
@@ -122,14 +132,6 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
             <Feedback type="warning">{t('clients.adminScopeWarning')}</Feedback>
           </div>
         )}
-        <div className="modal-footer modal-footer--embedded">
-          <Button variant="secondary" onClick={onClose}>
-            {t('common.cancel')}
-          </Button>
-          <Button type="submit" variant="primary">
-            {editingClient ? t('clients.saveChangesButton') : t('clients.registerClientButton')}
-          </Button>
-        </div>
       </form>
     </Modal>
   );

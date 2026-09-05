@@ -33,6 +33,7 @@ export function UserConsentsModal({
       isOpen={isOpen}
       onClose={onClose}
       title={t('users.consentsModalTitle', { name: account.display_name || account.username })}
+      description={t('users.consentsDescription')}
       maxWidth="600px"
       footer={
         <Button variant="secondary" onClick={onClose}>
@@ -40,7 +41,6 @@ export function UserConsentsModal({
         </Button>
       }
     >
-      <p className="text-muted text-sm mb-md">{t('users.consentsDescription')}</p>
 
       {loading ? (
         <div className="text-center py-xl">

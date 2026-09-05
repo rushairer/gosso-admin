@@ -1,13 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './Dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './Dialog';
 
 export interface ModalProps {
   isOpen?: boolean;
   open?: boolean;
   onClose: () => void;
   title?: React.ReactNode;
+  description?: React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
   maxWidth?: string;
@@ -24,6 +25,7 @@ export function Modal({
   open,
   onClose,
   title,
+  description,
   children,
   footer,
   maxWidth = '550px',
@@ -88,6 +90,9 @@ export function Modal({
         {title ? (
           <DialogHeader className="modal-header">
             <DialogTitle className="modal-title">{title}</DialogTitle>
+            {description ? (
+              <DialogDescription className="modal-description">{description}</DialogDescription>
+            ) : null}
           </DialogHeader>
         ) : (
           <DialogTitle className="sr-only">{accessibleLabel}</DialogTitle>

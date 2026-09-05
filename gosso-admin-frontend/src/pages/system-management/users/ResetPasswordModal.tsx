@@ -44,6 +44,9 @@ export function ResetPasswordModal({ isOpen, onClose, account, onSubmit }: Reset
       isOpen={isOpen}
       onClose={onClose}
       title={t('users.changePasswordModalTitle')}
+      description={t('users.changePasswordDescription', {
+        name: account.display_name || account.username,
+      })}
       maxWidth="400px"
       footer={
         <>
@@ -63,11 +66,6 @@ export function ResetPasswordModal({ isOpen, onClose, account, onSubmit }: Reset
       }
     >
       <form id="reset-password-form" onSubmit={handleSubmit}>
-        <p className="text-muted text-sm mb-md">
-          {t('users.changePasswordDescription', {
-            name: account.display_name || account.username,
-          })}
-        </p>
 
         {error && (
           <div className="mb-md">

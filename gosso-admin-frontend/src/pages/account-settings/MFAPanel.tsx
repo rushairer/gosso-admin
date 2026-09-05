@@ -266,15 +266,32 @@ export default function MFAPanel() {
       <Modal
         isOpen={showDisableModal}
         title={t('mfa.disableModalTitle')}
+        description={t('mfa.disableModalDescription')}
         maxWidth="400px"
         onClose={() => {
           setShowDisableModal(false);
           setConfirmPasswordForMFA('');
         }}
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => {
+                setShowDisableModal(false);
+                setConfirmPasswordForMFA('');
+              }}
+              disabled={loading}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button form="disable-mfa-form" variant="danger" type="submit" loading={loading} disabled={!confirmPasswordForMFA}>
+              {t('mfa.confirmDisableButton')}
+            </Button>
+          </>
+        }
       >
-        <p className="text-muted text-sm">{t('mfa.disableModalDescription')}</p>
-
-        <form onSubmit={handleDisableMFA} className="flex-col mt-md gap-md">
+        <form id="disable-mfa-form" onSubmit={handleDisableMFA} className="flex-col gap-md">
           <FormField label={t('mfa.accountPasswordLabel')} noMargin>
             <Input
               type="password"
@@ -284,22 +301,6 @@ export default function MFAPanel() {
               placeholder={t('mfa.accountPasswordPlaceholder')}
             />
           </FormField>
-
-          <ButtonGroup align="right">
-            <Button variant="danger" type="submit" loading={loading}>
-              {t('mfa.confirmDisableButton')}
-            </Button>
-            <Button
-              variant="secondary"
-              type="button"
-              onClick={() => {
-                setShowDisableModal(false);
-                setConfirmPasswordForMFA('');
-              }}
-            >
-              {t('common.cancel')}
-            </Button>
-          </ButtonGroup>
         </form>
       </Modal>
 
