@@ -13,7 +13,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     environmentOptions: {
-      jsdom: { url: 'https://localhost:8443/identity-admin/' },
+      jsdom: { url: 'https://sso.dev.local/identity-admin/' },
     },
     setupFiles: ['./src/test/setup.ts'],
     css: true,
