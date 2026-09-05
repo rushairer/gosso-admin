@@ -1328,15 +1328,37 @@
      ========================================================================== */
 
   /* Panel / card header slot alignment */
-  .panel-header,
-  .card-header,
-  .panel-heading {
+  .card-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
     padding: 18px 20px;
     border-bottom: 1px solid var(--ds-border-default);
+  }
+
+  .panel-heading,
+  .panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 0 16px 0;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--ds-border-default);
+  }
+
+  .admin-panel .panel-header {
+    padding: 24px 24px 16px 24px;
+  }
+
+  .workspace-panel > .panel-header,
+  .panel > .panel-header,
+  .agent-table-panel > .panel-header,
+  .editor-panel > .panel-header {
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
   }
 
   .panel-header h2,
