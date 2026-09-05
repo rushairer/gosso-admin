@@ -10,7 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Standardize Modal structure and design system alignment: add `description` prop to `Modal`, move modal action buttons out of form bodies into unified sticky `footer` prop across all modals (Client Editor, Email Change, MFA Disable, Passkeys Registration, User Creation, Password Reset, User Consents), and maintain stable close button geometry anchored to the title bar regardless of subtitle presence.
 
 ### Fixed
-- Fix `.panel-header` margin/padding inside `.workspace-panel` to eliminate double horizontal inset and align with table and form content.
+- Fix `.panel-header`, `.panel-body`, and `.plain-section` margin and padding across `.admin-panel` and `.workspace-panel` to eliminate redundant internal gutters, double border lines, and excessive 64px vertical canyon gaps below panel headers.
+- Unify table cell padding and edge alignment (`th:first-child`, `td:first-child` at `padding-left: 0`; `th:last-child`, `td:last-child` at `padding-right: 0`), ensuring table text and actions align seamlessly with panel headers and card boundaries.
 - Align Toast notification layout: vertically center icon and text, set `flex: 1` on message container, and push close button to the far right (`margin-left: auto`).
 
 ## [0.7.24] - 2026-09-04
