@@ -58,7 +58,10 @@ jobs:
         run: |
           set -euo pipefail
           rm -f gosso-admin-frontend/vendor/gouno-ui-*.tgz
-          npm pack --prefix .gouno-ui --pack-destination "$GITHUB_WORKSPACE/gosso-admin-frontend/vendor"
+          (
+            cd .gouno-ui
+            npm pack --pack-destination "$GITHUB_WORKSPACE/gosso-admin-frontend/vendor"
+          )
           GOUNO_UI_SHA="$(git -C .gouno-ui rev-parse HEAD)"
           {
             echo "repository=https://github.com/rushairer/gouno-ui"
