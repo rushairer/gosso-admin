@@ -3,7 +3,7 @@ import { Key, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 import type { PublicSiteBranding } from '../../types/api';
-import { Badge, Button, Feedback, FormField, Input } from '@gouno/ui';
+import { Alert, Button, Card, FormField, Input, Tag } from '@gouno/ui/core';
 
 interface LoginSurfaceProps {
   branding: PublicSiteBranding;
@@ -27,6 +27,15 @@ interface LoginSurfaceProps {
   onPasskeyLogin: () => void;
   onBackToLogin: () => void;
   onSwitchAccount?: () => void;
+}
+
+function DividerLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative flex items-center justify-center py-1">
+      <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+      <div className="relative bg-card px-2 text-xs font-medium uppercase text-muted-foreground">{children}</div>
+    </div>
+  );
 }
 
 export default function LoginSurface({
@@ -59,48 +68,35 @@ export default function LoginSurface({
 
   return (
     <div
-      className="login-surface flex min-h-screen w-full items-center justify-center bg-background bg-cover bg-center p-4 md:p-8"
+      className="flex min-h-screen w-full items-center justify-center bg-background bg-cover bg-center p-4 md:p-8"
       inert={preview}
       aria-hidden={preview || undefined}
       style={{ backgroundImage } as CSSProperties}
     >
-      <div className="login-card w-full max-w-md rounded-2xl border border-border bg-card/90 p-8 shadow-2xl backdrop-blur-xl transition-all">
-        {/* Header */}
-        <div className="text-center mb-8">
+      <Card variant="elevated" padding="base" className="w-full max-w-md bg-card/95 backdrop-blur-xl">
+        <div className="mb-6 text-center">
           {branding.logo_url ? (
-            <img
-              className="mx-auto mb-4 max-h-14 max-w-[160px] object-contain"
-              src={branding.logo_url}
-              alt={branding.product_name}
-            />
+            <img className="mx-auto mb-4 max-h-14 max-w-40 object-contain" src={branding.logo_url} alt={branding.product_name} />
           ) : null}
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
             {branding.login_title || branding.product_name || t('login.title')}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">{branding.login_description || t('login.subtitle')}</p>
+          <p className="mb-0 mt-2 text-sm text-muted-foreground">{branding.login_description || t('login.subtitle')}</p>
         </div>
 
-        {error ? (
-          <div className="mb-6">
-            <Feedback type="error">{error}</Feedback>
-          </div>
-        ) : null}
+        {error ? <Alert type="error" showIcon title={error} className="mb-5" /> : null}
 
         {isSudoMode ? (
-          <form onSubmit={onMfaSubmit} className="space-y-4">
-            <div className="rounded-lg border border-sky-500/30 bg-sky-950/20 p-4 space-y-2">
-              <div className="flex items-center justify-between gap-2">
+          <form onSubmit={onMfaSubmit} className="flex flex-col gap-4">
+            <div className="rounded-lg border bg-muted/30 p-4">
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <Shield size={16} className="shrink-0 text-sky-400" />
-                  <strong className="text-sm font-semibold text-foreground">{t('login.sudoModeTitle')}</strong>
+                  <Shield aria-hidden="true" className="size-4 shrink-0 text-primary" />
+                  <strong className="text-sm font-semibold">{t('login.sudoModeTitle')}</strong>
                 </div>
-                {sudoAccountName && (
-                  <Badge tone="neutral" className="text-xs truncate max-w-[160px]" title={sudoAccountName}>
-                    {sudoAccountName}
-                  </Badge>
-                )}
+                {sudoAccountName ? <Tag className="max-w-40 truncate" title={sudoAccountName}>{sudoAccountName}</Tag> : null}
               </div>
-              <p className="text-sm text-muted-foreground m-0 leading-relaxed">
+              <p className="mb-0 mt-2 text-sm leading-relaxed text-muted-foreground">
                 {t('login.sudoModeNotice', {
                   user: sudoAccountName,
                   defaultValue: '您正在执行敏感管理操作，请输入身份验证器动态码或使用通行密钥完成验证。',
@@ -108,9 +104,10 @@ export default function LoginSurface({
               </p>
             </div>
 
-            <FormField label={t('login.verificationCodeLabel')}>
+            <FormField label={t('login.verificationCodeLabel')} required>
               <Input
                 type="text"
+                inputMode="numeric"
                 maxLength={8}
                 className="text-center text-xl font-bold tracking-widest"
                 placeholder={t('login.verificationCodePlaceholder')}
@@ -121,76 +118,38 @@ export default function LoginSurface({
               />
             </FormField>
 
-            <Button type="submit" variant="primary" className="w-full" loading={loading}>
+            <Button type="submit" variant="solid" color="primary" className="w-full" loading={loading}>
               {loading ? t('login.verifyLoading') : t('login.verifyButton')}
             </Button>
-
-            <div className="relative flex items-center justify-center my-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase bg-card px-2 text-muted-foreground font-medium">
-                {t('common.or')}
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="secondary"
-              className="w-full flex items-center justify-center gap-2"
-              onClick={onPasskeyLogin}
-              loading={passkeyLoading}
-              icon={<Key size={16} />}
-            >
+            <DividerLabel>{t('common.or')}</DividerLabel>
+            <Button type="button" className="w-full" onClick={onPasskeyLogin} loading={passkeyLoading} icon={<Key />}>
               {passkeyLoading ? t('login.passkeyLoading') : t('login.passkeyStepUpButton')}
             </Button>
-
-            {onSwitchAccount && (
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full mt-2"
-                onClick={onSwitchAccount}
-                disabled={loading}
-              >
+            {onSwitchAccount ? (
+              <Button type="button" variant="ghost" className="w-full" onClick={onSwitchAccount} disabled={loading}>
                 {t('login.switchAccount')}
               </Button>
-            )}
+            ) : null}
           </form>
         ) : !mfaRequired ? (
-          <form onSubmit={onLoginSubmit} className="space-y-4">
-            {accountMismatch && (
-              <div className="rounded-lg border border-amber-500/30 bg-amber-950/20 p-4 space-y-2 mb-4">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <Shield size={16} className="shrink-0 text-amber-400" />
-                    <strong className="text-sm font-semibold text-foreground">{t('login.accountMismatchTitle')}</strong>
-                  </div>
-                  <Badge tone="warning" className="text-xs truncate max-w-[160px]" title={accountMismatch.target}>
-                    {accountMismatch.target}
-                  </Badge>
-                </div>
-                <p className="text-sm text-muted-foreground m-0 leading-relaxed">
+          <form onSubmit={onLoginSubmit} className="flex flex-col gap-4">
+            {accountMismatch ? (
+              <Alert
+                type="warning"
+                showIcon
+                title={t('login.accountMismatchTitle')}
+                description={
                   <Trans
                     i18nKey="login.accountMismatchNotice"
-                    values={{
-                      target: accountMismatch.target,
-                      current: accountMismatch.current,
-                    }}
+                    values={{ target: accountMismatch.target, current: accountMismatch.current }}
                     components={{ strong: <strong /> }}
                   />
-                </p>
-                {onSwitchAccount && (
-                  <div className="mt-2">
-                    <Button type="button" variant="secondary" size="sm" onClick={onSwitchAccount} disabled={loading}>
-                      {t('login.switchAccount')}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
+                }
+                action={onSwitchAccount ? <Button size="small" onClick={onSwitchAccount} disabled={loading}>{t('login.switchAccount')}</Button> : undefined}
+              />
+            ) : null}
 
-            <FormField label={t('login.usernameLabel')}>
+            <FormField label={t('login.usernameLabel')} required>
               <Input
                 type="text"
                 placeholder={t('login.usernamePlaceholder')}
@@ -200,8 +159,7 @@ export default function LoginSurface({
                 autoFocus={!preview}
               />
             </FormField>
-
-            <FormField label={t('login.passwordLabel')}>
+            <FormField label={t('login.passwordLabel')} required>
               <Input
                 type="password"
                 placeholder={t('login.passwordPlaceholder')}
@@ -210,54 +168,33 @@ export default function LoginSurface({
                 disabled={loading}
               />
             </FormField>
-
-            <div className="text-right text-xs -mt-2 mb-4">
-              <Link to="/forgot-password" className="text-primary hover:underline font-medium">
-                {t('login.forgotPasswordLink')}
-              </Link>
+            <div className="-mt-2 text-right text-xs">
+              <Link to="/forgot-password" className="font-medium text-primary hover:underline">{t('login.forgotPasswordLink')}</Link>
             </div>
 
             {showDevCredentials && !username && !password ? (
-              <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-3 text-xs text-muted-foreground leading-relaxed">
-                <strong className="text-primary">{t('login.devCredentialsTitle')}</strong>{' '}
-                {t('login.devCredentialsPrefix')} <code className="text-primary font-mono">admin</code> /{' '}
-                <code className="text-sky-300 font-mono">admin123</code>. {t('login.devCredentialsSuffix')}
-              </div>
+              <Alert
+                type="info"
+                title={t('login.devCredentialsTitle')}
+                description={<>{t('login.devCredentialsPrefix')} <code className="font-mono">admin</code> / <code className="font-mono">admin123</code>. {t('login.devCredentialsSuffix')}</>}
+              />
             ) : null}
 
-            <Button type="submit" variant="primary" className="w-full" loading={loading}>
+            <Button type="submit" variant="solid" color="primary" className="w-full" loading={loading}>
               {loading ? t('login.signInLoading') : t('login.signInButton')}
             </Button>
-
-            <div className="relative flex items-center justify-center my-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase bg-card px-2 text-muted-foreground font-medium">
-                {t('common.or')}
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="secondary"
-              className="w-full flex items-center justify-center gap-2"
-              onClick={onPasskeyLogin}
-              loading={passkeyLoading}
-              icon={<Key size={16} />}
-            >
+            <DividerLabel>{t('common.or')}</DividerLabel>
+            <Button type="button" className="w-full" onClick={onPasskeyLogin} loading={passkeyLoading} icon={<Key />}>
               {passkeyLoading ? t('login.passkeyLoading') : t('login.passkeyButton')}
             </Button>
           </form>
         ) : (
-          <form onSubmit={onMfaSubmit} className="space-y-4">
-            <div className="rounded-lg border border-blue-500/30 bg-blue-950/20 p-4 text-sm text-primary font-medium">
-              {t('login.mfaRequired')}
-            </div>
-
-            <FormField label={t('login.verificationCodeLabel')}>
+          <form onSubmit={onMfaSubmit} className="flex flex-col gap-4">
+            <Alert type="info" showIcon title={t('login.mfaRequired')} />
+            <FormField label={t('login.verificationCodeLabel')} required>
               <Input
                 type="text"
+                inputMode="numeric"
                 maxLength={8}
                 className="text-center text-xl font-bold tracking-widest"
                 placeholder={t('login.verificationCodePlaceholder')}
@@ -267,17 +204,15 @@ export default function LoginSurface({
                 autoFocus={!preview}
               />
             </FormField>
-
-            <Button type="submit" variant="primary" className="w-full" loading={loading}>
+            <Button type="submit" variant="solid" color="primary" className="w-full" loading={loading}>
               {loading ? t('login.verifyLoading') : t('login.verifyButton')}
             </Button>
-
-            <Button type="button" variant="secondary" className="w-full" onClick={onBackToLogin} disabled={loading}>
+            <Button type="button" className="w-full" onClick={onBackToLogin} disabled={loading}>
               {t('login.backToLogin')}
             </Button>
           </form>
         )}
-      </div>
+      </Card>
     </div>
   );
 }
