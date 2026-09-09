@@ -136,7 +136,8 @@ export default function Home() {
         <Alert
           type="info"
           showIcon
-          title={t('home.adminNotice')}
+          title={t('systemManagement.accessDeniedTitle')}
+          description={t('home.adminNotice')}
           action={
             <Button size="small" icon={<LogOut />} onClick={() => void logout('/')}>
               {t('home.switchAccount')}

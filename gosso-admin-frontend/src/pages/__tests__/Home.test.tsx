@@ -116,6 +116,7 @@ describe('Home page dashboard', () => {
     expect(screen.getByText('home.userTitle')).toBeInTheDocument();
     expect(screen.getByText('home.loggedInAsUser:owen_user')).toBeInTheDocument();
     expect(screen.getByText('home.goToAccountSettings')).toBeInTheDocument();
+    expect(screen.getByText('systemManagement.accessDeniedTitle')).toBeInTheDocument();
     expect(screen.getByText('home.adminNotice')).toBeInTheDocument();
     expect(screen.getByText('home.userProfile')).toBeInTheDocument();
     expect(screen.getByText('home.userSecurity')).toBeInTheDocument();
