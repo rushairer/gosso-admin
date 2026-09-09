@@ -23,7 +23,7 @@ const { redirectToAuthorize, logout, subscribe, getSnapshot, mockClient, current
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
   return {
     ...actual,
     useNavigate: () => mockNavigate,
@@ -41,6 +41,11 @@ vi.mock('react-i18next', () => ({
     t: (key: string, options?: Record<string, any>) => (options?.name ? `${key}:${options.name}` : key),
   }),
 }));
+
+function expectLinkTarget(label: string, href: string) {
+  const link = screen.getByText(label).closest('a');
+  expect(link).toHaveAttribute('href', href);
+}
 
 describe('Home page dashboard', () => {
   beforeEach(() => {
@@ -88,8 +93,9 @@ describe('Home page dashboard', () => {
     fireEvent.click(screen.getByText('home.enterDashboard'));
     expect(mockNavigate).toHaveBeenCalledWith('/system-management');
 
-    fireEvent.click(screen.getByText('home.clientRegistry'));
-    expect(mockNavigate).toHaveBeenCalledWith('/system-management/clients');
+    expectLinkTarget('home.clientRegistry', '/system-management/clients');
+    expectLinkTarget('home.userControl', '/system-management/users');
+    expectLinkTarget('home.mfaAndPasskeys', '/system-management/system');
   });
 
   it('renders tailored user account center view when user is non-admin', () => {
@@ -118,14 +124,9 @@ describe('Home page dashboard', () => {
     fireEvent.click(screen.getByText('home.goToAccountSettings'));
     expect(mockNavigate).toHaveBeenCalledWith('/account-settings/profile');
 
-    fireEvent.click(screen.getByText('home.userProfile'));
-    expect(mockNavigate).toHaveBeenCalledWith('/account-settings/profile');
-
-    fireEvent.click(screen.getByText('home.userSecurity'));
-    expect(mockNavigate).toHaveBeenCalledWith('/account-settings/mfa');
-
-    fireEvent.click(screen.getByText('home.userSessions'));
-    expect(mockNavigate).toHaveBeenCalledWith('/account-settings/sessions');
+    expectLinkTarget('home.userProfile', '/account-settings/profile');
+    expectLinkTarget('home.userSecurity', '/account-settings/mfa');
+    expectLinkTarget('home.userSessions', '/account-settings/sessions');
 
     fireEvent.click(screen.getByText('home.switchAccount'));
     expect(logout).toHaveBeenCalledWith('/');
