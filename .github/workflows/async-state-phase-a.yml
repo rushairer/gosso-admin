@@ -84,13 +84,6 @@ jobs:
           )
           replace_once(site, "disabled={!dirty || saving}", "disabled={!dirty || saving || loading}")
 
-          clients_test = 'gosso-admin-frontend/src/pages/system-management/ClientsTab.test.tsx'
-          replace_once(
-              clients_test,
-              """    const retry = await screen.findByRole('button', { name: /retry|重试/i });\n    await userEvent.click(retry);\n""",
-              """    const retry = await screen.findByRole('button', { name: /retry|重试/i });\n    expect(screen.queryByText(/No Clients Registered|暂无已注册的客户端/i)).not.toBeInTheDocument();\n    await userEvent.click(retry);\n""",
-          )
-
           users_test = 'gosso-admin-frontend/src/pages/system-management/UsersTab.test.tsx'
           replace_once(
               users_test,
