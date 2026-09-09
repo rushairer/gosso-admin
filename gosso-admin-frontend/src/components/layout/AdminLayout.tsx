@@ -106,10 +106,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       navigationLabel={t('nav.primaryNavigation')}
       navigation={(close) => (
         <>
-          <NavLink to="/" end className={navigationItemClass} onClick={close}>
-            <Home />
-            <span>{t('nav.overview')}</span>
-          </NavLink>
+          <NavigationGroup>
+            <NavLink to="/" end className={navigationItemClass} onClick={close}>
+              <Home />
+              <span>{t('nav.overview')}</span>
+            </NavLink>
+          </NavigationGroup>
           {session.loggedIn && session.isAdmin ? (
             <NavigationGroup label={t('nav.systemManagement')}>
               {systemItems.map(([key, label]) => (
