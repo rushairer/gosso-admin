@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { CheckSquare as ConsentIcon } from 'lucide-react';
-import { Button, EmptyState, ListRow, ListStack, LoadingSpinner, Modal, Tag } from '@gouno/ui';
+import { Button, Empty, Modal, Spinner, Tag, Text } from '@gouno/ui/core';
 import type { Account, Consent } from '../../../types/api';
 
 interface UserConsentsModalProps {
@@ -23,63 +23,57 @@ export function UserConsentsModal({
   onRevokeConsent,
 }: UserConsentsModalProps) {
   const { t } = useTranslation();
-
   if (!isOpen || !account) return null;
-
   const isSelf = account.id === currentAdminId;
 
   return (
     <Modal
-      isOpen={isOpen}
-      onClose={onClose}
+      open={isOpen}
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
       title={t('users.consentsModalTitle', { name: account.display_name || account.username })}
       description={t('users.consentsDescription')}
       maxWidth="600px"
-      footer={
-        <Button variant="secondary" onClick={onClose}>
-          {t('common.close')}
-        </Button>
-      }
+      footer={<Button onClick={onClose}>{t('common.close')}</Button>}
     >
       {loading ? (
-        <div className="text-center py-xl">
-          <LoadingSpinner size="sm" className="mx-auto mb-sm" />
-          <p className="text-muted text-sm">{t('users.loadingConsents')}</p>
+        <div className="flex min-h-32 items-center justify-center gap-3 text-sm text-muted-foreground" role="status">
+          <Spinner aria-label={t('users.loadingConsents')} />
+          <span>{t('users.loadingConsents')}</span>
         </div>
       ) : consents.length === 0 ? (
-        <EmptyState title={t('users.noConsentsTitle')} description={t('users.noConsentsDescription')} />
+        <Empty title={t('users.noConsentsTitle')} description={t('users.noConsentsDescription')} />
       ) : (
-        <ListStack>
+        <ul className="divide-y overflow-hidden rounded-lg border border-border/80 bg-card">
           {consents.map((consent) => (
-            <ListRow
-              key={consent.client_id}
-              action={
-                <Button variant="danger" size="sm" onClick={() => onRevokeConsent(consent.client_id)} disabled={isSelf}>
-                  {t('users.revokeAccess')}
-                </Button>
-              }
-            >
-              <div className="flex-1 mr-md">
-                <div className="flex-row items-center gap-sm">
-                  <span className="list-icon">
-                    <ConsentIcon size={16} />
+            <li key={consent.client_id} className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                    <ConsentIcon aria-hidden="true" className="size-4" />
                   </span>
-                  <div className="list-title">Client ID: {consent.client_id}</div>
+                  <Text as="div" className="min-w-0 truncate font-semibold">Client ID: {consent.client_id}</Text>
                 </div>
-                <div className="flex-row flex-wrap gap-xs mt-sm">
-                  {consent.scopes?.map((scope: string) => (
-                    <Tag key={scope} tone="neutral">
-                      {scope}
-                    </Tag>
-                  ))}
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {consent.scopes?.map((scope: string) => <Tag key={scope}>{scope}</Tag>)}
                 </div>
-                <div className="text-xs text-muted mt-sm">
+                <Text size="xs" tone="muted" className="mt-2">
                   {t('users.authorizedAt')} {consent.granted_at ? new Date(consent.granted_at).toLocaleString() : '-'}
-                </div>
+                </Text>
               </div>
-            </ListRow>
+              <Button
+                size="small"
+                variant="solid"
+                color="error"
+                onClick={() => void onRevokeConsent(consent.client_id)}
+                disabled={isSelf}
+              >
+                {t('users.revokeAccess')}
+              </Button>
+            </li>
           ))}
-        </ListStack>
+        </ul>
       )}
     </Modal>
   );
