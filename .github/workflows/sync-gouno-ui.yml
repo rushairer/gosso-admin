@@ -113,7 +113,7 @@ jobs:
           const theme = await import('@gouno/ui/theme');
           const gouno = await import('@gouno/ui/gouno');
           const surfaces = [
-            ['@gouno/ui/core', core, ['Tabs', 'NavigationProvider', 'TooltipProvider', 'Skeleton']],
+            ['@gouno/ui/core', core, ['Button', 'IconButton', 'Tabs', 'NavigationProvider', 'TooltipProvider', 'Skeleton']],
             ['@gouno/ui/theme', theme, ['ThemeProvider']],
             ['@gouno/ui/gouno', gouno, ['AppShell', 'PageContainer', 'PageHeader', 'NavigationGroup']],
           ];
