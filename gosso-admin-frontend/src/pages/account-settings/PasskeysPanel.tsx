@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Key, Calendar, Trash2, Plus } from 'lucide-react';
 import { usePasskeys } from '@gosso/client/react';
@@ -15,15 +15,21 @@ interface PendingRemoval {
 
 export default function PasskeysPanel() {
   const { t } = useTranslation();
-  const { passkeys, loading, error, register, remove } = usePasskeys();
+  const { passkeys, loading, error, reload, register, remove } = usePasskeys();
   const { requireSudo, clearSudo } = useSudo();
   const [validationError, setValidationError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showPasskeyModal, setShowPasskeyModal] = useState(false);
   const [newPasskeyName, setNewPasskeyName] = useState('');
   const [pendingRemoval, setPendingRemoval] = useState<PendingRemoval | null>(null);
+  const [hasResolvedInitialLoad, setHasResolvedInitialLoad] = useState(false);
 
-  const initialLoading = loading && passkeys.length === 0 && !error;
+  useEffect(() => {
+    if (!loading && !error) setHasResolvedInitialLoad(true);
+  }, [error, loading]);
+
+  const initialLoading = loading && !hasResolvedInitialLoad;
+  const fatalLoadError = Boolean(error) && !hasResolvedInitialLoad;
 
   const handleOpenAddPasskey = async () => {
     setValidationError(null);
@@ -100,7 +106,7 @@ export default function PasskeysPanel() {
             variant="solid"
             color="primary"
             icon={<Plus />}
-            disabled={initialLoading}
+            disabled={loading || fatalLoadError}
             onClick={() => void handleOpenAddPasskey()}
           >
             {t('passkeys.addPasskey')}
@@ -120,19 +126,26 @@ export default function PasskeysPanel() {
                     ? t('passkeys.credentialOwnershipMismatch')
                     : error)
               }
+              action={
+                fatalLoadError ? (
+                  <Button size="small" loading={loading} onClick={() => void reload().catch(() => {})}>
+                    {t('common.retry')}
+                  </Button>
+                ) : undefined
+              }
             />
           ) : null}
           {success ? <StatusMessage message={success} /> : null}
 
           {initialLoading ? (
             <PasskeysLoading label={t('passkeys.loadingPasskeys')} />
-          ) : passkeys.length === 0 ? (
+          ) : fatalLoadError ? null : passkeys.length === 0 ? (
             <Empty
               icon={<Key aria-hidden="true" className="size-6 text-muted-foreground" />}
               title={t('passkeys.noPasskeysTitle')}
               description={t('passkeys.noPasskeysDescription')}
               action={
-                <Button icon={<Plus />} onClick={() => void handleOpenAddPasskey()}>
+                <Button icon={<Plus />} disabled={loading} onClick={() => void handleOpenAddPasskey()}>
                   {t('passkeys.addPasskey')}
                 </Button>
               }

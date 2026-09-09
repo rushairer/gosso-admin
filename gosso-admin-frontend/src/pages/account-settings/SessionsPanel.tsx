@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Laptop, MapPin } from 'lucide-react';
 import { useSessions } from '@gosso/client/react';
@@ -22,11 +22,17 @@ import { Section, StatusMessage } from './shared';
 
 export default function SessionsPanel() {
   const { t } = useTranslation();
-  const { sessions, currentSession, loading, error, revoke } = useSessions();
+  const { sessions, currentSession, loading, error, reload, revoke } = useSessions();
   const [success, setSuccess] = useState<string | null>(null);
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
+  const [hasResolvedInitialLoad, setHasResolvedInitialLoad] = useState(false);
 
-  const initialLoading = loading && sessions.length === 0 && !error;
+  useEffect(() => {
+    if (!loading && !error) setHasResolvedInitialLoad(true);
+  }, [error, loading]);
+
+  const initialLoading = loading && !hasResolvedInitialLoad;
+  const fatalLoadError = Boolean(error) && !hasResolvedInitialLoad;
 
   const handleRevokeSession = async () => {
     if (!pendingSessionId) return;
@@ -44,7 +50,20 @@ export default function SessionsPanel() {
       <Section description={t('sessions.description')} surface="direct">
         <div className="flex flex-col gap-4">
           {success ? <StatusMessage message={success} /> : null}
-          {error ? <Alert type="error" showIcon title={error} /> : null}
+          {error ? (
+            <Alert
+              type="error"
+              showIcon
+              title={error}
+              action={
+                fatalLoadError ? (
+                  <Button size="small" loading={loading} onClick={() => void reload().catch(() => {})}>
+                    {t('common.retry')}
+                  </Button>
+                ) : undefined
+              }
+            />
+          ) : null}
 
           {initialLoading ? (
             <SessionsLoading
@@ -56,7 +75,7 @@ export default function SessionsPanel() {
                 { label: t('sessions.colActions'), skeletonClassName: 'h-8 w-20', align: 'right' },
               ]}
             />
-          ) : sessions.length === 0 && !error ? (
+          ) : fatalLoadError ? null : sessions.length === 0 ? (
             <Empty title={t('sessions.noSessionsTitle', { defaultValue: '暂无活跃会话' })} />
           ) : (
             <div aria-busy={loading}>

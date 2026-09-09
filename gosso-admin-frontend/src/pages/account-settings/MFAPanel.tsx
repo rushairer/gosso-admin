@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QrCode, Clipboard, AlertTriangle, RefreshCw, Unlock, Check, Copy } from 'lucide-react';
 import { useMfa } from '@gosso/client/react';
@@ -30,6 +30,7 @@ export default function MFAPanel() {
     backupCodes,
     loading,
     error,
+    reload,
     startEnroll,
     activate,
     disable,
@@ -41,6 +42,11 @@ export default function MFAPanel() {
   const [showRegenerateModal, setShowRegenerateModal] = useState(false);
   const [confirmPasswordForMFA, setConfirmPasswordForMFA] = useState('');
   const [success, setSuccess] = useState<string | null>(null);
+  const [hasResolvedInitialLoad, setHasResolvedInitialLoad] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !error) setHasResolvedInitialLoad(true);
+  }, [error, loading]);
 
   const handleEnrollMFA = async () => {
     setSuccess(null);
@@ -84,12 +90,30 @@ export default function MFAPanel() {
     });
   };
 
-  const initialLoading = loading && !mfaStatus.enabled && !mfaEnrollment;
+  const initialLoading = loading && !hasResolvedInitialLoad;
+  const fatalLoadError = Boolean(error) && !hasResolvedInitialLoad;
 
   if (initialLoading) {
     return (
       <Section description={t('mfa.description')} actions={<Skeleton className="h-6 w-20" />}>
         <MfaLoadingContent label={t('mfa.loadingMfa')} />
+      </Section>
+    );
+  }
+
+  if (fatalLoadError) {
+    return (
+      <Section description={t('mfa.description')}>
+        <Alert
+          type="error"
+          showIcon
+          title={error ?? ''}
+          action={
+            <Button size="small" loading={loading} onClick={() => void reload().catch(() => {})}>
+              {t('common.retry')}
+            </Button>
+          }
+        />
       </Section>
     );
   }
@@ -111,7 +135,13 @@ export default function MFAPanel() {
               <Text tone="muted" size="sm" className="max-w-2xl leading-relaxed">
                 {t('mfa.mfaNotEnrolledDescription')}
               </Text>
-              <Button variant="solid" color="primary" icon={<QrCode />} onClick={() => void handleEnrollMFA()}>
+              <Button
+                variant="solid"
+                color="primary"
+                icon={<QrCode />}
+                loading={loading}
+                onClick={() => void handleEnrollMFA()}
+              >
                 {t('mfa.setupAuthenticatorButton')}
               </Button>
             </div>
