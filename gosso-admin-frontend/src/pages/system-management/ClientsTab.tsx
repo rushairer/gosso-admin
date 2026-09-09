@@ -4,7 +4,7 @@ import {
   Plus as PlusIcon,
   Edit2 as EditIcon,
   Trash2 as TrashIcon,
-  Key as KeyIcon,
+  KeyRound,
   Copy as CopyIcon,
   RotateCcw,
 } from 'lucide-react';
@@ -211,7 +211,7 @@ export default function ClientsTab() {
         </div>
       ) : clients.length === 0 ? (
         <Empty
-          icon={<KeyIcon aria-hidden="true" className="size-6 text-muted-foreground" />}
+          icon={<KeyRound aria-hidden="true" className="size-6 text-muted-foreground" />}
           title={t('clients.noClientsTitle')}
           description={t('clients.noClientsDescription')}
           action={
@@ -258,6 +258,7 @@ export default function ClientsTab() {
                         <code className="min-w-0 flex-1 truncate text-xs">{uri}</code>
                         <IconButton
                           label={t('common.copy', { defaultValue: '复制' })}
+                          size="small"
                           icon={<CopyIcon />}
                           onClick={() => void handleCopyUri(uri)}
                         />
