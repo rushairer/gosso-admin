@@ -4,32 +4,33 @@ import { Laptop, MapPin } from 'lucide-react';
 import { useSessions } from '@gosso/client/react';
 import { logout } from '../../auth';
 import {
-  AsyncState,
-  Badge,
+  Alert,
   Button,
-  DataTable,
-  Feedback,
-  Panel,
-  PanelHeader,
-  TableSkeleton,
-  useConfirm,
-} from '@gouno/ui';
+  Empty,
+  Modal,
+  Spinner,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Tag,
+} from '@gouno/ui/core';
 import { parseUserAgent } from '../../utils/format';
+import { Section, StatusMessage } from './shared';
 
 export default function SessionsPanel() {
   const { t } = useTranslation();
   const { sessions, currentSession, loading, error, revoke } = useSessions();
   const [success, setSuccess] = useState<string | null>(null);
-  const { confirm, confirmDialog } = useConfirm();
+  const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
 
-  const handleRevokeSession = async (sessionId: string) => {
+  const handleRevokeSession = async () => {
+    if (!pendingSessionId) return;
+    const sessionId = pendingSessionId;
+    setPendingSessionId(null);
     setSuccess(null);
-    const confirmed = await confirm({
-      title: t('sessions.terminateSessionTitle'),
-      message: t('sessions.terminateSessionConfirmMessage'),
-      confirmLabel: t('sessions.terminateButton'),
-    });
-    if (!confirmed) return;
     try {
       await revoke(sessionId);
       setSuccess(t('sessions.sessionRevoked'));
@@ -38,74 +39,86 @@ export default function SessionsPanel() {
 
   return (
     <>
-      <Panel>
-        <PanelHeader title={t('sessions.title')} description={t('sessions.description')} />
+      <Section description={t('sessions.description')} surface="direct">
+        <div className="flex flex-col gap-4">
+          {success ? <StatusMessage message={success} /> : null}
+          {error ? <Alert type="error" showIcon title={error} /> : null}
 
-        {success && (
-          <div className="panel-body">
-            <Feedback type="success">{success}</Feedback>
-          </div>
-        )}
+          {loading ? (
+            <div className="flex min-h-40 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground" role="status">
+              <Spinner aria-label={t('common.loading')} />
+              <span>{t('common.loading')}</span>
+            </div>
+          ) : sessions.length === 0 && !error ? (
+            <Empty title={t('sessions.noSessionsTitle', { defaultValue: '暂无活跃会话' })} />
+          ) : (
+            <Table bordered>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('sessions.colDeviceBrowser')}</TableHead>
+                  <TableHead>{t('sessions.colIpAddress')}</TableHead>
+                  <TableHead>{t('sessions.colLastActive')}</TableHead>
+                  <TableHead className="text-right">{t('sessions.colActions')}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sessions.map((session) => {
+                  const isCurrent = session.id === currentSession?.id;
+                  return (
+                    <TableRow key={session.id}>
+                      <TableCell>
+                        <div className="flex min-w-52 items-center gap-2">
+                          <Laptop aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+                          <span className="font-medium">{parseUserAgent(session.user_agent)}</span>
+                          {isCurrent ? <Tag color="success">{t('sessions.currentSession')}</Tag> : null}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
+                          <MapPin aria-hidden="true" className="size-3" />
+                          {session.ip}
+                        </span>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                        {new Date(session.last_active_at).toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {isCurrent ? (
+                          <Button size="small" onClick={() => void logout()}>
+                            {t('sessions.signOutButton')}
+                          </Button>
+                        ) : (
+                          <Button
+                            size="small"
+                            variant="solid"
+                            color="error"
+                            onClick={() => setPendingSessionId(session.id)}
+                          >
+                            {t('sessions.revokeButton')}
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+      </Section>
 
-        <AsyncState
-          loading={loading}
-          skeleton={<TableSkeleton rows={3} columns={4} />}
-          error={error}
-          empty={!loading && sessions.length === 0 && !error}
-          emptyTitle={t('sessions.noSessionsTitle', { defaultValue: '暂无活跃会话' })}
-        >
-          <DataTable>
-            <thead>
-              <tr>
-                <th>{t('sessions.colDeviceBrowser')}</th>
-                <th>{t('sessions.colIpAddress')}</th>
-                <th>{t('sessions.colLastActive')}</th>
-                <th className="text-right">{t('sessions.colActions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sessions.map((session) => {
-                const isCurrent = session.id === currentSession?.id;
-                return (
-                  <tr key={session.id}>
-                    <td>
-                      <div className="flex-row items-center gap-sm">
-                        <Laptop
-                          size={16}
-                          className="shrink-0"
-                          color={isCurrent ? 'var(--action-primary)' : 'var(--text-secondary)'}
-                        />
-                        <span className="text-sm font-semibold">{parseUserAgent(session.user_agent)}</span>
-                        {isCurrent && <Badge tone="brand">{t('sessions.currentSession')}</Badge>}
-                      </div>
-                    </td>
-                    <td className="text-sm text-muted">
-                      <div className="flex-row items-center gap-xs font-mono">
-                        <MapPin size={13} className="shrink-0" color="var(--text-tertiary)" />
-                        <span>{session.ip}</span>
-                      </div>
-                    </td>
-                    <td className="text-muted text-sm">{new Date(session.last_active_at).toLocaleString()}</td>
-                    <td className="text-right">
-                      {isCurrent ? (
-                        <Button variant="secondary" size="sm" onClick={() => void logout()}>
-                          {t('sessions.signOutButton')}
-                        </Button>
-                      ) : (
-                        <Button variant="danger" size="sm" onClick={() => handleRevokeSession(session.id)}>
-                          {t('sessions.revokeButton')}
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </DataTable>
-        </AsyncState>
-      </Panel>
-
-      {confirmDialog}
+      <Modal
+        open={Boolean(pendingSessionId)}
+        title={t('sessions.terminateSessionTitle')}
+        description={t('sessions.terminateSessionConfirmMessage')}
+        onOpenChange={(next) => {
+          if (!next) setPendingSessionId(null);
+        }}
+        onOk={() => void handleRevokeSession()}
+        okText={t('sessions.terminateButton')}
+        cancelText={t('common.cancel')}
+        okButtonProps={{ variant: 'solid', color: 'error' }}
+      />
     </>
   );
 }
