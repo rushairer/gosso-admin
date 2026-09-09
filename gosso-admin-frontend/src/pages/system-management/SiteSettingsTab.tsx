@@ -2,28 +2,30 @@ import { useEffect, useState, type ChangeEvent } from 'react';
 import { Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
-  AsyncState,
+  Alert,
   Button,
-  ButtonGroup,
+  Card,
+  CardContent,
+  CardFooter,
   FormField,
   Input,
-  PanelBody,
-  PanelHeader,
-  PlainSection,
+  Spinner,
+  Text,
   Textarea,
-  useToast,
-} from '@gouno/ui';
+  useMessage,
+} from '@gouno/ui/core';
 import { siteSettingsService } from '../../services';
 import { DEFAULT_SITE_SETTINGS, mergeSiteSettings } from '../../config/site-defaults';
 import type { SiteSettings } from '../../types/api';
 import LoginPreview from '../../components/auth/LoginPreview';
 import { useSudo } from '../../components/auth/SudoContext';
+import { ManagementPanelLead } from './shared';
 
 const MAX_LOGIN_BACKGROUND_SOURCE_LENGTH = 8 * 1024 * 1024;
 
 export default function SiteSettingsTab() {
   const { t } = useTranslation();
-  const { showSuccess, showError } = useToast();
+  const message = useMessage();
   const { requireSudo } = useSudo();
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
   const [loading, setLoading] = useState(true);
@@ -65,9 +67,9 @@ export default function SiteSettingsTab() {
           const updated = mergeSiteSettings(await siteSettingsService.updateSiteSettings(settings));
           setSettings(updated);
           setBaseline(JSON.stringify(updated));
-          showSuccess(t('site.saved'));
+          message.success(t('site.saved'));
         } catch (reason: unknown) {
-          showError(reason instanceof Error ? reason.message : t('site.saveFailed'));
+          message.error(reason instanceof Error ? reason.message : t('site.saveFailed'));
         } finally {
           setSaving(false);
         }
@@ -75,18 +77,25 @@ export default function SiteSettingsTab() {
     });
   };
 
+  if (loading) {
+    return (
+      <div className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground" role="status">
+        <Spinner aria-label={t('site.loading')} />
+        <span>{t('site.loading')}</span>
+      </div>
+    );
+  }
+
   return (
-    <AsyncState
-      loading={loading}
-      loadingMessage={t('site.loading')}
-      error={error}
-      retryLabel={t('common.retry')}
-      onRetry={() => void load()}
-    >
-      <>
-        <PanelHeader title={t('site.title')} description={t('site.description')} />
-        <form onSubmit={save}>
-          <PanelBody stack>
+    <div className="flex flex-col gap-5">
+      <ManagementPanelLead description={t('site.description')} />
+      {error ? (
+        <Alert type="error" showIcon title={error} action={<Button size="small" onClick={() => void load()}>{t('common.retry')}</Button>} />
+      ) : null}
+
+      <form onSubmit={save} className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <Card padding="none" className="gap-0 overflow-clip">
+          <CardContent className="flex flex-col gap-5 p-6">
             <FormField label={t('site.productName')} required>
               <Input
                 required
@@ -95,84 +104,67 @@ export default function SiteSettingsTab() {
                 onChange={(event: ChangeEvent<HTMLInputElement>) => update('product_name', event.target.value)}
               />
             </FormField>
-          </PanelBody>
+            <FormField label={t('site.logoUrl')}>
+              <Input
+                type="text"
+                placeholder={t('site.logoUrlPlaceholder')}
+                value={settings.logo_url}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => update('logo_url', event.target.value)}
+              />
+            </FormField>
+            <FormField label={t('site.faviconUrl')}>
+              <Input
+                type="text"
+                placeholder={t('site.faviconUrlPlaceholder')}
+                value={settings.favicon_url}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => update('favicon_url', event.target.value)}
+              />
+            </FormField>
+            <FormField label={t('site.loginTitle')}>
+              <Input
+                maxLength={160}
+                placeholder={settings.product_name || 'GOSSO'}
+                value={settings.login_title}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => update('login_title', event.target.value)}
+              />
+            </FormField>
+            <FormField label={t('site.loginDescription')}>
+              <Textarea
+                rows={3}
+                maxLength={500}
+                placeholder={t('login.subtitle')}
+                value={settings.login_description}
+                onChange={(event: ChangeEvent<HTMLTextAreaElement>) => update('login_description', event.target.value)}
+              />
+            </FormField>
+            <FormField label={`${t('site.loginBackgroundUrl')} / Base64`} hint="PNG · JPEG · GIF · WebP · Base64 ≤ 8 MiB">
+              <Textarea
+                rows={5}
+                maxLength={MAX_LOGIN_BACKGROUND_SOURCE_LENGTH}
+                spellCheck={false}
+                placeholder={`${t('site.loginBackgroundUrlPlaceholder')} · https://… / data:image/png;base64,…`}
+                value={settings.login_background_url}
+                onChange={(event: ChangeEvent<HTMLTextAreaElement>) => update('login_background_url', event.target.value)}
+              />
+            </FormField>
+          </CardContent>
+          <CardFooter className="sticky bottom-0 z-10 justify-between border-t bg-card/95 px-6 py-4 backdrop-blur">
+            <Text size="sm" tone="muted" aria-live="polite">
+              {dirty ? t('site.unsavedChanges') : ''}
+            </Text>
+            <Button type="submit" variant="solid" color="primary" loading={saving} icon={<Save />} disabled={!dirty || saving}>
+              {t('site.save')}
+            </Button>
+          </CardFooter>
+        </Card>
 
-          <PlainSection title={t('site.loginAppearance')}>
-            <div className="flex-col gap-lg">
-              <FormField label={t('site.logoUrl')}>
-                <Input
-                  type="text"
-                  placeholder={t('site.logoUrlPlaceholder')}
-                  value={settings.logo_url}
-                  onChange={(event: ChangeEvent<HTMLInputElement>) => update('logo_url', event.target.value)}
-                />
-              </FormField>
-              <FormField label={t('site.faviconUrl')}>
-                <Input
-                  type="text"
-                  placeholder={t('site.faviconUrlPlaceholder')}
-                  value={settings.favicon_url}
-                  onChange={(event: ChangeEvent<HTMLInputElement>) => update('favicon_url', event.target.value)}
-                />
-              </FormField>
-              <FormField label={t('site.loginTitle')}>
-                <Input
-                  maxLength={160}
-                  placeholder={settings.product_name || 'GOSSO'}
-                  value={settings.login_title}
-                  onChange={(event: ChangeEvent<HTMLInputElement>) => update('login_title', event.target.value)}
-                />
-              </FormField>
-              <FormField label={t('site.loginDescription')}>
-                <Textarea
-                  rows={3}
-                  maxLength={500}
-                  placeholder={t('login.subtitle')}
-                  value={settings.login_description}
-                  onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
-                    update('login_description', event.target.value)
-                  }
-                />
-              </FormField>
-              <FormField
-                label={`${t('site.loginBackgroundUrl')} / Base64`}
-                hint="PNG · JPEG · GIF · WebP · Base64 ≤ 8 MiB"
-              >
-                <Textarea
-                  rows={5}
-                  maxLength={MAX_LOGIN_BACKGROUND_SOURCE_LENGTH}
-                  spellCheck={false}
-                  placeholder={`${t('site.loginBackgroundUrlPlaceholder')} · https://… / data:image/png;base64,…`}
-                  value={settings.login_background_url}
-                  onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
-                    update('login_background_url', event.target.value)
-                  }
-                />
-              </FormField>
-            </div>
-          </PlainSection>
-
-          <PlainSection title={t('site.preview')}>
+        <div className="xl:sticky xl:top-20 xl:self-start">
+          <Card padding="base" className="overflow-hidden">
+            <Text size="sm" className="mb-4 font-medium">{t('site.preview')}</Text>
             <LoginPreview branding={settings} />
-          </PlainSection>
-
-          <PanelBody className={`form-action-bar${dirty ? ' is-sticky' : ''}`}>
-            <p className="form-action-bar__status m-0" aria-live="polite">
-              {dirty && (
-                <>
-                  <span className="status-dot status-dot--warning" aria-hidden="true" />
-                  {t('site.unsavedChanges')}
-                </>
-              )}
-            </p>
-            <ButtonGroup align="right">
-              <Button variant="primary" type="submit" loading={saving} icon={<Save size={16} />}>
-                {t('site.save')}
-              </Button>
-            </ButtonGroup>
-          </PanelBody>
-        </form>
-      </>
-    </AsyncState>
+          </Card>
+        </div>
+      </form>
+    </div>
   );
 }
