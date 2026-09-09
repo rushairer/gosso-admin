@@ -1,50 +1,24 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Shield as ShieldIcon, RefreshCw } from 'lucide-react';
-import { Badge, Button, DefinitionList, DefinitionRow, Feedback, PanelHeader, PlainSection, Skeleton } from '@gouno/ui';
+import { Database, RefreshCw, Server, ShieldCheck } from 'lucide-react';
+import { Alert, Button, Card, Heading, Spinner, Tag, Text } from '@gouno/ui/core';
 import { useSystemStatus } from '../../features/system/useSystemStatus';
 import { dependencyLabel, dependencyIsHealthy, formatHealthTimestamp } from '../../utils/format';
+import { ManagementPanelLead } from './shared';
 
-function SystemStatusSkeleton() {
+function DefinitionCard({ title, rows }: { title: ReactNode; rows: Array<[ReactNode, ReactNode]> }) {
   return (
-    <div className="panel-stack" aria-busy="true" aria-label="Loading system status">
-      <div className="flex-row items-center justify-between mb-lg">
-        <div>
-          <Skeleton height={28} width={200} className="mb-xs" />
-          <Skeleton height={16} width={320} />
-        </div>
-        <Skeleton height={36} width={100} />
-      </div>
-      <div className="metric-strip">
-        <div className="metric-item">
-          <Skeleton height={14} width={80} className="mb-xs" />
-          <Skeleton height={20} width={120} />
-        </div>
-        <div className="metric-item">
-          <Skeleton height={14} width={80} className="mb-xs" />
-          <Skeleton height={20} width={60} />
-        </div>
-        <div className="metric-item">
-          <Skeleton height={14} width={80} className="mb-xs" />
-          <Skeleton height={20} width={100} />
-        </div>
-      </div>
-      <div className="inline-status-list mt-md">
-        <div className="inline-status-row">
-          <Skeleton variant="rectangular" width={34} height={34} />
-          <div className="flex-1">
-            <Skeleton height={14} width={140} className="mb-xs" />
-            <Skeleton height={18} width={80} />
+    <Card padding="base">
+      <Heading level={2} className="mb-4 text-base">{title}</Heading>
+      <dl className="divide-y">
+        {rows.map(([label, value], index) => (
+          <div key={index} className="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-[190px_minmax(0,1fr)] sm:gap-5">
+            <dt className="text-sm text-muted-foreground">{label}</dt>
+            <dd className="m-0 min-w-0 break-all text-sm">{value}</dd>
           </div>
-        </div>
-        <div className="inline-status-row">
-          <Skeleton variant="rectangular" width={34} height={34} />
-          <div className="flex-1">
-            <Skeleton height={14} width={140} className="mb-xs" />
-            <Skeleton height={18} width={80} />
-          </div>
-        </div>
-      </div>
-    </div>
+        ))}
+      </dl>
+    </Card>
   );
 }
 
@@ -58,169 +32,132 @@ export default function SystemStatusTab() {
     !dependencyIsHealthy(systemHealth?.checks?.redis);
 
   if (loading && !systemHealth) {
-    return <SystemStatusSkeleton />;
+    return (
+      <div className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground" role="status">
+        <Spinner aria-label={t('system.description')} />
+        <span>{t('system.description')}</span>
+      </div>
+    );
   }
 
+  const oidcRows: Array<[ReactNode, ReactNode]> = oidcConfig
+    ? [
+        [t('system.issuerLabel'), <code className="font-mono text-xs">{oidcConfig.issuer}</code>],
+        [t('system.authorizationEndpoint'), <code className="font-mono text-xs">{oidcConfig.authorization_endpoint}</code>],
+        [t('system.tokenEndpoint'), <code className="font-mono text-xs">{oidcConfig.token_endpoint}</code>],
+        [t('system.userinfoEndpoint'), <code className="font-mono text-xs">{oidcConfig.userinfo_endpoint}</code>],
+        [
+          t('system.jwksUri'),
+          <a href={oidcConfig.jwks_uri} target="_blank" rel="noopener noreferrer" className="font-mono text-xs text-primary hover:underline">
+            {oidcConfig.jwks_uri}
+          </a>,
+        ],
+      ]
+    : [];
+
+  const policyRows: Array<[ReactNode, ReactNode]> = securityPolicy
+    ? [
+        [t('system.sessionTtl'), securityPolicy.session_ttl],
+        [t('system.maxSessions'), securityPolicy.max_sessions],
+        [t('system.tokenExpiry'), `${securityPolicy.access_token_expiry} / ${securityPolicy.refresh_token_expiry}`],
+        [t('system.loginRateLimit'), `${securityPolicy.login_max_attempts} / ${securityPolicy.login_rate_limit_window}`],
+        [t('system.mfaRateLimit'), `${securityPolicy.mfa_account_max_attempts} / ${securityPolicy.mfa_account_rate_limit_window}`],
+      ]
+    : [];
+
   return (
-    <div>
-      <PanelHeader
-        title={t('system.title')}
+    <div className="flex flex-col gap-5">
+      <ManagementPanelLead
         description={t('system.description')}
-        action={
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => void refresh()}
-            loading={loading}
-            icon={<RefreshCw size={16} />}
-            title={t('system.refreshButton')}
-          >
+        actions={
+          <Button icon={<RefreshCw />} onClick={() => void refresh()} loading={loading} title={t('system.refreshButton')}>
             {t('system.refreshButton')}
           </Button>
         }
       />
 
-      <PlainSection title={t('system.infrastructureHealthSection')}>
-        <div className="metric-strip">
-          <div className="metric-item">
-            <div className="field-label">{t('system.checkedAtLabel')}</div>
-            <div className="field-value">
-              {formatHealthTimestamp(systemHealth?.checked_at || systemHealth?.fetched_at)}
-            </div>
+      {systemHealth?.fetch_error ? (
+        <Alert
+          type="error"
+          showIcon
+          title={systemHealth.fetch_error}
+          action={<Button size="small" onClick={() => void refresh()} loading={loading}>{t('common.retry', { defaultValue: 'Retry' })}</Button>}
+        />
+      ) : null}
+      {hasHealthIssue ? <Alert type="error" showIcon title={t('system.healthTroubleshootingHint')} /> : null}
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card padding="base">
+          <Text size="xs" tone="muted">{t('system.checkedAtLabel')}</Text>
+          <div className="mt-2 text-lg font-semibold">{formatHealthTimestamp(systemHealth?.checked_at || systemHealth?.fetched_at)}</div>
+        </Card>
+        <Card padding="base">
+          <Text size="xs" tone="muted">{t('system.httpStatusLabel')}</Text>
+          <div className="mt-2 text-lg font-semibold">{systemHealth?.http_status || t('common.notAvailable')}</div>
+        </Card>
+        <Card padding="base">
+          <Text size="xs" tone="muted">{t('system.probeDurationLabel')}</Text>
+          <div className="mt-2 text-lg font-semibold">
+            {typeof systemHealth?.duration_ms === 'number' ? `${systemHealth.duration_ms} ms` : t('common.notAvailable')}
           </div>
-          <div className="metric-item">
-            <div className="field-label">{t('system.httpStatusLabel')}</div>
-            <div className="field-value">{systemHealth?.http_status || t('common.notAvailable')}</div>
-          </div>
-          <div className="metric-item">
-            <div className="field-label">{t('system.probeDurationLabel')}</div>
-            <div className="field-value">
-              {typeof systemHealth?.duration_ms === 'number'
-                ? `${systemHealth.duration_ms} ms`
-                : t('common.notAvailable')}
+        </Card>
+      </div>
+
+      <Card padding="base">
+        <Heading level={2} className="mb-4 text-base">{t('system.infrastructureHealthSection')}</Heading>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="flex items-center gap-3 rounded-lg border p-4">
+            <span className={`flex size-10 items-center justify-center rounded-lg ${dependencyIsHealthy(systemHealth?.checks?.database) ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-destructive'}`}>
+              <Database aria-hidden="true" className="size-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="font-medium">{t('system.databaseConnection')}</div>
             </div>
+            <Tag color={dependencyIsHealthy(systemHealth?.checks?.database) ? 'success' : 'error'}>
+              {dependencyLabel(systemHealth?.checks?.database)}
+            </Tag>
+          </div>
+          <div className="flex items-center gap-3 rounded-lg border p-4">
+            <span className={`flex size-10 items-center justify-center rounded-lg ${dependencyIsHealthy(systemHealth?.checks?.redis) ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-destructive'}`}>
+              <Server aria-hidden="true" className="size-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="font-medium">{t('system.redisCacheAndLock')}</div>
+            </div>
+            <Tag color={dependencyIsHealthy(systemHealth?.checks?.redis) ? 'success' : 'error'}>
+              {dependencyLabel(systemHealth?.checks?.redis)}
+            </Tag>
           </div>
         </div>
+      </Card>
 
-        {systemHealth?.fetch_error && (
-          <div className="mb-md flex-row items-center justify-between gap-md">
-            <Feedback type="error">{systemHealth.fetch_error}</Feedback>
-            <Button variant="secondary" size="sm" onClick={() => void refresh()} loading={loading}>
-              {t('common.retry', { defaultValue: 'Retry' })}
-            </Button>
-          </div>
-        )}
-
-        {hasHealthIssue && (
-          <div className="mb-md">
-            <Feedback type="error">{t('system.healthTroubleshootingHint')}</Feedback>
-          </div>
-        )}
-
-        <div className="inline-status-list mt-md">
-          {/* Database Health */}
-          <div className="inline-status-row">
-            <div
-              className={`inline-icon ${systemHealth?.checks?.database === 'ok' ? 'inline-icon--success' : 'inline-icon--danger'}`}
-            >
-              <ShieldIcon size={20} />
+      {oidcConfig ? (
+        <>
+          <DefinitionCard title={t('system.oidcProfileSection')} rows={oidcRows} />
+          <Card padding="base">
+            <div className="mb-4 flex items-center gap-2">
+              <ShieldCheck aria-hidden="true" className="size-5 text-primary" />
+              <Heading level={2} className="text-base">{t('system.oidcProfileSection')}</Heading>
             </div>
-            <div>
-              <div className="inline-status-title">{t('system.databaseConnection')}</div>
-              <div
-                className={`inline-status-value ${dependencyIsHealthy(systemHealth?.checks?.database) ? 'inline-status-value--success' : 'inline-status-value--danger'}`}
-              >
-                {dependencyLabel(systemHealth?.checks?.database)}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <Text size="xs" tone="muted" className="mb-2">{t('system.supportedScopes')}</Text>
+                <div className="flex flex-wrap gap-2">
+                  {oidcConfig.scopes_supported?.map((scope: string) => <Tag key={scope} color={scope === 'admin' ? 'warning' : 'primary'}>{scope}</Tag>)}
+                </div>
+              </div>
+              <div>
+                <Text size="xs" tone="muted" className="mb-2">{t('system.grantTypesSupported')}</Text>
+                <div className="flex flex-wrap gap-2">
+                  {oidcConfig.grant_types_supported?.map((grant: string) => <Tag key={grant}>{grant}</Tag>)}
+                </div>
               </div>
             </div>
-          </div>
+          </Card>
+        </>
+      ) : null}
 
-          {/* Redis Health */}
-          <div className="inline-status-row">
-            <div
-              className={`inline-icon ${systemHealth?.checks?.redis === 'ok' ? 'inline-icon--success' : 'inline-icon--danger'}`}
-            >
-              <RefreshCw size={20} />
-            </div>
-            <div>
-              <div className="inline-status-title">{t('system.redisCacheAndLock')}</div>
-              <div
-                className={`inline-status-value ${dependencyIsHealthy(systemHealth?.checks?.redis) ? 'inline-status-value--success' : 'inline-status-value--danger'}`}
-              >
-                {dependencyLabel(systemHealth?.checks?.redis)}
-              </div>
-            </div>
-          </div>
-        </div>
-      </PlainSection>
-
-      {/* OIDC configuration info card */}
-      {oidcConfig && (
-        <PlainSection title={t('system.oidcProfileSection')}>
-          <DefinitionList>
-            <DefinitionRow label={t('system.issuerLabel')} mono>
-              {oidcConfig.issuer}
-            </DefinitionRow>
-
-            <DefinitionRow label={t('system.authorizationEndpoint')} mono>
-              {oidcConfig.authorization_endpoint}
-            </DefinitionRow>
-
-            <DefinitionRow label={t('system.tokenEndpoint')} mono>
-              {oidcConfig.token_endpoint}
-            </DefinitionRow>
-
-            <DefinitionRow label={t('system.userinfoEndpoint')} mono>
-              {oidcConfig.userinfo_endpoint}
-            </DefinitionRow>
-
-            <DefinitionRow label={t('system.jwksUri')} mono>
-              <a href={oidcConfig.jwks_uri} target="_blank" rel="noopener noreferrer" className="system-link">
-                {oidcConfig.jwks_uri}
-              </a>
-            </DefinitionRow>
-
-            <DefinitionRow label={t('system.supportedScopes')}>
-              <div className="flex-row flex-wrap gap-xs">
-                {oidcConfig.scopes_supported?.map((scope: string) => (
-                  <Badge key={scope} tone="neutral">
-                    {scope}
-                  </Badge>
-                ))}
-              </div>
-            </DefinitionRow>
-
-            <DefinitionRow label={t('system.grantTypesSupported')}>
-              <div className="flex-row flex-wrap gap-xs">
-                {oidcConfig.grant_types_supported?.map((gt: string) => (
-                  <Badge key={gt} tone="neutral">
-                    {gt}
-                  </Badge>
-                ))}
-              </div>
-            </DefinitionRow>
-          </DefinitionList>
-        </PlainSection>
-      )}
-
-      {securityPolicy && (
-        <PlainSection title={t('system.securityPolicy')}>
-          <p className="text-muted mb-md">{t('system.securityPolicyDescription')}</p>
-          <DefinitionList>
-            <DefinitionRow label={t('system.sessionTtl')}>{securityPolicy.session_ttl}</DefinitionRow>
-            <DefinitionRow label={t('system.maxSessions')}>{securityPolicy.max_sessions}</DefinitionRow>
-            <DefinitionRow label={t('system.tokenExpiry')}>
-              {securityPolicy.access_token_expiry} / {securityPolicy.refresh_token_expiry}
-            </DefinitionRow>
-            <DefinitionRow label={t('system.loginRateLimit')}>
-              {securityPolicy.login_max_attempts} / {securityPolicy.login_rate_limit_window}
-            </DefinitionRow>
-            <DefinitionRow label={t('system.mfaRateLimit')}>
-              {securityPolicy.mfa_account_max_attempts} / {securityPolicy.mfa_account_rate_limit_window}
-            </DefinitionRow>
-          </DefinitionList>
-        </PlainSection>
-      )}
+      {securityPolicy ? <DefinitionCard title={t('system.securityPolicy')} rows={policyRows} /> : null}
     </div>
   );
 }
