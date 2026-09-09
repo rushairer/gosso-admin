@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import {
   Plus as PlusIcon,
   Trash2 as TrashIcon,
-  Key as KeyIcon,
+  KeyRound as KeyIcon,
   User as UserIcon,
-  Shield as ShieldIcon,
+  UserRoundCog as RoleIcon,
   Lock as LockIcon,
   Unlock as UnlockIcon,
   CheckSquare as ConsentIcon,
@@ -367,7 +367,7 @@ export default function UsersTab() {
                         <IconButton
                           label={t('users.manageRoles')}
                           variant="ghost"
-                          icon={<ShieldIcon />}
+                          icon={<RoleIcon />}
                           onClick={() => handleOpenRoleModal(account)}
                         />
                         <IconButton
