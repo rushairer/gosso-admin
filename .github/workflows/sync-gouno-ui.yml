@@ -5,6 +5,7 @@ on:
     branches: [main, ui/gouno-production-alignment-20260909]
     paths:
       - .github/workflows/sync-gouno-ui.yml
+      - gosso-admin-frontend/src/**
   workflow_dispatch:
     inputs:
       ref:
