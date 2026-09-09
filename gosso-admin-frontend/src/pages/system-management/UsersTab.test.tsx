@@ -158,7 +158,7 @@ describe('UsersTab pagination', () => {
       expect(screen.getByRole('button', { name: /next|下一步/i })).toBeDisabled();
     });
     expect(screen.getByText('Operator 1')).toBeInTheDocument();
-    expect(screen.getByRole('table').parentElement).toHaveAttribute('aria-busy', 'true');
+    expect(screen.getByRole('table').closest('[aria-busy="true"]')).not.toBeNull();
 
     resolvePageTwo?.(accountResponse(2));
     expect(await screen.findByText('Operator 2')).toBeInTheDocument();
