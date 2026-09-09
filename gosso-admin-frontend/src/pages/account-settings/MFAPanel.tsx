@@ -1,29 +1,27 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { QRCodeSVG } from 'qrcode.react';
 import { Shield, QrCode, Clipboard, AlertTriangle, RefreshCw, Unlock, Check, Copy } from 'lucide-react';
 import { useMfa } from '@gosso/client/react';
 import {
+  Alert,
   Button,
-  ButtonGroup,
-  Feedback,
   FormField,
+  Heading,
   IconButton,
   Input,
   Modal,
-  PageLoader,
-  Panel,
-  PanelBody,
-  PanelHeader,
-  StatusBadge,
-  useConfirm,
-  useToast,
-} from '@gouno/ui';
+  QRCode,
+  Spinner,
+  Tag,
+  Text,
+  useMessage,
+} from '@gouno/ui/core';
 import { useSudo } from '../../components/auth/SudoContext';
+import { Section, StatusMessage } from './shared';
 
 export default function MFAPanel() {
   const { t } = useTranslation();
-  const { showSuccess } = useToast();
+  const message = useMessage();
   const { requireSudo } = useSudo();
   const {
     status: mfaStatus,
@@ -39,9 +37,9 @@ export default function MFAPanel() {
   } = useMfa();
   const [totpCode, setTotpCode] = useState('');
   const [showDisableModal, setShowDisableModal] = useState(false);
+  const [showRegenerateModal, setShowRegenerateModal] = useState(false);
   const [confirmPasswordForMFA, setConfirmPasswordForMFA] = useState('');
   const [success, setSuccess] = useState<string | null>(null);
-  const { confirm, confirmDialog } = useConfirm();
 
   const handleEnrollMFA = async () => {
     setSuccess(null);
@@ -50,8 +48,8 @@ export default function MFAPanel() {
     } catch {}
   };
 
-  const handleActivateMFA = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleActivateMFA = async (event: React.FormEvent) => {
+    event.preventDefault();
     setSuccess(null);
     try {
       await activate(totpCode);
@@ -60,8 +58,8 @@ export default function MFAPanel() {
     } catch {}
   };
 
-  const handleDisableMFA = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleDisableMFA = async (event: React.FormEvent) => {
+    event.preventDefault();
     setSuccess(null);
     try {
       await disable(confirmPasswordForMFA);
@@ -71,15 +69,9 @@ export default function MFAPanel() {
     } catch {}
   };
 
-  const handleGenerateBackupCodes = async () => {
+  const handleRegenerateBackupCodes = async () => {
+    setShowRegenerateModal(false);
     setSuccess(null);
-    const confirmed = await confirm({
-      title: t('mfa.regenerateConfirmTitle'),
-      message: t('mfa.regenerateConfirmMessage'),
-      confirmLabel: t('common.continue'),
-      confirmVariant: 'primary',
-    });
-    if (!confirmed) return;
     await requireSudo({
       actionTitle: t('mfa.regenerateConfirmTitle'),
       onSuccess: async () => {
@@ -92,190 +84,171 @@ export default function MFAPanel() {
   };
 
   if (loading && !mfaStatus.enabled && !mfaEnrollment) {
-    return <PageLoader message={t('mfa.loadingMfa')} />;
+    return (
+      <div className="flex min-h-40 items-center justify-center gap-3 text-sm text-muted-foreground" role="status">
+        <Spinner aria-label={t('mfa.loadingMfa')} />
+        <span>{t('mfa.loadingMfa')}</span>
+      </div>
+    );
   }
 
   return (
     <>
-      <Panel>
-        <PanelHeader
-          title={t('mfa.title')}
-          description={t('mfa.description')}
-          action={
-            mfaStatus.enabled ? (
-              <StatusBadge tone="success">{t('mfa.statusActive')}</StatusBadge>
-            ) : (
-              <StatusBadge tone="neutral">{t('mfa.statusDisabled')}</StatusBadge>
-            )
-          }
-        />
-        <PanelBody stack>
-          {error && (
-            <div className="mb-sm">
-              <Feedback type="error">{error}</Feedback>
-            </div>
-          )}
-          {success && (
-            <div className="mb-sm">
-              <Feedback type="success">{success}</Feedback>
-            </div>
-          )}
+      <Section
+        description={t('mfa.description')}
+        actions={mfaStatus.enabled ? <Tag color="success">{t('mfa.statusActive')}</Tag> : <Tag>{t('mfa.statusDisabled')}</Tag>}
+      >
+        <div className="flex flex-col gap-5">
+          {error ? <StatusMessage type="error" message={error} /> : null}
+          {success ? <StatusMessage message={success} /> : null}
 
-          {/* Not enrolled */}
-          {!mfaStatus.enabled && !mfaEnrollment && (
-            <div className="flex-col items-start gap-lg">
-              <p className="text-muted text-sm">{t('mfa.mfaNotEnrolledDescription')}</p>
-              <Button variant="primary" icon={<QrCode size={16} />} onClick={handleEnrollMFA}>
+          {!mfaStatus.enabled && !mfaEnrollment ? (
+            <div className="flex flex-col items-start gap-4 py-2">
+              <Text tone="muted" size="sm" className="max-w-2xl leading-relaxed">
+                {t('mfa.mfaNotEnrolledDescription')}
+              </Text>
+              <Button variant="solid" color="primary" icon={<QrCode />} onClick={() => void handleEnrollMFA()}>
                 {t('mfa.setupAuthenticatorButton')}
               </Button>
             </div>
-          )}
+          ) : null}
 
-          {/* Enrollment in progress */}
-          {mfaEnrollment && (
-            <div>
-              <h4 className="setup-title">{t('mfa.setupTitle')}</h4>
-
-              <div className="flex-row flex-wrap gap-2xl items-center">
-                <div className="mfa-qr-card">
-                  <QRCodeSVG
-                    value={mfaEnrollment.otpauth_url}
-                    size={180}
-                    marginSize={1}
-                    fgColor="#000000"
-                    bgColor="#ffffff"
-                    title={t('mfa.qrCodeAlt')}
-                  />
+          {mfaEnrollment ? (
+            <div className="flex flex-col gap-6">
+              <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-center">
+                <div className="mx-auto rounded-lg border bg-white p-4">
+                  <QRCode value={mfaEnrollment.otpauth_url} size={180} ariaLabel={t('mfa.qrCodeAlt')} />
                 </div>
-
-                <div className="flex-1 flex-col gap-md">
-                  <p className="text-muted text-sm">{t('mfa.scanQrStep1')}</p>
-                  <p className="text-muted text-sm">{t('mfa.manualEntryStep2')}</p>
-                  <div className="flex-row items-center gap-sm mfa-secret-box">
-                    <code className="mfa-secret-code">{mfaEnrollment.secret}</code>
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <Heading level={2} className="text-base">
+                      {t('mfa.setupTitle')}
+                    </Heading>
+                    <Text size="sm" tone="muted" className="mt-1 leading-relaxed">
+                      {t('mfa.scanQrStep1')} {t('mfa.manualEntryStep2')}
+                    </Text>
+                  </div>
+                  <div className="flex max-w-lg items-center justify-between gap-3 rounded-md border bg-muted/30 p-3">
+                    <code className="min-w-0 truncate font-mono text-xs">{mfaEnrollment.secret}</code>
                     <IconButton
                       label={t('mfa.copySecret')}
-                      icon={<Copy size={14} />}
-                      variant="ghost"
-                      size="sm"
+                      icon={<Copy />}
                       onClick={() => {
-                        navigator.clipboard.writeText(mfaEnrollment.secret);
-                        showSuccess(t('mfa.secretKeyCopied'));
+                        void navigator.clipboard.writeText(mfaEnrollment.secret);
+                        message.success(t('mfa.secretKeyCopied'));
                       }}
                     />
                   </div>
                 </div>
               </div>
 
-              <form onSubmit={handleActivateMFA} className="flex-col gap-md mfa-activation-form">
-                <FormField label={t('mfa.verificationCodeLabel')} noMargin>
+              <form onSubmit={handleActivateMFA} className="flex max-w-xl flex-col gap-4 border-t pt-5">
+                <FormField label={t('mfa.verificationCodeLabel')} required hint={t('mfa.verificationCodePlaceholder')}>
                   <Input
                     type="text"
+                    inputMode="numeric"
                     maxLength={8}
                     required
                     value={totpCode}
-                    onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ''))}
+                    onChange={(event) => setTotpCode(event.target.value.replace(/\D/g, ''))}
                     placeholder={t('mfa.verificationCodePlaceholder')}
-                    className="mfa-code-input"
                   />
                 </FormField>
-
-                <ButtonGroup align="right">
-                  <Button variant="primary" type="submit" disabled={loading} icon={<Check size={16} />}>
-                    {t('mfa.verifyAndActivateButton')}
-                  </Button>
-                  <Button variant="secondary" type="button" onClick={cancelEnroll}>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <Button type="button" onClick={() => void cancelEnroll()}>
                     {t('common.cancel')}
                   </Button>
-                </ButtonGroup>
+                  <Button variant="solid" color="primary" type="submit" disabled={loading} icon={<Check />}>
+                    {t('mfa.verifyAndActivateButton')}
+                  </Button>
+                </div>
               </form>
             </div>
-          )}
+          ) : null}
 
-          {/* MFA Active */}
-          {mfaStatus.enabled && (
-            <div className="flex-col gap-lg">
-              <div className="inline-status-row">
-                <div className="inline-icon inline-icon--success">
-                  <Shield size={20} />
-                </div>
-                <div>
-                  <div className="inline-status-title">{t('mfa.accountProtected')}</div>
-                  <div className="inline-status-value inline-status-value--success">{t('mfa.totpRegistered')}</div>
-                </div>
-              </div>
-
-              <div className="flex-row flex-wrap items-center gap-md">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  icon={<RefreshCw size={14} />}
-                  onClick={handleGenerateBackupCodes}
-                >
+          {mfaStatus.enabled ? (
+            <div className="flex flex-col gap-5">
+              <Alert
+                type="success"
+                showIcon
+                title={t('mfa.accountProtected')}
+                description={t('mfa.totpRegistered')}
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button size="small" icon={<RefreshCw />} onClick={() => setShowRegenerateModal(true)}>
                   {t('mfa.regenerateBackupCodes')}
                 </Button>
                 <Button
-                  variant="danger"
-                  size="sm"
-                  icon={<Unlock size={14} />}
+                  size="small"
+                  variant="solid"
+                  color="error"
+                  icon={<Unlock />}
                   onClick={() => setShowDisableModal(true)}
                 >
                   {t('mfa.disableTwoFactorAuth')}
                 </Button>
               </div>
             </div>
-          )}
+          ) : null}
 
-          {/* Backup Codes */}
-          {backupCodes.length > 0 && (
-            <div className="flex-col gap-md mt-lg pt-lg border-t border-[var(--border-default)]">
-              <div className="flex-row items-center gap-xs text-warning">
-                <AlertTriangle size={16} />
-                <h4 className="font-bold text-base m-0">{t('mfa.recoveryBackupCodesTitle')}</h4>
+          {backupCodes.length > 0 && mfaStatus.enabled ? (
+            <section className="flex flex-col gap-4 border-t pt-5" aria-labelledby="backup-codes-heading">
+              <div className="flex items-center gap-2 text-warning">
+                <AlertTriangle aria-hidden="true" className="size-4" />
+                <Heading id="backup-codes-heading" level={2} className="text-base">
+                  {t('mfa.recoveryBackupCodesTitle')}
+                </Heading>
               </div>
-
-              <p className="text-sm text-muted m-0">{t('mfa.recoveryBackupCodesDescription')}</p>
-
-              <div className="mfa-backup-codes-grid">
-                {backupCodes.map((code, idx) => (
-                  <code key={idx} className="mfa-backup-code">
+              <Text size="sm" tone="muted">
+                {t('mfa.recoveryBackupCodesDescription')}
+              </Text>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {backupCodes.map((code) => (
+                  <code key={code} className="rounded-md border bg-muted/30 px-3 py-2 text-center font-mono text-sm">
                     {code}
                   </code>
                 ))}
               </div>
-
               <div>
                 <Button
-                  variant="secondary"
-                  size="sm"
-                  icon={<Clipboard size={13} />}
+                  size="small"
+                  icon={<Clipboard />}
                   onClick={() => {
-                    navigator.clipboard.writeText(backupCodes.join('\n'));
-                    showSuccess(t('mfa.backupCodesCopied'));
+                    void navigator.clipboard.writeText(backupCodes.join('\n'));
+                    message.success(t('mfa.backupCodesCopied'));
                   }}
                 >
                   {t('mfa.copyCodesButton')}
                 </Button>
               </div>
-            </div>
-          )}
-        </PanelBody>
-      </Panel>
+            </section>
+          ) : null}
+        </div>
+      </Section>
 
-      {/* Disable MFA Modal */}
       <Modal
-        isOpen={showDisableModal}
+        open={showRegenerateModal}
+        title={t('mfa.regenerateConfirmTitle')}
+        description={t('mfa.regenerateConfirmMessage')}
+        onOpenChange={setShowRegenerateModal}
+        onOk={() => void handleRegenerateBackupCodes()}
+        okText={t('common.continue')}
+        cancelText={t('common.cancel')}
+        okButtonProps={{ variant: 'solid', color: 'primary' }}
+      />
+
+      <Modal
+        open={showDisableModal}
         title={t('mfa.disableModalTitle')}
         description={t('mfa.disableModalDescription')}
         maxWidth="400px"
-        onClose={() => {
-          setShowDisableModal(false);
-          setConfirmPasswordForMFA('');
+        onOpenChange={(next) => {
+          setShowDisableModal(next);
+          if (!next) setConfirmPasswordForMFA('');
         }}
         footer={
           <>
             <Button
-              variant="secondary"
               type="button"
               onClick={() => {
                 setShowDisableModal(false);
@@ -287,7 +260,8 @@ export default function MFAPanel() {
             </Button>
             <Button
               form="disable-mfa-form"
-              variant="danger"
+              variant="solid"
+              color="error"
               type="submit"
               loading={loading}
               disabled={!confirmPasswordForMFA}
@@ -297,20 +271,18 @@ export default function MFAPanel() {
           </>
         }
       >
-        <form id="disable-mfa-form" onSubmit={handleDisableMFA} className="flex-col gap-md">
-          <FormField label={t('mfa.accountPasswordLabel')} noMargin>
+        <form id="disable-mfa-form" onSubmit={handleDisableMFA} className="flex flex-col gap-4">
+          <FormField label={t('mfa.accountPasswordLabel')} required>
             <Input
               type="password"
               required
               value={confirmPasswordForMFA}
-              onChange={(e) => setConfirmPasswordForMFA(e.target.value)}
+              onChange={(event) => setConfirmPasswordForMFA(event.target.value)}
               placeholder={t('mfa.accountPasswordPlaceholder')}
             />
           </FormField>
         </form>
       </Modal>
-
-      {confirmDialog}
     </>
   );
 }
