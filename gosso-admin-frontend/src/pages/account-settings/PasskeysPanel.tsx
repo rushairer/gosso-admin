@@ -2,24 +2,15 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Key, Calendar, Trash2, Plus } from 'lucide-react';
 import { usePasskeys } from '@gosso/client/react';
-import {
-  Button,
-  EmptyState,
-  Feedback,
-  FormField,
-  IconButton,
-  Input,
-  ListRow,
-  ListStack,
-  Modal,
-  PageLoader,
-  Panel,
-  PanelBody,
-  PanelHeader,
-  useConfirm,
-} from '@gouno/ui';
+import { Alert, Button, Empty, FormField, IconButton, Input, Modal, Spinner, Text } from '@gouno/ui/core';
 import { useSudo } from '../../components/auth/SudoContext';
 import { logger } from '../../utils/logger';
+import { Section, StatusMessage } from './shared';
+
+interface PendingRemoval {
+  id: string;
+  name: string;
+}
 
 export default function PasskeysPanel() {
   const { t } = useTranslation();
@@ -29,21 +20,19 @@ export default function PasskeysPanel() {
   const [success, setSuccess] = useState<string | null>(null);
   const [showPasskeyModal, setShowPasskeyModal] = useState(false);
   const [newPasskeyName, setNewPasskeyName] = useState('');
-  const { confirm, confirmDialog } = useConfirm();
+  const [pendingRemoval, setPendingRemoval] = useState<PendingRemoval | null>(null);
 
   const handleOpenAddPasskey = async () => {
     setValidationError(null);
     setSuccess(null);
     await requireSudo({
       actionTitle: t('passkeys.addPasskey'),
-      onSuccess: () => {
-        setShowPasskeyModal(true);
-      },
+      onSuccess: () => setShowPasskeyModal(true),
     });
   };
 
-  const handleRegisterPasskey = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRegisterPasskey = async (event: React.FormEvent) => {
+    event.preventDefault();
     setValidationError(null);
     setSuccess(null);
     const trimmedName = newPasskeyName.trim();
@@ -64,9 +53,7 @@ export default function PasskeysPanel() {
           clearSudo();
           await requireSudo({
             actionTitle: t('passkeys.addPasskey'),
-            onSuccess: async () => {
-              await doRegister();
-            },
+            onSuccess: doRegister,
           });
           return;
         }
@@ -80,15 +67,12 @@ export default function PasskeysPanel() {
     });
   };
 
-  const handleDeletePasskey = async (id: string, name: string) => {
+  const handleDeletePasskey = async () => {
+    if (!pendingRemoval) return;
+    const { id } = pendingRemoval;
+    setPendingRemoval(null);
     setValidationError(null);
     setSuccess(null);
-    const confirmed = await confirm({
-      title: t('passkeys.removePasskey'),
-      message: t('passkeys.removePasskeyConfirmMessage', { name }),
-      confirmLabel: t('common.remove'),
-    });
-    if (!confirmed) return;
 
     await requireSudo({
       actionTitle: t('passkeys.removePasskey'),
@@ -103,101 +87,93 @@ export default function PasskeysPanel() {
     });
   };
 
-  if (loading) {
-    return <PageLoader message={t('passkeys.loadingPasskeys')} />;
-  }
-
   return (
     <>
-      <Panel>
-        <PanelHeader
-          title={t('passkeys.title')}
-          description={t('passkeys.description')}
-          action={
-            <Button variant="primary" icon={<Plus size={16} />} onClick={() => void handleOpenAddPasskey()}>
-              {t('passkeys.addPasskey')}
-            </Button>
-          }
-        />
-
-        {(validationError || error) && (
-          <div className="panel-feedback-wrapper">
-            <Feedback type="error">
-              {validationError ||
+      <Section
+        description={t('passkeys.description')}
+        surface="direct"
+        actions={
+          <Button variant="solid" color="primary" icon={<Plus />} onClick={() => void handleOpenAddPasskey()}>
+            {t('passkeys.addPasskey')}
+          </Button>
+        }
+      >
+        <div className="flex flex-col gap-4">
+          {validationError || error ? (
+            <Alert
+              type="error"
+              showIcon
+              title={
+                validationError ||
                 (error === 'credential not found'
                   ? t('passkeys.credentialNotFound')
                   : error === 'credential does not belong to account'
                     ? t('passkeys.credentialOwnershipMismatch')
-                    : error)}
-            </Feedback>
-          </div>
-        )}
-        {success && (
-          <div className="panel-feedback-wrapper">
-            <Feedback type="success">{success}</Feedback>
-          </div>
-        )}
+                    : error)
+              }
+            />
+          ) : null}
+          {success ? <StatusMessage message={success} /> : null}
 
-        {loading ? (
-          <PanelBody>
-            <div className="py-xl">
-              <PageLoader message={t('common.loading')} />
+          {loading ? (
+            <div className="flex min-h-40 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground" role="status">
+              <Spinner aria-label={t('passkeys.loadingPasskeys')} />
+              <span>{t('passkeys.loadingPasskeys')}</span>
             </div>
-          </PanelBody>
-        ) : passkeys.length === 0 ? (
-          <PanelBody>
-            <EmptyState
-              icon={<Key />}
+          ) : passkeys.length === 0 ? (
+            <Empty
+              icon={<Key aria-hidden="true" className="size-6 text-muted-foreground" />}
               title={t('passkeys.noPasskeysTitle')}
               description={t('passkeys.noPasskeysDescription')}
+              action={<Button icon={<Plus />} onClick={() => void handleOpenAddPasskey()}>{t('passkeys.addPasskey')}</Button>}
             />
-          </PanelBody>
-        ) : (
-          <PanelBody>
-            <ListStack>
+          ) : (
+            <ul className="divide-y overflow-hidden rounded-lg border border-border/80 bg-card" aria-label={t('passkeys.title')}>
               {passkeys.map((passkey) => (
-                <ListRow
-                  key={passkey.id}
-                  icon={<Key size={16} />}
-                  title={passkey.name}
-                  meta={
-                    <>
-                      <Calendar size={12} />
-                      {passkey.created_at
-                        ? new Date(passkey.created_at).toLocaleString()
-                        : t('passkeys.registeredDevice')}
-                    </>
-                  }
-                  action={
-                    <IconButton
-                      variant="danger"
-                      size="sm"
-                      icon={<Trash2 size={14} />}
-                      label={t('passkeys.removePasskey')}
-                      onClick={() => handleDeletePasskey(passkey.id, passkey.name)}
-                    />
-                  }
-                />
+                <li key={passkey.id} className="flex flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                      <Key aria-hidden="true" className="size-4" />
+                    </span>
+                    <div className="min-w-0">
+                      <Text as="div" className="truncate font-semibold">{passkey.name}</Text>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                        <span>{t('passkeys.registeredDevice')}</span>
+                        {passkey.created_at ? (
+                          <span className="flex items-center gap-1">
+                            <Calendar aria-hidden="true" className="size-3" />
+                            {new Date(passkey.created_at).toLocaleString()}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                  <IconButton
+                    variant="ghost"
+                    color="error"
+                    icon={<Trash2 />}
+                    label={t('passkeys.removePasskey')}
+                    onClick={() => setPendingRemoval({ id: passkey.id, name: passkey.name })}
+                  />
+                </li>
               ))}
-            </ListStack>
-          </PanelBody>
-        )}
-      </Panel>
+            </ul>
+          )}
+        </div>
+      </Section>
 
-      {/* Register Passkey Modal */}
       <Modal
-        isOpen={showPasskeyModal}
+        open={showPasskeyModal}
         title={t('passkeys.registerModalTitle')}
         description={t('passkeys.registerModalDescription')}
         maxWidth="400px"
-        onClose={() => {
-          setShowPasskeyModal(false);
-          setNewPasskeyName('');
+        onOpenChange={(next) => {
+          setShowPasskeyModal(next);
+          if (!next) setNewPasskeyName('');
         }}
         footer={
           <>
             <Button
-              variant="secondary"
               type="button"
               onClick={() => {
                 setShowPasskeyModal(false);
@@ -209,7 +185,8 @@ export default function PasskeysPanel() {
             </Button>
             <Button
               form="register-passkey-form"
-              variant="primary"
+              variant="solid"
+              color="primary"
               type="submit"
               loading={loading}
               disabled={!newPasskeyName.trim()}
@@ -219,20 +196,31 @@ export default function PasskeysPanel() {
           </>
         }
       >
-        <form id="register-passkey-form" onSubmit={handleRegisterPasskey} className="flex-col gap-md">
-          <FormField label={t('passkeys.passkeyNameLabel')} noMargin>
+        <form id="register-passkey-form" onSubmit={handleRegisterPasskey} className="flex flex-col gap-4">
+          <FormField label={t('passkeys.passkeyNameLabel')} required>
             <Input
               type="text"
               required
               value={newPasskeyName}
-              onChange={(e) => setNewPasskeyName(e.target.value)}
+              onChange={(event) => setNewPasskeyName(event.target.value)}
               placeholder={t('passkeys.passkeyNamePlaceholder')}
             />
           </FormField>
         </form>
       </Modal>
 
-      {confirmDialog}
+      <Modal
+        open={Boolean(pendingRemoval)}
+        title={t('passkeys.removePasskey')}
+        description={pendingRemoval ? t('passkeys.removePasskeyConfirmMessage', { name: pendingRemoval.name }) : undefined}
+        onOpenChange={(next) => {
+          if (!next) setPendingRemoval(null);
+        }}
+        onOk={() => void handleDeletePasskey()}
+        okText={t('common.remove')}
+        cancelText={t('common.cancel')}
+        okButtonProps={{ variant: 'solid', color: 'error' }}
+      />
     </>
   );
 }
