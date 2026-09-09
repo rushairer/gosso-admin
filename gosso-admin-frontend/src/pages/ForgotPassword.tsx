@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Mail } from 'lucide-react';
-import { Button, Card, Feedback, FormField, Input } from '@gouno/ui';
+import { Alert, Button, Card, FormField, Input } from '@gouno/ui/core';
 import { gossoClient } from '../auth';
 import { logger } from '../utils/logger';
 
@@ -13,14 +14,12 @@ export default function ForgotPassword() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!email.trim()) return;
-
     setLoading(true);
     setError(null);
     setSuccess(false);
-
     try {
       await gossoClient.requestPasswordReset(email.trim());
       setSuccess(true);
@@ -33,30 +32,25 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="login-surface flex-row items-center justify-center">
-      <Card className="login-card">
-        <div className="text-center mb-md">
-          <h1 className="login-card__title">{t('passwordReset.forgotTitle')}</h1>
-          <p className="text-muted login-card__description">{t('passwordReset.forgotDescription')}</p>
+    <div className="flex min-h-screen items-center justify-center bg-canvas p-4 md:p-8">
+      <Card variant="elevated" padding="base" className="w-full max-w-md">
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-bold tracking-tight">{t('passwordReset.forgotTitle')}</h1>
+          <p className="mb-0 mt-2 text-sm leading-relaxed text-muted-foreground">
+            {t('passwordReset.forgotDescription')}
+          </p>
         </div>
 
-        {error && (
-          <div className="mb-md">
-            <Feedback type="error">{error}</Feedback>
-          </div>
-        )}
+        {error ? <Alert type="error" showIcon title={error} className="mb-5" /> : null}
+        {success ? (
+          <Alert type="success" showIcon title={t('passwordReset.requestSuccess')} className="mb-5" />
+        ) : null}
 
-        {success && (
-          <div className="mb-md">
-            <Feedback type="success">{t('passwordReset.requestSuccess')}</Feedback>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <FormField label={t('passwordReset.emailLabel')} hint={t('passwordReset.emailHint')}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <FormField label={t('passwordReset.emailLabel')} hint={t('passwordReset.emailHint')} required>
             <Input
               type="email"
-              prefixIcon={<Mail size={16} />}
+              prefix={<Mail />}
               aria-label={t('passwordReset.emailLabel')}
               placeholder={t('passwordReset.emailPlaceholder')}
               value={email}
@@ -66,11 +60,11 @@ export default function ForgotPassword() {
               autoFocus
             />
           </FormField>
-
           <Button
             type="submit"
-            variant="primary"
-            className="login-card__action"
+            variant="solid"
+            color="primary"
+            className="w-full"
             loading={loading}
             disabled={!email.trim()}
           >
@@ -78,8 +72,8 @@ export default function ForgotPassword() {
           </Button>
         </form>
 
-        <div className="text-center mt-md">
-          <Link to="/login" className="btn-link">
+        <div className="mt-5 text-center">
+          <Link to="/login" className="text-sm font-medium text-primary hover:underline">
             {t('passwordReset.backToLogin')}
           </Link>
         </div>
