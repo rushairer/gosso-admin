@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Edit2 as EditIcon, X as XIcon, Check, Copy } from 'lucide-react';
+import { Check, Copy, Edit2 as EditIcon, Mail, X as XIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProfileManager, useUserProfile } from '@gosso/client/react';
 import { Button, IconButton, Input, Tag } from '@gouno/ui/core';
@@ -96,8 +96,11 @@ export default function ProfilePanel() {
 
           <SettingRow label={t('profile.emailLabel')}>
             <div className="flex max-w-xl items-center justify-between gap-4">
-              <span className={profile?.email ? 'min-w-0 truncate font-medium' : 'text-muted-foreground'}>
-                {profile?.email || t('profile.notConfigured')}
+              <span className="flex min-w-0 items-center gap-2">
+                <Mail aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+                <span className={profile?.email ? 'truncate font-medium' : 'truncate text-muted-foreground'}>
+                  {profile?.email || t('profile.notConfigured')}
+                </span>
               </span>
               <Button size="small" icon={<EditIcon />} onClick={handleStartEditEmail}>
                 {t('common.edit')}
