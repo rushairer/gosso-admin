@@ -1,53 +1,34 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, Info, Key, Laptop, LogOut, Settings, Shield, ShieldCheck, User, UserCheck } from 'lucide-react';
+import { ArrowRight, Key, Laptop, LogOut, Settings, Shield, ShieldCheck, User, UserCheck } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { useSession } from '@gosso/client/react';
 import { logout } from '../auth';
-import { Badge, Button, Card } from '@gouno/ui';
-
-const iconTileTones = {
-  primary: 'home-nav-card__icon-tile--primary',
-  neutral: 'home-nav-card__icon-tile--neutral',
-} as const;
+import { Alert, Button, Card, Heading, Tag, Text } from '@gouno/ui/core';
 
 interface QuickLink {
   to: string;
-  icon: ComponentType<{ size?: number }>;
-  tone: keyof typeof iconTileTones;
+  icon: ComponentType<{ className?: string }>;
   title: string;
   description: string;
 }
 
-function QuickCard({ link, onOpen }: { link: QuickLink; onOpen: () => void }) {
-  const { icon: Icon, tone, title, description } = link;
-
+function QuickCard({ link }: { link: QuickLink }) {
+  const { icon: Icon, title, description } = link;
   return (
-    <Card
-      interactive
-      className="home-nav-card flex items-center gap-4"
-      role="button"
-      onClick={onOpen}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          onOpen();
-        }
-      }}
+    <Link
+      to={link.to}
+      className="group flex min-h-32 w-full items-center gap-4 rounded-lg border bg-card px-6 py-5 text-left text-card-foreground shadow-surface transition-[border-color,background-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/40 hover:bg-accent/20 hover:shadow-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      <div className={`home-nav-card__icon-tile ${iconTileTones[tone]}`}>
-        <Icon size={20} />
-      </div>
-
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <h3 className="home-nav-card__title m-0 text-base font-semibold">{title}</h3>
-        <p className="text-muted m-0 text-xs leading-relaxed">{description}</p>
-      </div>
-
-      <span className="home-nav-card__arrow" aria-hidden="true">
-        <ArrowRight size={16} />
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary" aria-hidden="true">
+        <Icon className="size-5" />
       </span>
-    </Card>
+      <span className="min-w-0 flex-1">
+        <span className="block text-base font-semibold">{title}</span>
+        <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{description}</span>
+      </span>
+      <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+    </Link>
   );
 }
 
@@ -55,28 +36,24 @@ export default function Home() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAdmin: userAdmin, profile: user } = useSession();
-
   const userName = user?.preferred_username || user?.name || (userAdmin ? 'Administrator' : 'User');
 
   const adminQuickLinks: QuickLink[] = [
     {
       to: '/system-management/clients',
       icon: Key,
-      tone: 'primary',
       title: t('home.clientRegistry'),
       description: t('home.clientRegistryDescription'),
     },
     {
       to: '/system-management/users',
       icon: UserCheck,
-      tone: 'neutral',
       title: t('home.userControl'),
       description: t('home.userControlDescription'),
     },
     {
       to: '/system-management/system',
       icon: Settings,
-      tone: 'primary',
       title: t('home.mfaAndPasskeys'),
       description: t('home.mfaAndPasskeysDescription'),
     },
@@ -86,21 +63,18 @@ export default function Home() {
     {
       to: '/account-settings/profile',
       icon: User,
-      tone: 'primary',
       title: t('home.userProfile'),
       description: t('home.userProfileDescription'),
     },
     {
       to: '/account-settings/mfa',
       icon: Shield,
-      tone: 'neutral',
       title: t('home.userSecurity'),
       description: t('home.userSecurityDescription'),
     },
     {
       to: '/account-settings/sessions',
       icon: Laptop,
-      tone: 'primary',
       title: t('home.userSessions'),
       description: t('home.userSessionsDescription'),
     },
@@ -110,70 +84,62 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
-      <Card className="home-hero" padding="lg">
-        <div className="home-hero__glow" aria-hidden="true" />
-
+      <Card padding="base" variant="elevated" className="relative overflow-hidden border-primary/20">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-28 size-72 rounded-full bg-primary/10 blur-3xl" />
         <div className="relative flex flex-col items-start gap-6">
           <div className="flex flex-wrap items-center gap-4 sm:gap-5">
-            <div className="home-hero__icon shrink-0">
-              {userAdmin ? (
-                <ShieldCheck size={28} color="var(--action-primary)" />
-              ) : (
-                <UserCheck size={28} color="var(--action-primary)" />
-              )}
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-accent text-primary ring-1 ring-primary/15">
+              {userAdmin ? <ShieldCheck className="size-7" aria-hidden="true" /> : <UserCheck className="size-7" aria-hidden="true" />}
             </div>
-
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-              <h2 className="home-hero-title m-0 text-2xl font-bold tracking-tight sm:text-3xl">
+            <div className="flex min-w-0 flex-wrap items-center gap-3 sm:gap-4">
+              <Heading level={1} className="text-2xl sm:text-3xl">
                 {userAdmin ? t('home.title') : t('home.userTitle')}
-              </h2>
-              <Badge tone="success">
+              </Heading>
+              <Tag color="success">
                 {userAdmin
                   ? t('home.loggedInAsAdmin', { name: userName })
                   : t('home.loggedInAsUser', { name: userName })}
-              </Badge>
+              </Tag>
             </div>
           </div>
 
-          <p className="home-hero-desc m-0 max-w-3xl text-sm leading-relaxed text-[var(--color-text-muted)] sm:text-base">
+          <Text tone="muted" className="max-w-3xl leading-relaxed">
             {userAdmin ? t('home.description') : t('home.userDescription')}
-          </p>
+          </Text>
 
-          <div className="pt-2">
-            <Button
-              variant="primary"
-              size="default"
-              icon={<ArrowRight size={16} />}
-              iconPosition="right"
-              onClick={() => navigate(userAdmin ? '/system-management' : '/account-settings/profile')}
-            >
-              {userAdmin ? t('home.enterDashboard') : t('home.goToAccountSettings')}
-            </Button>
-          </div>
+          <Button
+            variant="solid"
+            color="primary"
+            icon={<ArrowRight />}
+            iconPlacement="end"
+            onClick={() => navigate(userAdmin ? '/system-management/clients' : '/account-settings/profile')}
+          >
+            {userAdmin ? t('home.enterDashboard') : t('home.goToAccountSettings')}
+          </Button>
         </div>
       </Card>
 
-      {!userAdmin && (
-        <Card className="home-admin-notice flex flex-row flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-1 items-center gap-3">
-            <Info size={20} color="var(--action-primary)" className="shrink-0" />
-            <p className="text-muted m-0 text-sm">{t('home.adminNotice')}</p>
-          </div>
-          <Button variant="secondary" size="sm" icon={<LogOut size={14} />} onClick={() => logout('/')}>
-            {t('home.switchAccount')}
-          </Button>
-        </Card>
-      )}
+      {!userAdmin ? (
+        <Alert
+          type="info"
+          showIcon
+          title={t('home.adminNotice')}
+          action={
+            <Button size="small" icon={<LogOut />} onClick={() => void logout('/')}>
+              {t('home.switchAccount')}
+            </Button>
+          }
+        />
+      ) : null}
 
-      <div className="flex flex-col gap-6">
-        <div className="home-section-label">{t('home.quickNavigation')}</div>
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {quickLinks.map((link) => (
-            <QuickCard key={link.to} link={link} onOpen={() => navigate(link.to)} />
-          ))}
+      <section aria-labelledby="home-quick-navigation" className="flex flex-col gap-5">
+        <Heading id="home-quick-navigation" level={2} className="text-sm font-semibold text-muted-foreground">
+          {t('home.quickNavigation')}
+        </Heading>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          {quickLinks.map((link) => <QuickCard key={link.to} link={link} />)}
         </div>
-      </div>
+      </section>
     </div>
   );
 }
