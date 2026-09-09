@@ -80,6 +80,14 @@ jobs:
         working-directory: gosso-admin-frontend
         run: |
           rm -rf node_modules
+          node --input-type=module <<'EOF'
+          import { readFile, writeFile } from 'node:fs/promises';
+          const lock = JSON.parse(await readFile('./package-lock.json', 'utf8'));
+          if (lock.packages) {
+            delete lock.packages['node_modules/@gouno/ui'];
+          }
+          await writeFile('./package-lock.json', `${JSON.stringify(lock, null, 2)}\n`);
+          EOF
           npm install --package-lock-only --ignore-scripts --legacy-peer-deps
           npm ci --legacy-peer-deps
           npm run quality
