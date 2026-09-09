@@ -147,7 +147,9 @@ export default function SiteSettingsTab() {
                   maxLength={500}
                   placeholder={t('login.subtitle')}
                   value={settings.login_description}
-                  onChange={(event: ChangeEvent<HTMLTextAreaElement>) => update('login_description', event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
+                    update('login_description', event.target.value)
+                  }
                 />
               </FormField>
               <FormField
@@ -160,7 +162,9 @@ export default function SiteSettingsTab() {
                   spellCheck={false}
                   placeholder={`${t('site.loginBackgroundUrlPlaceholder')} · https://… / data:image/png;base64,…`}
                   value={settings.login_background_url}
-                  onChange={(event: ChangeEvent<HTMLTextAreaElement>) => update('login_background_url', event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
+                    update('login_background_url', event.target.value)
+                  }
                 />
               </FormField>
             </CardContent>

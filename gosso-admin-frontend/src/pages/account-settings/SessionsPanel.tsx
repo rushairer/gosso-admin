@@ -45,7 +45,10 @@ export default function SessionsPanel() {
           {error ? <Alert type="error" showIcon title={error} /> : null}
 
           {loading ? (
-            <div className="flex min-h-40 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground" role="status">
+            <div
+              className="flex min-h-40 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground"
+              role="status"
+            >
               <Spinner aria-label={t('common.loading')} />
               <span>{t('common.loading')}</span>
             </div>

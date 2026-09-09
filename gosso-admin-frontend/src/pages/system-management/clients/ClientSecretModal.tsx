@@ -40,12 +40,7 @@ export const ClientSecretModal: React.FC<ClientSecretModalProps> = ({
       }
     >
       <div className="flex flex-col gap-4">
-        <Alert
-          type="warning"
-          showIcon
-          icon={<InfoIcon />}
-          title={t('clients.secretWarning')}
-        />
+        <Alert type="warning" showIcon icon={<InfoIcon />} title={t('clients.secretWarning')} />
         <FormField label={t('clients.clientIdLabel')}>
           <code className="block rounded-md bg-muted p-3 text-xs">{details.client_id}</code>
         </FormField>

@@ -20,14 +20,20 @@ function QuickCard({ link }: { link: QuickLink }) {
       to={link.to}
       className="group flex min-h-32 w-full items-center gap-4 rounded-lg border bg-card px-6 py-5 text-left text-card-foreground shadow-surface transition-[border-color,background-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/40 hover:bg-accent/20 hover:shadow-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary" aria-hidden="true">
+      <span
+        className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary"
+        aria-hidden="true"
+      >
         <Icon className="size-5" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-base font-semibold">{title}</span>
         <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{description}</span>
       </span>
-      <ArrowRight aria-hidden="true" className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+      <ArrowRight
+        aria-hidden="true"
+        className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+      />
     </Link>
   );
 }
@@ -85,11 +91,18 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-6 lg:gap-8">
       <Card padding="base" variant="elevated" className="relative overflow-hidden border-primary/20">
-        <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-28 size-72 rounded-full bg-primary/10 blur-3xl" />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-24 -top-28 size-72 rounded-full bg-primary/10 blur-3xl"
+        />
         <div className="relative flex flex-col items-start gap-6">
           <div className="flex flex-wrap items-center gap-4 sm:gap-5">
             <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-accent text-primary ring-1 ring-primary/15">
-              {userAdmin ? <ShieldCheck className="size-7" aria-hidden="true" /> : <UserCheck className="size-7" aria-hidden="true" />}
+              {userAdmin ? (
+                <ShieldCheck className="size-7" aria-hidden="true" />
+              ) : (
+                <UserCheck className="size-7" aria-hidden="true" />
+              )}
             </div>
             <div className="flex min-w-0 flex-wrap items-center gap-3 sm:gap-4">
               <Heading level={1} className="text-2xl sm:text-3xl">
@@ -137,7 +150,9 @@ export default function Home() {
           {t('home.quickNavigation')}
         </Heading>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-          {quickLinks.map((link) => <QuickCard key={link.to} link={link} />)}
+          {quickLinks.map((link) => (
+            <QuickCard key={link.to} link={link} />
+          ))}
         </div>
       </section>
     </div>

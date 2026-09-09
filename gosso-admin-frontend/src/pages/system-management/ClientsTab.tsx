@@ -42,10 +42,7 @@ import { ManagementPanelLead } from './shared';
 
 const clientScopeOptions = ['openid', 'profile', 'email', 'admin'];
 
-type PendingAction =
-  | { type: 'delete'; client: OAuth2Client }
-  | { type: 'rotate'; client: OAuth2Client }
-  | null;
+type PendingAction = { type: 'delete'; client: OAuth2Client } | { type: 'rotate'; client: OAuth2Client } | null;
 
 function isAdminScope(scope: string) {
   return scope === 'admin' || scope.startsWith('admin:');
@@ -196,12 +193,19 @@ export default function ClientsTab() {
           type="error"
           showIcon
           title={error}
-          action={<Button size="small" onClick={() => void fetchClients()}>{t('common.retry')}</Button>}
+          action={
+            <Button size="small" onClick={() => void fetchClients()}>
+              {t('common.retry')}
+            </Button>
+          }
         />
       ) : null}
 
       {loading ? (
-        <div className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground" role="status">
+        <div
+          className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground"
+          role="status"
+        >
           <Spinner aria-label={t('clients.loadingClients')} />
           <span>{t('clients.loadingClients')}</span>
         </div>
@@ -210,7 +214,11 @@ export default function ClientsTab() {
           icon={<KeyIcon aria-hidden="true" className="size-6 text-muted-foreground" />}
           title={t('clients.noClientsTitle')}
           description={t('clients.noClientsDescription')}
-          action={<Button icon={<PlusIcon />} onClick={() => handleOpenClientModal(null)}>{t('clients.registerClient')}</Button>}
+          action={
+            <Button icon={<PlusIcon />} onClick={() => handleOpenClientModal(null)}>
+              {t('clients.registerClient')}
+            </Button>
+          }
         />
       ) : (
         <Table bordered>
@@ -232,7 +240,11 @@ export default function ClientsTab() {
                   <code className="mt-1 block max-w-64 truncate text-xs text-muted-foreground" title={client.client_id}>
                     {client.client_id}
                   </code>
-                  {client.description ? <Text size="xs" tone="muted" className="mt-1">{client.description}</Text> : null}
+                  {client.description ? (
+                    <Text size="xs" tone="muted" className="mt-1">
+                      {client.description}
+                    </Text>
+                  ) : null}
                 </TableCell>
                 <TableCell>
                   <Tag color={client.is_confidential ? 'warning' : 'success'}>
@@ -244,14 +256,20 @@ export default function ClientsTab() {
                     {client.redirect_uris.map((uri) => (
                       <div key={uri} className="flex items-center gap-2 rounded-md bg-muted/60 px-2 py-1.5" title={uri}>
                         <code className="min-w-0 flex-1 truncate text-xs">{uri}</code>
-                        <IconButton label={t('common.copy', { defaultValue: '复制' })} icon={<CopyIcon />} onClick={() => void handleCopyUri(uri)} />
+                        <IconButton
+                          label={t('common.copy', { defaultValue: '复制' })}
+                          icon={<CopyIcon />}
+                          onClick={() => void handleCopyUri(uri)}
+                        />
                       </div>
                     ))}
                   </div>
                 </TableCell>
                 <TableCell className="min-w-48 whitespace-normal">
                   <div className="flex flex-wrap gap-1.5">
-                    {client.grant_types.map((grant) => <Tag key={grant}>{grant.replace('_', ' ')}</Tag>)}
+                    {client.grant_types.map((grant) => (
+                      <Tag key={grant}>{grant.replace('_', ' ')}</Tag>
+                    ))}
                   </div>
                 </TableCell>
                 <TableCell className="min-w-40 whitespace-normal">
@@ -265,11 +283,27 @@ export default function ClientsTab() {
                 </TableCell>
                 <TableCell>
                   <div className="flex min-w-max flex-nowrap items-center justify-end gap-1">
-                    <IconButton label={t('clients.editClient')} variant="ghost" icon={<EditIcon />} onClick={() => handleOpenClientModal(client)} />
+                    <IconButton
+                      label={t('clients.editClient')}
+                      variant="ghost"
+                      icon={<EditIcon />}
+                      onClick={() => handleOpenClientModal(client)}
+                    />
                     {client.is_confidential ? (
-                      <IconButton label={t('clients.rotateSecret')} variant="ghost" icon={<RotateCcw />} onClick={() => setPendingAction({ type: 'rotate', client })} />
+                      <IconButton
+                        label={t('clients.rotateSecret')}
+                        variant="ghost"
+                        icon={<RotateCcw />}
+                        onClick={() => setPendingAction({ type: 'rotate', client })}
+                      />
                     ) : null}
-                    <IconButton label={t('clients.deleteClient')} variant="ghost" color="error" icon={<TrashIcon />} onClick={() => setPendingAction({ type: 'delete', client })} />
+                    <IconButton
+                      label={t('clients.deleteClient')}
+                      variant="ghost"
+                      color="error"
+                      icon={<TrashIcon />}
+                      onClick={() => setPendingAction({ type: 'delete', client })}
+                    />
                   </div>
                 </TableCell>
               </TableRow>
@@ -304,7 +338,9 @@ export default function ClientsTab() {
       <Modal
         open={Boolean(pendingAction)}
         title={pendingAction?.type === 'rotate' ? t('clients.rotateSecretTitle') : t('clients.deleteConfirmTitle')}
-        description={pendingAction?.type === 'rotate' ? t('clients.rotateSecretMessage') : t('clients.deleteConfirmMessage')}
+        description={
+          pendingAction?.type === 'rotate' ? t('clients.rotateSecretMessage') : t('clients.deleteConfirmMessage')
+        }
         onOpenChange={(next) => {
           if (!next) setPendingAction(null);
         }}

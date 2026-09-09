@@ -96,7 +96,9 @@ export default function MFAPanel() {
     <>
       <Section
         description={t('mfa.description')}
-        actions={mfaStatus.enabled ? <Tag color="success">{t('mfa.statusActive')}</Tag> : <Tag>{t('mfa.statusDisabled')}</Tag>}
+        actions={
+          mfaStatus.enabled ? <Tag color="success">{t('mfa.statusActive')}</Tag> : <Tag>{t('mfa.statusDisabled')}</Tag>
+        }
       >
         <div className="flex flex-col gap-5">
           {error ? <StatusMessage type="error" message={error} /> : null}
@@ -168,12 +170,7 @@ export default function MFAPanel() {
 
           {mfaStatus.enabled ? (
             <div className="flex flex-col gap-5">
-              <Alert
-                type="success"
-                showIcon
-                title={t('mfa.accountProtected')}
-                description={t('mfa.totpRegistered')}
-              />
+              <Alert type="success" showIcon title={t('mfa.accountProtected')} description={t('mfa.totpRegistered')} />
               <div className="flex flex-wrap gap-2">
                 <Button size="small" icon={<RefreshCw />} onClick={() => setShowRegenerateModal(true)}>
                   {t('mfa.regenerateBackupCodes')}

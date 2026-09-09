@@ -47,16 +47,23 @@ export function UserConsentsModal({
       ) : (
         <ul className="divide-y overflow-hidden rounded-lg border border-border/80 bg-card">
           {consents.map((consent) => (
-            <li key={consent.client_id} className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <li
+              key={consent.client_id}
+              className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+            >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
                     <ConsentIcon aria-hidden="true" className="size-4" />
                   </span>
-                  <Text as="div" className="min-w-0 truncate font-semibold">Client ID: {consent.client_id}</Text>
+                  <Text as="div" className="min-w-0 truncate font-semibold">
+                    Client ID: {consent.client_id}
+                  </Text>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1.5">
-                  {consent.scopes?.map((scope: string) => <Tag key={scope}>{scope}</Tag>)}
+                  {consent.scopes?.map((scope: string) => (
+                    <Tag key={scope}>{scope}</Tag>
+                  ))}
                 </div>
                 <Text size="xs" tone="muted" className="mt-2">
                   {t('users.authorizedAt')} {consent.granted_at ? new Date(consent.granted_at).toLocaleString() : '-'}

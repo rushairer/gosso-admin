@@ -63,7 +63,9 @@ export function AssignRolesModal({
                     <ShieldIcon aria-hidden="true" className="size-4" />
                   </span>
                   <div className="min-w-0">
-                    <Text as="div" className="font-semibold">{role.name}</Text>
+                    <Text as="div" className="font-semibold">
+                      {role.name}
+                    </Text>
                     {role.description ? (
                       <Text size="xs" tone="muted">
                         {role.description}

@@ -82,11 +82,23 @@ export default function AuditLogsTab() {
       </Card>
 
       {error ? (
-        <Alert type="error" showIcon title={error} action={<Button size="small" onClick={search}>{t('common.retry')}</Button>} />
+        <Alert
+          type="error"
+          showIcon
+          title={error}
+          action={
+            <Button size="small" onClick={search}>
+              {t('common.retry')}
+            </Button>
+          }
+        />
       ) : null}
 
       {auditLoading ? (
-        <div className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground" role="status">
+        <div
+          className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground"
+          role="status"
+        >
           <Spinner aria-label={t('audit.loadingLogs', { defaultValue: 'Loading audit logs' })} />
           <span>{t('audit.loadingLogs', { defaultValue: 'Loading audit logs' })}</span>
         </div>
@@ -95,7 +107,11 @@ export default function AuditLogsTab() {
           icon={<AuditIcon aria-hidden="true" className="size-6 text-muted-foreground" />}
           title={t('audit.noLogsTitle')}
           description={t('audit.noLogsDescription')}
-          action={<Button size="small" icon={<X />} onClick={clearFilters}>{t('common.clear')}</Button>}
+          action={
+            <Button size="small" icon={<X />} onClick={clearFilters}>
+              {t('common.clear')}
+            </Button>
+          }
         />
       ) : (
         <>
@@ -115,11 +131,15 @@ export default function AuditLogsTab() {
                   <TableCell className="whitespace-nowrap font-mono text-xs text-muted-foreground">
                     {log.created_at ? new Date(log.created_at).toLocaleString() : '-'}
                   </TableCell>
-                  <TableCell><Tag>{log.action}</Tag></TableCell>
+                  <TableCell>
+                    <Tag>{log.action}</Tag>
+                  </TableCell>
                   <TableCell className="font-mono text-xs">{log.actor}</TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">{log.account_id || '-'}</TableCell>
                   <TableCell className="text-right">
-                    <Button size="small" onClick={() => setSelectedAuditLog(log)}>{t('common.view')}</Button>
+                    <Button size="small" onClick={() => setSelectedAuditLog(log)}>
+                      {t('common.view')}
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

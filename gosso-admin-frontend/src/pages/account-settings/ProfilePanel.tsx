@@ -107,13 +107,19 @@ export default function ProfilePanel() {
 
           <SettingRow label={t('profile.securityRoleLabel')}>
             <div className="flex flex-wrap gap-2">
-              {profile?.roles?.length ? profile.roles.map((role) => <Tag key={role}>{role}</Tag>) : <Tag>{t('profile.standardUser')}</Tag>}
+              {profile?.roles?.length ? (
+                profile.roles.map((role) => <Tag key={role}>{role}</Tag>)
+              ) : (
+                <Tag>{t('profile.standardUser')}</Tag>
+              )}
             </div>
           </SettingRow>
 
           <SettingRow label={t('profile.subjectIdLabel')}>
             <div className="flex max-w-xl items-center justify-between gap-4">
-              <code className="min-w-0 truncate rounded bg-muted px-2 py-1 font-mono text-xs">{profile?.sub || '-'}</code>
+              <code className="min-w-0 truncate rounded bg-muted px-2 py-1 font-mono text-xs">
+                {profile?.sub || '-'}
+              </code>
               {profile?.sub ? (
                 <Button
                   size="small"
@@ -131,7 +137,9 @@ export default function ProfilePanel() {
 
           <SettingRow label={t('profile.ssoIssuerLabel')}>
             <div className="flex max-w-xl items-center justify-between gap-4">
-              <code className="min-w-0 truncate rounded bg-muted px-2 py-1 font-mono text-xs">{window.location.origin}</code>
+              <code className="min-w-0 truncate rounded bg-muted px-2 py-1 font-mono text-xs">
+                {window.location.origin}
+              </code>
               <Button
                 size="small"
                 icon={<Copy />}

@@ -132,7 +132,10 @@ export function SudoProvider({ children }: { children: ReactNode }) {
   };
 
   const accountName = session.profile?.preferred_username || session.profile?.name || session.profile?.sub || '';
-  const contextValue = useMemo(() => ({ isSudoActive, requireSudo, clearSudo }), [isSudoActive, requireSudo, clearSudo]);
+  const contextValue = useMemo(
+    () => ({ isSudoActive, requireSudo, clearSudo }),
+    [isSudoActive, requireSudo, clearSudo]
+  );
 
   return (
     <SudoContext.Provider value={contextValue}>
@@ -143,7 +146,11 @@ export function SudoProvider({ children }: { children: ReactNode }) {
           if (!next) handleClose();
         }}
         title={t('login.sudoModeTitle')}
-        footer={<Button onClick={handleClose} disabled={loading || passkeyLoading}>{t('common.cancel')}</Button>}
+        footer={
+          <Button onClick={handleClose} disabled={loading || passkeyLoading}>
+            {t('common.cancel')}
+          </Button>
+        }
       >
         <div className="flex flex-col gap-4">
           <div className="rounded-lg border bg-muted/30 p-4">
@@ -154,7 +161,11 @@ export function SudoProvider({ children }: { children: ReactNode }) {
                   {pendingAction?.actionTitle || t('login.sudoModeTitle')}
                 </strong>
               </div>
-              {accountName ? <Tag className="max-w-40 truncate" title={accountName}>{accountName}</Tag> : null}
+              {accountName ? (
+                <Tag className="max-w-40 truncate" title={accountName}>
+                  {accountName}
+                </Tag>
+              ) : null}
             </div>
             <p className="mb-0 mt-2 text-sm leading-relaxed text-muted-foreground">
               {pendingAction?.description ||
@@ -186,14 +197,25 @@ export function SudoProvider({ children }: { children: ReactNode }) {
                 autoFocus
               />
             </FormField>
-            <Button type="submit" variant="solid" color="primary" className="w-full" loading={loading} disabled={passkeyLoading}>
+            <Button
+              type="submit"
+              variant="solid"
+              color="primary"
+              className="w-full"
+              loading={loading}
+              disabled={passkeyLoading}
+            >
               {loading ? t('login.verifyLoading') : t('login.verifyButton')}
             </Button>
           </form>
 
           <div className="relative flex items-center justify-center py-1">
-            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
-            <div className="relative bg-background px-2 text-xs font-medium uppercase text-muted-foreground">{t('common.or')}</div>
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative bg-background px-2 text-xs font-medium uppercase text-muted-foreground">
+              {t('common.or')}
+            </div>
           </div>
 
           <Button

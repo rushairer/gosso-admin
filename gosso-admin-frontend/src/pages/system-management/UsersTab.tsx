@@ -245,13 +245,23 @@ export default function UsersTab() {
   const actionDescription = pendingAction
     ? pendingAction.type === 'status'
       ? pendingAction.account.status === 'active'
-        ? t('users.disableConfirmMessage', { username: pendingAction.account.display_name || pendingAction.account.username })
-        : t('users.enableConfirmMessage', { username: pendingAction.account.display_name || pendingAction.account.username })
+        ? t('users.disableConfirmMessage', {
+            username: pendingAction.account.display_name || pendingAction.account.username,
+          })
+        : t('users.enableConfirmMessage', {
+            username: pendingAction.account.display_name || pendingAction.account.username,
+          })
       : pendingAction.type === 'unlock'
-        ? t('users.clearLockoutConfirmMessage', { username: pendingAction.account.display_name || pendingAction.account.username })
+        ? t('users.clearLockoutConfirmMessage', {
+            username: pendingAction.account.display_name || pendingAction.account.username,
+          })
         : pendingAction.type === 'reset-mfa'
-          ? t('users.resetMfaConfirmMessage', { username: pendingAction.account.display_name || pendingAction.account.username })
-          : t('users.deleteUserConfirmMessage', { username: pendingAction.account.display_name || pendingAction.account.username })
+          ? t('users.resetMfaConfirmMessage', {
+              username: pendingAction.account.display_name || pendingAction.account.username,
+            })
+          : t('users.deleteUserConfirmMessage', {
+              username: pendingAction.account.display_name || pendingAction.account.username,
+            })
     : '';
 
   return (
@@ -259,18 +269,36 @@ export default function UsersTab() {
       <ManagementPanelLead
         description={t('users.description')}
         actions={
-          <Button variant="solid" color="primary" icon={<PlusIcon />} disabled={loading} onClick={() => setShowCreateUserModal(true)}>
+          <Button
+            variant="solid"
+            color="primary"
+            icon={<PlusIcon />}
+            disabled={loading}
+            onClick={() => setShowCreateUserModal(true)}
+          >
             {t('users.addUser')}
           </Button>
         }
       />
 
       {error ? (
-        <Alert type="error" showIcon title={error} action={<Button size="small" onClick={() => void fetchAccounts()}>{t('common.retry')}</Button>} />
+        <Alert
+          type="error"
+          showIcon
+          title={error}
+          action={
+            <Button size="small" onClick={() => void fetchAccounts()}>
+              {t('common.retry')}
+            </Button>
+          }
+        />
       ) : null}
 
       {loading ? (
-        <div className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground" role="status">
+        <div
+          className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground"
+          role="status"
+        >
           <Spinner aria-label={t('users.loadingAccounts')} />
           <span>{t('users.loadingAccounts')}</span>
         </div>
@@ -279,7 +307,11 @@ export default function UsersTab() {
           icon={<UserIcon aria-hidden="true" className="size-6 text-muted-foreground" />}
           title={t('users.noUsersTitle')}
           description={t('users.noUsersDescription')}
-          action={<Button icon={<PlusIcon />} onClick={() => setShowCreateUserModal(true)}>{t('users.addUser')}</Button>}
+          action={
+            <Button icon={<PlusIcon />} onClick={() => setShowCreateUserModal(true)}>
+              {t('users.addUser')}
+            </Button>
+          }
         />
       ) : (
         <>
@@ -315,19 +347,36 @@ export default function UsersTab() {
                       <div className="flex flex-wrap gap-1.5">
                         {account.roles?.length ? (
                           account.roles.map((role) => (
-                            <Tag key={role.id} color={role.name === 'admin' ? 'warning' : 'default'} title={role.description}>
+                            <Tag
+                              key={role.id}
+                              color={role.name === 'admin' ? 'warning' : 'default'}
+                              title={role.description}
+                            >
                               {role.name}
                             </Tag>
                           ))
                         ) : (
-                          <Text size="sm" tone="muted">{t('users.noRolesAssigned')}</Text>
+                          <Text size="sm" tone="muted">
+                            {t('users.noRolesAssigned')}
+                          </Text>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex min-w-max flex-nowrap items-center justify-end gap-1">
-                        <IconButton label={t('users.manageRoles')} variant="ghost" icon={<ShieldIcon />} onClick={() => handleOpenRoleModal(account)} />
-                        <IconButton label={t('users.changePassword')} variant="ghost" icon={<KeyIcon />} onClick={() => handleOpenPasswordModal(account)} disabled={isSelf} />
+                        <IconButton
+                          label={t('users.manageRoles')}
+                          variant="ghost"
+                          icon={<ShieldIcon />}
+                          onClick={() => handleOpenRoleModal(account)}
+                        />
+                        <IconButton
+                          label={t('users.changePassword')}
+                          variant="ghost"
+                          icon={<KeyIcon />}
+                          onClick={() => handleOpenPasswordModal(account)}
+                          disabled={isSelf}
+                        />
                         <IconButton
                           label={account.status === 'active' ? t('users.suspendUser') : t('users.activateUser')}
                           variant="ghost"
@@ -345,16 +394,26 @@ export default function UsersTab() {
                               <ConsentIcon />
                               {t('users.manageConsents')}
                             </DropdownMenuItem>
-                            <DropdownMenuItem disabled={isSelf} onSelect={() => setPendingAction({ type: 'unlock', account })}>
+                            <DropdownMenuItem
+                              disabled={isSelf}
+                              onSelect={() => setPendingAction({ type: 'unlock', account })}
+                            >
                               <UnlockIcon />
                               {t('users.unlockAccount')}
                             </DropdownMenuItem>
-                            <DropdownMenuItem disabled={isSelf} onSelect={() => setPendingAction({ type: 'reset-mfa', account })}>
+                            <DropdownMenuItem
+                              disabled={isSelf}
+                              onSelect={() => setPendingAction({ type: 'reset-mfa', account })}
+                            >
                               <ResetMfaIcon />
                               {t('users.resetMfaButton')}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem variant="destructive" disabled={isSelf} onSelect={() => setPendingAction({ type: 'delete', account })}>
+                            <DropdownMenuItem
+                              variant="destructive"
+                              disabled={isSelf}
+                              onSelect={() => setPendingAction({ type: 'delete', account })}
+                            >
                               <TrashIcon />
                               {t('users.deleteUser')}
                             </DropdownMenuItem>
@@ -379,7 +438,11 @@ export default function UsersTab() {
         </>
       )}
 
-      <CreateUserModal isOpen={showCreateUserModal} onClose={() => setShowCreateUserModal(false)} onSubmit={handleCreateUser} />
+      <CreateUserModal
+        isOpen={showCreateUserModal}
+        onClose={() => setShowCreateUserModal(false)}
+        onSubmit={handleCreateUser}
+      />
       <AssignRolesModal
         isOpen={showRoleModal}
         onClose={() => setShowRoleModal(false)}

@@ -32,11 +32,27 @@ export default function SystemManagement() {
   }
 
   const tabs = [
-    { key: 'clients' as const, label: t('systemManagement.tabClients'), icon: <KeyIcon aria-hidden="true" size={16} /> },
+    {
+      key: 'clients' as const,
+      label: t('systemManagement.tabClients'),
+      icon: <KeyIcon aria-hidden="true" size={16} />,
+    },
     { key: 'users' as const, label: t('systemManagement.tabUsers'), icon: <UserIcon aria-hidden="true" size={16} /> },
-    { key: 'audit-logs' as const, label: t('systemManagement.tabAuditLogs'), icon: <AuditIcon aria-hidden="true" size={16} /> },
-    { key: 'site-settings' as const, label: t('site.tabLabel'), icon: <SlidersHorizontal aria-hidden="true" size={16} /> },
-    { key: 'system' as const, label: t('systemManagement.tabSystemStatus'), icon: <ShieldIcon aria-hidden="true" size={16} /> },
+    {
+      key: 'audit-logs' as const,
+      label: t('systemManagement.tabAuditLogs'),
+      icon: <AuditIcon aria-hidden="true" size={16} />,
+    },
+    {
+      key: 'site-settings' as const,
+      label: t('site.tabLabel'),
+      icon: <SlidersHorizontal aria-hidden="true" size={16} />,
+    },
+    {
+      key: 'system' as const,
+      label: t('systemManagement.tabSystemStatus'),
+      icon: <ShieldIcon aria-hidden="true" size={16} />,
+    },
   ];
 
   return (

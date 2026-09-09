@@ -136,10 +136,20 @@ export function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUserModalPr
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField id="new-locale" label={t('users.localeLabel')}>
-            <Input id="new-locale" value={form.locale} onChange={(e) => setForm((p) => ({ ...p, locale: e.target.value }))} disabled={submitting || Boolean(success)} />
+            <Input
+              id="new-locale"
+              value={form.locale}
+              onChange={(e) => setForm((p) => ({ ...p, locale: e.target.value }))}
+              disabled={submitting || Boolean(success)}
+            />
           </FormField>
           <FormField id="new-timezone" label={t('users.timezoneLabel')}>
-            <Input id="new-timezone" value={form.timezone} onChange={(e) => setForm((p) => ({ ...p, timezone: e.target.value }))} disabled={submitting || Boolean(success)} />
+            <Input
+              id="new-timezone"
+              value={form.timezone}
+              onChange={(e) => setForm((p) => ({ ...p, timezone: e.target.value }))}
+              disabled={submitting || Boolean(success)}
+            />
           </FormField>
         </div>
       </form>

@@ -42,9 +42,7 @@ export default function ForgotPassword() {
         </div>
 
         {error ? <Alert type="error" showIcon title={error} className="mb-5" /> : null}
-        {success ? (
-          <Alert type="success" showIcon title={t('passwordReset.requestSuccess')} className="mb-5" />
-        ) : null}
+        {success ? <Alert type="success" showIcon title={t('passwordReset.requestSuccess')} className="mb-5" /> : null}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <FormField label={t('passwordReset.emailLabel')} hint={t('passwordReset.emailHint')} required>

@@ -65,9 +65,7 @@ export default function ResetPassword() {
         </div>
 
         {error ? <Alert type="error" showIcon title={error} className="mb-5" /> : null}
-        {success ? (
-          <Alert type="success" showIcon title={t('passwordReset.resetSuccess')} className="mb-5" />
-        ) : null}
+        {success ? <Alert type="success" showIcon title={t('passwordReset.resetSuccess')} className="mb-5" /> : null}
 
         {!success ? (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">

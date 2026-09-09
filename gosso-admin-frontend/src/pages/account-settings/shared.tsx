@@ -18,7 +18,11 @@ export function Section({ description, actions, surface = 'card', children }: Se
     <div className="flex flex-col gap-5">
       {description || actions ? (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          {description ? <p className="m-0 max-w-3xl text-sm leading-6 text-muted-foreground">{description}</p> : <span />}
+          {description ? (
+            <p className="m-0 max-w-3xl text-sm leading-6 text-muted-foreground">{description}</p>
+          ) : (
+            <span />
+          )}
           {actions ? <div className="shrink-0">{actions}</div> : null}
         </div>
       ) : null}

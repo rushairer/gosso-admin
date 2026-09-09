@@ -49,8 +49,12 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-danger-subtle text-destructive">
             <AlertTriangle aria-hidden="true" className="size-6" />
           </div>
-          <Heading level={1} className="text-xl">{i18n.t('errorBoundary.title')}</Heading>
-          <Text tone="muted" className="mt-2">{i18n.t('errorBoundary.description')}</Text>
+          <Heading level={1} className="text-xl">
+            {i18n.t('errorBoundary.title')}
+          </Heading>
+          <Text tone="muted" className="mt-2">
+            {i18n.t('errorBoundary.description')}
+          </Text>
           {import.meta.env.DEV && this.state.error ? (
             <pre className="mt-5 max-h-56 overflow-auto rounded-lg bg-muted p-4 text-left font-mono text-xs">
               {this.state.error.message}

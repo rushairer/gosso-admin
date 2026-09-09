@@ -42,7 +42,9 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({ isOpen
           <>
             <dt className="text-muted-foreground">{t('audit.detailResourceData')}</dt>
             <dd className="m-0 min-w-0">
-              <pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 font-mono text-xs">{JSON.stringify(auditLog.resource, null, 2)}</pre>
+              <pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 font-mono text-xs">
+                {JSON.stringify(auditLog.resource, null, 2)}
+              </pre>
             </dd>
           </>
         ) : null}
@@ -50,7 +52,9 @@ export const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({ isOpen
           <>
             <dt className="text-muted-foreground">{t('audit.detailMetaContext')}</dt>
             <dd className="m-0 min-w-0">
-              <pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 font-mono text-xs">{JSON.stringify(auditLog.meta, null, 2)}</pre>
+              <pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 font-mono text-xs">
+                {JSON.stringify(auditLog.meta, null, 2)}
+              </pre>
             </dd>
           </>
         ) : null}

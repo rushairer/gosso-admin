@@ -116,7 +116,10 @@ export default function PasskeysPanel() {
           {success ? <StatusMessage message={success} /> : null}
 
           {loading ? (
-            <div className="flex min-h-40 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground" role="status">
+            <div
+              className="flex min-h-40 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground"
+              role="status"
+            >
               <Spinner aria-label={t('passkeys.loadingPasskeys')} />
               <span>{t('passkeys.loadingPasskeys')}</span>
             </div>
@@ -125,18 +128,30 @@ export default function PasskeysPanel() {
               icon={<Key aria-hidden="true" className="size-6 text-muted-foreground" />}
               title={t('passkeys.noPasskeysTitle')}
               description={t('passkeys.noPasskeysDescription')}
-              action={<Button icon={<Plus />} onClick={() => void handleOpenAddPasskey()}>{t('passkeys.addPasskey')}</Button>}
+              action={
+                <Button icon={<Plus />} onClick={() => void handleOpenAddPasskey()}>
+                  {t('passkeys.addPasskey')}
+                </Button>
+              }
             />
           ) : (
-            <ul className="divide-y overflow-hidden rounded-lg border border-border/80 bg-card" aria-label={t('passkeys.title')}>
+            <ul
+              className="divide-y overflow-hidden rounded-lg border border-border/80 bg-card"
+              aria-label={t('passkeys.title')}
+            >
               {passkeys.map((passkey) => (
-                <li key={passkey.id} className="flex flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <li
+                  key={passkey.id}
+                  className="flex flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
+                >
                   <div className="flex min-w-0 items-start gap-3">
                     <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                       <Key aria-hidden="true" className="size-4" />
                     </span>
                     <div className="min-w-0">
-                      <Text as="div" className="truncate font-semibold">{passkey.name}</Text>
+                      <Text as="div" className="truncate font-semibold">
+                        {passkey.name}
+                      </Text>
                       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         <span>{t('passkeys.registeredDevice')}</span>
                         {passkey.created_at ? (
@@ -212,7 +227,9 @@ export default function PasskeysPanel() {
       <Modal
         open={Boolean(pendingRemoval)}
         title={t('passkeys.removePasskey')}
-        description={pendingRemoval ? t('passkeys.removePasskeyConfirmMessage', { name: pendingRemoval.name }) : undefined}
+        description={
+          pendingRemoval ? t('passkeys.removePasskeyConfirmMessage', { name: pendingRemoval.name }) : undefined
+        }
         onOpenChange={(next) => {
           if (!next) setPendingRemoval(null);
         }}

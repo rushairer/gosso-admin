@@ -11,6 +11,12 @@ export function ManagementPanelLead({ description, actions }: { description?: Re
   );
 }
 
-export function StatusNotice({ children, type = 'success' }: { children: ReactNode; type?: 'success' | 'error' | 'info' | 'warning' }) {
+export function StatusNotice({
+  children,
+  type = 'success',
+}: {
+  children: ReactNode;
+  type?: 'success' | 'error' | 'info' | 'warning';
+}) {
   return <Alert type={type} showIcon title={children} />;
 }

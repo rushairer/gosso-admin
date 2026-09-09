@@ -106,9 +106,7 @@ export default function LoginSurface({
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
             {branding.login_title || branding.product_name || t('login.title')}
           </h1>
-          <p className="mb-0 mt-2 text-sm text-muted-foreground">
-            {branding.login_description || t('login.subtitle')}
-          </p>
+          <p className="mb-0 mt-2 text-sm text-muted-foreground">{branding.login_description || t('login.subtitle')}</p>
         </div>
 
         {error ? <Alert type="error" showIcon title={error} className="mb-5" /> : null}
@@ -153,13 +151,7 @@ export default function LoginSurface({
               {loading ? t('login.verifyLoading') : t('login.verifyButton')}
             </Button>
             <DividerLabel>{t('common.or')}</DividerLabel>
-            <Button
-              type="button"
-              className="w-full"
-              onClick={onPasskeyLogin}
-              loading={passkeyLoading}
-              icon={<Key />}
-            >
+            <Button type="button" className="w-full" onClick={onPasskeyLogin} loading={passkeyLoading} icon={<Key />}>
               {passkeyLoading ? t('login.passkeyLoading') : t('login.passkeyStepUpButton')}
             </Button>
             {onSwitchAccount ? (
@@ -234,13 +226,7 @@ export default function LoginSurface({
               {loading ? t('login.signInLoading') : t('login.signInButton')}
             </Button>
             <DividerLabel>{t('common.or')}</DividerLabel>
-            <Button
-              type="button"
-              className="w-full"
-              onClick={onPasskeyLogin}
-              loading={passkeyLoading}
-              icon={<Key />}
-            >
+            <Button type="button" className="w-full" onClick={onPasskeyLogin} loading={passkeyLoading} icon={<Key />}>
               {passkeyLoading ? t('login.passkeyLoading') : t('login.passkeyButton')}
             </Button>
           </LoginForm>
