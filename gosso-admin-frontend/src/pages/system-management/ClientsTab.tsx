@@ -16,7 +16,6 @@ import {
   Empty,
   IconButton,
   Modal,
-  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -39,6 +38,7 @@ import {
 import { useClients } from '../../features/clients/useClients';
 import { useSudo } from '../../components/auth/SudoContext';
 import { ManagementPanelLead } from './shared';
+import { SystemCollectionLoading } from './loading';
 
 const clientScopeOptions = ['openid', 'profile', 'email', 'admin'];
 
@@ -202,13 +202,18 @@ export default function ClientsTab() {
       ) : null}
 
       {loading ? (
-        <div
-          className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground"
-          role="status"
-        >
-          <Spinner aria-label={t('clients.loadingClients')} />
-          <span>{t('clients.loadingClients')}</span>
-        </div>
+        <SystemCollectionLoading
+          label={t('clients.loadingClients')}
+          rows={4}
+          columns={[
+            { header: t('clients.colNameId'), skeletonClassName: 'h-4 w-44' },
+            { header: t('clients.colType'), skeletonClassName: 'h-6 w-20' },
+            { header: t('clients.colRedirectUris'), skeletonClassName: 'h-4 w-56' },
+            { header: t('clients.colGrantTypes'), skeletonClassName: 'h-4 w-32' },
+            { header: t('clients.colScopes'), skeletonClassName: 'h-4 w-28' },
+            { header: t('clients.colActions'), skeletonClassName: 'h-8 w-24', align: 'right' },
+          ]}
+        />
       ) : clients.length === 0 ? (
         <Empty
           icon={<KeyRound aria-hidden="true" className="size-6 text-muted-foreground" />}

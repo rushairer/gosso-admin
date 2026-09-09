@@ -9,7 +9,6 @@ import {
   FormField,
   Input,
   Pagination,
-  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -22,6 +21,7 @@ import { AuditLogDetailModal } from './audit/AuditLogDetailModal';
 import type { AuditLog } from '../../types/api';
 import { useAuditLogs } from '../../features/audit/useAuditLogs';
 import { ManagementPanelLead } from './shared';
+import { SystemCollectionLoading } from './loading';
 
 export default function AuditLogsTab() {
   const { t } = useTranslation();
@@ -71,10 +71,16 @@ export default function AuditLogsTab() {
             />
           </FormField>
           <div className="flex gap-2 pb-0.5">
-            <Button type="submit" variant="solid" color="primary" icon={<Search />}>
+            <Button
+              type="submit"
+              variant="solid"
+              color="primary"
+              icon={<Search />}
+              loading={auditLoading}
+            >
               {t('common.search')}
             </Button>
-            <Button type="button" icon={<X />} onClick={clearFilters}>
+            <Button type="button" icon={<X />} onClick={clearFilters} disabled={auditLoading}>
               {t('common.clear')}
             </Button>
           </div>
@@ -87,7 +93,7 @@ export default function AuditLogsTab() {
           showIcon
           title={error}
           action={
-            <Button size="small" onClick={search}>
+            <Button size="small" onClick={search} loading={auditLoading}>
               {t('common.retry')}
             </Button>
           }
@@ -95,13 +101,19 @@ export default function AuditLogsTab() {
       ) : null}
 
       {auditLoading ? (
-        <div
-          className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground"
-          role="status"
-        >
-          <Spinner aria-label={t('audit.loadingLogs', { defaultValue: 'Loading audit logs' })} />
-          <span>{t('audit.loadingLogs', { defaultValue: 'Loading audit logs' })}</span>
-        </div>
+        <SystemCollectionLoading
+          label={t('audit.loadingLogs', { defaultValue: 'Loading audit logs' })}
+          density="compact"
+          rows={5}
+          showPagination
+          columns={[
+            { header: t('audit.colTime'), skeletonClassName: 'h-4 w-36' },
+            { header: t('audit.colAction'), skeletonClassName: 'h-6 w-28' },
+            { header: t('audit.colActor'), skeletonClassName: 'h-4 w-28' },
+            { header: t('audit.colTargetUser'), skeletonClassName: 'h-4 w-36' },
+            { header: t('audit.colDetails'), skeletonClassName: 'h-8 w-16', align: 'right' },
+          ]}
+        />
       ) : auditLogs.length === 0 && !error ? (
         <Empty
           icon={<AuditIcon aria-hidden="true" className="size-6 text-muted-foreground" />}

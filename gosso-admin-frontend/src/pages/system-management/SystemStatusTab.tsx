@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Database, RefreshCw, Server, ShieldCheck } from 'lucide-react';
-import { Alert, Button, Card, Heading, Spinner, Tag, Text } from '@gouno/ui/core';
+import { Alert, Button, Card, Heading, Tag, Text } from '@gouno/ui/core';
 import { useSystemStatus } from '../../features/system/useSystemStatus';
 import { dependencyLabel, dependencyIsHealthy, formatHealthTimestamp } from '../../utils/format';
 import { ManagementPanelLead } from './shared';
+import { SystemStatusLoading } from './loading';
 
 function DefinitionCard({ title, rows }: { title: ReactNode; rows: Array<[ReactNode, ReactNode]> }) {
   return (
@@ -35,12 +36,16 @@ export default function SystemStatusTab() {
 
   if (loading && !systemHealth) {
     return (
-      <div
-        className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground"
-        role="status"
-      >
-        <Spinner aria-label={t('system.description')} />
-        <span>{t('system.description')}</span>
+      <div className="flex flex-col gap-5">
+        <ManagementPanelLead
+          description={t('system.description')}
+          actions={
+            <Button icon={<RefreshCw />} loading title={t('system.refreshButton')} disabled>
+              {t('system.refreshButton')}
+            </Button>
+          }
+        />
+        <SystemStatusLoading label={t('system.description')} />
       </div>
     );
   }
