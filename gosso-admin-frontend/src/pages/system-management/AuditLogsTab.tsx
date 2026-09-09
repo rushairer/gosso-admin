@@ -42,6 +42,9 @@ export default function AuditLogsTab() {
     goToPage,
   } = useAuditLogs();
 
+  const initialLoading = auditLoading && auditLogs.length === 0 && !error;
+  const fatalLoadError = Boolean(error) && auditLogs.length === 0 && !auditLoading;
+
   return (
     <div className="flex flex-col gap-5">
       <ManagementPanelLead description={t('audit.description')} />
@@ -94,7 +97,7 @@ export default function AuditLogsTab() {
         />
       ) : null}
 
-      {auditLoading ? (
+      {initialLoading ? (
         <SystemCollectionLoading
           label={t('audit.loadingLogs', { defaultValue: 'Loading audit logs' })}
           density="compact"
@@ -108,7 +111,7 @@ export default function AuditLogsTab() {
             { header: t('audit.colDetails'), skeletonClassName: 'h-8 w-16', align: 'right' },
           ]}
         />
-      ) : auditLogs.length === 0 && !error ? (
+      ) : fatalLoadError ? null : auditLogs.length === 0 ? (
         <Empty
           icon={<AuditIcon aria-hidden="true" className="size-6 text-muted-foreground" />}
           title={t('audit.noLogsTitle')}
@@ -120,7 +123,7 @@ export default function AuditLogsTab() {
           }
         />
       ) : (
-        <>
+        <div className="flex flex-col gap-3" aria-busy={auditLoading}>
           <Table bordered density="compact">
             <TableHeader>
               <TableRow>
@@ -143,7 +146,7 @@ export default function AuditLogsTab() {
                   <TableCell className="font-mono text-xs">{log.actor}</TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">{log.account_id || '-'}</TableCell>
                   <TableCell className="text-right">
-                    <Button size="small" onClick={() => setSelectedAuditLog(log)}>
+                    <Button size="small" onClick={() => setSelectedAuditLog(log)} disabled={auditLoading}>
                       {t('common.view')}
                     </Button>
                   </TableCell>
@@ -159,8 +162,9 @@ export default function AuditLogsTab() {
             showTotal={(total) => t('audit.totalLogs', { count: total })}
             prevText={t('common.previous')}
             nextText={t('common.next')}
+            disabled={auditLoading}
           />
-        </>
+        </div>
       )}
 
       <AuditLogDetailModal

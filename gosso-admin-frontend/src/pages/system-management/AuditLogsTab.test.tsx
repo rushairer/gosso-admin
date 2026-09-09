@@ -61,4 +61,34 @@ describe('AuditLogsTab', () => {
       });
     });
   });
+
+  it('keeps the current audit table visible while a filtered search is pending', async () => {
+    let resolveSearch: ((value: typeof firstPage) => void) | undefined;
+    vi.mocked(auditService.fetchAuditLogs)
+      .mockResolvedValueOnce(firstPage)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveSearch = resolve;
+          })
+      );
+
+    render(<AuditLogsTab />);
+    expect(await screen.findByText('account.updated')).toBeInTheDocument();
+
+    await userEvent.type(screen.getByPlaceholderText('e.g. auth.login.success'), 'account.updated');
+    await userEvent.click(screen.getByRole('button', { name: /search/i }));
+
+    await waitFor(() => {
+      expect(auditService.fetchAuditLogs).toHaveBeenCalledTimes(2);
+      expect(screen.getByRole('button', { name: /search/i })).toBeDisabled();
+    });
+    expect(screen.getByText('account.updated')).toBeInTheDocument();
+    expect(screen.getByRole('table').closest('[aria-busy="true"]')).not.toBeNull();
+
+    resolveSearch?.(firstPage);
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /search/i })).not.toBeDisabled();
+    });
+  });
 });

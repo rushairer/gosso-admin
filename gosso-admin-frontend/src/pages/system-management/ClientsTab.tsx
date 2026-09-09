@@ -66,6 +66,9 @@ export default function ClientsTab() {
   const [copied, setCopied] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
+  const initialLoading = loading && clients.length === 0 && !error;
+  const fatalLoadError = Boolean(error) && clients.length === 0 && !loading;
+
   const handleCopyUri = async (uri: string) => {
     try {
       await navigator.clipboard.writeText(uri);
@@ -201,7 +204,7 @@ export default function ClientsTab() {
         />
       ) : null}
 
-      {loading ? (
+      {initialLoading ? (
         <SystemCollectionLoading
           label={t('clients.loadingClients')}
           rows={4}
@@ -214,7 +217,7 @@ export default function ClientsTab() {
             { header: t('clients.colActions'), skeletonClassName: 'h-8 w-24', align: 'right' },
           ]}
         />
-      ) : clients.length === 0 ? (
+      ) : fatalLoadError ? null : clients.length === 0 ? (
         <Empty
           icon={<KeyRound aria-hidden="true" className="size-6 text-muted-foreground" />}
           title={t('clients.noClientsTitle')}
@@ -226,96 +229,102 @@ export default function ClientsTab() {
           }
         />
       ) : (
-        <Table bordered>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('clients.colNameId')}</TableHead>
-              <TableHead>{t('clients.colType')}</TableHead>
-              <TableHead>{t('clients.colRedirectUris')}</TableHead>
-              <TableHead>{t('clients.colGrantTypes')}</TableHead>
-              <TableHead>{t('clients.colScopes')}</TableHead>
-              <TableHead className="text-right">{t('clients.colActions')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {clients.map((client) => (
-              <TableRow key={client.client_id}>
-                <TableCell className="min-w-56 whitespace-normal">
-                  <div className="font-semibold">{client.name}</div>
-                  <code className="mt-1 block max-w-64 truncate text-xs text-muted-foreground" title={client.client_id}>
-                    {client.client_id}
-                  </code>
-                  {client.description ? (
-                    <Text size="xs" tone="muted" className="mt-1">
-                      {client.description}
-                    </Text>
-                  ) : null}
-                </TableCell>
-                <TableCell>
-                  <Tag color={client.is_confidential ? 'warning' : 'success'}>
-                    {client.is_confidential ? t('clients.statusConfidential') : t('clients.statusPublic')}
-                  </Tag>
-                </TableCell>
-                <TableCell className="min-w-72 whitespace-normal">
-                  <div className="flex flex-col gap-2">
-                    {client.redirect_uris.map((uri) => (
-                      <div key={uri} className="flex items-center gap-2 rounded-md bg-muted/60 px-2 py-1.5" title={uri}>
-                        <code className="min-w-0 flex-1 truncate text-xs">{uri}</code>
-                        <IconButton
-                          label={t('common.copy', { defaultValue: '复制' })}
-                          size="small"
-                          icon={<CopyIcon />}
-                          onClick={() => void handleCopyUri(uri)}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell className="min-w-48 whitespace-normal">
-                  <div className="flex flex-wrap gap-1.5">
-                    {client.grant_types.map((grant) => (
-                      <Tag key={grant}>{grant.replace('_', ' ')}</Tag>
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell className="min-w-40 whitespace-normal">
-                  <div className="flex flex-wrap gap-1.5">
-                    {client.scopes.map((scope) => (
-                      <Tag key={scope} color={isAdminScope(scope) ? 'warning' : 'primary'}>
-                        {scope.toLowerCase()}
-                      </Tag>
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex min-w-max flex-nowrap items-center justify-end gap-1">
-                    <IconButton
-                      label={t('clients.editClient')}
-                      variant="ghost"
-                      icon={<EditIcon />}
-                      onClick={() => handleOpenClientModal(client)}
-                    />
-                    {client.is_confidential ? (
-                      <IconButton
-                        label={t('clients.rotateSecret')}
-                        variant="ghost"
-                        icon={<RotateCcw />}
-                        onClick={() => setPendingAction({ type: 'rotate', client })}
-                      />
-                    ) : null}
-                    <IconButton
-                      label={t('clients.deleteClient')}
-                      variant="ghost"
-                      color="error"
-                      icon={<TrashIcon />}
-                      onClick={() => setPendingAction({ type: 'delete', client })}
-                    />
-                  </div>
-                </TableCell>
+        <div aria-busy={loading}>
+          <Table bordered>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('clients.colNameId')}</TableHead>
+                <TableHead>{t('clients.colType')}</TableHead>
+                <TableHead>{t('clients.colRedirectUris')}</TableHead>
+                <TableHead>{t('clients.colGrantTypes')}</TableHead>
+                <TableHead>{t('clients.colScopes')}</TableHead>
+                <TableHead className="text-right">{t('clients.colActions')}</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {clients.map((client) => (
+                <TableRow key={client.client_id}>
+                  <TableCell className="min-w-56 whitespace-normal">
+                    <div className="font-semibold">{client.name}</div>
+                    <code className="mt-1 block max-w-64 truncate text-xs text-muted-foreground" title={client.client_id}>
+                      {client.client_id}
+                    </code>
+                    {client.description ? (
+                      <Text size="xs" tone="muted" className="mt-1">
+                        {client.description}
+                      </Text>
+                    ) : null}
+                  </TableCell>
+                  <TableCell>
+                    <Tag color={client.is_confidential ? 'warning' : 'success'}>
+                      {client.is_confidential ? t('clients.statusConfidential') : t('clients.statusPublic')}
+                    </Tag>
+                  </TableCell>
+                  <TableCell className="min-w-72 whitespace-normal">
+                    <div className="flex flex-col gap-2">
+                      {client.redirect_uris.map((uri) => (
+                        <div key={uri} className="flex items-center gap-2 rounded-md bg-muted/60 px-2 py-1.5" title={uri}>
+                          <code className="min-w-0 flex-1 truncate text-xs">{uri}</code>
+                          <IconButton
+                            label={t('common.copy', { defaultValue: '复制' })}
+                            size="small"
+                            icon={<CopyIcon />}
+                            onClick={() => void handleCopyUri(uri)}
+                            disabled={loading}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell className="min-w-48 whitespace-normal">
+                    <div className="flex flex-wrap gap-1.5">
+                      {client.grant_types.map((grant) => (
+                        <Tag key={grant}>{grant.replace('_', ' ')}</Tag>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell className="min-w-40 whitespace-normal">
+                    <div className="flex flex-wrap gap-1.5">
+                      {client.scopes.map((scope) => (
+                        <Tag key={scope} color={isAdminScope(scope) ? 'warning' : 'primary'}>
+                          {scope.toLowerCase()}
+                        </Tag>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex min-w-max flex-nowrap items-center justify-end gap-1">
+                      <IconButton
+                        label={t('clients.editClient')}
+                        variant="ghost"
+                        icon={<EditIcon />}
+                        onClick={() => handleOpenClientModal(client)}
+                        disabled={loading}
+                      />
+                      {client.is_confidential ? (
+                        <IconButton
+                          label={t('clients.rotateSecret')}
+                          variant="ghost"
+                          icon={<RotateCcw />}
+                          onClick={() => setPendingAction({ type: 'rotate', client })}
+                          disabled={loading}
+                        />
+                      ) : null}
+                      <IconButton
+                        label={t('clients.deleteClient')}
+                        variant="ghost"
+                        color="error"
+                        icon={<TrashIcon />}
+                        onClick={() => setPendingAction({ type: 'delete', client })}
+                        disabled={loading}
+                      />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
 
       <ClientEditorModal

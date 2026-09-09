@@ -74,6 +74,19 @@ Dense row actions stay compact, single-line, and associated with the row they af
 
 Production-only actions are allowed and expected when real behavior exceeds the Showcase fixture. Preserve those actions while keeping the same visual grammar.
 
+## Async State Grammar
+
+Asynchronous UI must preserve the most stable structure that is already known.
+
+- Use `Skeleton` when the eventual structure is predictable. Keep route shells, PageHeader/Tabs, panel leads, Table headers, form geometry, and list anatomy visible instead of replacing the whole region with a spinner.
+- Treat initial loading separately from later refreshes. If usable data already exists, keep it rendered, mark the affected region with `aria-busy`, and disable controls that would conflict with the in-flight refresh.
+- Use `Button` / `IconButton` loading or disabled state for mutations and submissions. A save, delete, search, pagination, or security action must not replace unrelated page content with a loading placeholder.
+- `Empty` means a successful load returned no data. A fatal initial load error must render an `Alert`/retry state without also rendering `Empty`.
+- A refresh failure may render an in-flow `Alert` together with previously loaded stale content when that content is still useful and safe to show.
+- Use `Spinner` only for genuinely indeterminate processing where there is no meaningful future content silhouette to preserve, such as the OAuth callback/code-exchange step.
+
+Product-local loading compositions may live next to the route family when they mirror real product anatomy. Do not promote them into Gouno Core until repeated use across independent products proves a stable abstraction.
+
 ## Forms and Product-Local Composition
 
 Forms use Gouno UI controls and semantic field components, while business validation and submission remain product-owned.
