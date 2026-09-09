@@ -115,7 +115,7 @@ jobs:
           const surfaces = [
             ['@gouno/ui/core', core, ['Tabs', 'NavigationProvider', 'TooltipProvider']],
             ['@gouno/ui/theme', theme, ['ThemeProvider']],
-            ['@gouno/ui/gouno', gouno, ['AppShell', 'PageContainer', 'PageHeader']],
+            ['@gouno/ui/gouno', gouno, ['AppShell', 'PageContainer', 'PageHeader', 'NavigationGroup']],
           ];
           for (const [entrypoint, surface, names] of surfaces) {
             for (const name of names) {
