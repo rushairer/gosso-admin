@@ -27,6 +27,15 @@ describe('AuditLogsTab', () => {
     vi.mocked(auditService.fetchAuditLogs).mockResolvedValue(firstPage);
   });
 
+  it('does not render an empty state when the initial audit load fails', async () => {
+    vi.mocked(auditService.fetchAuditLogs).mockRejectedValueOnce(new Error('Audit API unavailable'));
+
+    render(<AuditLogsTab />);
+
+    expect(await screen.findByText('Audit API unavailable')).toBeInTheDocument();
+    expect(screen.queryByText(/No Audit Logs Found|未找到审计日志/i)).not.toBeInTheDocument();
+  });
+
   it('loads filters explicitly and clears them without relying on a timer', async () => {
     render(<AuditLogsTab />);
 

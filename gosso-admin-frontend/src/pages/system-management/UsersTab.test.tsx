@@ -119,6 +119,18 @@ describe('UsersTab pagination', () => {
     expect(screen.getAllByRole('columnheader')).toHaveLength(4);
   });
 
+  it('does not render an empty state when the initial account load fails', async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ message: 'Account API unavailable' }),
+    } as Response);
+
+    renderUsersTab();
+
+    expect(await screen.findByText('Account API unavailable')).toBeInTheDocument();
+    expect(screen.queryByText(/No User Accounts|暂无用户账户/i)).not.toBeInTheDocument();
+  });
+
   it('uses the bounded role projection without per-account requests', async () => {
     renderUsersTab();
 

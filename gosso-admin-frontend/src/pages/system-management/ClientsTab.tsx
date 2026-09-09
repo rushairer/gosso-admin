@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Plus as PlusIcon,
@@ -65,9 +65,14 @@ export default function ClientsTab() {
   } | null>(null);
   const [copied, setCopied] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+  const [hasResolvedInitialLoad, setHasResolvedInitialLoad] = useState(false);
 
-  const initialLoading = loading && clients.length === 0 && !error;
-  const fatalLoadError = Boolean(error) && clients.length === 0 && !loading;
+  useEffect(() => {
+    if (!loading && !error) setHasResolvedInitialLoad(true);
+  }, [error, loading]);
+
+  const initialLoading = loading && !hasResolvedInitialLoad;
+  const fatalLoadError = Boolean(error) && !hasResolvedInitialLoad;
 
   const handleCopyUri = async (uri: string) => {
     try {

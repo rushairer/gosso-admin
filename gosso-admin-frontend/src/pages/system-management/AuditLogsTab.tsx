@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText as AuditIcon, Search, X } from 'lucide-react';
 import {
@@ -42,8 +42,14 @@ export default function AuditLogsTab() {
     goToPage,
   } = useAuditLogs();
 
-  const initialLoading = auditLoading && auditLogs.length === 0 && !error;
-  const fatalLoadError = Boolean(error) && auditLogs.length === 0 && !auditLoading;
+  const [hasResolvedInitialLoad, setHasResolvedInitialLoad] = useState(false);
+
+  useEffect(() => {
+    if (!auditLoading && !error) setHasResolvedInitialLoad(true);
+  }, [auditLoading, error]);
+
+  const initialLoading = auditLoading && !hasResolvedInitialLoad;
+  const fatalLoadError = Boolean(error) && !hasResolvedInitialLoad;
 
   return (
     <div className="flex flex-col gap-5">

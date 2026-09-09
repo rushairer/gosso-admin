@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Plus as PlusIcon,
@@ -80,8 +80,14 @@ export default function UsersTab() {
   const [consentsList, setConsentsList] = useState<Consent[]>([]);
   const [consentsLoading, setConsentsLoading] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+  const [hasResolvedInitialLoad, setHasResolvedInitialLoad] = useState(false);
 
-  const initialLoading = loading && accounts.length === 0;
+  useEffect(() => {
+    if (!loading && !error) setHasResolvedInitialLoad(true);
+  }, [error, loading]);
+
+  const initialLoading = loading && !hasResolvedInitialLoad;
+  const fatalLoadError = Boolean(error) && !hasResolvedInitialLoad;
 
   const handleCreateUser = async (formData: CreateAccountPayload) => {
     await accountService.createAccount(formData);
@@ -308,7 +314,7 @@ export default function UsersTab() {
             { header: t('users.colActions'), skeletonClassName: 'h-8 w-32', align: 'right' },
           ]}
         />
-      ) : accounts.length === 0 ? (
+      ) : fatalLoadError ? null : accounts.length === 0 ? (
         <Empty
           icon={<UserIcon aria-hidden="true" className="size-6 text-muted-foreground" />}
           title={t('users.noUsersTitle')}

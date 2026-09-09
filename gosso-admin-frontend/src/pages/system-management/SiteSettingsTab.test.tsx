@@ -29,6 +29,25 @@ describe('SiteSettingsTab', () => {
     vi.mocked(siteSettingsService.updateSiteSettings).mockImplementation(async (next) => next);
   });
 
+  it('does not expose editable defaults when the initial settings load fails', async () => {
+    vi.mocked(siteSettingsService.getSiteSettings).mockRejectedValueOnce(new Error('Settings API unavailable'));
+
+    render(
+      <MemoryRouter>
+        <MessageProvider>
+          <SiteSettingsTab />
+        </MessageProvider>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText('Settings API unavailable')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /save settings/i })).not.toBeInTheDocument();
+    expect(screen.queryByText('1440 × 900')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /retry/i }));
+    expect(await screen.findByDisplayValue('Acme Identity')).toBeInTheDocument();
+  });
+
   it('loads settings and saves the updated brand form', async () => {
     render(
       <MemoryRouter>
