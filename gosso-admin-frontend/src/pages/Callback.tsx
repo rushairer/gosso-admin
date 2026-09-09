@@ -18,9 +18,7 @@ export default function Callback() {
           <Card variant="elevated" padding="base" className="w-full max-w-md text-center">
             <h1 className="text-2xl font-bold tracking-tight">{t('auth.authenticationError')}</h1>
             <Text size="sm" tone="muted" className="mt-2 leading-relaxed">
-              {t('auth.authenticationErrorDescription', {
-                defaultValue: '授权回调参数无效或授权码交换失败。',
-              })}
+              {t('auth.codeExchangeFailed')}
             </Text>
             <Alert
               type="error"
