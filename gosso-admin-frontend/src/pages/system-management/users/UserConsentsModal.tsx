@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { CheckSquare as ConsentIcon } from 'lucide-react';
-import { Button, Empty, Modal, Spinner, Tag, Text } from '@gouno/ui/core';
+import { Button, Empty, Modal, Skeleton, Tag, Text } from '@gouno/ui/core';
 import type { Account, Consent } from '../../../types/api';
 
 interface UserConsentsModalProps {
@@ -11,6 +11,34 @@ interface UserConsentsModalProps {
   loading: boolean;
   currentAdminId?: string;
   onRevokeConsent: (clientId: string) => Promise<void>;
+}
+
+export function ConsentListLoading({ label }: { label: string }) {
+  return (
+    <ul
+      className="divide-y overflow-hidden rounded-lg border border-border/80 bg-card"
+      role="status"
+      aria-live="polite"
+      aria-label={label}
+    >
+      {Array.from({ length: 3 }, (_, index) => (
+        <li key={index} className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <Skeleton className="size-8 shrink-0 rounded-md" />
+              <Skeleton className="h-4 w-56 max-w-full" />
+            </div>
+            <div className="mt-3 flex gap-2">
+              <Skeleton className="h-6 w-16" />
+              <Skeleton className="h-6 w-20" />
+            </div>
+            <Skeleton className="mt-2 h-3 w-44" />
+          </div>
+          <Skeleton className="h-8 w-24 shrink-0" />
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 export function UserConsentsModal({
@@ -38,10 +66,7 @@ export function UserConsentsModal({
       footer={<Button onClick={onClose}>{t('common.close')}</Button>}
     >
       {loading ? (
-        <div className="flex min-h-32 items-center justify-center gap-3 text-sm text-muted-foreground" role="status">
-          <Spinner aria-label={t('users.loadingConsents')} />
-          <span>{t('users.loadingConsents')}</span>
-        </div>
+        <ConsentListLoading label={t('users.loadingConsents')} />
       ) : consents.length === 0 ? (
         <Empty title={t('users.noConsentsTitle')} description={t('users.noConsentsDescription')} />
       ) : (
