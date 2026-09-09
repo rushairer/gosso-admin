@@ -109,9 +109,18 @@ jobs:
           npm install --package-lock-only --ignore-scripts --legacy-peer-deps
           npm ci --legacy-peer-deps
           node --input-type=module <<'EOF'
-          const ui = await import('@gouno/ui');
-          for (const name of ['AppShell', 'PageContainer']) {
-            if (!ui[name]) throw new Error(`vendored @gouno/ui is missing canonical export ${name}`);
+          const core = await import('@gouno/ui/core');
+          const theme = await import('@gouno/ui/theme');
+          const gouno = await import('@gouno/ui/gouno');
+          const surfaces = [
+            ['@gouno/ui/core', core, ['Tabs', 'NavigationProvider', 'TooltipProvider']],
+            ['@gouno/ui/theme', theme, ['ThemeProvider']],
+            ['@gouno/ui/gouno', gouno, ['AppShell', 'PageContainer', 'PageHeader']],
+          ];
+          for (const [entrypoint, surface, names] of surfaces) {
+            for (const name of names) {
+              if (!surface[name]) throw new Error(`vendored ${entrypoint} is missing canonical export ${name}`);
+            }
           }
           EOF
           npm run quality
