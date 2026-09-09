@@ -1,7 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Link } from 'react-router-dom';
-import { ThemeProvider, NavigationProvider, TooltipProvider } from '@gouno/ui';
+import { NavigationProvider, TooltipProvider } from '@gouno/ui/core';
+import { ThemeProvider } from '@gouno/ui/theme';
 import './i18n';
 import './styles/tailwind.css';
 import './styles/accessibility.css';

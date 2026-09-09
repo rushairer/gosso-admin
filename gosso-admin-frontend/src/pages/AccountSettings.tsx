@@ -26,18 +26,35 @@ export default function AccountSettings() {
   }
 
   const tabs = [
-    { key: 'profile' as const, label: t('accountSettings.tabProfile'), icon: <User aria-hidden="true" size={16} /> },
+    {
+      key: 'profile' as const,
+      label: t('accountSettings.tabProfile'),
+      icon: <User aria-hidden="true" size={16} />,
+      children: <ProfilePanel />,
+    },
     {
       key: 'password' as const,
       label: t('accountSettings.tabPassword'),
       icon: <Lock aria-hidden="true" size={16} />,
+      children: <PasswordPanel />,
     },
-    { key: 'mfa' as const, label: t('accountSettings.tabMFA'), icon: <Shield aria-hidden="true" size={16} /> },
-    { key: 'passkeys' as const, label: t('accountSettings.tabPasskeys'), icon: <Key aria-hidden="true" size={16} /> },
+    {
+      key: 'mfa' as const,
+      label: t('accountSettings.tabMFA'),
+      icon: <Shield aria-hidden="true" size={16} />,
+      children: <MFAPanel />,
+    },
+    {
+      key: 'passkeys' as const,
+      label: t('accountSettings.tabPasskeys'),
+      icon: <Key aria-hidden="true" size={16} />,
+      children: <PasskeysPanel />,
+    },
     {
       key: 'sessions' as const,
       label: t('accountSettings.tabSessions'),
       icon: <Laptop aria-hidden="true" size={16} />,
+      children: <SessionsPanel />,
     },
   ];
 
@@ -53,12 +70,6 @@ export default function AccountSettings() {
         onChange={(next) => navigate(`/account-settings/${next}`)}
         ariaLabel={t('accountSettings.sectionsLabel')}
       />
-
-      {activeTab === 'profile' && <ProfilePanel />}
-      {activeTab === 'password' && <PasswordPanel />}
-      {activeTab === 'mfa' && <MFAPanel />}
-      {activeTab === 'passkeys' && <PasskeysPanel />}
-      {activeTab === 'sessions' && <SessionsPanel />}
     </div>
   );
 }

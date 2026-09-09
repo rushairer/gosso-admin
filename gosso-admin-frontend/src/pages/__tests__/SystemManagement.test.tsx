@@ -72,6 +72,7 @@ describe('SystemManagement access gate', () => {
   it('renders administration content only for administrators', async () => {
     getSnapshot.mockReturnValue({ loggedIn: true, isAdmin: true, profile: { sub: 'admin-1' } });
     renderSystemManagement();
-    expect(await screen.findByText('Clients content')).toBeInTheDocument();
+    const clientsContent = await screen.findByText('Clients content');
+    expect(screen.getByRole('tabpanel')).toContainElement(clientsContent);
   });
 });

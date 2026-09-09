@@ -5,6 +5,7 @@ import ts from "typescript";
 
 const root = fileURLToPath(new URL("../src/", import.meta.url));
 const files = [];
+const packageRootImport = /(?:\bfrom\s+|\bimport\s*\(\s*)["']@gouno\/ui["']/;
 
 async function collect(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
@@ -161,6 +162,9 @@ function checkTsxContracts(name, source) {
 for (const path of files) {
   const name = relative(root, path);
   const source = await readFile(path, "utf8");
+  if ((name.endsWith(".ts") || name.endsWith(".tsx")) && packageRootImport.test(source)) {
+    failures.push(`${name}: @gouno/ui package-root imports are compatibility-only; use an owned subpath`);
+  }
   checkTsxContracts(name, source);
 }
 

@@ -71,7 +71,8 @@ describe('AccountSettings access gate', () => {
       profile: { sub: 'account-1', preferred_username: 'operator' },
     });
     renderAccountSettings();
-    expect(await screen.findByText('Profile content')).toBeInTheDocument();
+    const profileContent = await screen.findByText('Profile content');
+    expect(screen.getByRole('tabpanel')).toContainElement(profileContent);
     expect(redirectToAuthorize).not.toHaveBeenCalled();
   });
 });

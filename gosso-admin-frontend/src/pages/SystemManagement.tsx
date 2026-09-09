@@ -36,22 +36,31 @@ export default function SystemManagement() {
       key: 'clients' as const,
       label: t('systemManagement.tabClients'),
       icon: <KeyIcon aria-hidden="true" size={16} />,
+      children: <ClientsTab />,
     },
-    { key: 'users' as const, label: t('systemManagement.tabUsers'), icon: <UserIcon aria-hidden="true" size={16} /> },
+    {
+      key: 'users' as const,
+      label: t('systemManagement.tabUsers'),
+      icon: <UserIcon aria-hidden="true" size={16} />,
+      children: <UsersTab />,
+    },
     {
       key: 'audit-logs' as const,
       label: t('systemManagement.tabAuditLogs'),
       icon: <AuditIcon aria-hidden="true" size={16} />,
+      children: <AuditLogsTab />,
     },
     {
       key: 'site-settings' as const,
       label: t('site.tabLabel'),
       icon: <SlidersHorizontal aria-hidden="true" size={16} />,
+      children: <SiteSettingsTab />,
     },
     {
       key: 'system' as const,
       label: t('systemManagement.tabSystemStatus'),
       icon: <ShieldIcon aria-hidden="true" size={16} />,
+      children: <SystemStatusTab />,
     },
   ];
 
@@ -67,12 +76,6 @@ export default function SystemManagement() {
         onChange={(next) => navigate(`/system-management/${next}`)}
         ariaLabel={t('systemManagement.sectionsLabel')}
       />
-
-      {activeTab === 'clients' && <ClientsTab />}
-      {activeTab === 'users' && <UsersTab />}
-      {activeTab === 'audit-logs' && <AuditLogsTab />}
-      {activeTab === 'site-settings' && <SiteSettingsTab />}
-      {activeTab === 'system' && <SystemStatusTab />}
     </div>
   );
 }
