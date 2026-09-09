@@ -6,8 +6,15 @@ import { useSession } from '@gosso/client/react';
 import { logout, redirectToAuthorize } from '../../auth';
 import { siteSettingsService } from '../../services';
 import type { SessionSnapshot } from '../../auth';
-import { Button, IconButton } from '@gouno/ui';
-import { AdminShell, NavigationGroup, navigationItemClass, ThemeToggle } from '@gouno/ui';
+import {
+  AppShell,
+  Button,
+  IconButton,
+  NavigationGroup,
+  PageContainer,
+  ThemeToggle,
+  navigationItemClass,
+} from '@gouno/ui';
 
 function initials(snapshot: SessionSnapshot) {
   const name = snapshot.profile?.preferred_username || snapshot.profile?.name || 'Guest';
@@ -101,8 +108,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     ['passkeys', t('accountSettings.tabPasskeys')],
     ['sessions', t('accountSettings.tabSessions')],
   ];
+
   return (
-    <AdminShell
+    <AppShell
       brand={<Link to="/">{productName}</Link>}
       breadcrumbs={pageLabel}
       navigationLabel={t('nav.primaryNavigation')}
@@ -163,7 +171,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </div>
       }
     >
-      {children}
-    </AdminShell>
+      <PageContainer>{children}</PageContainer>
+    </AppShell>
   );
 }
