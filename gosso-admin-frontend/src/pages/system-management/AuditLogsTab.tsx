@@ -71,13 +71,7 @@ export default function AuditLogsTab() {
             />
           </FormField>
           <div className="flex gap-2 pb-0.5">
-            <Button
-              type="submit"
-              variant="solid"
-              color="primary"
-              icon={<Search />}
-              loading={auditLoading}
-            >
+            <Button type="submit" variant="solid" color="primary" icon={<Search />} loading={auditLoading}>
               {t('common.search')}
             </Button>
             <Button type="button" icon={<X />} onClick={clearFilters} disabled={auditLoading}>
