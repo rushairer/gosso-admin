@@ -6,8 +6,9 @@ import { useSession } from '@gosso/client/react';
 import { logout, redirectToAuthorize } from '../../auth';
 import { siteSettingsService } from '../../services';
 import type { SessionSnapshot } from '../../auth';
-import { Button, IconButton } from '@gouno/ui';
-import { AdminShell, NavigationGroup, navigationItemClass, ThemeToggle } from '@gouno/ui';
+import { Button, IconButton } from '@gouno/ui/core';
+import { AppShell, NavigationGroup, PageContainer, navigationItemClass } from '@gouno/ui/gouno';
+import { ThemeToggle } from '@gouno/ui/theme';
 
 function initials(snapshot: SessionSnapshot) {
   const name = snapshot.profile?.preferred_username || snapshot.profile?.name || 'Guest';
@@ -41,10 +42,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     void siteSettingsService
       .getPublicSiteBranding()
-      .then((branding) => {
-        const name = branding.product_name || 'GOSSO';
-        setProductName(name);
-      })
+      .then((branding) => setProductName(branding.product_name || 'GOSSO'))
       .catch(() => undefined);
   }, []);
 
@@ -86,7 +84,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }, [pageLabel, productName, t]);
 
   const userName = session.profile?.preferred_username || session.profile?.name || t('nav.notSignedIn');
-
   const systemItems = [
     ['clients', t('systemManagement.tabClients')],
     ['users', t('systemManagement.tabUsers')],
@@ -101,8 +98,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     ['passkeys', t('accountSettings.tabPasskeys')],
     ['sessions', t('accountSettings.tabSessions')],
   ];
+
   return (
-    <AdminShell
+    <AppShell
       brand={<Link to="/">{productName}</Link>}
       breadcrumbs={pageLabel}
       navigationLabel={t('nav.primaryNavigation')}
@@ -144,7 +142,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         session.loggedIn ? (
           <IconButton label={t('nav.signOut')} icon={<LogOut />} onClick={() => logout('/')} />
         ) : (
-          <Button variant="primary" icon={<LogIn />} onClick={() => redirectToAuthorize('/system-management/clients')}>
+          <Button
+            variant="solid"
+            color="primary"
+            icon={<LogIn />}
+            onClick={() => redirectToAuthorize('/system-management/clients')}
+          >
             {t('nav.signIn')}
           </Button>
         )
@@ -156,14 +159,14 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </span>
           <div className="min-w-0">
             <strong className="block truncate text-sm">{userName}</strong>
-            <p className="text-xs text-muted-foreground">
+            <p className="m-0 text-xs text-muted-foreground">
               {session.loggedIn ? (session.isAdmin ? t('nav.administrator') : t('nav.user')) : t('nav.anonymous')}
             </p>
           </div>
         </div>
       }
     >
-      {children}
-    </AdminShell>
+      <PageContainer>{children}</PageContainer>
+    </AppShell>
   );
 }
