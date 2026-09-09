@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthCallback } from '@gosso/client/react';
 import { routerPath } from '../config/appPaths';
-import { Alert, Button, Card, Spinner, Text } from '@gouno/ui/core';
+import { Alert, ButtonLink, Card, Spinner, Text } from '@gouno/ui/core';
 
 export default function Callback() {
   const { t } = useTranslation();
@@ -33,9 +33,9 @@ export default function Callback() {
               }
             />
             <div className="mt-5">
-              <Button asChild variant="solid" color="primary" className="w-full">
-                <Link to="/">{t('auth.goHome')}</Link>
-              </Button>
+              <ButtonLink to="/" variant="solid" color="primary" block>
+                {t('auth.goHome')}
+              </ButtonLink>
             </div>
           </Card>
         </div>
