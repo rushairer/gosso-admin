@@ -246,7 +246,10 @@ export default function ClientsTab() {
                 <TableRow key={client.client_id}>
                   <TableCell className="min-w-56 whitespace-normal">
                     <div className="font-semibold">{client.name}</div>
-                    <code className="mt-1 block max-w-64 truncate text-xs text-muted-foreground" title={client.client_id}>
+                    <code
+                      className="mt-1 block max-w-64 truncate text-xs text-muted-foreground"
+                      title={client.client_id}
+                    >
                       {client.client_id}
                     </code>
                     {client.description ? (
@@ -263,7 +266,11 @@ export default function ClientsTab() {
                   <TableCell className="min-w-72 whitespace-normal">
                     <div className="flex flex-col gap-2">
                       {client.redirect_uris.map((uri) => (
-                        <div key={uri} className="flex items-center gap-2 rounded-md bg-muted/60 px-2 py-1.5" title={uri}>
+                        <div
+                          key={uri}
+                          className="flex items-center gap-2 rounded-md bg-muted/60 px-2 py-1.5"
+                          title={uri}
+                        >
                           <code className="min-w-0 flex-1 truncate text-xs">{uri}</code>
                           <IconButton
                             label={t('common.copy', { defaultValue: '复制' })}
