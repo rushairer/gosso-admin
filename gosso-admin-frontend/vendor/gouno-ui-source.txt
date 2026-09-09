@@ -1,3 +1,3 @@
 repository=https://github.com/rushairer/gouno-ui
 ref=main
-sha=4cc4d0b4dfac07f66bef99980c1a3dc4a3b42499
+sha=dc9a02005a06c6a1c9459e6fd4fe0e246db3e9d1
