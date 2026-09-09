@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-import { ToastProvider } from '@gouno/ui';
+import { MessageProvider } from '@gouno/ui/core';
 import { siteSettingsService } from '../../services';
 import SiteSettingsTab from './SiteSettingsTab';
 
@@ -32,9 +32,9 @@ describe('SiteSettingsTab', () => {
   it('loads settings and saves the updated brand form', async () => {
     render(
       <MemoryRouter>
-        <ToastProvider>
+        <MessageProvider>
           <SiteSettingsTab />
-        </ToastProvider>
+        </MessageProvider>
       </MemoryRouter>
     );
     expect(await screen.findByDisplayValue('Acme Identity')).toBeInTheDocument();
@@ -54,9 +54,9 @@ describe('SiteSettingsTab', () => {
   it('renders the real login surface and updates its desktop and mobile previews from draft values', async () => {
     render(
       <MemoryRouter>
-        <ToastProvider>
+        <MessageProvider>
           <SiteSettingsTab />
-        </ToastProvider>
+        </MessageProvider>
       </MemoryRouter>
     );
 
@@ -77,9 +77,9 @@ describe('SiteSettingsTab', () => {
   it('previews and saves a base64 login background image', async () => {
     render(
       <MemoryRouter>
-        <ToastProvider>
+        <MessageProvider>
           <SiteSettingsTab />
-        </ToastProvider>
+        </MessageProvider>
       </MemoryRouter>
     );
 
