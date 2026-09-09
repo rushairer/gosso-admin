@@ -51,7 +51,9 @@ export function SystemCollectionLoading({
               {columns.map((column, columnIndex) => (
                 <TableCell key={columnIndex}>
                   <Skeleton
-                    className={`${column.skeletonClassName ?? 'h-4 w-24'} ${column.align === 'right' ? 'ml-auto' : ''}`}
+                    className={`${column.skeletonClassName ?? 'h-4 w-24'} ${
+                      column.align === 'right' ? 'ml-auto' : ''
+                    }`}
                   />
                 </TableCell>
               ))}
