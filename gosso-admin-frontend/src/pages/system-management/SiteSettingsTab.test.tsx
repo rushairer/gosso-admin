@@ -88,7 +88,8 @@ describe('SiteSettingsTab', () => {
     const backgroundField = screen.getByLabelText(/login background url/i);
     await userEvent.type(backgroundField, dataUrl);
 
-    const loginSurface = document.querySelector('.login-preview .login-surface') as HTMLElement | null;
+    const loginSurface = document.querySelector('[data-slot="login-surface"]') as HTMLElement | null;
+    expect(loginSurface).not.toBeNull();
     expect(loginSurface?.style.backgroundImage).toContain(dataUrl);
 
     await userEvent.click(screen.getByRole('button', { name: /save settings/i }));
