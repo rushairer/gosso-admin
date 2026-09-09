@@ -1,15 +1,5 @@
 import type { ReactNode } from 'react';
-import {
-  Card,
-  Skeleton,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Text,
-} from '@gouno/ui/core';
+import { Card, Skeleton, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Text } from '@gouno/ui/core';
 
 type LoadingColumn = {
   header: ReactNode;
@@ -84,12 +74,7 @@ function FieldSkeleton({ width = 'w-28' }: { width?: string }) {
 
 export function SiteSettingsLoading({ label }: { label: string }) {
   return (
-    <div
-      className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]"
-      role="status"
-      aria-live="polite"
-      aria-label={label}
-    >
+    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]" role="status" aria-live="polite" aria-label={label}>
       <Card padding="none" className="gap-0 overflow-clip">
         <div className="flex flex-col gap-5 p-6">
           <FieldSkeleton width="w-24" />
@@ -130,10 +115,7 @@ function DefinitionLoadingCard() {
       <Skeleton className="mb-4 h-5 w-40" />
       <div className="divide-y">
         {Array.from({ length: 4 }, (_, index) => (
-          <div
-            key={index}
-            className="grid gap-2 py-3 first:pt-0 last:pb-0 sm:grid-cols-[190px_minmax(0,1fr)] sm:gap-5"
-          >
+          <div key={index} className="grid gap-2 py-3 first:pt-0 last:pb-0 sm:grid-cols-[190px_minmax(0,1fr)] sm:gap-5">
             <Skeleton className="h-4 w-28" />
             <Skeleton className="h-4 w-full max-w-md" />
           </div>
