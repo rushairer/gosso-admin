@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { FormEvent } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, Lock } from 'lucide-react';
-import { Button, Card, Feedback, FormField, IconButton, Input } from '@gouno/ui';
+import { Alert, Button, Card, FormField, IconButton, Input } from '@gouno/ui/core';
 import { gossoClient } from '../auth';
 import { logger } from '../utils/logger';
 
@@ -22,11 +23,10 @@ export default function ResetPassword() {
   const [error, setError] = useState<string | null>(token ? null : t('passwordReset.invalidLink'));
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
     setSuccess(false);
-
     if (!token) {
       setError(t('passwordReset.invalidLink'));
       return;
@@ -43,7 +43,6 @@ export default function ResetPassword() {
     setLoading(true);
     try {
       await gossoClient.resetPassword(token, newPassword);
-
       setSuccess(true);
       setNewPassword('');
       setConfirmPassword('');
@@ -56,28 +55,23 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="login-surface flex-row items-center justify-center">
-      <Card className="login-card">
-        <div className="text-center mb-md">
-          <h1 className="login-card__title">{t('passwordReset.resetTitle')}</h1>
-          <p className="text-muted login-card__description">{t('passwordReset.resetDescription')}</p>
+    <div className="flex min-h-screen items-center justify-center bg-canvas p-4 md:p-8">
+      <Card variant="elevated" padding="base" className="w-full max-w-md">
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-bold tracking-tight">{t('passwordReset.resetTitle')}</h1>
+          <p className="mb-0 mt-2 text-sm leading-relaxed text-muted-foreground">
+            {t('passwordReset.resetDescription')}
+          </p>
         </div>
 
-        {error && (
-          <div className="mb-md">
-            <Feedback type="error">{error}</Feedback>
-          </div>
-        )}
+        {error ? <Alert type="error" showIcon title={error} className="mb-5" /> : null}
+        {success ? (
+          <Alert type="success" showIcon title={t('passwordReset.resetSuccess')} className="mb-5" />
+        ) : null}
 
-        {success && (
-          <div className="mb-md">
-            <Feedback type="success">{t('passwordReset.resetSuccess')}</Feedback>
-          </div>
-        )}
-
-        {!success && (
-          <form onSubmit={handleSubmit}>
-            <FormField label={t('passwordReset.newPasswordLabel')}>
+        {!success ? (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <FormField label={t('passwordReset.newPasswordLabel')} required hint={t('passwordReset.passwordHint')}>
               <Input
                 type={showPassword ? 'text' : 'password'}
                 aria-label={t('passwordReset.newPasswordLabel')}
@@ -86,21 +80,22 @@ export default function ResetPassword() {
                 onChange={(event) => setNewPassword(event.target.value)}
                 disabled={loading || !token}
                 required
+                autoComplete="new-password"
                 autoFocus={Boolean(token)}
-                suffixIcon={
+                suffix={
                   <IconButton
                     label={showPassword ? t('passwordReset.hidePassword') : t('passwordReset.showPassword')}
-                    icon={showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    icon={showPassword ? <EyeOff /> : <Eye />}
                     variant="ghost"
-                    size="sm"
+                    size="small"
                     disabled={!token}
-                    onClick={() => setShowPassword(!showPassword)}
+                    type="button"
+                    onClick={() => setShowPassword((visible) => !visible)}
                   />
                 }
               />
             </FormField>
-
-            <FormField label={t('passwordReset.confirmPasswordLabel')}>
+            <FormField label={t('passwordReset.confirmPasswordLabel')} required>
               <Input
                 type="password"
                 aria-label={t('passwordReset.confirmPasswordLabel')}
@@ -109,24 +104,25 @@ export default function ResetPassword() {
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 disabled={loading || !token}
                 required
+                autoComplete="new-password"
               />
             </FormField>
-
             <Button
               type="submit"
-              variant="primary"
-              className="login-card__action"
+              variant="solid"
+              color="primary"
+              className="w-full"
               loading={loading}
               disabled={loading || !token}
-              icon={<Lock size={16} />}
+              icon={<Lock />}
             >
               {t('passwordReset.resetButton')}
             </Button>
           </form>
-        )}
+        ) : null}
 
-        <div className="text-center mt-md">
-          <Link to="/login" className="btn-link">
+        <div className="mt-5 text-center">
+          <Link to="/login" className="text-sm font-medium text-primary hover:underline">
             {t('passwordReset.backToLogin')}
           </Link>
         </div>
