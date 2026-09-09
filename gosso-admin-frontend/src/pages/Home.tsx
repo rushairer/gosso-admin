@@ -21,7 +21,7 @@ function QuickCard({ link }: { link: QuickLink }) {
       className="group flex min-h-32 w-full items-center gap-4 rounded-lg border bg-card px-6 py-5 text-left text-card-foreground shadow-surface transition-[border-color,background-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/40 hover:bg-accent/20 hover:shadow-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <span
-        className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary"
+        className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary ring-1 ring-primary/15"
         aria-hidden="true"
       >
         <Icon className="size-5" />
@@ -123,7 +123,7 @@ export default function Home() {
           <Button
             variant="solid"
             color="primary"
-            icon={<ArrowRight />}
+            icon={<ArrowRight className="size-4" />}
             iconPlacement="end"
             onClick={() => navigate(userAdmin ? '/system-management' : '/account-settings/profile')}
           >
@@ -139,7 +139,7 @@ export default function Home() {
           title={t('systemManagement.accessDeniedTitle')}
           description={t('home.adminNotice')}
           action={
-            <Button size="small" icon={<LogOut />} onClick={() => void logout('/')}>
+            <Button size="small" icon={<LogOut className="size-4" />} onClick={() => void logout('/')}>
               {t('home.switchAccount')}
             </Button>
           }

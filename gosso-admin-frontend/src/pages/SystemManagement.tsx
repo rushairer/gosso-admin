@@ -1,12 +1,6 @@
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Key as KeyIcon,
-  User as UserIcon,
-  Shield as ShieldIcon,
-  FileText as AuditIcon,
-  SlidersHorizontal,
-} from 'lucide-react';
+import { FileText, KeyRound, Shield, SlidersHorizontal, Users } from 'lucide-react';
 import { Tabs } from '@gouno/ui/core';
 import { PageHeader } from '@gouno/ui/gouno';
 import ClientsTab from './system-management/ClientsTab';
@@ -35,31 +29,31 @@ export default function SystemManagement() {
     {
       key: 'clients' as const,
       label: t('systemManagement.tabClients'),
-      icon: <KeyIcon aria-hidden="true" size={16} />,
+      icon: <KeyRound aria-hidden="true" className="size-4" />,
       children: <ClientsTab />,
     },
     {
       key: 'users' as const,
       label: t('systemManagement.tabUsers'),
-      icon: <UserIcon aria-hidden="true" size={16} />,
+      icon: <Users aria-hidden="true" className="size-4" />,
       children: <UsersTab />,
     },
     {
       key: 'audit-logs' as const,
       label: t('systemManagement.tabAuditLogs'),
-      icon: <AuditIcon aria-hidden="true" size={16} />,
+      icon: <FileText aria-hidden="true" className="size-4" />,
       children: <AuditLogsTab />,
     },
     {
       key: 'site-settings' as const,
       label: t('site.tabLabel'),
-      icon: <SlidersHorizontal aria-hidden="true" size={16} />,
+      icon: <SlidersHorizontal aria-hidden="true" className="size-4" />,
       children: <SiteSettingsTab />,
     },
     {
       key: 'system' as const,
       label: t('systemManagement.tabSystemStatus'),
-      icon: <ShieldIcon aria-hidden="true" size={16} />,
+      icon: <Shield aria-hidden="true" className="size-4" />,
       children: <SystemStatusTab />,
     },
   ];
