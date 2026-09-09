@@ -90,6 +90,7 @@ jobs:
           EOF
           npm install --package-lock-only --ignore-scripts --legacy-peer-deps
           npm ci --legacy-peer-deps
+          npm run format
           npm run quality
           VITE_APP_BASE_PATH=/identity-admin npm run build
 
@@ -97,7 +98,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add gosso-admin-frontend/vendor/gouno-ui-0.1.0.tgz \
+          git add gosso-admin-frontend/src \
+                  gosso-admin-frontend/vendor/gouno-ui-0.1.0.tgz \
                   gosso-admin-frontend/vendor/gouno-ui-source.txt \
                   gosso-admin-frontend/package-lock.json
           if git diff --cached --quiet; then
@@ -107,5 +109,5 @@ jobs:
           GOUNO_UI_SHA="$(git -C .gouno-ui rev-parse --short=12 HEAD)"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(ui): sync gouno ui ${GOUNO_UI_SHA}"
+          git commit -m "chore(ui): format and sync gouno ui ${GOUNO_UI_SHA}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
