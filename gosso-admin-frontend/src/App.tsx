@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { ToastProvider, PageLoader } from '@gouno/ui';
+import { MessageProvider, Spinner } from '@gouno/ui/core';
 import { SudoProvider } from './components/auth/SudoContext';
 import { routerBasename } from './config/appPaths';
 import { GossoProvider, RequireAdmin, RequireAuth } from '@gosso/client/react';
@@ -18,10 +18,19 @@ const SystemManagement = lazy(() => import('./pages/SystemManagement'));
 const AccountSettings = lazy(() => import('./pages/AccountSettings'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
+function AppLoader() {
+  return (
+    <div className="flex min-h-40 items-center justify-center gap-3 text-sm text-muted-foreground" role="status">
+      <Spinner aria-label="Loading" />
+      <span>Loading…</span>
+    </div>
+  );
+}
+
 function AccountRoute({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   return (
-    <RequireAuth redirectTo={appPath(location.pathname)} fallback={<PageLoader />}>
+    <RequireAuth redirectTo={appPath(location.pathname)} fallback={<AppLoader />}>
       {children}
     </RequireAuth>
   );
@@ -32,7 +41,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return (
     <RequireAdmin
       redirectTo={appPath(location.pathname)}
-      fallback={<PageLoader />}
+      fallback={<AppLoader />}
       unauthorized={<Navigate replace to="/" />}
     >
       {children}
@@ -42,20 +51,18 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <GossoProvider client={gossoClient} initializeSession fallback={<PageLoader />}>
+    <GossoProvider client={gossoClient} initializeSession fallback={<AppLoader />}>
       <ErrorBoundary>
-        <ToastProvider>
+        <MessageProvider>
           <SudoProvider>
             <BrowserRouter basename={routerBasename}>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<AppLoader />}>
                 <Routes>
-                  {/* OIDC flow callbacks and triggers */}
                   <Route path="/callback" element={<Callback />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
 
-                  {/* Regular layouts */}
                   <Route
                     path="/"
                     element={
@@ -89,7 +96,6 @@ export default function App() {
                     }
                   />
 
-                  {/* 404 catch-all */}
                   <Route
                     path="*"
                     element={
@@ -102,7 +108,7 @@ export default function App() {
               </Suspense>
             </BrowserRouter>
           </SudoProvider>
-        </ToastProvider>
+        </MessageProvider>
       </ErrorBoundary>
     </GossoProvider>
   );
