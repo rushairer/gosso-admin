@@ -90,6 +90,16 @@ function accountResponse(page: number): Response {
   } as Response;
 }
 
+function renderUsersTab() {
+  return render(
+    <GossoProvider client={gossoClient as any}>
+      <MessageProvider>
+        <UsersTab />
+      </MessageProvider>
+    </GossoProvider>
+  );
+}
+
 describe('UsersTab pagination', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -100,14 +110,17 @@ describe('UsersTab pagination', () => {
     });
   });
 
+  it('shows a structural table skeleton while the first account request is pending', () => {
+    vi.mocked(apiFetch).mockImplementation(() => new Promise<Response>(() => {}));
+
+    renderUsersTab();
+
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.getAllByRole('columnheader')).toHaveLength(4);
+  });
+
   it('uses the bounded role projection without per-account requests', async () => {
-    render(
-      <GossoProvider client={gossoClient as any}>
-        <MessageProvider>
-          <UsersTab />
-        </MessageProvider>
-      </GossoProvider>
-    );
+    renderUsersTab();
 
     expect(await screen.findByText('Operator 1')).toBeInTheDocument();
     expect(apiFetch).toHaveBeenCalledTimes(1);
@@ -121,5 +134,33 @@ describe('UsersTab pagination', () => {
     });
     expect(await screen.findByText('Operator 2')).toBeInTheDocument();
     expect(apiFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps the current table visible and disables pagination while the next page is loading', async () => {
+    let resolvePageTwo: ((value: Response) => void) | undefined;
+    vi.mocked(apiFetch).mockImplementation((input) => {
+      const url = String(input);
+      if (url.includes('page=2')) {
+        return new Promise<Response>((resolve) => {
+          resolvePageTwo = resolve;
+        });
+      }
+      return Promise.resolve(accountResponse(1));
+    });
+
+    renderUsersTab();
+    expect(await screen.findByText('Operator 1')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /next|下一步/i }));
+
+    await waitFor(() => {
+      expect(apiFetch).toHaveBeenCalledWith('/api/v1/admin/accounts?page=2&page_size=20&include=roles');
+      expect(screen.getByRole('button', { name: /next|下一步/i })).toBeDisabled();
+    });
+    expect(screen.getByText('Operator 1')).toBeInTheDocument();
+    expect(screen.getByRole('table').parentElement).toHaveAttribute('aria-busy', 'true');
+
+    resolvePageTwo?.(accountResponse(2));
+    expect(await screen.findByText('Operator 2')).toBeInTheDocument();
   });
 });

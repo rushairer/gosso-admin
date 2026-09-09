@@ -25,7 +25,6 @@ import {
   IconButton,
   Modal,
   Pagination,
-  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -47,6 +46,7 @@ import { ResetPasswordModal } from './users/ResetPasswordModal';
 import { UserConsentsModal } from './users/UserConsentsModal';
 import { useSudo } from '../../components/auth/SudoContext';
 import { ManagementPanelLead } from './shared';
+import { SystemCollectionLoading } from './loading';
 
 type PendingAction =
   | { type: 'status'; account: Account }
@@ -80,6 +80,8 @@ export default function UsersTab() {
   const [consentsList, setConsentsList] = useState<Consent[]>([]);
   const [consentsLoading, setConsentsLoading] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+
+  const initialLoading = loading && accounts.length === 0;
 
   const handleCreateUser = async (formData: CreateAccountPayload) => {
     await accountService.createAccount(formData);
@@ -294,14 +296,18 @@ export default function UsersTab() {
         />
       ) : null}
 
-      {loading ? (
-        <div
-          className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground"
-          role="status"
-        >
-          <Spinner aria-label={t('users.loadingAccounts')} />
-          <span>{t('users.loadingAccounts')}</span>
-        </div>
+      {initialLoading ? (
+        <SystemCollectionLoading
+          label={t('users.loadingAccounts')}
+          rows={5}
+          showPagination
+          columns={[
+            { header: t('users.colUser'), skeletonClassName: 'h-4 w-48' },
+            { header: t('users.colStatus'), skeletonClassName: 'h-6 w-20' },
+            { header: t('users.colRoles'), skeletonClassName: 'h-6 w-32' },
+            { header: t('users.colActions'), skeletonClassName: 'h-8 w-32', align: 'right' },
+          ]}
+        />
       ) : accounts.length === 0 ? (
         <Empty
           icon={<UserIcon aria-hidden="true" className="size-6 text-muted-foreground" />}
@@ -314,7 +320,7 @@ export default function UsersTab() {
           }
         />
       ) : (
-        <>
+        <div className="flex flex-col gap-3" aria-busy={loading}>
           <Table bordered>
             <TableHeader>
               <TableRow>
@@ -434,8 +440,9 @@ export default function UsersTab() {
             showTotal={(total) => t('users.paginationSummary', { page, total })}
             prevText={t('common.previous')}
             nextText={t('common.next')}
+            disabled={loading}
           />
-        </>
+        </div>
       )}
 
       <CreateUserModal
