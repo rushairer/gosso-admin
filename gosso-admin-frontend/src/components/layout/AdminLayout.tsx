@@ -1,7 +1,20 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Home, LayoutDashboard, LogIn, LogOut, Settings, User } from 'lucide-react';
+import {
+  FileText,
+  Home,
+  Key,
+  KeyRound,
+  Laptop,
+  Lock,
+  LogIn,
+  LogOut,
+  Shield,
+  SlidersHorizontal,
+  User,
+  Users,
+} from 'lucide-react';
 import { useSession } from '@gosso/client/react';
 import { logout, redirectToAuthorize } from '../../auth';
 import { siteSettingsService } from '../../services';
@@ -85,18 +98,18 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   const userName = session.profile?.preferred_username || session.profile?.name || t('nav.notSignedIn');
   const systemItems = [
-    ['clients', t('systemManagement.tabClients')],
-    ['users', t('systemManagement.tabUsers')],
-    ['audit-logs', t('systemManagement.tabAuditLogs')],
-    ['site-settings', t('site.tabLabel')],
-    ['system', t('systemManagement.tabSystemStatus')],
+    { key: 'clients', label: t('systemManagement.tabClients'), icon: <KeyRound aria-hidden="true" /> },
+    { key: 'users', label: t('systemManagement.tabUsers'), icon: <Users aria-hidden="true" /> },
+    { key: 'audit-logs', label: t('systemManagement.tabAuditLogs'), icon: <FileText aria-hidden="true" /> },
+    { key: 'site-settings', label: t('site.tabLabel'), icon: <SlidersHorizontal aria-hidden="true" /> },
+    { key: 'system', label: t('systemManagement.tabSystemStatus'), icon: <Shield aria-hidden="true" /> },
   ];
   const accountItems = [
-    ['profile', t('accountSettings.tabProfile')],
-    ['password', t('accountSettings.tabPassword')],
-    ['mfa', t('accountSettings.tabMFA')],
-    ['passkeys', t('accountSettings.tabPasskeys')],
-    ['sessions', t('accountSettings.tabSessions')],
+    { key: 'profile', label: t('accountSettings.tabProfile'), icon: <User aria-hidden="true" /> },
+    { key: 'password', label: t('accountSettings.tabPassword'), icon: <Lock aria-hidden="true" /> },
+    { key: 'mfa', label: t('accountSettings.tabMFA'), icon: <Shield aria-hidden="true" /> },
+    { key: 'passkeys', label: t('accountSettings.tabPasskeys'), icon: <Key aria-hidden="true" /> },
+    { key: 'sessions', label: t('accountSettings.tabSessions'), icon: <Laptop aria-hidden="true" /> },
   ];
 
   return (
@@ -114,9 +127,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </NavigationGroup>
           {session.loggedIn && session.isAdmin ? (
             <NavigationGroup label={t('nav.systemManagement')}>
-              {systemItems.map(([key, label]) => (
+              {systemItems.map(({ key, label, icon }) => (
                 <NavLink key={key} to={`/system-management/${key}`} className={navigationItemClass} onClick={close}>
-                  <LayoutDashboard />
+                  {icon}
                   <span>{label}</span>
                 </NavLink>
               ))}
@@ -124,9 +137,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           ) : null}
           {session.loggedIn ? (
             <NavigationGroup label={t('nav.accountSettings')}>
-              {accountItems.map(([key, label]) => (
+              {accountItems.map(({ key, label, icon }) => (
                 <NavLink key={key} to={`/account-settings/${key}`} className={navigationItemClass} onClick={close}>
-                  <Settings />
+                  {icon}
                   <span>{label}</span>
                 </NavLink>
               ))}
