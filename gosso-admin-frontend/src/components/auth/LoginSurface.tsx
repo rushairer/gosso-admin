@@ -1,9 +1,9 @@
 import type { CSSProperties, FormEventHandler, ReactNode } from 'react';
-import { Key, Shield } from 'lucide-react';
+import { KeyRound, Shield, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 import type { PublicSiteBranding } from '../../types/api';
-import { Alert, Button, Card, FormField, Input, Tag } from '@gouno/ui/core';
+import { Alert, Button, Card, FormField, Heading, Input, Tag, Text } from '@gouno/ui/core';
 
 interface LoginSurfaceProps {
   branding: PublicSiteBranding;
@@ -31,11 +31,9 @@ interface LoginSurfaceProps {
 
 function DividerLabel({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex items-center justify-center py-1">
-      <div className="absolute inset-0 flex items-center">
-        <span className="w-full border-t" />
-      </div>
-      <div className="relative bg-card px-2 text-xs font-medium uppercase text-muted-foreground">{children}</div>
+    <div className="relative my-5 flex items-center justify-center">
+      <div className="absolute inset-x-0 border-t" />
+      <span className="relative bg-card px-2 text-xs uppercase text-muted-foreground">{children}</span>
     </div>
   );
 }
@@ -89,24 +87,40 @@ export default function LoginSurface({
   return (
     <div
       data-slot="login-surface"
-      className="flex min-h-screen w-full items-center justify-center bg-background bg-cover bg-center p-4 md:p-8"
+      className="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-background bg-cover bg-center p-4 sm:p-8"
       inert={preview}
       aria-hidden={preview || undefined}
       style={{ backgroundImage } as CSSProperties}
     >
-      <Card variant="elevated" padding="base" className="w-full max-w-md bg-card/95 backdrop-blur-xl">
-        <div className="mb-6 text-center">
+      {!backgroundImage ? (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,color-mix(in_srgb,var(--primary)_18%,transparent),transparent_38%),radial-gradient(circle_at_90%_90%,color-mix(in_srgb,var(--muted-foreground)_10%,transparent),transparent_42%)]"
+        />
+      ) : null}
+      <Card
+        variant="elevated"
+        padding="lg"
+        className="relative w-full max-w-md border-border/80 bg-raised/95 backdrop-blur"
+      >
+        <div className="mb-7 text-center">
           {branding.logo_url ? (
             <img
               className="mx-auto mb-4 max-h-14 max-w-40 object-contain"
               src={branding.logo_url}
               alt={branding.product_name}
             />
-          ) : null}
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          ) : (
+            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <ShieldCheck aria-hidden="true" className="size-6" />
+            </div>
+          )}
+          <Heading level={1} className="text-2xl font-bold tracking-tight">
             {branding.login_title || branding.product_name || t('login.title')}
-          </h1>
-          <p className="mb-0 mt-2 text-sm text-muted-foreground">{branding.login_description || t('login.subtitle')}</p>
+          </Heading>
+          <Text tone="muted" size="sm" className="mt-2 leading-relaxed">
+            {branding.login_description || t('login.subtitle')}
+          </Text>
         </div>
 
         {error ? <Alert type="error" showIcon title={error} className="mb-5" /> : null}
@@ -138,7 +152,7 @@ export default function LoginSurface({
                 type="text"
                 inputMode="numeric"
                 maxLength={8}
-                className="text-center text-xl font-bold tracking-widest"
+                className="text-center text-xl font-bold tracking-[0.28em]"
                 placeholder={t('login.verificationCodePlaceholder')}
                 value={mfaCode}
                 onChange={(event) => onMfaCodeChange(event.target.value.replace(/\D/g, ''))}
@@ -151,7 +165,13 @@ export default function LoginSurface({
               {loading ? t('login.verifyLoading') : t('login.verifyButton')}
             </Button>
             <DividerLabel>{t('common.or')}</DividerLabel>
-            <Button type="button" className="w-full" onClick={onPasskeyLogin} loading={passkeyLoading} icon={<Key />}>
+            <Button
+              type="button"
+              className="w-full"
+              onClick={onPasskeyLogin}
+              loading={passkeyLoading}
+              icon={<KeyRound />}
+            >
               {passkeyLoading ? t('login.passkeyLoading') : t('login.passkeyStepUpButton')}
             </Button>
             {onSwitchAccount ? (
@@ -226,7 +246,13 @@ export default function LoginSurface({
               {loading ? t('login.signInLoading') : t('login.signInButton')}
             </Button>
             <DividerLabel>{t('common.or')}</DividerLabel>
-            <Button type="button" className="w-full" onClick={onPasskeyLogin} loading={passkeyLoading} icon={<Key />}>
+            <Button
+              type="button"
+              className="w-full"
+              onClick={onPasskeyLogin}
+              loading={passkeyLoading}
+              icon={<KeyRound />}
+            >
               {passkeyLoading ? t('login.passkeyLoading') : t('login.passkeyButton')}
             </Button>
           </LoginForm>
@@ -238,7 +264,7 @@ export default function LoginSurface({
                 type="text"
                 inputMode="numeric"
                 maxLength={8}
-                className="text-center text-xl font-bold tracking-widest"
+                className="text-center text-xl font-bold tracking-[0.28em]"
                 placeholder={t('login.verificationCodePlaceholder')}
                 value={mfaCode}
                 onChange={(event) => onMfaCodeChange(event.target.value.replace(/\D/g, ''))}
