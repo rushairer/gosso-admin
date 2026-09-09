@@ -25,6 +25,14 @@ The current vendored `gouno-ui-*.tgz` is a distribution artifact, not a second s
 
 When Gouno UI registry releases become the stable distribution mechanism, prefer SemVer dependency upgrades plus the existing quality gates over product-side migration forks.
 
+## Migration Status
+
+The Gosso Admin reverse-migration and design convergence onto canonical Gouno UI is closed as of 2026-09-09. The production application is now a normal consumer of the shared package rather than an active migration target.
+
+Future Gouno UI changes must flow through the synchronization workflow and be handled as normal dependency upgrades: validate exported contracts, run the full product quality gates, and make only the product-side compatibility or fidelity changes required by an intentional upstream contract change.
+
+Do not reopen a broad product-side migration program merely because Gouno UI gains new Showcase examples, documentation, tests, Patterns, or unrelated product fixtures. Reopen migration-level work only for an explicit breaking shared contract or an intentional redesign of the Gosso Admin canonical product language.
+
 ## Normal Admin Page Grammar
 
 Normal routed admin/settings pages use this composition order:
