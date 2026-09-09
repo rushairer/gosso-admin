@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Key, Calendar, Trash2, Plus } from 'lucide-react';
 import { usePasskeys } from '@gosso/client/react';
-import { Alert, Button, Empty, FormField, IconButton, Input, Modal, Spinner, Text } from '@gouno/ui/core';
+import { Alert, Button, Empty, FormField, IconButton, Input, Modal, Text } from '@gouno/ui/core';
 import { useSudo } from '../../components/auth/SudoContext';
 import { logger } from '../../utils/logger';
+import { PasskeysLoading } from './loading';
 import { Section, StatusMessage } from './shared';
 
 interface PendingRemoval {
@@ -21,6 +22,8 @@ export default function PasskeysPanel() {
   const [showPasskeyModal, setShowPasskeyModal] = useState(false);
   const [newPasskeyName, setNewPasskeyName] = useState('');
   const [pendingRemoval, setPendingRemoval] = useState<PendingRemoval | null>(null);
+
+  const initialLoading = loading && passkeys.length === 0 && !error;
 
   const handleOpenAddPasskey = async () => {
     setValidationError(null);
@@ -93,7 +96,13 @@ export default function PasskeysPanel() {
         description={t('passkeys.description')}
         surface="direct"
         actions={
-          <Button variant="solid" color="primary" icon={<Plus />} onClick={() => void handleOpenAddPasskey()}>
+          <Button
+            variant="solid"
+            color="primary"
+            icon={<Plus />}
+            disabled={initialLoading}
+            onClick={() => void handleOpenAddPasskey()}
+          >
             {t('passkeys.addPasskey')}
           </Button>
         }
@@ -115,14 +124,8 @@ export default function PasskeysPanel() {
           ) : null}
           {success ? <StatusMessage message={success} /> : null}
 
-          {loading ? (
-            <div
-              className="flex min-h-40 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground"
-              role="status"
-            >
-              <Spinner aria-label={t('passkeys.loadingPasskeys')} />
-              <span>{t('passkeys.loadingPasskeys')}</span>
-            </div>
+          {initialLoading ? (
+            <PasskeysLoading label={t('passkeys.loadingPasskeys')} />
           ) : passkeys.length === 0 ? (
             <Empty
               icon={<Key aria-hidden="true" className="size-6 text-muted-foreground" />}
@@ -138,6 +141,7 @@ export default function PasskeysPanel() {
             <ul
               className="divide-y overflow-hidden rounded-lg border border-border/80 bg-card"
               aria-label={t('passkeys.title')}
+              aria-busy={loading}
             >
               {passkeys.map((passkey) => (
                 <li
@@ -169,6 +173,7 @@ export default function PasskeysPanel() {
                     icon={<Trash2 />}
                     label={t('passkeys.removePasskey')}
                     onClick={() => setPendingRemoval({ id: passkey.id, name: passkey.name })}
+                    disabled={loading}
                   />
                 </li>
               ))}

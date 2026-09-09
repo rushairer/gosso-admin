@@ -11,12 +11,13 @@ import {
   Input,
   Modal,
   QRCode,
-  Spinner,
+  Skeleton,
   Tag,
   Text,
   useMessage,
 } from '@gouno/ui/core';
 import { useSudo } from '../../components/auth/SudoContext';
+import { MfaLoadingContent } from './loading';
 import { Section, StatusMessage } from './shared';
 
 export default function MFAPanel() {
@@ -83,12 +84,13 @@ export default function MFAPanel() {
     });
   };
 
-  if (loading && !mfaStatus.enabled && !mfaEnrollment) {
+  const initialLoading = loading && !mfaStatus.enabled && !mfaEnrollment;
+
+  if (initialLoading) {
     return (
-      <div className="flex min-h-40 items-center justify-center gap-3 text-sm text-muted-foreground" role="status">
-        <Spinner aria-label={t('mfa.loadingMfa')} />
-        <span>{t('mfa.loadingMfa')}</span>
-      </div>
+      <Section description={t('mfa.description')} actions={<Skeleton className="h-6 w-20" />}>
+        <MfaLoadingContent label={t('mfa.loadingMfa')} />
+      </Section>
     );
   }
 

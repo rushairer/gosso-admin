@@ -8,7 +8,6 @@ import {
   Button,
   Empty,
   Modal,
-  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -18,6 +17,7 @@ import {
   Tag,
 } from '@gouno/ui/core';
 import { parseUserAgent } from '../../utils/format';
+import { SessionsLoading } from './loading';
 import { Section, StatusMessage } from './shared';
 
 export default function SessionsPanel() {
@@ -25,6 +25,8 @@ export default function SessionsPanel() {
   const { sessions, currentSession, loading, error, revoke } = useSessions();
   const [success, setSuccess] = useState<string | null>(null);
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
+
+  const initialLoading = loading && sessions.length === 0 && !error;
 
   const handleRevokeSession = async () => {
     if (!pendingSessionId) return;
@@ -44,68 +46,73 @@ export default function SessionsPanel() {
           {success ? <StatusMessage message={success} /> : null}
           {error ? <Alert type="error" showIcon title={error} /> : null}
 
-          {loading ? (
-            <div
-              className="flex min-h-40 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground"
-              role="status"
-            >
-              <Spinner aria-label={t('common.loading')} />
-              <span>{t('common.loading')}</span>
-            </div>
+          {initialLoading ? (
+            <SessionsLoading
+              label={t('common.loading')}
+              headers={[
+                { label: t('sessions.colDeviceBrowser'), skeletonClassName: 'h-4 w-44' },
+                { label: t('sessions.colIpAddress'), skeletonClassName: 'h-4 w-28' },
+                { label: t('sessions.colLastActive'), skeletonClassName: 'h-4 w-36' },
+                { label: t('sessions.colActions'), skeletonClassName: 'h-8 w-20', align: 'right' },
+              ]}
+            />
           ) : sessions.length === 0 && !error ? (
             <Empty title={t('sessions.noSessionsTitle', { defaultValue: '暂无活跃会话' })} />
           ) : (
-            <Table bordered>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('sessions.colDeviceBrowser')}</TableHead>
-                  <TableHead>{t('sessions.colIpAddress')}</TableHead>
-                  <TableHead>{t('sessions.colLastActive')}</TableHead>
-                  <TableHead className="text-right">{t('sessions.colActions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sessions.map((session) => {
-                  const isCurrent = session.id === currentSession?.id;
-                  return (
-                    <TableRow key={session.id}>
-                      <TableCell>
-                        <div className="flex min-w-52 items-center gap-2">
-                          <Laptop aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
-                          <span className="font-medium">{parseUserAgent(session.user_agent)}</span>
-                          {isCurrent ? <Tag color="success">{t('sessions.currentSession')}</Tag> : null}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
-                          <MapPin aria-hidden="true" className="size-3" />
-                          {session.ip}
-                        </span>
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-                        {new Date(session.last_active_at).toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {isCurrent ? (
-                          <Button size="small" onClick={() => void logout()}>
-                            {t('sessions.signOutButton')}
-                          </Button>
-                        ) : (
-                          <Button
-                            size="small"
-                            variant="solid"
-                            color="error"
-                            onClick={() => setPendingSessionId(session.id)}
-                          >
-                            {t('sessions.revokeButton')}
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            <div aria-busy={loading}>
+              <Table bordered>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t('sessions.colDeviceBrowser')}</TableHead>
+                    <TableHead>{t('sessions.colIpAddress')}</TableHead>
+                    <TableHead>{t('sessions.colLastActive')}</TableHead>
+                    <TableHead className="text-right">{t('sessions.colActions')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sessions.map((session) => {
+                    const isCurrent = session.id === currentSession?.id;
+                    return (
+                      <TableRow key={session.id}>
+                        <TableCell>
+                          <div className="flex min-w-52 items-center gap-2">
+                            <Laptop aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+                            <span className="font-medium">{parseUserAgent(session.user_agent)}</span>
+                            {isCurrent ? <Tag color="success">{t('sessions.currentSession')}</Tag> : null}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
+                            <MapPin aria-hidden="true" className="size-3" />
+                            {session.ip}
+                          </span>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                          {new Date(session.last_active_at).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {isCurrent ? (
+                            <Button size="small" onClick={() => void logout()} disabled={loading}>
+                              {t('sessions.signOutButton')}
+                            </Button>
+                          ) : (
+                            <Button
+                              size="small"
+                              variant="solid"
+                              color="error"
+                              onClick={() => setPendingSessionId(session.id)}
+                              disabled={loading}
+                            >
+                              {t('sessions.revokeButton')}
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </div>
       </Section>
