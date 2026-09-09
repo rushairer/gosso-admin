@@ -10,22 +10,32 @@ import {
   Unlock as UnlockIcon,
   CheckSquare as ConsentIcon,
   RotateCcw as ResetMfaIcon,
+  MoreHorizontal,
 } from 'lucide-react';
 import { useUserProfile } from '@gosso/client/react';
 import {
+  Alert,
   Button,
-  ButtonGroup,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Empty,
   IconButton,
-  AsyncState,
-  DataTable,
-  EmptyState,
-  PanelHeader,
-  StatusBadge,
-  TableSkeleton,
+  Modal,
+  Pagination,
+  Spinner,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Tag,
-  useConfirm,
-  useToast,
-} from '@gouno/ui';
+  Text,
+  useMessage,
+} from '@gouno/ui/core';
 
 import { accountService } from '../../services';
 import type { Account, Consent } from '../../types/api';
@@ -36,10 +46,18 @@ import { AssignRolesModal } from './users/AssignRolesModal';
 import { ResetPasswordModal } from './users/ResetPasswordModal';
 import { UserConsentsModal } from './users/UserConsentsModal';
 import { useSudo } from '../../components/auth/SudoContext';
+import { ManagementPanelLead } from './shared';
+
+type PendingAction =
+  | { type: 'status'; account: Account }
+  | { type: 'unlock'; account: Account }
+  | { type: 'reset-mfa'; account: Account }
+  | { type: 'delete'; account: Account }
+  | null;
 
 export default function UsersTab() {
   const { t } = useTranslation();
-  const { showSuccess, showError } = useToast();
+  const message = useMessage();
   const { requireSudo } = useSudo();
   const {
     accounts,
@@ -52,11 +70,8 @@ export default function UsersTab() {
     totalAccounts,
     refresh: fetchAccounts,
   } = useAdminUsers();
-  const { confirm, confirmDialog } = useConfirm();
-
   const currentAdmin = useUserProfile();
 
-  // Modals state
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -64,125 +79,93 @@ export default function UsersTab() {
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [consentsList, setConsentsList] = useState<Consent[]>([]);
   const [consentsLoading, setConsentsLoading] = useState(false);
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
   const handleCreateUser = async (formData: CreateAccountPayload) => {
     await accountService.createAccount(formData);
-    showSuccess(t('users.userCreatedSuccess'));
-    fetchAccounts();
+    message.success(t('users.userCreatedSuccess'));
+    void fetchAccounts();
   };
 
-  const handleToggleUserStatus = async (acc: Account) => {
-    const isActivating = acc.status !== 'active';
-    const newStatus = isActivating ? 'active' : 'suspended';
-    if (
-      !(await confirm({
-        title: isActivating ? t('users.activateUser') : t('users.suspendUser'),
-        message: isActivating
-          ? t('users.enableConfirmMessage', { username: acc.display_name || acc.username })
-          : t('users.disableConfirmMessage', { username: acc.display_name || acc.username }),
-      }))
-    )
-      return;
+  const performStatusToggle = async (account: Account) => {
+    const isActivating = account.status !== 'active';
     try {
-      await accountService.updateAccountStatus(acc.id, newStatus);
-      showSuccess(isActivating ? t('users.userActivatedSuccess') : t('users.userSuspendedSuccess'));
-      fetchAccounts();
+      await accountService.updateAccountStatus(account.id, isActivating ? 'active' : 'suspended');
+      message.success(isActivating ? t('users.userActivatedSuccess') : t('users.userSuspendedSuccess'));
+      void fetchAccounts();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('users.statusUpdateFailed');
-      showError(message);
+      message.error(err instanceof Error ? err.message : t('users.statusUpdateFailed'));
     }
   };
 
-  const handleDeleteUser = async (accountId: string) => {
-    const targetUser = accounts.find((a) => a.id === accountId);
-    if (
-      !(await confirm({
-        title: t('users.deleteUserConfirmTitle'),
-        message: t('users.deleteUserConfirmMessage', {
-          username: targetUser?.display_name || targetUser?.username || accountId,
-        }),
-      }))
-    )
-      return;
+  const performDeleteUser = async (account: Account) => {
     await requireSudo({
       actionTitle: t('users.deleteUserConfirmTitle'),
       onSuccess: async () => {
         try {
-          await accountService.deleteAccount(accountId);
-          showSuccess(t('users.userDeletedSuccess'));
-          fetchAccounts();
+          await accountService.deleteAccount(account.id);
+          message.success(t('users.userDeletedSuccess'));
+          void fetchAccounts();
         } catch (err: unknown) {
-          const message = err instanceof Error ? err.message : t('users.deleteUserFailed');
-          showError(message);
+          message.error(err instanceof Error ? err.message : t('users.deleteUserFailed'));
         }
       },
     });
   };
 
-  const handleClearLockout = async (accountId: string) => {
-    const targetUser = accounts.find((a) => a.id === accountId);
-    if (
-      !(await confirm({
-        title: t('users.unlockAccount'),
-        message: t('users.clearLockoutConfirmMessage', {
-          username: targetUser?.display_name || targetUser?.username || accountId,
-        }),
-      }))
-    )
-      return;
+  const performClearLockout = async (account: Account) => {
     try {
-      await accountService.clearLockout(accountId);
-      showSuccess(t('users.lockoutClearedSuccess'));
-      fetchAccounts();
+      await accountService.clearLockout(account.id);
+      message.success(t('users.lockoutClearedSuccess'));
+      void fetchAccounts();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('users.unlockAccountFailed');
-      showError(message);
+      message.error(err instanceof Error ? err.message : t('users.unlockAccountFailed'));
     }
   };
 
-  const handleResetUserMFA = async (acc: Account) => {
-    if (
-      !(await confirm({
-        title: t('users.resetMfaButton'),
-        message: t('users.resetMfaConfirmMessage', { username: acc.display_name || acc.username }),
-      }))
-    )
-      return;
+  const performResetMfa = async (account: Account) => {
     await requireSudo({
       actionTitle: t('users.resetMfaButton'),
       onSuccess: async () => {
         try {
-          await accountService.resetMfa(acc.id);
-          showSuccess(t('users.mfaResetSuccess', { username: acc.display_name || acc.username }));
-          fetchAccounts();
+          await accountService.resetMfa(account.id);
+          message.success(t('users.mfaResetSuccess', { username: account.display_name || account.username }));
+          void fetchAccounts();
         } catch (err: unknown) {
-          const message = err instanceof Error ? err.message : t('users.resetMfaFailed');
-          showError(message);
+          message.error(err instanceof Error ? err.message : t('users.resetMfaFailed'));
         }
       },
     });
   };
 
-  const handleOpenRoleModal = (acc: Account) => {
-    setSelectedAccount(acc);
+  const confirmPendingAction = async () => {
+    const action = pendingAction;
+    if (!action) return;
+    setPendingAction(null);
+    if (action.type === 'status') return performStatusToggle(action.account);
+    if (action.type === 'unlock') return performClearLockout(action.account);
+    if (action.type === 'reset-mfa') return performResetMfa(action.account);
+    return performDeleteUser(action.account);
+  };
+
+  const handleOpenRoleModal = (account: Account) => {
+    setSelectedAccount(account);
     setShowRoleModal(true);
   };
 
   const handleAssignRole = async (roleId: string) => {
     if (!selectedAccount) return;
     await requireSudo({
-      actionTitle: t('users.rolesModalTitle', {
-        name: selectedAccount.display_name || selectedAccount.username,
-      }),
+      actionTitle: t('users.rolesModalTitle', { name: selectedAccount.display_name || selectedAccount.username }),
       onSuccess: async () => {
         try {
           await accountService.assignRole(selectedAccount.id, roleId);
-          showSuccess(t('users.roleAssignedSuccess'));
+          message.success(t('users.roleAssignedSuccess'));
           const updatedRoles = await accountService.fetchAccountRoles(selectedAccount.id);
           setSelectedAccount((prev) => (prev ? { ...prev, roles: updatedRoles } : null));
-          fetchAccounts();
+          void fetchAccounts();
         } catch (err: unknown) {
-          showError(err instanceof Error ? err.message : t('users.assignRoleFailed'));
+          message.error(err instanceof Error ? err.message : t('users.assignRoleFailed'));
           throw err;
         }
       },
@@ -192,25 +175,23 @@ export default function UsersTab() {
   const handleRemoveRole = async (roleId: string) => {
     if (!selectedAccount) return;
     await requireSudo({
-      actionTitle: t('users.rolesModalTitle', {
-        name: selectedAccount.display_name || selectedAccount.username,
-      }),
+      actionTitle: t('users.rolesModalTitle', { name: selectedAccount.display_name || selectedAccount.username }),
       onSuccess: async () => {
         try {
           await accountService.removeRole(selectedAccount.id, roleId);
-          showSuccess(t('users.roleRemovedSuccess'));
+          message.success(t('users.roleRemovedSuccess'));
           const updatedRoles = await accountService.fetchAccountRoles(selectedAccount.id);
           setSelectedAccount((prev) => (prev ? { ...prev, roles: updatedRoles } : null));
-          fetchAccounts();
+          void fetchAccounts();
         } catch (err: unknown) {
-          showError(err instanceof Error ? err.message : t('users.removeRoleFailed'));
+          message.error(err instanceof Error ? err.message : t('users.removeRoleFailed'));
         }
       },
     });
   };
 
-  const handleOpenPasswordModal = (acc: Account) => {
-    setSelectedAccount(acc);
+  const handleOpenPasswordModal = (account: Account) => {
+    setSelectedAccount(account);
     setShowPasswordModal(true);
   };
 
@@ -220,20 +201,19 @@ export default function UsersTab() {
       actionTitle: t('users.resetPasswordTitle', { defaultValue: '重置成员密码' }),
       onSuccess: async () => {
         await accountService.resetPassword(selectedAccount.id, password);
-        showSuccess(t('users.passwordUpdatedSuccess'));
+        message.success(t('users.passwordUpdatedSuccess'));
       },
     });
   };
 
-  const handleOpenConsentModal = async (acc: Account) => {
-    setSelectedAccount(acc);
+  const handleOpenConsentModal = async (account: Account) => {
+    setSelectedAccount(account);
     setShowConsentModal(true);
     setConsentsLoading(true);
     try {
-      const list = await accountService.fetchAccountConsents(acc.id);
-      setConsentsList(list);
+      setConsentsList(await accountService.fetchAccountConsents(account.id));
     } catch (err: unknown) {
-      showError(err instanceof Error ? err.message : t('users.loadConsentsFailed'));
+      message.error(err instanceof Error ? err.message : t('users.loadConsentsFailed'));
     } finally {
       setConsentsLoading(false);
     }
@@ -243,23 +223,56 @@ export default function UsersTab() {
     if (!selectedAccount) return;
     try {
       await accountService.revokeConsent(selectedAccount.id, clientId);
-      showSuccess(t('users.consentRevokedSuccess'));
-      const updated = await accountService.fetchAccountConsents(selectedAccount.id);
-      setConsentsList(updated);
+      message.success(t('users.consentRevokedSuccess'));
+      setConsentsList(await accountService.fetchAccountConsents(selectedAccount.id));
     } catch (err: unknown) {
-      showError(err instanceof Error ? err.message : t('users.revokeConsentFailed'));
+      message.error(err instanceof Error ? err.message : t('users.revokeConsentFailed'));
     }
   };
 
+  const actionTitle = pendingAction
+    ? pendingAction.type === 'status'
+      ? pendingAction.account.status === 'active'
+        ? t('users.suspendUser')
+        : t('users.activateUser')
+      : pendingAction.type === 'unlock'
+        ? t('users.unlockAccount')
+        : pendingAction.type === 'reset-mfa'
+          ? t('users.resetMfaButton')
+          : t('users.deleteUserConfirmTitle')
+    : '';
+
+  const actionDescription = pendingAction
+    ? pendingAction.type === 'status'
+      ? pendingAction.account.status === 'active'
+        ? t('users.disableConfirmMessage', {
+            username: pendingAction.account.display_name || pendingAction.account.username,
+          })
+        : t('users.enableConfirmMessage', {
+            username: pendingAction.account.display_name || pendingAction.account.username,
+          })
+      : pendingAction.type === 'unlock'
+        ? t('users.clearLockoutConfirmMessage', {
+            username: pendingAction.account.display_name || pendingAction.account.username,
+          })
+        : pendingAction.type === 'reset-mfa'
+          ? t('users.resetMfaConfirmMessage', {
+              username: pendingAction.account.display_name || pendingAction.account.username,
+            })
+          : t('users.deleteUserConfirmMessage', {
+              username: pendingAction.account.display_name || pendingAction.account.username,
+            })
+    : '';
+
   return (
-    <div>
-      <PanelHeader
-        title={t('users.title')}
+    <div className="flex flex-col gap-5">
+      <ManagementPanelLead
         description={t('users.description')}
-        action={
+        actions={
           <Button
-            variant="primary"
-            icon={<PlusIcon size={16} />}
+            variant="solid"
+            color="primary"
+            icon={<PlusIcon />}
             disabled={loading}
             onClick={() => setShowCreateUserModal(true)}
           >
@@ -267,156 +280,169 @@ export default function UsersTab() {
           </Button>
         }
       />
-      <AsyncState
-        loading={loading}
-        loadingMessage={t('users.loadingAccounts')}
-        skeleton={<TableSkeleton rows={5} columns={4} />}
-        error={error}
-        retryLabel={t('common.retry')}
-        onRetry={() => void fetchAccounts()}
-        empty={accounts.length === 0}
-        emptyState={
-          <EmptyState icon={<UserIcon />} title={t('users.noUsersTitle')} description={t('users.noUsersDescription')} />
-        }
-      >
-        <DataTable>
-          <thead>
-            <tr>
-              <th>{t('users.colUser')}</th>
-              <th>{t('users.colStatus')}</th>
-              <th>{t('users.colRoles')}</th>
-              <th className="col-actions">{t('users.colActions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {accounts.map((acc) => (
-              <tr key={acc.id}>
-                <td>
-                  <div className="font-bold text-sm text-[var(--color-text-main)]">
-                    {acc.display_name || acc.username}
-                  </div>
-                  <div className="text-xs text-[var(--color-text-muted)] font-mono">
-                    {acc.username} ({acc.id})
-                  </div>
-                </td>
-                <td>
-                  <div className="flex flex-col gap-1 items-start">
-                    {acc.status === 'active' ? (
-                      <StatusBadge tone="success">{t('users.statusActive')}</StatusBadge>
-                    ) : (
-                      <StatusBadge tone="danger">{t('users.statusSuspended')}</StatusBadge>
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <div className="flex flex-row flex-wrap gap-1.5">
-                    {acc.roles && acc.roles.length > 0 ? (
-                      acc.roles.map((role) => (
-                        <Tag key={role.id} title={role.description}>
-                          <ShieldIcon size={10} className="mr-1 inline shrink-0" />
-                          {role.name}
-                        </Tag>
-                      ))
-                    ) : (
-                      <span className="text-sm text-[var(--color-text-muted)] italic">
-                        {t('users.noRolesAssigned')}
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <ButtonGroup compact>
-                    <IconButton
-                      variant="secondary"
-                      size="sm"
-                      icon={<ShieldIcon size={14} />}
-                      label={t('users.manageRoles')}
-                      onClick={() => handleOpenRoleModal(acc)}
-                    />
-                    <IconButton
-                      variant="secondary"
-                      size="sm"
-                      icon={<ConsentIcon size={14} />}
-                      label={t('users.manageConsents')}
-                      onClick={() => handleOpenConsentModal(acc)}
-                    />
-                    <IconButton
-                      variant="secondary"
-                      size="sm"
-                      icon={<KeyIcon size={14} />}
-                      label={t('users.changePassword')}
-                      onClick={() => handleOpenPasswordModal(acc)}
-                      disabled={acc.id === currentAdmin?.sub}
-                    />
-                    <IconButton
-                      variant="secondary"
-                      size="sm"
-                      icon={
-                        acc.status === 'active' ? (
-                          <LockIcon size={14} className="text-warning" />
-                        ) : (
-                          <UnlockIcon size={14} className="text-success" />
-                        )
-                      }
-                      label={acc.status === 'active' ? t('users.suspendUser') : t('users.activateUser')}
-                      onClick={() => handleToggleUserStatus(acc)}
-                      disabled={acc.id === currentAdmin?.sub}
-                    />
-                    <IconButton
-                      variant="secondary"
-                      size="sm"
-                      icon={<UnlockIcon size={14} />}
-                      label={t('users.unlockAccount')}
-                      onClick={() => handleClearLockout(acc.id)}
-                      disabled={acc.id === currentAdmin?.sub}
-                    />
-                    <IconButton
-                      variant="secondary"
-                      size="sm"
-                      icon={<ResetMfaIcon size={14} />}
-                      label={t('users.resetMfaButton')}
-                      onClick={() => handleResetUserMFA(acc)}
-                      disabled={acc.id === currentAdmin?.sub}
-                    />
-                    <IconButton
-                      variant="danger"
-                      size="sm"
-                      icon={<TrashIcon size={14} />}
-                      label={t('users.deleteUser')}
-                      onClick={() => handleDeleteUser(acc.id)}
-                      disabled={acc.id === currentAdmin?.sub}
-                    />
-                  </ButtonGroup>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </DataTable>
-        <div className="table-pagination">
-          <div className="table-pagination-info">{t('users.paginationSummary', { page, total: totalAccounts })}</div>
-          <ButtonGroup compact>
-            <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-              {t('common.previous')}
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled={page * pageSize >= totalAccounts}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              {t('common.next')}
-            </Button>
-          </ButtonGroup>
-        </div>
-      </AsyncState>
 
-      {/* Modals */}
+      {error ? (
+        <Alert
+          type="error"
+          showIcon
+          title={error}
+          action={
+            <Button size="small" onClick={() => void fetchAccounts()}>
+              {t('common.retry')}
+            </Button>
+          }
+        />
+      ) : null}
+
+      {loading ? (
+        <div
+          className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground"
+          role="status"
+        >
+          <Spinner aria-label={t('users.loadingAccounts')} />
+          <span>{t('users.loadingAccounts')}</span>
+        </div>
+      ) : accounts.length === 0 ? (
+        <Empty
+          icon={<UserIcon aria-hidden="true" className="size-6 text-muted-foreground" />}
+          title={t('users.noUsersTitle')}
+          description={t('users.noUsersDescription')}
+          action={
+            <Button icon={<PlusIcon />} onClick={() => setShowCreateUserModal(true)}>
+              {t('users.addUser')}
+            </Button>
+          }
+        />
+      ) : (
+        <>
+          <Table bordered>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('users.colUser')}</TableHead>
+                <TableHead>{t('users.colStatus')}</TableHead>
+                <TableHead>{t('users.colRoles')}</TableHead>
+                <TableHead className="text-right">{t('users.colActions')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {accounts.map((account) => {
+                const isSelf = account.id === currentAdmin?.sub;
+                return (
+                  <TableRow key={account.id}>
+                    <TableCell className="min-w-64 whitespace-normal">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-semibold">{account.display_name || account.username}</span>
+                        {isSelf ? <Tag color="primary">{t('nav.administrator')}</Tag> : null}
+                      </div>
+                      <Text size="xs" tone="muted" className="mt-1 font-mono">
+                        {account.username} · {account.id}
+                      </Text>
+                    </TableCell>
+                    <TableCell>
+                      <Tag color={account.status === 'active' ? 'success' : 'error'}>
+                        {account.status === 'active' ? t('users.statusActive') : t('users.statusSuspended')}
+                      </Tag>
+                    </TableCell>
+                    <TableCell className="min-w-48 whitespace-normal">
+                      <div className="flex flex-wrap gap-1.5">
+                        {account.roles?.length ? (
+                          account.roles.map((role) => (
+                            <Tag
+                              key={role.id}
+                              color={role.name === 'admin' ? 'warning' : 'default'}
+                              title={role.description}
+                            >
+                              {role.name}
+                            </Tag>
+                          ))
+                        ) : (
+                          <Text size="sm" tone="muted">
+                            {t('users.noRolesAssigned')}
+                          </Text>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex min-w-max flex-nowrap items-center justify-end gap-1">
+                        <IconButton
+                          label={t('users.manageRoles')}
+                          variant="ghost"
+                          icon={<ShieldIcon />}
+                          onClick={() => handleOpenRoleModal(account)}
+                        />
+                        <IconButton
+                          label={t('users.changePassword')}
+                          variant="ghost"
+                          icon={<KeyIcon />}
+                          onClick={() => handleOpenPasswordModal(account)}
+                          disabled={isSelf}
+                        />
+                        <IconButton
+                          label={account.status === 'active' ? t('users.suspendUser') : t('users.activateUser')}
+                          variant="ghost"
+                          color={account.status === 'active' ? 'error' : 'primary'}
+                          icon={account.status === 'active' ? <LockIcon /> : <UnlockIcon />}
+                          onClick={() => setPendingAction({ type: 'status', account })}
+                          disabled={isSelf}
+                        />
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <IconButton label={t('users.colActions')} variant="ghost" icon={<MoreHorizontal />} />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onSelect={() => void handleOpenConsentModal(account)}>
+                              <ConsentIcon />
+                              {t('users.manageConsents')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              disabled={isSelf}
+                              onSelect={() => setPendingAction({ type: 'unlock', account })}
+                            >
+                              <UnlockIcon />
+                              {t('users.unlockAccount')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              disabled={isSelf}
+                              onSelect={() => setPendingAction({ type: 'reset-mfa', account })}
+                            >
+                              <ResetMfaIcon />
+                              {t('users.resetMfaButton')}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              variant="destructive"
+                              disabled={isSelf}
+                              onSelect={() => setPendingAction({ type: 'delete', account })}
+                            >
+                              <TrashIcon />
+                              {t('users.deleteUser')}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+          <Pagination
+            page={page}
+            total={totalAccounts}
+            pageSize={pageSize}
+            onChange={(nextPage) => setPage(nextPage)}
+            showTotal={(total) => t('users.paginationSummary', { page, total })}
+            prevText={t('common.previous')}
+            nextText={t('common.next')}
+          />
+        </>
+      )}
+
       <CreateUserModal
         isOpen={showCreateUserModal}
         onClose={() => setShowCreateUserModal(false)}
         onSubmit={handleCreateUser}
       />
-
       <AssignRolesModal
         isOpen={showRoleModal}
         onClose={() => setShowRoleModal(false)}
@@ -426,14 +452,12 @@ export default function UsersTab() {
         onAssignRole={handleAssignRole}
         onRemoveRole={handleRemoveRole}
       />
-
       <ResetPasswordModal
         isOpen={showPasswordModal}
         onClose={() => setShowPasswordModal(false)}
         account={selectedAccount}
         onSubmit={handleResetPassword}
       />
-
       <UserConsentsModal
         isOpen={showConsentModal}
         onClose={() => setShowConsentModal(false)}
@@ -444,7 +468,21 @@ export default function UsersTab() {
         onRevokeConsent={handleRevokeConsent}
       />
 
-      {confirmDialog}
+      <Modal
+        open={Boolean(pendingAction)}
+        title={actionTitle}
+        description={actionDescription}
+        onOpenChange={(next) => {
+          if (!next) setPendingAction(null);
+        }}
+        onOk={() => void confirmPendingAction()}
+        okText={t('common.continue')}
+        cancelText={t('common.cancel')}
+        okButtonProps={{
+          variant: 'solid',
+          color: pendingAction?.type === 'unlock' ? 'primary' : 'error',
+        }}
+      />
     </div>
   );
 }

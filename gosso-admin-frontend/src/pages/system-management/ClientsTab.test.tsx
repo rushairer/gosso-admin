@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ToastProvider } from '@gouno/ui';
+import { MessageProvider } from '@gouno/ui/core';
 import { apiFetch } from '../../auth';
 import ClientsTab from './ClientsTab';
 
@@ -69,9 +69,9 @@ describe('ClientsTab', () => {
     vi.mocked(apiFetch).mockResolvedValue({ ok: true, json: async () => ({ data: [] }) } as Response);
 
     render(
-      <ToastProvider>
+      <MessageProvider>
         <ClientsTab />
-      </ToastProvider>
+      </MessageProvider>
     );
 
     expect(await screen.findByText(/No Clients Registered|暂无已注册的客户端/i)).toBeInTheDocument();
@@ -84,9 +84,9 @@ describe('ClientsTab', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ data: [] }) } as Response);
 
     render(
-      <ToastProvider>
+      <MessageProvider>
         <ClientsTab />
-      </ToastProvider>
+      </MessageProvider>
     );
 
     const retry = await screen.findByRole('button', { name: /retry|重试/i });

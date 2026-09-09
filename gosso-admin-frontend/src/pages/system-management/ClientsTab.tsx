@@ -6,23 +6,27 @@ import {
   Trash2 as TrashIcon,
   Key as KeyIcon,
   Copy as CopyIcon,
+  RotateCcw,
 } from 'lucide-react';
 import { clientService } from '../../services';
 import type { OAuth2Client } from '../../types/api';
 import {
+  Alert,
   Button,
-  ButtonGroup,
-  AsyncState,
-  DataTable,
-  EmptyState,
+  Empty,
   IconButton,
-  PanelHeader,
-  StatusBadge,
-  TableSkeleton,
+  Modal,
+  Spinner,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Tag,
-  useConfirm,
-  useToast,
-} from '@gouno/ui';
+  Text,
+  useMessage,
+} from '@gouno/ui/core';
 
 import { ClientEditorModal } from './clients/ClientEditorModal';
 import { ClientSecretModal } from './clients/ClientSecretModal';
@@ -34,8 +38,11 @@ import {
 } from '../../features/clients/clientForm';
 import { useClients } from '../../features/clients/useClients';
 import { useSudo } from '../../components/auth/SudoContext';
+import { ManagementPanelLead } from './shared';
 
 const clientScopeOptions = ['openid', 'profile', 'email', 'admin'];
+
+type PendingAction = { type: 'delete'; client: OAuth2Client } | { type: 'rotate'; client: OAuth2Client } | null;
 
 function isAdminScope(scope: string) {
   return scope === 'admin' || scope.startsWith('admin:');
@@ -43,17 +50,13 @@ function isAdminScope(scope: string) {
 
 export default function ClientsTab() {
   const { t } = useTranslation();
-  const { showSuccess, showError } = useToast();
+  const message = useMessage();
   const { requireSudo } = useSudo();
   const { clients, loading, error, refresh: fetchClients } = useClients(t('clients.errorLoadingClients'));
-  const { confirm, confirmDialog } = useConfirm();
 
-  // Client Modal State
   const [showClientModal, setShowClientModal] = useState(false);
   const [editingClient, setEditingClient] = useState<OAuth2Client | null>(null);
   const [clientForm, setClientForm] = useState(defaultClientForm);
-
-  // Client Secret Modal State
   const [showSecretModal, setShowSecretModal] = useState(false);
   const [newClientDetails, setNewClientDetails] = useState<{
     client_id: string;
@@ -61,13 +64,14 @@ export default function ClientsTab() {
     name: string;
   } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
   const handleCopyUri = async (uri: string) => {
     try {
       await navigator.clipboard.writeText(uri);
-      showSuccess(t('common.copied', { defaultValue: '已复制到剪贴板' }));
+      message.success(t('common.copied', { defaultValue: '已复制到剪贴板' }));
     } catch {
-      showError(t('common.copyFailed', { defaultValue: '复制失败' }));
+      message.error(t('common.copyFailed', { defaultValue: '复制失败' }));
     }
   };
 
@@ -82,11 +86,11 @@ export default function ClientsTab() {
     setShowClientModal(true);
   };
 
-  const handleClientFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleClientFormSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     const payload = clientPayloadFromForm(clientForm);
     if (!payload.name || payload.redirect_uris.length === 0) {
-      showError(t('clients.nameRedirectRequired'));
+      message.error(t('clients.nameRedirectRequired'));
       return;
     }
 
@@ -94,11 +98,10 @@ export default function ClientsTab() {
       if (editingClient) {
         await clientService.updateClient(editingClient.client_id, payload);
         setShowClientModal(false);
-        fetchClients();
+        void fetchClients();
       } else {
         const result = await clientService.createClient(payload);
         setShowClientModal(false);
-
         if (clientForm.is_confidential && result.client_secret) {
           setNewClientDetails({
             client_id: result.client.client_id,
@@ -107,48 +110,51 @@ export default function ClientsTab() {
           });
           setShowSecretModal(true);
         } else {
-          showSuccess(t('clients.clientRegisteredSuccess'));
+          message.success(t('clients.clientRegisteredSuccess'));
         }
-        fetchClients();
+        void fetchClients();
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('clients.errorSavingClient');
-      showError(message);
+      message.error(err instanceof Error ? err.message : t('clients.errorSavingClient'));
     }
   };
 
-  const handleDeleteClient = async (clientId: string) => {
-    if (!(await confirm({ title: t('clients.deleteConfirmTitle'), message: t('clients.deleteConfirmMessage') })))
-      return;
-    await requireSudo({
-      actionTitle: t('clients.deleteConfirmTitle'),
-      onSuccess: async () => {
-        try {
-          await clientService.deleteClient(clientId);
-          fetchClients();
-        } catch (err: unknown) {
-          const message = err instanceof Error ? err.message : t('clients.errorDeletingClient');
-          showError(message);
-        }
-      },
-    });
-  };
+  const confirmPendingAction = async () => {
+    const action = pendingAction;
+    if (!action) return;
+    setPendingAction(null);
 
-  const handleRotateSecret = async (client: OAuth2Client) => {
-    if (!client.is_confidential) return;
-    if (!(await confirm({ title: t('clients.rotateSecretTitle'), message: t('clients.rotateSecretMessage') }))) return;
+    if (action.type === 'delete') {
+      await requireSudo({
+        actionTitle: t('clients.deleteConfirmTitle'),
+        onSuccess: async () => {
+          try {
+            await clientService.deleteClient(action.client.client_id);
+            void fetchClients();
+          } catch (err: unknown) {
+            message.error(err instanceof Error ? err.message : t('clients.errorDeletingClient'));
+          }
+        },
+      });
+      return;
+    }
+
+    if (!action.client.is_confidential) return;
     await requireSudo({
       actionTitle: t('clients.rotateSecretTitle'),
       onSuccess: async () => {
         try {
-          const result = await clientService.rotateSecret(client.client_id);
-          setNewClientDetails({ client_id: result.client_id, client_secret: result.client_secret, name: client.name });
+          const result = await clientService.rotateSecret(action.client.client_id);
+          setNewClientDetails({
+            client_id: result.client_id,
+            client_secret: result.client_secret,
+            name: action.client.name,
+          });
           setShowSecretModal(true);
-          showSuccess(t('clients.secretRotatedSuccess'));
-          fetchClients();
+          message.success(t('clients.secretRotatedSuccess'));
+          void fetchClients();
         } catch (err: unknown) {
-          const message = err instanceof Error ? err.message : t('clients.errorRotatingSecret');
-          showError(message);
+          message.error(err instanceof Error ? err.message : t('clients.errorRotatingSecret'));
         }
       },
     });
@@ -156,7 +162,7 @@ export default function ClientsTab() {
 
   const copySecret = () => {
     if (!newClientDetails?.client_secret) return;
-    navigator.clipboard.writeText(newClientDetails.client_secret);
+    void navigator.clipboard.writeText(newClientDetails.client_secret);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -166,14 +172,14 @@ export default function ClientsTab() {
   };
 
   return (
-    <div>
-      <PanelHeader
-        title={t('clients.title')}
+    <div className="flex flex-col gap-5">
+      <ManagementPanelLead
         description={t('clients.description')}
-        action={
+        actions={
           <Button
-            variant="primary"
-            icon={<PlusIcon size={16} />}
+            variant="solid"
+            color="primary"
+            icon={<PlusIcon />}
             disabled={loading}
             onClick={() => handleOpenClientModal(null)}
           >
@@ -181,127 +187,130 @@ export default function ClientsTab() {
           </Button>
         }
       />
-      <AsyncState
-        loading={loading}
-        loadingMessage={t('clients.loadingClients')}
-        skeleton={<TableSkeleton rows={5} columns={6} />}
-        error={error}
-        retryLabel={t('common.retry')}
-        onRetry={() => void fetchClients()}
-        empty={clients.length === 0}
-        emptyState={
-          <EmptyState
-            icon={<KeyIcon />}
-            title={t('clients.noClientsTitle')}
-            description={t('clients.noClientsDescription')}
-          />
-        }
-      >
-        <DataTable>
-          <thead>
-            <tr>
-              <th>{t('clients.colNameId')}</th>
-              <th>{t('clients.colType')}</th>
-              <th>{t('clients.colRedirectUris')}</th>
-              <th>{t('clients.colGrantTypes')}</th>
-              <th>{t('clients.colScopes')}</th>
-              <th className="col-w-actions">{t('clients.colActions')}</th>
-            </tr>
-          </thead>
-          <tbody>
+
+      {error ? (
+        <Alert
+          type="error"
+          showIcon
+          title={error}
+          action={
+            <Button size="small" onClick={() => void fetchClients()}>
+              {t('common.retry')}
+            </Button>
+          }
+        />
+      ) : null}
+
+      {loading ? (
+        <div
+          className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground"
+          role="status"
+        >
+          <Spinner aria-label={t('clients.loadingClients')} />
+          <span>{t('clients.loadingClients')}</span>
+        </div>
+      ) : clients.length === 0 ? (
+        <Empty
+          icon={<KeyIcon aria-hidden="true" className="size-6 text-muted-foreground" />}
+          title={t('clients.noClientsTitle')}
+          description={t('clients.noClientsDescription')}
+          action={
+            <Button icon={<PlusIcon />} onClick={() => handleOpenClientModal(null)}>
+              {t('clients.registerClient')}
+            </Button>
+          }
+        />
+      ) : (
+        <Table bordered>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('clients.colNameId')}</TableHead>
+              <TableHead>{t('clients.colType')}</TableHead>
+              <TableHead>{t('clients.colRedirectUris')}</TableHead>
+              <TableHead>{t('clients.colGrantTypes')}</TableHead>
+              <TableHead>{t('clients.colScopes')}</TableHead>
+              <TableHead className="text-right">{t('clients.colActions')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {clients.map((client) => (
-              <tr key={client.client_id}>
-                <td>
-                  <div className="client-name-row">
-                    <span className="client-name">{client.name}</span>
-                    <code className="client-id-code" title={client.client_id}>
-                      {client.client_id}
-                    </code>
-                  </div>
-                  {client.description && (
-                    <div className="client-desc" title={client.description}>
+              <TableRow key={client.client_id}>
+                <TableCell className="min-w-56 whitespace-normal">
+                  <div className="font-semibold">{client.name}</div>
+                  <code className="mt-1 block max-w-64 truncate text-xs text-muted-foreground" title={client.client_id}>
+                    {client.client_id}
+                  </code>
+                  {client.description ? (
+                    <Text size="xs" tone="muted" className="mt-1">
                       {client.description}
-                    </div>
-                  )}
-                </td>
-                <td>
-                  {client.is_confidential ? (
-                    <StatusBadge tone="danger" compact>
-                      {t('clients.statusConfidential')}
-                    </StatusBadge>
-                  ) : (
-                    <StatusBadge tone="success" compact>
-                      {t('clients.statusPublic')}
-                    </StatusBadge>
-                  )}
-                </td>
-                <td>
-                  <div className="flex flex-col gap-1.5 max-w-[300px]">
-                    {client.redirect_uris.map((uri, idx) => (
-                      <div key={idx} className="uri-copy-chip" title={uri}>
-                        <span className="uri-copy-text">{uri}</span>
+                    </Text>
+                  ) : null}
+                </TableCell>
+                <TableCell>
+                  <Tag color={client.is_confidential ? 'warning' : 'success'}>
+                    {client.is_confidential ? t('clients.statusConfidential') : t('clients.statusPublic')}
+                  </Tag>
+                </TableCell>
+                <TableCell className="min-w-72 whitespace-normal">
+                  <div className="flex flex-col gap-2">
+                    {client.redirect_uris.map((uri) => (
+                      <div key={uri} className="flex items-center gap-2 rounded-md bg-muted/60 px-2 py-1.5" title={uri}>
+                        <code className="min-w-0 flex-1 truncate text-xs">{uri}</code>
                         <IconButton
                           label={t('common.copy', { defaultValue: '复制' })}
-                          icon={<CopyIcon size={12} />}
-                          variant="secondary"
-                          size="sm"
-                          className="uri-copy-btn"
+                          icon={<CopyIcon />}
                           onClick={() => void handleCopyUri(uri)}
                         />
                       </div>
                     ))}
                   </div>
-                </td>
-                <td>
-                  <div className="flex flex-row flex-wrap gap-1.5">
-                    {client.grant_types.map((g) => (
-                      <Tag key={g} tone="neutral">
-                        {g.replace('_', ' ')}
+                </TableCell>
+                <TableCell className="min-w-48 whitespace-normal">
+                  <div className="flex flex-wrap gap-1.5">
+                    {client.grant_types.map((grant) => (
+                      <Tag key={grant}>{grant.replace('_', ' ')}</Tag>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell className="min-w-40 whitespace-normal">
+                  <div className="flex flex-wrap gap-1.5">
+                    {client.scopes.map((scope) => (
+                      <Tag key={scope} color={isAdminScope(scope) ? 'warning' : 'primary'}>
+                        {scope.toLowerCase()}
                       </Tag>
                     ))}
                   </div>
-                </td>
-                <td>
-                  <div className="flex flex-row flex-wrap gap-1.5">
-                    {client.scopes.map((s) => (
-                      <Tag key={s} tone={isAdminScope(s) ? 'warning' : 'brand'}>
-                        {s.toLowerCase()}
-                      </Tag>
-                    ))}
-                  </div>
-                </td>
-                <td>
-                  <ButtonGroup compact>
+                </TableCell>
+                <TableCell>
+                  <div className="flex min-w-max flex-nowrap items-center justify-end gap-1">
                     <IconButton
                       label={t('clients.editClient')}
-                      variant="secondary"
-                      size="sm"
-                      icon={<EditIcon size={14} />}
+                      variant="ghost"
+                      icon={<EditIcon />}
                       onClick={() => handleOpenClientModal(client)}
                     />
-                    {client.is_confidential && (
+                    {client.is_confidential ? (
                       <IconButton
                         label={t('clients.rotateSecret')}
-                        variant="secondary"
-                        size="sm"
-                        icon={<KeyIcon size={14} />}
-                        onClick={() => void handleRotateSecret(client)}
+                        variant="ghost"
+                        icon={<RotateCcw />}
+                        onClick={() => setPendingAction({ type: 'rotate', client })}
                       />
-                    )}
+                    ) : null}
                     <IconButton
                       label={t('clients.deleteClient')}
-                      variant="danger"
-                      size="sm"
-                      icon={<TrashIcon size={14} />}
-                      onClick={() => handleDeleteClient(client.client_id)}
+                      variant="ghost"
+                      color="error"
+                      icon={<TrashIcon />}
+                      onClick={() => setPendingAction({ type: 'delete', client })}
                     />
-                  </ButtonGroup>
-                </td>
-              </tr>
+                  </div>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </DataTable>
-      </AsyncState>
+          </TableBody>
+        </Table>
+      )}
 
       <ClientEditorModal
         isOpen={showClientModal}
@@ -326,7 +335,23 @@ export default function ClientsTab() {
         }}
       />
 
-      {confirmDialog}
+      <Modal
+        open={Boolean(pendingAction)}
+        title={pendingAction?.type === 'rotate' ? t('clients.rotateSecretTitle') : t('clients.deleteConfirmTitle')}
+        description={
+          pendingAction?.type === 'rotate' ? t('clients.rotateSecretMessage') : t('clients.deleteConfirmMessage')
+        }
+        onOpenChange={(next) => {
+          if (!next) setPendingAction(null);
+        }}
+        onOk={() => void confirmPendingAction()}
+        okText={t('common.continue')}
+        cancelText={t('common.cancel')}
+        okButtonProps={{
+          variant: 'solid',
+          color: pendingAction?.type === 'delete' ? 'error' : 'primary',
+        }}
+      />
     </div>
   );
 }

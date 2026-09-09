@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState, type FormEventHandler } from 'react'
 import { Monitor, Smartphone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { PublicSiteBranding } from '../../types/api';
-import { Button } from '@gouno/ui';
+import { Button } from '@gouno/ui/core';
 import LoginSurface from './LoginSurface';
 
 const VIEWPORTS = {
@@ -30,12 +30,10 @@ export default function LoginPreview({ branding }: LoginPreviewProps) {
   useLayoutEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
-
     const resize = () => {
       if (stage.clientWidth > 0) setScale(Math.min(stage.clientWidth / dimensions.width, 1));
     };
     resize();
-
     if (typeof ResizeObserver === 'undefined') return;
     const observer = new ResizeObserver(resize);
     observer.observe(stage);
@@ -43,33 +41,31 @@ export default function LoginPreview({ branding }: LoginPreviewProps) {
   }, [dimensions.width]);
 
   return (
-    <div className="login-preview overflow-hidden rounded-xl border border-border bg-black/40 shadow-inner">
-      <div
-        className="flex items-center gap-2 border-b border-border bg-card p-3"
-        role="group"
-        aria-label={t('site.previewViewport')}
-      >
+    <div className="overflow-hidden rounded-xl border bg-background">
+      <div className="flex items-center gap-2 border-b bg-card p-3" role="group" aria-label={t('site.previewViewport')}>
         <Button
-          variant={viewport === 'desktop' ? 'primary' : 'secondary'}
-          size="sm"
+          variant={viewport === 'desktop' ? 'solid' : 'outline'}
+          color={viewport === 'desktop' ? 'primary' : 'default'}
+          size="small"
           type="button"
           aria-pressed={viewport === 'desktop'}
-          icon={<Monitor size={15} />}
+          icon={<Monitor />}
           onClick={() => setViewport('desktop')}
         >
           {t('site.previewDesktop')}
         </Button>
         <Button
-          variant={viewport === 'mobile' ? 'primary' : 'secondary'}
-          size="sm"
+          variant={viewport === 'mobile' ? 'solid' : 'outline'}
+          color={viewport === 'mobile' ? 'primary' : 'default'}
+          size="small"
           type="button"
           aria-pressed={viewport === 'mobile'}
-          icon={<Smartphone size={15} />}
+          icon={<Smartphone />}
           onClick={() => setViewport('mobile')}
         >
           {t('site.previewMobile')}
         </Button>
-        <span className="ml-auto text-xs font-mono text-muted-foreground">
+        <span className="ml-auto font-mono text-xs text-muted-foreground">
           {dimensions.width} × {dimensions.height}
         </span>
       </div>
@@ -80,12 +76,8 @@ export default function LoginPreview({ branding }: LoginPreviewProps) {
         style={{ height: dimensions.height * scale }}
       >
         <div
-          className="absolute top-0 left-1/2 origin-top"
-          style={{
-            width: dimensions.width,
-            height: dimensions.height,
-            transform: `translateX(-50%) scale(${scale})`,
-          }}
+          className="absolute left-1/2 top-0 origin-top"
+          style={{ width: dimensions.width, height: dimensions.height, transform: `translateX(-50%) scale(${scale})` }}
         >
           <LoginSurface
             branding={branding}

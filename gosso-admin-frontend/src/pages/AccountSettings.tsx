@@ -1,7 +1,8 @@
 import { Shield, Key, Laptop, Lock, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { Tabs } from '@gouno/ui';
+import { Tabs } from '@gouno/ui/core';
+import { PageHeader } from '@gouno/ui/gouno';
 import ProfilePanel from './account-settings/ProfilePanel';
 import PasswordPanel from './account-settings/PasswordPanel';
 import MFAPanel from './account-settings/MFAPanel';
@@ -25,27 +26,31 @@ export default function AccountSettings() {
   }
 
   const tabs = [
-    { value: 'profile' as const, label: t('accountSettings.tabProfile'), icon: <User aria-hidden="true" size={16} /> },
+    { key: 'profile' as const, label: t('accountSettings.tabProfile'), icon: <User aria-hidden="true" size={16} /> },
     {
-      value: 'password' as const,
+      key: 'password' as const,
       label: t('accountSettings.tabPassword'),
       icon: <Lock aria-hidden="true" size={16} />,
     },
-    { value: 'mfa' as const, label: t('accountSettings.tabMFA'), icon: <Shield aria-hidden="true" size={16} /> },
-    { value: 'passkeys' as const, label: t('accountSettings.tabPasskeys'), icon: <Key aria-hidden="true" size={16} /> },
+    { key: 'mfa' as const, label: t('accountSettings.tabMFA'), icon: <Shield aria-hidden="true" size={16} /> },
+    { key: 'passkeys' as const, label: t('accountSettings.tabPasskeys'), icon: <Key aria-hidden="true" size={16} /> },
     {
-      value: 'sessions' as const,
+      key: 'sessions' as const,
       label: t('accountSettings.tabSessions'),
       icon: <Laptop aria-hidden="true" size={16} />,
     },
   ];
 
   return (
-    <div className="flex-col gap-xl">
-      <Tabs
-        value={activeTab}
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={t('pageTitles.accountSettingsTitle')}
+        description={t('pageTitles.accountSettingsDescription')}
+      />
+      <Tabs<AccountSettingsTab>
+        activeKey={activeTab}
         items={tabs}
-        onValueChange={(next) => navigate(`/account-settings/${next}`)}
+        onChange={(next) => navigate(`/account-settings/${next}`)}
         ariaLabel={t('accountSettings.sectionsLabel')}
       />
 

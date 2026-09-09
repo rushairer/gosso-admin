@@ -2,19 +2,9 @@ import { useState } from 'react';
 import { Edit2 as EditIcon, X as XIcon, Check, Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProfileManager, useUserProfile } from '@gosso/client/react';
-import {
-  Button,
-  Feedback,
-  IconButton,
-  Input,
-  Panel,
-  PanelHeader,
-  PlainSection,
-  DefinitionList,
-  DefinitionRow,
-  Tag,
-} from '@gouno/ui';
+import { Button, IconButton, Input, Tag } from '@gouno/ui/core';
 import { EmailChangeModal } from './EmailChangeModal';
+import { Section, SettingRow, StatusMessage } from './shared';
 
 export default function ProfilePanel() {
   const { t } = useTranslation();
@@ -23,12 +13,8 @@ export default function ProfilePanel() {
 
   const [validationError, setValidationError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  // Profile Edit States
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState('');
-
-  // Email Edit States
   const [showEmailModal, setShowEmailModal] = useState(false);
 
   const handleStartEditName = () => {
@@ -38,16 +24,14 @@ export default function ProfilePanel() {
     setSuccess(null);
   };
 
-  const handleSaveName = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveName = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!newName.trim()) return;
 
     try {
       setValidationError(null);
       setSuccess(null);
-
       await updateDisplayName(newName.trim());
-
       setSuccess(t('profile.displayNameUpdatedSuccess'));
       setIsEditingName(false);
     } catch {}
@@ -59,137 +43,126 @@ export default function ProfilePanel() {
     setSuccess(null);
   };
 
-  const handleCloseEmailModal = () => {
-    setShowEmailModal(false);
-  };
-
   return (
-    <Panel>
-      <PanelHeader title={t('profile.title')} description={t('profile.description')} />
-      <PlainSection title={t('profile.accountProfileSection')}>
-        {(validationError || profileError) && (
-          <div className="mb-md">
-            <Feedback type="error">{validationError || profileError}</Feedback>
-          </div>
-        )}
-        {success && (
-          <div className="mb-md">
-            <Feedback type="success">{success}</Feedback>
-          </div>
-        )}
+    <Section description={t('profile.description')}>
+      <div className="flex flex-col gap-4">
+        {validationError || profileError ? (
+          <StatusMessage type="error" message={validationError || profileError} />
+        ) : null}
+        {success ? <StatusMessage message={success} /> : null}
 
-        <DefinitionList>
-          <DefinitionRow label={t('profile.usernameLabel')}>{profile?.preferred_username || '-'}</DefinitionRow>
+        <dl>
+          <SettingRow label={t('profile.usernameLabel')}>
+            <span className="font-medium">{profile?.preferred_username || '-'}</span>
+          </SettingRow>
 
-          <DefinitionRow label={t('profile.displayNameLabel')}>
+          <SettingRow label={t('profile.displayNameLabel')}>
             {isEditingName ? (
-              <form onSubmit={handleSaveName} className="flex items-center gap-2 max-w-md w-full">
+              <form onSubmit={handleSaveName} className="flex max-w-xl flex-wrap items-center gap-2">
                 <Input
+                  aria-label={t('profile.displayNameLabel')}
                   type="text"
                   required
                   value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  className="max-w-[240px]"
+                  onChange={(event) => setNewName(event.target.value)}
+                  className="min-w-52 flex-1"
+                  autoFocus
                 />
                 <IconButton
                   label="Save display name"
-                  icon={<Check size={14} />}
-                  variant="primary"
-                  size="sm"
+                  icon={<Check />}
+                  variant="solid"
+                  color="primary"
                   type="submit"
                   disabled={loading}
                 />
                 <IconButton
                   label="Cancel"
-                  icon={<XIcon size={14} />}
-                  variant="secondary"
-                  size="sm"
+                  icon={<XIcon />}
                   type="button"
                   onClick={() => setIsEditingName(false)}
                   disabled={loading}
                 />
               </form>
             ) : (
-              <div className="flex items-center justify-between gap-4 max-w-xl w-full">
-                <span className="text-sm font-medium text-[var(--color-text-main)]">{profile?.name || '-'}</span>
-                <Button variant="secondary" size="sm" icon={<EditIcon size={12} />} onClick={handleStartEditName}>
+              <div className="flex max-w-xl items-center justify-between gap-4">
+                <span className="min-w-0 truncate font-medium">{profile?.name || '-'}</span>
+                <Button size="small" icon={<EditIcon />} onClick={handleStartEditName}>
                   {t('common.edit')}
                 </Button>
               </div>
             )}
-          </DefinitionRow>
+          </SettingRow>
 
-          <DefinitionRow label={t('profile.emailLabel')}>
-            <div className="flex items-center justify-between gap-4 max-w-xl w-full">
-              <span
-                className={`text-sm ${profile?.email ? 'font-medium text-[var(--color-text-main)]' : 'text-muted'}`}
-              >
+          <SettingRow label={t('profile.emailLabel')}>
+            <div className="flex max-w-xl items-center justify-between gap-4">
+              <span className={profile?.email ? 'min-w-0 truncate font-medium' : 'text-muted-foreground'}>
                 {profile?.email || t('profile.notConfigured')}
               </span>
-              <Button variant="secondary" size="sm" icon={<EditIcon size={12} />} onClick={handleStartEditEmail}>
+              <Button size="small" icon={<EditIcon />} onClick={handleStartEditEmail}>
                 {t('common.edit')}
               </Button>
             </div>
-          </DefinitionRow>
+          </SettingRow>
 
-          <DefinitionRow label={t('profile.securityRoleLabel')}>
-            <div className="flex items-center gap-2">
-              {profile?.roles?.map((role) => <Tag key={role}>{role}</Tag>) || (
-                <Tag tone="neutral">{t('profile.standardUser')}</Tag>
+          <SettingRow label={t('profile.securityRoleLabel')}>
+            <div className="flex flex-wrap gap-2">
+              {profile?.roles?.length ? (
+                profile.roles.map((role) => <Tag key={role}>{role}</Tag>)
+              ) : (
+                <Tag>{t('profile.standardUser')}</Tag>
               )}
             </div>
-          </DefinitionRow>
+          </SettingRow>
 
-          <DefinitionRow label={t('profile.subjectIdLabel')}>
-            <div className="flex-row items-center justify-between gap-md max-w-xl w-full">
-              <code className="text-mono text-xs inline-code">{profile?.sub || '-'}</code>
-              {profile?.sub && (
+          <SettingRow label={t('profile.subjectIdLabel')}>
+            <div className="flex max-w-xl items-center justify-between gap-4">
+              <code className="min-w-0 truncate rounded bg-muted px-2 py-1 font-mono text-xs">
+                {profile?.sub || '-'}
+              </code>
+              {profile?.sub ? (
                 <Button
-                  variant="secondary"
-                  size="sm"
-                  icon={<Copy size={12} />}
+                  size="small"
+                  icon={<Copy />}
                   onClick={() => {
-                    navigator.clipboard.writeText(profile.sub);
+                    void navigator.clipboard.writeText(profile.sub);
                     setSuccess(t('profile.copiedSubjectId'));
                   }}
                 >
                   {t('profile.copyId')}
                 </Button>
-              )}
+              ) : null}
             </div>
-          </DefinitionRow>
+          </SettingRow>
 
-          <DefinitionRow label={t('profile.ssoIssuerLabel')}>
-            <div className="flex-row items-center justify-between gap-md max-w-xl w-full">
-              <code className="text-mono text-xs inline-code">{window.location.origin}</code>
+          <SettingRow label={t('profile.ssoIssuerLabel')}>
+            <div className="flex max-w-xl items-center justify-between gap-4">
+              <code className="min-w-0 truncate rounded bg-muted px-2 py-1 font-mono text-xs">
+                {window.location.origin}
+              </code>
               <Button
-                variant="secondary"
-                size="sm"
-                icon={<Copy size={12} />}
+                size="small"
+                icon={<Copy />}
                 onClick={() => {
-                  navigator.clipboard.writeText(window.location.origin);
+                  void navigator.clipboard.writeText(window.location.origin);
                   setSuccess(t('profile.copiedIssuer'));
                 }}
               >
                 {t('profile.copyIssuer')}
               </Button>
             </div>
-          </DefinitionRow>
-        </DefinitionList>
-      </PlainSection>
-
-      {/* Edit Email Modal */}
+          </SettingRow>
+        </dl>
+      </div>
 
       {showEmailModal ? (
         <EmailChangeModal
           isOpen
           initialEmail={profile?.email || ''}
-          onClose={handleCloseEmailModal}
-          onProfileUpdated={() => {
-            setSuccess(t('profile.emailUpdatedSuccess'));
-          }}
+          onClose={() => setShowEmailModal(false)}
+          onProfileUpdated={() => setSuccess(t('profile.emailUpdatedSuccess'))}
         />
       ) : null}
-    </Panel>
+    </Section>
   );
 }

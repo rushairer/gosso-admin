@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Feedback, FormField, Input, Modal } from '@gouno/ui';
+import { Alert, Button, FormField, Input, Modal } from '@gouno/ui/core';
 import type { Account } from '../../../types/api';
 
 interface ResetPasswordModalProps {
@@ -19,8 +19,8 @@ export function ResetPasswordModal({ isOpen, onClose, account, onSubmit }: Reset
 
   if (!isOpen || !account) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError(null);
     setSuccess(null);
     setSubmitting(true);
@@ -41,8 +41,10 @@ export function ResetPasswordModal({ isOpen, onClose, account, onSubmit }: Reset
 
   return (
     <Modal
-      isOpen={isOpen}
-      onClose={onClose}
+      open={isOpen}
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
       title={t('users.changePasswordModalTitle')}
       description={t('users.changePasswordDescription', {
         name: account.display_name || account.username,
@@ -50,34 +52,26 @@ export function ResetPasswordModal({ isOpen, onClose, account, onSubmit }: Reset
       maxWidth="400px"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose} disabled={submitting || !!success}>
+          <Button onClick={onClose} disabled={submitting || Boolean(success)}>
             {t('common.cancel')}
           </Button>
           <Button
             form="reset-password-form"
             type="submit"
-            variant="primary"
+            variant="solid"
+            color="primary"
             loading={submitting}
-            disabled={!newPassword || submitting || !!success}
+            disabled={!newPassword || submitting || Boolean(success)}
           >
             {t('users.updatePasswordButton')}
           </Button>
         </>
       }
     >
-      <form id="reset-password-form" onSubmit={handleSubmit}>
-        {error && (
-          <div className="mb-md">
-            <Feedback type="error">{error}</Feedback>
-          </div>
-        )}
-        {success && (
-          <div className="mb-md">
-            <Feedback type="success">{success}</Feedback>
-          </div>
-        )}
-
-        <FormField id="new-password" label={t('users.newPasswordLabel')} noMargin required>
+      <form id="reset-password-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {error ? <Alert type="error" showIcon title={error} /> : null}
+        {success ? <Alert type="success" showIcon title={success} /> : null}
+        <FormField id="new-password" label={t('users.newPasswordLabel')} required>
           <Input
             id="new-password"
             type="password"
@@ -85,7 +79,7 @@ export function ResetPasswordModal({ isOpen, onClose, account, onSubmit }: Reset
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required
-            disabled={submitting || !!success}
+            disabled={submitting || Boolean(success)}
             autoFocus
           />
         </FormField>

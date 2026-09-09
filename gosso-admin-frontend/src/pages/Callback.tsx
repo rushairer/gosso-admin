@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthCallback } from '@gosso/client/react';
 import { routerPath } from '../config/appPaths';
-import { ButtonLink, Card, LoadingSpinner } from '@gouno/ui';
+import { Alert, ButtonLink, Card, Spinner, Text } from '@gouno/ui/core';
 
 export default function Callback() {
   const { t } = useTranslation();
@@ -14,26 +14,43 @@ export default function Callback() {
     <AuthCallback
       onSuccess={handleSuccess}
       renderError={(error, detail) => (
-        <div className="login-surface flex-row items-center justify-center">
-          <Card className="login-card text-center">
-            <h2 className="login-card__title status-danger-text">{t('auth.authenticationError')}</h2>
-            <p className="text-muted login-card__description mb-md">
-              {detail?.code === 'CALLBACK_PARAMS_MISSING'
-                ? t('auth.invalidCallbackParams')
-                : error || t('auth.codeExchangeFailed')}
-            </p>
-            <ButtonLink to="/" variant="primary">
-              {t('auth.goHome')}
-            </ButtonLink>
+        <div className="flex min-h-screen items-center justify-center bg-canvas p-4 md:p-8">
+          <Card variant="elevated" padding="base" className="w-full max-w-md text-center">
+            <h1 className="text-2xl font-bold tracking-tight">{t('auth.authenticationError')}</h1>
+            <Text size="sm" tone="muted" className="mt-2 leading-relaxed">
+              {t('auth.codeExchangeFailed')}
+            </Text>
+            <Alert
+              type="error"
+              showIcon
+              className="mt-5 text-left"
+              title={
+                detail?.code === 'CALLBACK_PARAMS_MISSING'
+                  ? t('auth.invalidCallbackParams')
+                  : error || t('auth.codeExchangeFailed')
+              }
+            />
+            <div className="mt-5">
+              <ButtonLink to="/" variant="solid" color="primary" block>
+                {t('auth.goHome')}
+              </ButtonLink>
+            </div>
           </Card>
         </div>
       )}
       renderLoading={() => (
-        <div className="login-surface flex-row items-center justify-center">
-          <Card className="login-card text-center">
-            <h2 className="login-card__title">{t('auth.authenticating')}</h2>
-            <p className="text-muted login-card__description mb-md">{t('auth.authenticatingDescription')}</p>
-            <LoadingSpinner size="md" />
+        <div className="flex min-h-screen items-center justify-center bg-canvas p-4 md:p-8">
+          <Card variant="elevated" padding="base" className="w-full max-w-md text-center">
+            <h1 className="text-2xl font-bold tracking-tight">{t('auth.authenticating')}</h1>
+            <Text size="sm" tone="muted" className="mt-2 leading-relaxed">
+              {t('auth.authenticatingDescription')}
+            </Text>
+            <div className="mt-6 flex flex-col items-center gap-4 py-2" role="status">
+              <Spinner className="size-6" aria-label={t('auth.authenticating')} />
+              <Text size="sm" tone="muted">
+                OAuth 2.0 Authorization Code + PKCE
+              </Text>
+            </div>
           </Card>
         </div>
       )}

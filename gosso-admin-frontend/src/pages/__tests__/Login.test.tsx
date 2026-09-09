@@ -197,12 +197,10 @@ describe('Login', () => {
       </MemoryRouter>
     );
 
-    // Sudo mode is blocked for wrong user
     expect(screen.queryByText(/^安全提权验证/)).not.toBeInTheDocument();
-    // Account mismatch notice is shown
-    expect(screen.getByText(/安全提权账号不符|Account Mismatch/i)).toBeInTheDocument();
-    expect(screen.getByTitle('targetuser')).toBeInTheDocument();
-    // Normal login form is rendered with targetuser prefilled
+    const mismatchAlert = screen.getByRole('alert');
+    expect(mismatchAlert).toHaveTextContent(/安全提权账号不符|Account Mismatch/i);
+    expect(mismatchAlert).toHaveTextContent('targetuser');
     expect(screen.getByPlaceholderText(/username|用户名/i)).toHaveValue('targetuser');
     expect(screen.getByPlaceholderText(/password|密码/i)).toBeInTheDocument();
   });

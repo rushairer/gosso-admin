@@ -7,7 +7,8 @@ import {
   FileText as AuditIcon,
   SlidersHorizontal,
 } from 'lucide-react';
-import { Panel, Tabs } from '@gouno/ui';
+import { Tabs } from '@gouno/ui/core';
+import { PageHeader } from '@gouno/ui/gouno';
 import ClientsTab from './system-management/ClientsTab';
 import UsersTab from './system-management/UsersTab';
 import AuditLogsTab from './system-management/AuditLogsTab';
@@ -32,48 +33,46 @@ export default function SystemManagement() {
 
   const tabs = [
     {
-      value: 'clients' as const,
+      key: 'clients' as const,
       label: t('systemManagement.tabClients'),
       icon: <KeyIcon aria-hidden="true" size={16} />,
     },
+    { key: 'users' as const, label: t('systemManagement.tabUsers'), icon: <UserIcon aria-hidden="true" size={16} /> },
     {
-      value: 'users' as const,
-      label: t('systemManagement.tabUsers'),
-      icon: <UserIcon aria-hidden="true" size={16} />,
-    },
-    {
-      value: 'audit-logs' as const,
+      key: 'audit-logs' as const,
       label: t('systemManagement.tabAuditLogs'),
       icon: <AuditIcon aria-hidden="true" size={16} />,
     },
     {
-      value: 'site-settings' as const,
+      key: 'site-settings' as const,
       label: t('site.tabLabel'),
       icon: <SlidersHorizontal aria-hidden="true" size={16} />,
     },
     {
-      value: 'system' as const,
+      key: 'system' as const,
       label: t('systemManagement.tabSystemStatus'),
       icon: <ShieldIcon aria-hidden="true" size={16} />,
     },
   ];
 
   return (
-    <div className="flex-col gap-xl">
-      <Tabs
-        value={activeTab}
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={t('pageTitles.systemManagementTitle')}
+        description={t('pageTitles.systemManagementDescription')}
+      />
+      <Tabs<SystemManagementTab>
+        activeKey={activeTab}
         items={tabs}
-        onValueChange={(next) => navigate(`/system-management/${next}`)}
+        onChange={(next) => navigate(`/system-management/${next}`)}
         ariaLabel={t('systemManagement.sectionsLabel')}
       />
 
-      <Panel>
-        {activeTab === 'clients' && <ClientsTab />}
-        {activeTab === 'users' && <UsersTab />}
-        {activeTab === 'audit-logs' && <AuditLogsTab />}
-        {activeTab === 'site-settings' && <SiteSettingsTab />}
-        {activeTab === 'system' && <SystemStatusTab />}
-      </Panel>
+      {activeTab === 'clients' && <ClientsTab />}
+      {activeTab === 'users' && <UsersTab />}
+      {activeTab === 'audit-logs' && <AuditLogsTab />}
+      {activeTab === 'site-settings' && <SiteSettingsTab />}
+      {activeTab === 'system' && <SystemStatusTab />}
     </div>
   );
 }

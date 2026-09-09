@@ -2,18 +2,8 @@ import { useState } from 'react';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProfileManager } from '@gosso/client/react';
-import {
-  Button,
-  ButtonGroup,
-  Feedback,
-  FormField,
-  IconButton,
-  Input,
-  Panel,
-  PanelBody,
-  PanelHeader,
-  PlainSection,
-} from '@gouno/ui';
+import { Button, FormField, IconButton, Input, Text } from '@gouno/ui/core';
+import { Section, StatusMessage } from './shared';
 
 export default function PasswordPanel() {
   const { t } = useTranslation();
@@ -27,8 +17,8 @@ export default function PasswordPanel() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setValidationError(null);
     setSuccess(null);
 
@@ -43,101 +33,90 @@ export default function PasswordPanel() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    } catch {
-      // Handled by profileError from useProfileManager
-    }
+    } catch {}
   };
 
   const isDirty = Boolean(currentPassword || newPassword || confirmPassword);
 
   return (
-    <Panel>
-      <PanelHeader title={t('password.title')} description={t('password.description')} />
-      <form onSubmit={handleSubmit}>
-        <PlainSection>
-          <div className="flex-col gap-lg max-w-xl">
-            {(validationError || profileError) && <Feedback type="error">{validationError || profileError}</Feedback>}
-            {success && <Feedback type="success">{success}</Feedback>}
+    <Section description={t('password.description')}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <div className="flex max-w-xl flex-col gap-5">
+          {validationError || profileError ? (
+            <StatusMessage type="error" message={validationError || profileError} />
+          ) : null}
+          {success ? <StatusMessage message={success} /> : null}
 
-            <FormField label={t('password.currentPasswordLabel')} required>
-              <Input
-                type={showCurrentPwd ? 'text' : 'password'}
-                required
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="••••••••••••"
-                autoComplete="current-password"
-                suffixIcon={
-                  <IconButton
-                    label="Toggle current password visibility"
-                    icon={showCurrentPwd ? <EyeOff size={16} /> : <Eye size={16} />}
-                    variant="ghost"
-                    size="sm"
-                    type="button"
-                    onClick={() => setShowCurrentPwd(!showCurrentPwd)}
-                  />
-                }
-              />
-            </FormField>
+          <FormField label={t('password.currentPasswordLabel')} required>
+            <Input
+              type={showCurrentPwd ? 'text' : 'password'}
+              required
+              value={currentPassword}
+              onChange={(event) => setCurrentPassword(event.target.value)}
+              placeholder="••••••••••••"
+              autoComplete="current-password"
+              suffix={
+                <IconButton
+                  label="Toggle current password visibility"
+                  icon={showCurrentPwd ? <EyeOff /> : <Eye />}
+                  variant="ghost"
+                  type="button"
+                  onClick={() => setShowCurrentPwd((visible) => !visible)}
+                />
+              }
+            />
+          </FormField>
 
-            <FormField label={t('password.newPasswordLabel')} required hint={t('password.newPasswordPlaceholder')}>
-              <Input
-                type={showNewPwd ? 'text' : 'password'}
-                required
-                minLength={12}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder={t('password.newPasswordPlaceholder')}
-                autoComplete="new-password"
-                suffixIcon={
-                  <IconButton
-                    label="Toggle new password visibility"
-                    icon={showNewPwd ? <EyeOff size={16} /> : <Eye size={16} />}
-                    variant="ghost"
-                    size="sm"
-                    type="button"
-                    onClick={() => setShowNewPwd(!showNewPwd)}
-                  />
-                }
-              />
-            </FormField>
+          <FormField label={t('password.newPasswordLabel')} required hint={t('password.newPasswordPlaceholder')}>
+            <Input
+              type={showNewPwd ? 'text' : 'password'}
+              required
+              minLength={12}
+              value={newPassword}
+              onChange={(event) => setNewPassword(event.target.value)}
+              placeholder={t('password.newPasswordPlaceholder')}
+              autoComplete="new-password"
+              suffix={
+                <IconButton
+                  label="Toggle new password visibility"
+                  icon={showNewPwd ? <EyeOff /> : <Eye />}
+                  variant="ghost"
+                  type="button"
+                  onClick={() => setShowNewPwd((visible) => !visible)}
+                />
+              }
+            />
+          </FormField>
 
-            <FormField label={t('password.confirmPasswordLabel')} required>
-              <Input
-                type="password"
-                required
-                minLength={12}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder={t('password.confirmPasswordPlaceholder')}
-                autoComplete="new-password"
-              />
-            </FormField>
-          </div>
-        </PlainSection>
+          <FormField label={t('password.confirmPasswordLabel')} required>
+            <Input
+              type="password"
+              required
+              minLength={12}
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              placeholder={t('password.confirmPasswordPlaceholder')}
+              autoComplete="new-password"
+            />
+          </FormField>
+        </div>
 
-        <PanelBody className="form-action-bar">
-          <p className="form-action-bar__status m-0" aria-live="polite">
-            {isDirty && (
-              <>
-                <span className="status-dot status-dot--warning" aria-hidden="true" />
-                <span>{t('site.unsavedChanges')}</span>
-              </>
-            )}
-          </p>
-          <ButtonGroup align="right">
-            <Button
-              variant="primary"
-              type="submit"
-              loading={loading}
-              disabled={!currentPassword || !newPassword || !confirmPassword}
-              icon={<Lock size={16} />}
-            >
-              {loading ? t('password.changePasswordLoading') : t('password.changePasswordButton')}
-            </Button>
-          </ButtonGroup>
-        </PanelBody>
+        <div className="flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <Text size="sm" tone="muted" aria-live="polite">
+            {isDirty ? t('site.unsavedChanges') : ''}
+          </Text>
+          <Button
+            variant="solid"
+            color="primary"
+            type="submit"
+            loading={loading}
+            disabled={!currentPassword || !newPassword || !confirmPassword}
+            icon={<Lock />}
+          >
+            {loading ? t('password.changePasswordLoading') : t('password.changePasswordButton')}
+          </Button>
+        </div>
       </form>
-    </Panel>
+    </Section>
   );
 }
