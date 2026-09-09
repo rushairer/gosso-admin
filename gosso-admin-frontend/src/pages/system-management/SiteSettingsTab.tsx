@@ -1,5 +1,5 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
-import { Save } from 'lucide-react';
+import { Image, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -145,6 +145,7 @@ export default function SiteSettingsTab() {
                 <Textarea
                   rows={3}
                   maxLength={500}
+                  showCount
                   placeholder={t('login.subtitle')}
                   value={settings.login_description}
                   onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
@@ -188,9 +189,12 @@ export default function SiteSettingsTab() {
 
         <div className="xl:sticky xl:top-20 xl:self-start">
           <Card padding="base" className="overflow-hidden">
-            <Text size="sm" className="mb-4 font-medium">
-              {t('site.preview')}
-            </Text>
+            <div className="mb-4 flex items-center gap-2">
+              <Image aria-hidden="true" className="size-4 text-muted-foreground" />
+              <Text size="sm" className="font-medium">
+                {t('site.preview')}
+              </Text>
+            </div>
             <LoginPreview branding={settings} />
           </Card>
         </div>
