@@ -1,4 +1,5 @@
 name: Sync Gouno UI
+# Editing this workflow intentionally triggers the verified upstream resync path.
 
 on:
   push:
