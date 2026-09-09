@@ -1,20 +1,27 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText as AuditIcon } from 'lucide-react';
+import { FileText as AuditIcon, Search, X } from 'lucide-react';
 import {
-  AsyncState,
-  Badge,
+  Alert,
   Button,
-  ButtonGroup,
-  DataTable,
+  Card,
+  Empty,
   FormField,
   Input,
-  PanelHeader,
-  TableSkeleton,
-} from '@gouno/ui';
+  Pagination,
+  Spinner,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  Tag,
+} from '@gouno/ui/core';
 import { AuditLogDetailModal } from './audit/AuditLogDetailModal';
 import type { AuditLog } from '../../types/api';
 import { useAuditLogs } from '../../features/audit/useAuditLogs';
+import { ManagementPanelLead } from './shared';
 
 export default function AuditLogsTab() {
   const { t } = useTranslation();
@@ -36,119 +43,99 @@ export default function AuditLogsTab() {
   } = useAuditLogs();
 
   return (
-    <div>
-      <PanelHeader title={t('audit.title')} description={t('audit.description')} />
-      <div className="panel-body panel-filter-bar">
+    <div className="flex flex-col gap-5">
+      <ManagementPanelLead description={t('audit.description')} />
+
+      <Card padding="sm">
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
+          onSubmit={(event) => {
+            event.preventDefault();
             search();
           }}
-          className="table-filter-bar"
+          className="flex flex-col gap-3 md:flex-row md:items-end"
         >
-          <div className="table-filter-field">
-            <FormField label={t('audit.eventTypeLabel')} noMargin>
-              <Input
-                type="text"
-                placeholder={t('audit.eventTypePlaceholder')}
-                value={filterEventType}
-                onChange={(e) => setFilterEventType(e.target.value)}
-                className="w-full"
-              />
-            </FormField>
-          </div>
-          <div className="table-filter-field table-filter-field--wide">
-            <FormField label={t('audit.accountIdLabel')} noMargin>
-              <Input
-                type="text"
-                placeholder={t('audit.accountIdPlaceholder')}
-                value={filterAccountID}
-                onChange={(e) => setFilterAccountID(e.target.value)}
-                className="w-full"
-              />
-            </FormField>
-          </div>
-          <div className="table-filter-actions">
-            <Button variant="primary" size="sm" type="submit">
+          <FormField label={t('audit.eventTypeLabel')} className="min-w-0 flex-1">
+            <Input
+              type="text"
+              placeholder={t('audit.eventTypePlaceholder')}
+              value={filterEventType}
+              onChange={(event) => setFilterEventType(event.target.value)}
+            />
+          </FormField>
+          <FormField label={t('audit.accountIdLabel')} className="min-w-0 flex-1">
+            <Input
+              type="text"
+              placeholder={t('audit.accountIdPlaceholder')}
+              value={filterAccountID}
+              onChange={(event) => setFilterAccountID(event.target.value)}
+            />
+          </FormField>
+          <div className="flex gap-2 pb-0.5">
+            <Button type="submit" variant="solid" color="primary" icon={<Search />}>
               {t('common.search')}
             </Button>
-            <Button variant="secondary" size="sm" type="button" onClick={clearFilters}>
+            <Button type="button" icon={<X />} onClick={clearFilters}>
               {t('common.clear')}
             </Button>
           </div>
         </form>
-      </div>
+      </Card>
 
-      <AsyncState
-        loading={auditLoading}
-        skeleton={
-          <div className="table-skeleton-container">
-            <TableSkeleton rows={5} columns={5} />
-          </div>
-        }
-        error={error}
-        retryLabel={t('common.retry')}
-        onRetry={search}
-        empty={!auditLoading && auditLogs.length === 0 && !error}
-        emptyIcon={<AuditIcon />}
-        emptyTitle={t('audit.noLogsTitle')}
-        emptyDescription={t('audit.noLogsDescription')}
-      >
-        <div>
-          <DataTable>
-            <thead>
-              <tr>
-                <th>{t('audit.colTime')}</th>
-                <th>{t('audit.colAction')}</th>
-                <th>{t('audit.colActor')}</th>
-                <th>{t('audit.colTargetUser')}</th>
-                <th className="col-w-actions">{t('audit.colDetails')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {auditLogs.map((log) => (
-                <tr key={log.id}>
-                  <td className="text-sm text-[var(--color-text-muted)]">
-                    {log.created_at ? new Date(log.created_at).toLocaleString() : '-'}
-                  </td>
-                  <td>
-                    <Badge tone="neutral">{log.action}</Badge>
-                  </td>
-                  <td className="text-sm font-mono text-[var(--color-text-main)]">{log.actor}</td>
-                  <td className="text-sm font-mono text-[var(--color-text-muted)]">{log.account_id || '-'}</td>
-                  <td>
-                    <Button variant="secondary" size="sm" onClick={() => setSelectedAuditLog(log)}>
-                      {t('common.view')}
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </DataTable>
+      {error ? (
+        <Alert type="error" showIcon title={error} action={<Button size="small" onClick={search}>{t('common.retry')}</Button>} />
+      ) : null}
 
-          {/* Pagination */}
-          <div className="table-pagination">
-            <div className="table-pagination-info">
-              {t('audit.totalLogs', { count: auditTotal })}
-              <span>·</span>
-              <span>{t('audit.pageLabel', { page: auditPage })}</span>
-            </div>
-            <ButtonGroup compact>
-              <Button variant="secondary" size="sm" disabled={auditPage <= 1} onClick={() => goToPage(auditPage - 1)}>
-                {t('common.previous')}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                disabled={auditLogs.length < pageSize || auditPage * pageSize >= auditTotal}
-                onClick={() => goToPage(auditPage + 1)}
-              >
-                {t('common.next')}
-              </Button>
-            </ButtonGroup>
-          </div>
+      {auditLoading ? (
+        <div className="flex min-h-48 items-center justify-center gap-3 rounded-lg border bg-card text-sm text-muted-foreground" role="status">
+          <Spinner aria-label={t('audit.loadingLogs', { defaultValue: 'Loading audit logs' })} />
+          <span>{t('audit.loadingLogs', { defaultValue: 'Loading audit logs' })}</span>
         </div>
-      </AsyncState>
+      ) : auditLogs.length === 0 && !error ? (
+        <Empty
+          icon={<AuditIcon aria-hidden="true" className="size-6 text-muted-foreground" />}
+          title={t('audit.noLogsTitle')}
+          description={t('audit.noLogsDescription')}
+          action={<Button size="small" icon={<X />} onClick={clearFilters}>{t('common.clear')}</Button>}
+        />
+      ) : (
+        <>
+          <Table bordered density="compact">
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('audit.colTime')}</TableHead>
+                <TableHead>{t('audit.colAction')}</TableHead>
+                <TableHead>{t('audit.colActor')}</TableHead>
+                <TableHead>{t('audit.colTargetUser')}</TableHead>
+                <TableHead className="text-right">{t('audit.colDetails')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {auditLogs.map((log) => (
+                <TableRow key={log.id}>
+                  <TableCell className="whitespace-nowrap font-mono text-xs text-muted-foreground">
+                    {log.created_at ? new Date(log.created_at).toLocaleString() : '-'}
+                  </TableCell>
+                  <TableCell><Tag>{log.action}</Tag></TableCell>
+                  <TableCell className="font-mono text-xs">{log.actor}</TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">{log.account_id || '-'}</TableCell>
+                  <TableCell className="text-right">
+                    <Button size="small" onClick={() => setSelectedAuditLog(log)}>{t('common.view')}</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <Pagination
+            page={auditPage}
+            total={auditTotal}
+            pageSize={pageSize}
+            onChange={(nextPage) => goToPage(nextPage)}
+            showTotal={(total) => t('audit.totalLogs', { count: total })}
+            prevText={t('common.previous')}
+            nextText={t('common.next')}
+          />
+        </>
+      )}
 
       <AuditLogDetailModal
         isOpen={Boolean(selectedAuditLog)}
