@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Eye, EyeOff, Mail } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProfileManager } from '@gosso/client/react';
-import { Button, Feedback, FormField, IconButton, Input, Modal } from '@gouno/ui';
+import { Alert, Button, FormField, IconButton, Input, Modal } from '@gouno/ui/core';
 import type { UserProfile } from '../../auth';
 
 interface EmailChangeModalProps {
@@ -34,7 +34,6 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
   const requestVerificationCode = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!newEmail.trim() || !password) return;
-
     try {
       await requestEmailChange(newEmail.trim(), password);
       setStep('verify');
@@ -44,7 +43,6 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
   const handleConfirmEmailChange = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!code.trim()) return;
-
     try {
       const updatedProfile = await confirmEmailChange(newEmail.trim(), code.trim());
       onProfileUpdated(updatedProfile);
@@ -54,20 +52,23 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
 
   return (
     <Modal
-      isOpen={isOpen}
+      open={isOpen}
       title={t('profile.editEmailTitle')}
       description={t('profile.editEmailDescription')}
       maxWidth="460px"
-      onClose={onClose}
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
       footer={
         step === 'input' ? (
           <>
-            <Button variant="secondary" type="button" onClick={onClose} disabled={loading}>
+            <Button type="button" onClick={onClose} disabled={loading}>
               {t('common.cancel')}
             </Button>
             <Button
               form="email-change-request-form"
-              variant="primary"
+              variant="solid"
+              color="primary"
               type="submit"
               loading={loading}
               disabled={loading || !newEmail.trim() || !password}
@@ -77,12 +78,13 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
           </>
         ) : (
           <>
-            <Button variant="secondary" type="button" onClick={() => setStep('input')} disabled={loading}>
+            <Button type="button" onClick={() => setStep('input')} disabled={loading}>
               {t('common.previous') || 'Back'}
             </Button>
             <Button
               form="email-change-confirm-form"
-              variant="primary"
+              variant="solid"
+              color="primary"
               type="submit"
               loading={loading}
               disabled={loading || !code.trim()}
@@ -93,57 +95,55 @@ export function EmailChangeModal({ isOpen, initialEmail, onClose, onProfileUpdat
         )
       }
     >
-      {error && (
-        <div className="mb-md">
-          <Feedback type="error">{error}</Feedback>
-        </div>
-      )}
+      <div className="flex flex-col gap-4">
+        {error ? <Alert type="error" showIcon title={error} /> : null}
 
-      {step === 'input' ? (
-        <form id="email-change-request-form" onSubmit={requestVerificationCode} className="flex-col gap-lg">
-          <FormField label={t('profile.newEmailLabel')} noMargin>
-            <Input
-              type="email"
-              prefixIcon={<Mail size={16} />}
-              required
-              value={newEmail}
-              onChange={(event) => setNewEmail(event.target.value)}
-              placeholder="user@example.com"
-            />
-          </FormField>
+        {step === 'input' ? (
+          <form id="email-change-request-form" onSubmit={requestVerificationCode} className="flex flex-col gap-4">
+            <FormField label={t('profile.newEmailLabel')} required>
+              <Input
+                type="email"
+                prefix={<Mail />}
+                required
+                value={newEmail}
+                onChange={(event) => setNewEmail(event.target.value)}
+                placeholder="user@example.com"
+              />
+            </FormField>
 
-          <FormField label={t('profile.currentPasswordLabel')} noMargin>
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="••••••••••••"
-              suffixIcon={
-                <IconButton
-                  label={showPassword ? t('passwordReset.hidePassword') : t('passwordReset.showPassword')}
-                  icon={showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowPassword((visible) => !visible)}
-                />
-              }
-            />
-          </FormField>
-        </form>
-      ) : (
-        <form id="email-change-confirm-form" onSubmit={handleConfirmEmailChange} className="flex-col gap-lg">
-          <FormField label={t('profile.verificationCodeLabel')} noMargin>
-            <Input
-              type="text"
-              required
-              value={code}
-              onChange={(event) => setCode(event.target.value)}
-              placeholder="123456"
-            />
-          </FormField>
-        </form>
-      )}
+            <FormField label={t('profile.currentPasswordLabel')} required>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="••••••••••••"
+                suffix={
+                  <IconButton
+                    label={showPassword ? t('passwordReset.hidePassword') : t('passwordReset.showPassword')}
+                    icon={showPassword ? <EyeOff /> : <Eye />}
+                    variant="ghost"
+                    type="button"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                  />
+                }
+              />
+            </FormField>
+          </form>
+        ) : (
+          <form id="email-change-confirm-form" onSubmit={handleConfirmEmailChange} className="flex flex-col gap-4">
+            <FormField label={t('profile.verificationCodeLabel')} required>
+              <Input
+                type="text"
+                required
+                value={code}
+                onChange={(event) => setCode(event.target.value)}
+                placeholder="123456"
+              />
+            </FormField>
+          </form>
+        )}
+      </div>
     </Modal>
   );
 }
