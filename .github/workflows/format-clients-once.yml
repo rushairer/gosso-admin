@@ -7,7 +7,7 @@ on:
       - .github/workflows/format-clients-once.yml
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   format:
@@ -27,9 +27,12 @@ jobs:
         working-directory: gosso-admin-frontend
         run: npm ci
 
-      - name: Print canonical clients file
-        working-directory: gosso-admin-frontend
+      - name: Apply canonical formatting and remove one-time workflow
         run: |
-          echo '---BEGIN_CANONICAL_CLIENTS_TSX---'
-          ./node_modules/.bin/prettier src/pages/system-management/ClientsTab.tsx
-          echo '---END_CANONICAL_CLIENTS_TSX---'
+          ./gosso-admin-frontend/node_modules/.bin/prettier --write gosso-admin-frontend/src/pages/system-management/ClientsTab.tsx
+          git rm .github/workflows/format-clients-once.yml
+          git add gosso-admin-frontend/src/pages/system-management/ClientsTab.tsx
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(states): apply canonical formatting"
+          git push origin HEAD:main
