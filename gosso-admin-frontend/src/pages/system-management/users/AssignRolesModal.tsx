@@ -64,10 +64,20 @@ export function AssignRolesModal({
                   </span>
                   <div className="min-w-0">
                     <Text as="div" className="font-semibold">{role.name}</Text>
-                    {role.description ? <Text size="xs" tone="muted">{role.description}</Text> : null}
+                    {role.description ? (
+                      <Text size="xs" tone="muted">
+                        {role.description}
+                      </Text>
+                    ) : null}
                   </div>
                 </div>
-                <Button size="small" variant="solid" color="error" onClick={() => void onRemoveRole(role.id)} disabled={isSelf}>
+                <Button
+                  size="small"
+                  variant="solid"
+                  color="error"
+                  onClick={() => void onRemoveRole(role.id)}
+                  disabled={isSelf}
+                >
                   {t('common.remove')}
                 </Button>
               </li>
@@ -83,7 +93,11 @@ export function AssignRolesModal({
               <div className="flex flex-col gap-2 sm:flex-row">
                 <div className="min-w-0 flex-1">
                   {discoveredRoles.length > 0 ? (
-                    <Select id="assign-role" value={newRoleInput} onChange={(e) => setNewRoleInput(e.target.value)}>
+                    <Select
+                      id="assign-role"
+                      value={newRoleInput}
+                      onChange={(value) => setNewRoleInput(Array.isArray(value) ? (value[0] ?? '') : value)}
+                    >
                       <option value="">{t('users.selectDiscoveredRole')}</option>
                       {discoveredRoles
                         .filter((role) => !account.roles?.some((assigned) => assigned.id === role.id))
@@ -99,11 +113,17 @@ export function AssignRolesModal({
                       type="text"
                       placeholder={t('users.enterRoleUuid')}
                       value={newRoleInput}
-                      onChange={(e) => setNewRoleInput(e.target.value)}
+                      onChange={(event) => setNewRoleInput(event.target.value)}
                     />
                   )}
                 </div>
-                <Button type="submit" variant="solid" color="primary" loading={assigning} disabled={!newRoleInput || assigning}>
+                <Button
+                  type="submit"
+                  variant="solid"
+                  color="primary"
+                  loading={assigning}
+                  disabled={!newRoleInput || assigning}
+                >
                   {t('common.assign')}
                 </Button>
               </div>
