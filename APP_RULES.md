@@ -80,6 +80,7 @@ Asynchronous UI must preserve the most stable structure that is already known.
 
 - Use `Skeleton` when the eventual structure is predictable. Keep route shells, PageHeader/Tabs, panel leads, Table headers, form geometry, and list anatomy visible instead of replacing the whole region with a spinner.
 - Treat initial loading separately from later refreshes. If usable data already exists, keep it rendered, mark the affected region with `aria-busy`, and disable controls that would conflict with the in-flight refresh.
+- Domain-shaped defaults exposed by SDKs or hooks are unresolved until the first successful request completes. Values such as `MFA disabled`, empty Passkeys, or empty Sessions must not be presented as real business state before that boundary is crossed.
 - Use `Button` / `IconButton` loading or disabled state for mutations and submissions. A save, delete, search, pagination, or security action must not replace unrelated page content with a loading placeholder.
 - `Empty` means a successful load returned no data. A fatal initial load error must render an `Alert`/retry state without also rendering `Empty`.
 - A refresh failure may render an in-flow `Alert` together with previously loaded stale content when that content is still useful and safe to show.
