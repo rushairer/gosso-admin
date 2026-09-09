@@ -2,7 +2,7 @@ name: Sync Gouno UI
 
 on:
   push:
-    branches: [main]
+    branches: [main, ui/gouno-production-alignment-20260909]
     paths:
       - .github/workflows/sync-gouno-ui.yml
   workflow_dispatch:
@@ -16,7 +16,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: sync-gouno-ui
+  group: sync-gouno-ui-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -108,4 +108,4 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore(ui): sync gouno ui ${GOUNO_UI_SHA}"
-          git push origin HEAD:main
+          git push origin "HEAD:${GITHUB_REF_NAME}"
