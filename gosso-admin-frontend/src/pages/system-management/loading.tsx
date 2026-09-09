@@ -48,15 +48,14 @@ export function SystemCollectionLoading({
         <TableBody>
           {Array.from({ length: rows }, (_, rowIndex) => (
             <TableRow key={rowIndex}>
-              {columns.map((column, columnIndex) => (
-                <TableCell key={columnIndex}>
-                  <Skeleton
-                    className={`${column.skeletonClassName ?? 'h-4 w-24'} ${
-                      column.align === 'right' ? 'ml-auto' : ''
-                    }`}
-                  />
-                </TableCell>
-              ))}
+              {columns.map((column, columnIndex) => {
+                const alignmentClass = column.align === 'right' ? 'ml-auto' : '';
+                return (
+                  <TableCell key={columnIndex}>
+                    <Skeleton className={`${column.skeletonClassName ?? 'h-4 w-24'} ${alignmentClass}`} />
+                  </TableCell>
+                );
+              })}
             </TableRow>
           ))}
         </TableBody>
