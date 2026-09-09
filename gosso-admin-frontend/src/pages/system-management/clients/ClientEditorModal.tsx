@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Checkbox, CheckboxGroup, Feedback, FormField, Input, Modal } from '@gouno/ui';
+import { Alert, Button, Checkbox, CheckboxGroup, FormField, Input, Modal } from '@gouno/ui/core';
 import type { OAuth2Client } from '../../../types/api';
 import type { ClientFormData } from '../../../features/clients/clientForm';
 
@@ -31,8 +31,10 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
 
   return (
     <Modal
-      isOpen={isOpen}
-      onClose={onClose}
+      open={isOpen}
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
       title={editingClient ? t('clients.editModalTitle') : t('clients.registerModalTitle')}
       description={
         editingClient
@@ -44,17 +46,17 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
       maxWidth="620px"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose} type="button">
+          <Button onClick={onClose} type="button">
             {t('common.cancel')}
           </Button>
-          <Button form="client-editor-form" type="submit" variant="primary">
+          <Button form="client-editor-form" type="submit" variant="solid" color="primary">
             {editingClient ? t('clients.saveChangesButton') : t('clients.registerClientButton')}
           </Button>
         </>
       }
     >
-      <form id="client-editor-form" onSubmit={onSubmit}>
-        <FormField label={t('clients.clientNameLabel')}>
+      <form id="client-editor-form" onSubmit={onSubmit} className="flex flex-col gap-5">
+        <FormField label={t('clients.clientNameLabel')} required>
           <Input
             type="text"
             placeholder={t('clients.clientNamePlaceholder')}
@@ -70,7 +72,7 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
             onChange={(e) => setClientForm((p) => ({ ...p, description: e.target.value }))}
           />
         </FormField>
-        <FormField label={t('clients.redirectUrisLabel')} hint={t('clients.redirectUrisHint')}>
+        <FormField label={t('clients.redirectUrisLabel')} hint={t('clients.redirectUrisHint')} required>
           <Input
             type="text"
             placeholder={t('clients.redirectUrisPlaceholder')}
@@ -78,7 +80,6 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
             onChange={(e) => setClientForm((p) => ({ ...p, redirect_uris: e.target.value }))}
           />
         </FormField>
-
         <FormField label={t('clients.postLogoutRedirectUrisLabel')}>
           <Input
             type="text"
@@ -87,7 +88,6 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
             onChange={(e) => setClientForm((p) => ({ ...p, post_logout_redirect_uris: e.target.value }))}
           />
         </FormField>
-
         <FormField
           label={t('clients.allowedResourcesLabel', { defaultValue: 'Allowed Resources (RFC 8707)' })}
           hint={t('clients.allowedResourcesHint', {
@@ -101,17 +101,15 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
             onChange={(e) => setClientForm((p) => ({ ...p, allowed_resources: e.target.value }))}
           />
         </FormField>
-
         <FormField label={t('clients.clientTypeLabel')}>
           <Checkbox
             id="is_confidential"
             label={t('clients.confidentialClientLabel')}
             checked={clientForm.is_confidential}
             onChange={(event) => setClientForm((p) => ({ ...p, is_confidential: event.target.checked }))}
-            disabled={!!editingClient}
+            disabled={Boolean(editingClient)}
           />
         </FormField>
-
         <CheckboxGroup label={t('clients.grantTypesLabel')}>
           {['authorization_code', 'client_credentials', 'refresh_token', 'device_code'].map((gt) => (
             <Checkbox
@@ -123,7 +121,6 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
             />
           ))}
         </CheckboxGroup>
-
         <CheckboxGroup label={t('clients.scopesLabel')}>
           {clientScopeOptions.map((sc) => (
             <Checkbox
@@ -135,11 +132,9 @@ export const ClientEditorModal: React.FC<ClientEditorModalProps> = ({
             />
           ))}
         </CheckboxGroup>
-        {clientForm.scopes.some(isAdminScope) && (
-          <div className="mb-md">
-            <Feedback type="warning">{t('clients.adminScopeWarning')}</Feedback>
-          </div>
-        )}
+        {clientForm.scopes.some(isAdminScope) ? (
+          <Alert type="warning" showIcon title={t('clients.adminScopeWarning')} />
+        ) : null}
       </form>
     </Modal>
   );
