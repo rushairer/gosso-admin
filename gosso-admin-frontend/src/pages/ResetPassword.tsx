@@ -71,7 +71,7 @@ export default function ResetPassword() {
 
         {!success ? (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <FormField label={t('passwordReset.newPasswordLabel')} required hint={t('passwordReset.passwordHint')}>
+            <FormField label={t('passwordReset.newPasswordLabel')} required hint={t('passwordReset.passwordTooShort')}>
               <Input
                 type={showPassword ? 'text' : 'password'}
                 aria-label={t('passwordReset.newPasswordLabel')}
