@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ToastProvider } from '@gouno/ui';
+import { MessageProvider } from '@gouno/ui/core';
 import { GossoProvider } from '@gosso/client/react';
 import { apiFetch, gossoClient } from '../../auth';
 import UsersTab from './UsersTab';
@@ -103,9 +103,9 @@ describe('UsersTab pagination', () => {
   it('uses the bounded role projection without per-account requests', async () => {
     render(
       <GossoProvider client={gossoClient as any}>
-        <ToastProvider>
+        <MessageProvider>
           <UsersTab />
-        </ToastProvider>
+        </MessageProvider>
       </GossoProvider>
     );
 
