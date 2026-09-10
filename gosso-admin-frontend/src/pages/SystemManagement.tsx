@@ -2,11 +2,11 @@ import type { ComponentType } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '@gouno/ui/gouno';
-import ClientsTab from './system-management/ClientsTab';
-import UsersTab from './system-management/UsersTab';
-import AuditLogsTab from './system-management/AuditLogsTab';
-import SystemStatusTab from './system-management/SystemStatusTab';
-import SiteSettingsTab from './system-management/SiteSettingsTab';
+import ClientsPanel from './system-management/ClientsTab';
+import UsersPanel from './system-management/UsersTab';
+import AuditLogsPanel from './system-management/AuditLogsTab';
+import SystemStatusPanel from './system-management/SystemStatusTab';
+import SiteSettingsPanel from './system-management/SiteSettingsTab';
 
 const systemManagementSections = ['clients', 'users', 'audit-logs', 'site-settings', 'system'] as const;
 type SystemManagementSection = (typeof systemManagementSections)[number];
@@ -19,23 +19,23 @@ type SectionConfig = {
 const sectionConfig: Record<SystemManagementSection, SectionConfig> = {
   clients: {
     titleKey: 'systemManagement.tabClients',
-    panel: ClientsTab,
+    panel: ClientsPanel,
   },
   users: {
     titleKey: 'systemManagement.tabUsers',
-    panel: UsersTab,
+    panel: UsersPanel,
   },
   'audit-logs': {
     titleKey: 'systemManagement.tabAuditLogs',
-    panel: AuditLogsTab,
+    panel: AuditLogsPanel,
   },
   'site-settings': {
     titleKey: 'site.tabLabel',
-    panel: SiteSettingsTab,
+    panel: SiteSettingsPanel,
   },
   system: {
     titleKey: 'systemManagement.tabSystemStatus',
-    panel: SystemStatusTab,
+    panel: SystemStatusPanel,
   },
 };
 
