@@ -68,7 +68,7 @@ export default function AccountSettings() {
         activeKey={activeTab}
         items={tabs}
         onChange={(next) => navigate(`/account-settings/${next}`)}
-        ariaLabel={t('accountSettings.sectionsLabel')}
+        aria-label={t('accountSettings.sectionsLabel')}
       />
     </div>
   );
