@@ -33,22 +33,27 @@ Future Gouno UI changes must flow through the synchronization workflow and be ha
 
 Do not reopen a broad product-side migration program merely because Gouno UI gains new Showcase examples, documentation, tests, Patterns, or unrelated product fixtures. Reopen migration-level work only for an explicit breaking shared contract or an intentional redesign of the Gosso Admin canonical product language.
 
+The 2026-09-10 System Management navigation change is such an intentional product-language redesign, but it remains a narrow product update rather than a reopened migration program. Its five durable management domains are standalone Sidebar destinations; Account Settings remains the canonical page-local Tabs family.
+
 ## Normal Admin Page Grammar
 
-Normal routed admin/settings pages use this composition order:
+Normal routed admin/settings pages use the smallest navigation hierarchy that matches their information architecture:
 
-1. `PageHeader` for the route-family title and description.
-2. One page-local `Tabs` layer when the route has peer sections.
-3. A panel lead only when the active section needs description, status, or actions.
-4. The section's real content surfaces: `Card`, `Table`, `Empty`, `Alert`, forms, lists, or status rows.
+1. `PageHeader` owns the routed page title and any route-level introduction that is stable for that destination.
+2. A durable domain that is already reachable from the Sidebar renders its panel lead and real content directly; do not repeat those destinations in a route-family `Tabs` layer.
+3. One page-local `Tabs` layer is allowed when peer views genuinely share one route context and are not already independent primary-navigation destinations. Account Settings is the canonical current example.
+4. A panel lead is used only when the active page or section needs description, status, or actions.
+5. Real content surfaces follow: `Card`, `Table`, `Empty`, `Alert`, forms, lists, or status rows.
 
-Do not repeat the selected tab label immediately as another heading. Do not add a wrapper Card merely to create spacing around a self-surfaced Table, list, or Empty state.
+Do not repeat the current page or selected tab label immediately as another heading. Do not add a wrapper Card merely to create spacing around a self-surfaced Table, list, or Empty state.
 
 Landing/dashboard routes may use a different composition when the stable Showcase explicitly defines it. The Overview Hero is such a product-space exception.
 
 ## Tabs Ownership
 
-`Tabs` owns the structural relationship and spacing between the tab bar and its active `TabPanel`. Business content belongs inside the tab item's `children` / panel ownership rather than as a page sibling that happens to be separated with an outer `gap`.
+`Tabs` is a page-local secondary-navigation primitive, not a second representation of the primary Sidebar navigation. The five System Management domains (`clients`, `users`, `audit-logs`, `site-settings`, `system`) are standalone Sidebar routes and must not be wrapped in a System Management `Tabs` layer.
+
+Where Tabs is canonical, it owns the structural relationship and spacing between the tab bar and its active `TabPanel`. Business content belongs inside the tab item's `children` / panel ownership rather than as a page sibling that happens to be separated with an outer `gap`.
 
 The active panel owns its own internal padding and rhythm. Do not use page-level spacing utilities to compensate for a Tabs layout defect.
 
@@ -86,7 +91,7 @@ Production-only actions are allowed and expected when real behavior exceeds the 
 
 Asynchronous UI must preserve the most stable structure that is already known.
 
-- Use `Skeleton` when the eventual structure is predictable. Keep route shells, PageHeader/Tabs, panel leads, Table headers, form geometry, and list anatomy visible instead of replacing the whole region with a spinner.
+- Use `Skeleton` when the eventual structure is predictable. Keep route shells, PageHeader, any canonical page-local Tabs, panel leads, Table headers, form geometry, and list anatomy visible instead of replacing the whole region with a spinner.
 - Treat initial loading separately from later refreshes. If usable data already exists, keep it rendered, mark the affected region with `aria-busy`, and disable controls that would conflict with the in-flight refresh.
 - Domain-shaped defaults exposed by SDKs or hooks are unresolved until the first successful request completes. Values such as `MFA disabled`, empty Passkeys, or empty Sessions must not be presented as real business state before that boundary is crossed.
 - Use `Button` / `IconButton` loading or disabled state for mutations and submissions. A save, delete, search, pagination, or security action must not replace unrelated page content with a loading placeholder.
