@@ -66,7 +66,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }, [pageTitles, location.pathname]);
 
   const pageLabel = useMemo(() => {
-    const systemManagementTab = location.pathname.match(/^\/system-management\/([^/]+)/)?.[1];
+    const systemManagementSection = location.pathname.match(/^\/system-management\/([^/]+)/)?.[1];
     const systemManagementLabels: Record<string, string> = {
       clients: t('systemManagement.tabClients'),
       users: t('systemManagement.tabUsers'),
@@ -74,8 +74,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       'site-settings': t('site.tabLabel'),
       system: t('systemManagement.tabSystemStatus'),
     };
-    if (systemManagementTab) {
-      return systemManagementLabels[systemManagementTab] || pageTitles['/system-management'].title;
+    if (systemManagementSection) {
+      return systemManagementLabels[systemManagementSection] || pageTitles['/system-management'].title;
     }
 
     const accountSettingsTab = location.pathname.match(/^\/account-settings\/([^/]+)/)?.[1];
@@ -97,7 +97,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }, [pageLabel, productName, t]);
 
   const userName = session.profile?.preferred_username || session.profile?.name || t('nav.notSignedIn');
-  const systemItems = [
+  const systemManagementItems = [
     { key: 'clients', label: t('systemManagement.tabClients'), icon: <KeyRound aria-hidden="true" /> },
     { key: 'users', label: t('systemManagement.tabUsers'), icon: <Users aria-hidden="true" /> },
     { key: 'audit-logs', label: t('systemManagement.tabAuditLogs'), icon: <FileText aria-hidden="true" /> },
@@ -127,7 +127,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </NavigationGroup>
           {session.loggedIn && session.isAdmin ? (
             <NavigationGroup label={t('nav.systemManagement')}>
-              {systemItems.map(({ key, label, icon }) => (
+              {systemManagementItems.map(({ key, label, icon }) => (
                 <NavLink key={key} to={`/system-management/${key}`} className={navigationItemClass} onClick={close}>
                   {icon}
                   <span>{label}</span>
