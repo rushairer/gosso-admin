@@ -151,7 +151,7 @@ export default function MFAPanel() {
             <div className="flex flex-col gap-6">
               <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-center">
                 <div className="mx-auto rounded-lg border bg-white p-4">
-                  <QRCode value={mfaEnrollment.otpauth_url} size={180} ariaLabel={t('mfa.qrCodeAlt')} />
+                  <QRCode value={mfaEnrollment.otpauth_url} size={180} aria-label={t('mfa.qrCodeAlt')} />
                 </div>
                 <div className="flex flex-col gap-4">
                   <div>
