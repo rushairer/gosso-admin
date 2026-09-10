@@ -59,14 +59,18 @@ jobs:
         run: |
           set -euo pipefail
           VENDOR="$GITHUB_WORKSPACE/gosso-admin-frontend/vendor"
+          FRONTEND_PACKAGE="$GITHUB_WORKSPACE/gosso-admin-frontend/package.json"
+          PACKAGE_VERSION="$(node --input-type=module -e "import { readFile } from 'node:fs/promises'; const pkg = JSON.parse(await readFile('.gouno-ui/package.json', 'utf8')); process.stdout.write(pkg.version);")"
+          ARCHIVE="gouno-ui-${PACKAGE_VERSION}.tgz"
+
           rm -f "$VENDOR"/gouno-ui-*.tgz
           PACK_JSON="$(cd .gouno-ui && npm pack --json)"
           PACK_FILE="$(printf '%s' "$PACK_JSON" | node --input-type=module -e 'let s=""; process.stdin.on("data", c => s += c); process.stdin.on("end", () => { const value = JSON.parse(s); if (!value[0]?.filename) process.exit(1); process.stdout.write(value[0].filename); });')"
-          cp ".gouno-ui/$PACK_FILE" "$VENDOR/gouno-ui-0.1.0.tgz"
+          cp ".gouno-ui/$PACK_FILE" "$VENDOR/$ARCHIVE"
 
           GOUNO_UI_SHA="$(git -C .gouno-ui rev-parse HEAD)"
-          SHA256="$(sha256sum "$VENDOR/gouno-ui-0.1.0.tgz" | awk '{print $1}')"
-          INTEGRITY="sha512-$(openssl dgst -sha512 -binary "$VENDOR/gouno-ui-0.1.0.tgz" | openssl base64 -A)"
+          SHA256="$(sha256sum "$VENDOR/$ARCHIVE" | awk '{print $1}')"
+          INTEGRITY="sha512-$(openssl dgst -sha512 -binary "$VENDOR/$ARCHIVE" | openssl base64 -A)"
 
           cat > "$VENDOR/gouno-ui-source.txt" <<EOF
           repository=https://github.com/rushairer/gouno-ui
@@ -74,13 +78,21 @@ jobs:
           sha=$GOUNO_UI_SHA
           EOF
 
-          node --input-type=module - "$VENDOR/ui-manifest.json" "$SHA256" "$INTEGRITY" "$GOUNO_UI_SHA" <<'EOF'
+          node --input-type=module - "$FRONTEND_PACKAGE" "$ARCHIVE" <<'EOF'
+          import { readFile, writeFile } from 'node:fs/promises';
+          const [, , path, archive] = process.argv;
+          const pkg = JSON.parse(await readFile(path, 'utf8'));
+          pkg.dependencies['@gouno/ui'] = `file:vendor/${archive}`;
+          await writeFile(path, `${JSON.stringify(pkg, null, 2)}\n`);
+          EOF
+
+          node --input-type=module - "$VENDOR/ui-manifest.json" "$PACKAGE_VERSION" "$ARCHIVE" "$SHA256" "$INTEGRITY" "$GOUNO_UI_SHA" <<'EOF'
           import { writeFile } from 'node:fs/promises';
-          const [, , path, sha256, integrity, sourceSha] = process.argv;
+          const [, , path, version, archive, sha256, integrity, sourceSha] = process.argv;
           const manifest = {
             name: '@gouno/ui',
-            version: '0.1.0',
-            archive: 'gouno-ui-0.1.0.tgz',
+            version,
+            archive,
             sha256,
             integrity,
             source: 'rushairer/gouno-ui',
@@ -131,16 +143,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add gosso-admin-frontend/vendor/gouno-ui-0.1.0.tgz \
-                  gosso-admin-frontend/vendor/gouno-ui-source.txt \
-                  gosso-admin-frontend/vendor/ui-manifest.json \
-                  gosso-admin-frontend/package-lock.json
+          git add -A gosso-admin-frontend/vendor \
+                     gosso-admin-frontend/package.json \
+                     gosso-admin-frontend/package-lock.json
           if git diff --cached --quiet; then
             echo "Gouno UI package is already synchronized."
             exit 0
           fi
+          GOUNO_UI_VERSION="$(node --input-type=module -e "import { readFile } from 'node:fs/promises'; const pkg = JSON.parse(await readFile('gosso-admin-frontend/package.json', 'utf8')); process.stdout.write(pkg.dependencies['@gouno/ui'].match(/gouno-ui-(.+)\.tgz$/)?.[1] || 'unknown');")"
           GOUNO_UI_SHA="$(git -C .gouno-ui rev-parse --short=12 HEAD)"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(ui): sync gouno ui ${GOUNO_UI_SHA}"
+          git commit -m "chore(ui): sync gouno ui ${GOUNO_UI_VERSION} ${GOUNO_UI_SHA}"
           git push origin HEAD:main
