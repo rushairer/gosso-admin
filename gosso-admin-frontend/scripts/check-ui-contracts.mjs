@@ -92,10 +92,16 @@ function checkTsxContracts(name, source) {
     ts.ScriptKind.TSX,
   );
   const sharedPrimitive = name.startsWith("components/ui/");
+  const standaloneSystemManagement = name === "pages/SystemManagement.tsx";
 
   function visit(node) {
     if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
       const tag = jsxTagName(node, sourceFile);
+      if (standaloneSystemManagement && tag === "Tabs") {
+        failures.push(
+          `${name}:${location(sourceFile, node)} system management domains are standalone Sidebar routes and must not add a route-family Tabs layer`,
+        );
+      }
       if (!sharedPrimitive && tag === "button") {
         failures.push(
           `${name}:${location(sourceFile, node)} native button must use Button, ButtonLink, or IconButton`,
