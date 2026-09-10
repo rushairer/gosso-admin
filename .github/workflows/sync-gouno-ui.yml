@@ -122,6 +122,31 @@ jobs:
           npm install --package-lock-only --ignore-scripts --legacy-peer-deps
           npm ci --legacy-peer-deps
           node --input-type=module <<'EOF'
+          import { createHash } from 'node:crypto';
+          import { readFile } from 'node:fs/promises';
+
+          const pkg = JSON.parse(await readFile('./package.json', 'utf8'));
+          const manifest = JSON.parse(await readFile('./vendor/ui-manifest.json', 'utf8'));
+          const source = await readFile('./vendor/gouno-ui-source.txt', 'utf8');
+          const archivePath = `./vendor/${manifest.archive}`;
+          const archive = await readFile(archivePath);
+          const installed = JSON.parse(await readFile('./node_modules/@gouno/ui/package.json', 'utf8'));
+          const sha256 = createHash('sha256').update(archive).digest('hex');
+          const integrity = `sha512-${createHash('sha512').update(archive).digest('base64')}`;
+
+          if (pkg.dependencies?.['@gouno/ui'] !== `file:vendor/${manifest.archive}`) {
+            throw new Error('package.json Gouno UI dependency does not match vendor manifest archive');
+          }
+          if (installed.version !== manifest.version) {
+            throw new Error('installed Gouno UI version does not match vendor manifest');
+          }
+          if (manifest.sha256 !== sha256 || manifest.integrity !== integrity) {
+            throw new Error('vendored Gouno UI archive digest does not match vendor manifest');
+          }
+          if (!source.includes(`sha=${manifest.sourceSha}`)) {
+            throw new Error('Gouno UI provenance source SHA does not match vendor manifest');
+          }
+
           const core = await import('@gouno/ui/core');
           const theme = await import('@gouno/ui/theme');
           const gouno = await import('@gouno/ui/gouno');
