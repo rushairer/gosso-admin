@@ -25,6 +25,7 @@ vi.mock('../system-management/ClientsTab', () => ({ default: () => <div>Clients 
 vi.mock('../system-management/UsersTab', () => ({ default: () => <div>Users content</div> }));
 vi.mock('../system-management/AuditLogsTab', () => ({ default: () => <div>Audit content</div> }));
 vi.mock('../system-management/SystemStatusTab', () => ({ default: () => <div>System content</div> }));
+vi.mock('../system-management/SiteSettingsTab', () => ({ default: () => <div>Site settings content</div> }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 
 function renderSystemManagement(path = '/system-management/clients') {
@@ -33,7 +34,7 @@ function renderSystemManagement(path = '/system-management/clients') {
       <MemoryRouter initialEntries={[path]}>
         <Routes>
           <Route
-            path="/system-management/:tab"
+            path="/system-management/:section"
             element={
               <RequireAdmin
                 redirectTo="/system-management/clients"
@@ -69,10 +70,22 @@ describe('SystemManagement access gate', () => {
     expect(redirectToAuthorize).not.toHaveBeenCalled();
   });
 
-  it('renders administration content only for administrators', async () => {
+  it('renders the requested administration domain as a standalone page for administrators', async () => {
     getSnapshot.mockReturnValue({ loggedIn: true, isAdmin: true, profile: { sub: 'admin-1' } });
     renderSystemManagement();
-    const clientsContent = await screen.findByText('Clients content');
-    expect(screen.getByRole('tabpanel')).toContainElement(clientsContent);
+
+    expect(await screen.findByRole('heading', { name: 'systemManagement.tabClients' })).toBeInTheDocument();
+    expect(screen.getByText('Clients content')).toBeInTheDocument();
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
+    expect(screen.queryByRole('tabpanel')).not.toBeInTheDocument();
+  });
+
+  it('renders a different system management section without route-family tabs', async () => {
+    getSnapshot.mockReturnValue({ loggedIn: true, isAdmin: true, profile: { sub: 'admin-1' } });
+    renderSystemManagement('/system-management/users');
+
+    expect(await screen.findByRole('heading', { name: 'systemManagement.tabUsers' })).toBeInTheDocument();
+    expect(screen.getByText('Users content')).toBeInTheDocument();
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument();
   });
 });

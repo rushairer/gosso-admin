@@ -1,7 +1,6 @@
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import type { ComponentType } from 'react';
+import { Navigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FileText, KeyRound, Shield, SlidersHorizontal, Users } from 'lucide-react';
-import { Tabs } from '@gouno/ui/core';
 import { PageHeader } from '@gouno/ui/gouno';
 import ClientsTab from './system-management/ClientsTab';
 import UsersTab from './system-management/UsersTab';
@@ -9,67 +8,56 @@ import AuditLogsTab from './system-management/AuditLogsTab';
 import SystemStatusTab from './system-management/SystemStatusTab';
 import SiteSettingsTab from './system-management/SiteSettingsTab';
 
-const systemManagementTabs = ['clients', 'users', 'audit-logs', 'site-settings', 'system'] as const;
-type SystemManagementTab = (typeof systemManagementTabs)[number];
+const systemManagementSections = ['clients', 'users', 'audit-logs', 'site-settings', 'system'] as const;
+type SystemManagementSection = (typeof systemManagementSections)[number];
 
-function isSystemManagementTab(value: string | undefined): value is SystemManagementTab {
-  return Boolean(value && systemManagementTabs.includes(value as SystemManagementTab));
+type SectionConfig = {
+  titleKey: string;
+  panel: ComponentType;
+};
+
+const sectionConfig: Record<SystemManagementSection, SectionConfig> = {
+  clients: {
+    titleKey: 'systemManagement.tabClients',
+    panel: ClientsTab,
+  },
+  users: {
+    titleKey: 'systemManagement.tabUsers',
+    panel: UsersTab,
+  },
+  'audit-logs': {
+    titleKey: 'systemManagement.tabAuditLogs',
+    panel: AuditLogsTab,
+  },
+  'site-settings': {
+    titleKey: 'site.tabLabel',
+    panel: SiteSettingsTab,
+  },
+  system: {
+    titleKey: 'systemManagement.tabSystemStatus',
+    panel: SystemStatusTab,
+  },
+};
+
+function isSystemManagementSection(value: string | undefined): value is SystemManagementSection {
+  return Boolean(value && systemManagementSections.includes(value as SystemManagementSection));
 }
 
 export default function SystemManagement() {
   const { t } = useTranslation();
-  const { tab } = useParams();
-  const navigate = useNavigate();
-  const activeTab = isSystemManagementTab(tab) ? tab : 'clients';
-  if (!isSystemManagementTab(tab)) {
+  const { section } = useParams();
+
+  if (!isSystemManagementSection(section)) {
     return <Navigate replace to="/system-management/clients" />;
   }
 
-  const tabs = [
-    {
-      key: 'clients' as const,
-      label: t('systemManagement.tabClients'),
-      icon: <KeyRound aria-hidden="true" className="size-4" />,
-      children: <ClientsTab />,
-    },
-    {
-      key: 'users' as const,
-      label: t('systemManagement.tabUsers'),
-      icon: <Users aria-hidden="true" className="size-4" />,
-      children: <UsersTab />,
-    },
-    {
-      key: 'audit-logs' as const,
-      label: t('systemManagement.tabAuditLogs'),
-      icon: <FileText aria-hidden="true" className="size-4" />,
-      children: <AuditLogsTab />,
-    },
-    {
-      key: 'site-settings' as const,
-      label: t('site.tabLabel'),
-      icon: <SlidersHorizontal aria-hidden="true" className="size-4" />,
-      children: <SiteSettingsTab />,
-    },
-    {
-      key: 'system' as const,
-      label: t('systemManagement.tabSystemStatus'),
-      icon: <Shield aria-hidden="true" className="size-4" />,
-      children: <SystemStatusTab />,
-    },
-  ];
+  const page = sectionConfig[section];
+  const Panel = page.panel;
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title={t('pageTitles.systemManagementTitle')}
-        description={t('pageTitles.systemManagementDescription')}
-      />
-      <Tabs<SystemManagementTab>
-        activeKey={activeTab}
-        items={tabs}
-        onChange={(next) => navigate(`/system-management/${next}`)}
-        ariaLabel={t('systemManagement.sectionsLabel')}
-      />
+      <PageHeader title={t(page.titleKey)} />
+      <Panel />
     </div>
   );
 }

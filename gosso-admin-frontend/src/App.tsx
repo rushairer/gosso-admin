@@ -46,18 +46,20 @@ function AppBootstrapLoader() {
   );
 }
 
-function PageLoader() {
+function PageLoader({ showTabs = false }: { showTabs?: boolean }) {
   return (
     <div className="flex flex-col gap-6" role="status" aria-live="polite" aria-label="Loading page">
       <div className="flex flex-col gap-3">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-full max-w-2xl" />
       </div>
-      <div className="flex gap-3 overflow-hidden border-b pb-3">
-        <Skeleton className="h-8 w-28 shrink-0" />
-        <Skeleton className="h-8 w-28 shrink-0" />
-        <Skeleton className="h-8 w-28 shrink-0" />
-      </div>
+      {showTabs ? (
+        <div className="flex gap-3 overflow-hidden border-b pb-3">
+          <Skeleton className="h-8 w-28 shrink-0" />
+          <Skeleton className="h-8 w-28 shrink-0" />
+          <Skeleton className="h-8 w-28 shrink-0" />
+        </div>
+      ) : null}
       <div className="grid gap-4 md:grid-cols-3">
         <Skeleton className="h-24 w-full rounded-lg" />
         <Skeleton className="h-24 w-full rounded-lg" />
@@ -68,10 +70,10 @@ function PageLoader() {
   );
 }
 
-function AccountRoute({ children }: { children: React.ReactNode }) {
+function AccountRoute({ children, showTabs = false }: { children: React.ReactNode; showTabs?: boolean }) {
   const location = useLocation();
   return (
-    <RequireAuth redirectTo={appPath(location.pathname)} fallback={<PageLoader />}>
+    <RequireAuth redirectTo={appPath(location.pathname)} fallback={<PageLoader showTabs={showTabs} />}>
       {children}
     </RequireAuth>
   );
@@ -148,8 +150,8 @@ export default function App() {
                   path="/account-settings/:tab"
                   element={
                     <AdminLayout>
-                      <AccountRoute>
-                        <Suspense fallback={<PageLoader />}>
+                      <AccountRoute showTabs>
+                        <Suspense fallback={<PageLoader showTabs />}>
                           <AccountSettings />
                         </Suspense>
                       </AccountRoute>
@@ -158,7 +160,7 @@ export default function App() {
                 />
                 <Route path="/system-management" element={<Navigate replace to="/system-management/clients" />} />
                 <Route
-                  path="/system-management/:tab"
+                  path="/system-management/:section"
                   element={
                     <AdminLayout>
                       <AdminRoute>
