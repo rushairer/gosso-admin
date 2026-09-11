@@ -1,0 +1,47 @@
+name: Format AdminLayout Once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/format-admin-layout-once.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: format-admin-layout-once
+  cancel-in-progress: false
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: gosso-admin-frontend/package-lock.json
+
+      - name: Format and self-clean
+        working-directory: gosso-admin-frontend
+        run: |
+          npm ci --legacy-peer-deps
+          npx prettier --write src/components/layout/AdminLayout.tsx
+          npx prettier --check src/components/layout/AdminLayout.tsx
+          cd ..
+          rm .github/workflows/format-admin-layout-once.yml
+          git add gosso-admin-frontend/src/components/layout/AdminLayout.tsx .github/workflows/format-admin-layout-once.yml
+          if git diff --cached --quiet; then
+            echo "No formatting change required; removing helper only."
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "style(ui): apply repository Prettier to AdminLayout"
+          git push origin HEAD:main
