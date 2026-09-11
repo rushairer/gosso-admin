@@ -18,11 +18,17 @@ import { logout, redirectToAuthorize } from '../../auth';
 import { siteSettingsService } from '../../services';
 import type { SessionSnapshot } from '../../auth';
 import { Button, IconButton } from '@gouno/ui/core';
-import { AppShell, NavigationGroup, PageContainer, navigationItemClass } from '@gouno/ui/gouno';
+import {
+  AppShell,
+  NavigationGroup,
+  PageContainer,
+  navigationItemClass,
+} from '@gouno/ui/gouno';
 import { ThemeToggle } from '@gouno/ui/theme';
 
 function initials(snapshot: SessionSnapshot) {
-  const name = snapshot.profile?.preferred_username || snapshot.profile?.name || 'Guest';
+  const name =
+    snapshot.profile?.preferred_username || snapshot.profile?.name || 'Guest';
   return name.slice(0, 2).toUpperCase();
 }
 
@@ -32,23 +38,24 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = useSession();
   const [productName, setProductName] = useState('GOSSO');
 
-  const pageTitles: Record<string, { title: string; description: string }> = useMemo(
-    () => ({
-      '/': {
-        title: t('pageTitles.overviewTitle'),
-        description: t('pageTitles.overviewDescription'),
-      },
-      '/system-management': {
-        title: t('pageTitles.systemManagementTitle'),
-        description: t('pageTitles.systemManagementDescription'),
-      },
-      '/account-settings': {
-        title: t('pageTitles.accountSettingsTitle'),
-        description: t('pageTitles.accountSettingsDescription'),
-      },
-    }),
-    [t]
-  );
+  const pageTitles: Record<string, { title: string; description: string }> =
+    useMemo(
+      () => ({
+        '/': {
+          title: t('pageTitles.overviewTitle'),
+          description: t('pageTitles.overviewDescription'),
+        },
+        '/system-management': {
+          title: t('pageTitles.systemManagementTitle'),
+          description: t('pageTitles.systemManagementDescription'),
+        },
+        '/account-settings': {
+          title: t('pageTitles.accountSettingsTitle'),
+          description: t('pageTitles.accountSettingsDescription'),
+        },
+      }),
+      [t],
+    );
 
   useEffect(() => {
     void siteSettingsService
@@ -58,13 +65,17 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   const page = useMemo(() => {
-    if (location.pathname.startsWith('/system-management')) return pageTitles['/system-management'];
-    if (location.pathname.startsWith('/account-settings')) return pageTitles['/account-settings'];
+    if (location.pathname.startsWith('/system-management'))
+      return pageTitles['/system-management'];
+    if (location.pathname.startsWith('/account-settings'))
+      return pageTitles['/account-settings'];
     return pageTitles[location.pathname] || pageTitles['/'];
   }, [pageTitles, location.pathname]);
 
   const pageLabel = useMemo(() => {
-    const systemManagementSection = location.pathname.match(/^\/system-management\/([^/]+)/)?.[1];
+    const systemManagementSection = location.pathname.match(
+      /^\/system-management\/([^/]+)/,
+    )?.[1];
     const systemManagementLabels: Record<string, string> = {
       clients: t('systemManagement.tabClients'),
       users: t('systemManagement.tabUsers'),
@@ -73,10 +84,15 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       system: t('systemManagement.tabSystemStatus'),
     };
     if (systemManagementSection) {
-      return systemManagementLabels[systemManagementSection] || pageTitles['/system-management'].title;
+      return (
+        systemManagementLabels[systemManagementSection] ||
+        pageTitles['/system-management'].title
+      );
     }
 
-    const accountSettingsTab = location.pathname.match(/^\/account-settings\/([^/]+)/)?.[1];
+    const accountSettingsTab = location.pathname.match(
+      /^\/account-settings\/([^/]+)/,
+    )?.[1];
     const accountSettingsLabels: Record<string, string> = {
       profile: t('accountSettings.tabProfile'),
       password: t('accountSettings.tabPassword'),
@@ -85,7 +101,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       sessions: t('accountSettings.tabSessions'),
     };
     if (accountSettingsTab) {
-      return accountSettingsLabels[accountSettingsTab] || pageTitles['/account-settings'].title;
+      return (
+        accountSettingsLabels[accountSettingsTab] ||
+        pageTitles['/account-settings'].title
+      );
     }
     return page.title;
   }, [location.pathname, page.title, pageTitles, t]);
@@ -94,13 +113,36 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     document.title = `${pageLabel} - ${productName} ${t('nav.brandSubtitle')}`;
   }, [pageLabel, productName, t]);
 
-  const userName = session.profile?.preferred_username || session.profile?.name || t('nav.notSignedIn');
+  const userName =
+    session.profile?.preferred_username ||
+    session.profile?.name ||
+    t('nav.notSignedIn');
   const systemManagementItems = [
-    { key: 'clients', label: t('systemManagement.tabClients'), icon: <KeyRound aria-hidden="true" /> },
-    { key: 'users', label: t('systemManagement.tabUsers'), icon: <Users aria-hidden="true" /> },
-    { key: 'audit-logs', label: t('systemManagement.tabAuditLogs'), icon: <FileText aria-hidden="true" /> },
-    { key: 'site-settings', label: t('site.tabLabel'), icon: <SlidersHorizontal aria-hidden="true" /> },
-    { key: 'system', label: t('systemManagement.tabSystemStatus'), icon: <Shield aria-hidden="true" /> },
+    {
+      key: 'clients',
+      label: t('systemManagement.tabClients'),
+      icon: <KeyRound aria-hidden="true" />,
+    },
+    {
+      key: 'users',
+      label: t('systemManagement.tabUsers'),
+      icon: <Users aria-hidden="true" />,
+    },
+    {
+      key: 'audit-logs',
+      label: t('systemManagement.tabAuditLogs'),
+      icon: <FileText aria-hidden="true" />,
+    },
+    {
+      key: 'site-settings',
+      label: t('site.tabLabel'),
+      icon: <SlidersHorizontal aria-hidden="true" />,
+    },
+    {
+      key: 'system',
+      label: t('systemManagement.tabSystemStatus'),
+      icon: <Shield aria-hidden="true" />,
+    },
   ];
 
   return (
@@ -111,7 +153,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       navigation={(close) => (
         <>
           <NavigationGroup>
-            <NavLink to="/" end className={navigationItemClass} onClick={close}>
+            <NavLink
+              to="/"
+              end
+              className={navigationItemClass}
+              onClick={close}
+            >
               <Home />
               <span>{t('nav.overview')}</span>
             </NavLink>
@@ -119,7 +166,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           {session.loggedIn && session.isAdmin ? (
             <NavigationGroup label={t('nav.systemManagement')}>
               {systemManagementItems.map(({ key, label, icon }) => (
-                <NavLink key={key} to={`/system-management/${key}`} className={navigationItemClass} onClick={close}>
+                <NavLink
+                  key={key}
+                  to={`/system-management/${key}`}
+                  className={navigationItemClass}
+                  onClick={close}
+                >
                   {icon}
                   <span>{label}</span>
                 </NavLink>
@@ -128,7 +180,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           ) : null}
           {session.loggedIn ? (
             <NavigationGroup>
-              <NavLink to="/account-settings" className={navigationItemClass} onClick={close}>
+              <NavLink
+                to="/account-settings"
+                className={navigationItemClass}
+                onClick={close}
+              >
                 <UserCog />
                 <span>{t('nav.accountSettings')}</span>
               </NavLink>
@@ -139,12 +195,20 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       toolbar={
         <ThemeToggle
           label="Theme / 主题"
-          labels={{ light: 'Light / 浅色', dark: 'Dark / 深色', system: 'System / 跟随系统' }}
+          labels={{
+            light: 'Light / 浅色',
+            dark: 'Dark / 深色',
+            system: 'System / 跟随系统',
+          }}
         />
       }
       account={
         session.loggedIn ? (
-          <IconButton label={t('nav.signOut')} icon={<LogOut />} onClick={() => logout('/')} />
+          <IconButton
+            label={t('nav.signOut')}
+            icon={<LogOut />}
+            onClick={() => logout('/')}
+          />
         ) : (
           <Button
             variant="solid"
@@ -164,7 +228,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <div className="min-w-0">
             <strong className="block truncate text-sm">{userName}</strong>
             <p className="m-0 text-xs text-muted-foreground">
-              {session.loggedIn ? (session.isAdmin ? t('nav.administrator') : t('nav.user')) : t('nav.anonymous')}
+              {session.loggedIn
+                ? session.isAdmin
+                  ? t('nav.administrator')
+                  : t('nav.user')
+                : t('nav.anonymous')}
             </p>
           </div>
         </div>
