@@ -77,6 +77,28 @@ function staticClassName(attribute) {
   return "";
 }
 
+function staticJsxAttributeValue(node, attributeName) {
+  const attributes = ts.isJsxElement(node)
+    ? node.openingElement.attributes
+    : node.attributes;
+  for (const attribute of attributes.properties) {
+    if (!ts.isJsxAttribute(attribute) || attribute.name.text !== attributeName)
+      continue;
+    const initializer = attribute.initializer;
+    if (!initializer) return "";
+    if (ts.isStringLiteral(initializer)) return initializer.text;
+    if (
+      ts.isJsxExpression(initializer) &&
+      initializer.expression &&
+      (ts.isStringLiteral(initializer.expression) ||
+        ts.isNoSubstitutionTemplateLiteral(initializer.expression))
+    ) {
+      return initializer.expression.text;
+    }
+  }
+  return "";
+}
+
 function checkTsxContracts(name, source) {
   if (
     !name.endsWith(".tsx") ||
@@ -93,6 +115,7 @@ function checkTsxContracts(name, source) {
   );
   const sharedPrimitive = name.startsWith("components/ui/");
   const standaloneSystemManagement = name === "pages/SystemManagement.tsx";
+  const adminLayout = name === "components/layout/AdminLayout.tsx";
 
   function visit(node) {
     if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
@@ -101,6 +124,14 @@ function checkTsxContracts(name, source) {
         failures.push(
           `${name}:${location(sourceFile, node)} system management domains are standalone Sidebar routes and must not add a route-family Tabs layer`,
         );
+      }
+      if (adminLayout && tag === "NavLink") {
+        const target = staticJsxAttributeValue(node, "to");
+        if (/^\/account-settings\/.+/.test(target)) {
+          failures.push(
+            `${name}:${location(sourceFile, node)} account settings Tabs are page-local navigation; Sidebar must link only to /account-settings`,
+          );
+        }
       }
       if (!sharedPrimitive && tag === "button") {
         failures.push(
