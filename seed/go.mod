@@ -3,8 +3,8 @@ module seed
 go 1.26.6
 
 require (
-	github.com/jackc/pgx/v5 v5.10.0
-	golang.org/x/crypto v0.55.0
+	github.com/jackc/pgx/v5 v5.11.0
+	golang.org/x/crypto v0.56.0
 )
 
 require (
