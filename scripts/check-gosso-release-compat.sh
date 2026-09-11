@@ -13,6 +13,8 @@ override_file="$(mktemp)"
 cat >"$override_file" <<EOF
 services:
   gosso:
+    environment:
+      GOUNO_WEB_SERVER_DEBUG: "false"
     ports:
       - "127.0.0.1:${GOSSO_COMPAT_PORT}:8080"
     volumes:
@@ -77,8 +79,6 @@ if [ "$ready" != "true" ]; then
 fi
 printf '[ok] release image booted, migrated, and became ready\n'
 
-# Exercise the downstream seed source against the schema produced by the
-# released Gosso image. This deliberately does not use a prebuilt seed image.
 (
   cd seed
   GOSSO_ADMIN_ENV=development \
@@ -115,8 +115,6 @@ curl -fsS -H "Authorization: Bearer ${access_token}" \
   "http://127.0.0.1:${GOSSO_COMPAT_PORT}/api/v1/admin/accounts?page_size=1" >/tmp/gosso-compat-accounts.json
 printf '[ok] live user-session principal can access Admin control plane\n'
 
-# Mirror @gosso/client cookie mode. We tell Gosso the original request was HTTPS
-# so the emitted __Host- cookie must carry the browser-required Secure attribute.
 curl -fsS -D /tmp/gosso-compat-cookie-headers.txt -o /tmp/gosso-compat-cookie-login.json \
   -H 'Content-Type: application/json' \
   -H 'X-Gosso-Cookie-Session: 1' \
