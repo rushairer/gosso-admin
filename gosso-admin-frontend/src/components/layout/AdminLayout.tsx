@@ -4,15 +4,13 @@ import { useTranslation } from 'react-i18next';
 import {
   FileText,
   Home,
-  Key,
   KeyRound,
-  Laptop,
-  Lock,
   LogIn,
   LogOut,
   Shield,
   SlidersHorizontal,
   User,
+  UserCog,
   Users,
 } from 'lucide-react';
 import { useSession } from '@gosso/client/react';
@@ -104,13 +102,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     { key: 'site-settings', label: t('site.tabLabel'), icon: <SlidersHorizontal aria-hidden="true" /> },
     { key: 'system', label: t('systemManagement.tabSystemStatus'), icon: <Shield aria-hidden="true" /> },
   ];
-  const accountItems = [
-    { key: 'profile', label: t('accountSettings.tabProfile'), icon: <User aria-hidden="true" /> },
-    { key: 'password', label: t('accountSettings.tabPassword'), icon: <Lock aria-hidden="true" /> },
-    { key: 'mfa', label: t('accountSettings.tabMFA'), icon: <Shield aria-hidden="true" /> },
-    { key: 'passkeys', label: t('accountSettings.tabPasskeys'), icon: <Key aria-hidden="true" /> },
-    { key: 'sessions', label: t('accountSettings.tabSessions'), icon: <Laptop aria-hidden="true" /> },
-  ];
 
   return (
     <AppShell
@@ -136,13 +127,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </NavigationGroup>
           ) : null}
           {session.loggedIn ? (
-            <NavigationGroup label={t('nav.accountSettings')}>
-              {accountItems.map(({ key, label, icon }) => (
-                <NavLink key={key} to={`/account-settings/${key}`} className={navigationItemClass} onClick={close}>
-                  {icon}
-                  <span>{label}</span>
-                </NavLink>
-              ))}
+            <NavigationGroup>
+              <NavLink to="/account-settings" className={navigationItemClass} onClick={close}>
+                <UserCog />
+                <span>{t('nav.accountSettings')}</span>
+              </NavLink>
             </NavigationGroup>
           ) : null}
         </>
