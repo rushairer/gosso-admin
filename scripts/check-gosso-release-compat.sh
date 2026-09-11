@@ -6,16 +6,17 @@ GOSSO_RELEASE_DIGEST="${GOSSO_RELEASE_DIGEST:-sha256:5c91647bdfe7c8de9dec8e40f88
 GOSSO_COMPAT_PORT="${GOSSO_COMPAT_PORT:-18080}"
 ADMIN_USERNAME="${ADMIN_USERNAME:-compat-admin}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-CompatAdminPassword123}"
-GOSSO_RUNTIME_UID="${GOSSO_RUNTIME_UID:-10001}"
 
 export GOSSO_IMAGE_TAG="v${GOSSO_RELEASE_VERSION}@${GOSSO_RELEASE_DIGEST}"
-
+key_dir="$(mktemp -d)"
 override_file="$(mktemp)"
 cat >"$override_file" <<EOF
 services:
   gosso:
     ports:
       - "127.0.0.1:${GOSSO_COMPAT_PORT}:8080"
+    volumes:
+      - "${key_dir}:/app/keys"
 EOF
 
 compose=(docker compose -f docker-compose.yml -f "$override_file")
@@ -29,26 +30,13 @@ cleanup() {
     "${compose[@]}" logs --no-color gosso db redis >&2 || true
   fi
   "${compose[@]}" down -v --remove-orphans >/dev/null 2>&1 || true
-  rm -f "$override_file"
+  sudo chown -R "$(id -u):$(id -g)" "$key_dir" 2>/dev/null || true
+  rm -rf "$key_dir" "$override_file"
   exit "$rc"
 }
 trap cleanup EXIT
 
 printf '[compat] Gosso release: v%s@%s\n' "$GOSSO_RELEASE_VERSION" "$GOSSO_RELEASE_DIGEST"
-
-mkdir -p keys
-if [ ! -f keys/private.pem ]; then
-  openssl genpkey -algorithm RSA -out keys/private.pem -pkeyopt rsa_keygen_bits:2048 >/dev/null 2>&1
-fi
-# The release image intentionally runs as UID 10001. Keep the signing key at
-# 0600 while assigning it to that runtime identity; making the key world-
-# readable would hide a real deployment permission problem.
-chmod 600 keys/private.pem
-if [ "$(id -u)" -eq 0 ]; then
-  chown "${GOSSO_RUNTIME_UID}:${GOSSO_RUNTIME_UID}" keys/private.pem
-else
-  sudo chown "${GOSSO_RUNTIME_UID}:${GOSSO_RUNTIME_UID}" keys/private.pem
-fi
 
 resolved_image="ghcr.io/rushairer/gosso:${GOSSO_IMAGE_TAG}"
 if ! "${compose[@]}" config | grep -Fq "image: ${resolved_image}"; then
@@ -57,6 +45,22 @@ if ! "${compose[@]}" config | grep -Fq "image: ${resolved_image}"; then
 fi
 
 "${compose[@]}" pull gosso
+
+# Do not guess the numeric UID behind Alpine's system user. Query the published
+# image itself, then keep the signing key at 0600 and assign it to that exact
+# runtime identity. The temporary mount also avoids mutating repository files.
+runtime_uid="$(docker run --rm --entrypoint id "$resolved_image" -u)"
+runtime_gid="$(docker run --rm --entrypoint id "$resolved_image" -g)"
+openssl genpkey -algorithm RSA -out "$key_dir/private.pem" -pkeyopt rsa_keygen_bits:2048 >/dev/null 2>&1
+chmod 700 "$key_dir"
+chmod 600 "$key_dir/private.pem"
+if [ "$(id -u)" -eq 0 ]; then
+  chown -R "${runtime_uid}:${runtime_gid}" "$key_dir"
+else
+  sudo chown -R "${runtime_uid}:${runtime_gid}" "$key_dir"
+fi
+printf '[ok] signing key remains 0600 and is owned by release runtime uid=%s gid=%s\n' "$runtime_uid" "$runtime_gid"
+
 "${compose[@]}" up -d db redis mailpit gosso
 
 ready=false
