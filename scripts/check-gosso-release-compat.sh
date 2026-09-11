@@ -6,6 +6,7 @@ GOSSO_RELEASE_DIGEST="${GOSSO_RELEASE_DIGEST:-sha256:5c91647bdfe7c8de9dec8e40f88
 GOSSO_COMPAT_PORT="${GOSSO_COMPAT_PORT:-18080}"
 ADMIN_USERNAME="${ADMIN_USERNAME:-compat-admin}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-CompatAdminPassword123}"
+GOSSO_RUNTIME_UID="${GOSSO_RUNTIME_UID:-10001}"
 
 export GOSSO_IMAGE_TAG="v${GOSSO_RELEASE_VERSION}@${GOSSO_RELEASE_DIGEST}"
 
@@ -38,7 +39,15 @@ printf '[compat] Gosso release: v%s@%s\n' "$GOSSO_RELEASE_VERSION" "$GOSSO_RELEA
 mkdir -p keys
 if [ ! -f keys/private.pem ]; then
   openssl genpkey -algorithm RSA -out keys/private.pem -pkeyopt rsa_keygen_bits:2048 >/dev/null 2>&1
-  chmod 600 keys/private.pem
+fi
+# The release image intentionally runs as UID 10001. Keep the signing key at
+# 0600 while assigning it to that runtime identity; making the key world-
+# readable would hide a real deployment permission problem.
+chmod 600 keys/private.pem
+if [ "$(id -u)" -eq 0 ]; then
+  chown "${GOSSO_RUNTIME_UID}:${GOSSO_RUNTIME_UID}" keys/private.pem
+else
+  sudo chown "${GOSSO_RUNTIME_UID}:${GOSSO_RUNTIME_UID}" keys/private.pem
 fi
 
 resolved_image="ghcr.io/rushairer/gosso:${GOSSO_IMAGE_TAG}"
