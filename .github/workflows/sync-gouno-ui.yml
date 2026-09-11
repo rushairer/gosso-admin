@@ -1,5 +1,6 @@
 name: Sync Gouno UI
 # Editing this workflow intentionally triggers the verified upstream resync path.
+# Last explicit upstream sync target: gouno-ui main@0ba9fabda8e61f3a278b3fb5f37b8f671c167abb.
 
 on:
   push:
