@@ -1,0 +1,53 @@
+name: Gosso Release Compatibility
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - ".github/workflows/gosso-release-compat.yml"
+      - "docker-compose.yml"
+      - "init.sql"
+      - "seed/**"
+      - "scripts/check-gosso-release-compat.sh"
+      - "gosso-admin-frontend/src/auth.ts"
+      - "gosso-admin-frontend/package.json"
+      - "gosso-admin-frontend/package-lock.json"
+  pull_request:
+    branches: [main, master]
+    paths:
+      - ".github/workflows/gosso-release-compat.yml"
+      - "docker-compose.yml"
+      - "init.sql"
+      - "seed/**"
+      - "scripts/check-gosso-release-compat.sh"
+      - "gosso-admin-frontend/src/auth.ts"
+      - "gosso-admin-frontend/package.json"
+      - "gosso-admin-frontend/package-lock.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: gosso-release-compat-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gosso-1-6:
+    name: Gosso v1.6.0 acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Go for current Admin seed
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: seed/go.mod
+          cache-dependency-path: seed/go.sum
+
+      - name: Verify released Gosso compatibility
+        run: bash scripts/check-gosso-release-compat.sh
