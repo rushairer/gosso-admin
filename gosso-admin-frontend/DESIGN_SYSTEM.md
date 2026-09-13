@@ -1,10 +1,11 @@
 # Shared UI Design System Baseline
 
-This frontend follows the same interaction and layout contract as `gouno-blog/blog-frontend`. Product branding may use a different accent hue, but component geometry, spacing, state semantics, surface depth, and accessibility behavior must remain equivalent.
+This frontend follows the same interaction and layout contract as `gouno-blog/blog-frontend` and the Gouno UI Showcase. Product branding may use a different accent hue, but component geometry, spacing, state semantics, surface depth, and accessibility behavior must remain equivalent.
 
 ## Primitive ownership
 
-- Shared controls live in `src/components/ui` and compose `cn`, `cva`, Radix UI, and semantic CSS tokens.
+- Shared controls, tokens, theme behavior, shell patterns, runtime theme bootstrap, and canonical Gouno family brand marks are owned by the published `@gouno/ui` package.
+- Product code consumes governed package entrypoints such as `@gouno/ui/core`, `@gouno/ui/patterns`, `@gouno/ui/gouno`, `@gouno/ui/theme`, and `@gouno/ui/brand-icons/*`; it must not recreate package primitives under `src/components/ui` or vendor package assets into `public/`.
 - Feature code must use `Button`, `ButtonLink`, `IconButton`, `IconButtonLink`, `Badge`, `Dialog`, `Modal`, `Panel`, and shared form controls instead of duplicating their markup.
 - Legacy size aliases remain accepted for compatibility, but new code uses `sm`, `default`, or `lg`.
 
@@ -37,16 +38,21 @@ Table cells are vertically centered. Text, icons, badges, and actions that belon
 
 ## Surface and overlay contract
 
-Panels use the semantic dark surface hierarchy, an 8% text-derived border, a 12px radius, and a restrained elevation shadow. Interactive panels lift by at most 1px.
+Panels use semantic surface tokens, restrained borders/radii/elevation, and the same light/dark hierarchy as the canonical package. Product code must not recreate primitive surface rules locally.
 
-`Dialog` and `Modal` use Radix UI focus management. Overlays blur by 8px, dialog surfaces use a 12px radius, and footer actions are separated by a top border and aligned to the end. Escape and outside-click behavior must be configured through the shared primitive rather than reimplemented by a page.
+`Dialog` and `Modal` consume the focus-management and overlay behavior provided by `@gouno/ui`; product pages must not import Radix UI directly or reimplement escape/outside-click behavior.
 
 ## CSS cascade isolation
 
 - Tailwind is imported exactly once from `src/styles/tailwind.css`, which must be the first CSS entry loaded by `main.tsx`.
-- Global document defaults live in `@layer base`; reusable product styles live in `@layer components`; semantic variables live in `@layer theme`.
+- Canonical reset, font faces, semantic tokens, and primitive styling come from `@gouno/ui`; product CSS is feature-scoped only.
 - Accessibility overrides that must outrank utilities live in the final `overrides` layer and are loaded last.
 - Every source stylesheet must place style rules inside an explicit cascade layer; `npm run lint:css` rejects unlayered top-level rules, `!important`, and invalid entry ordering.
+
+## Brand and bootstrap ownership
+
+- Shell branding uses the canonical color-agnostic Gosso Admin mark published under `@gouno/ui/brand-icons/gosso-admin.svg` and the same CSS-mask treatment as Showcase. Runtime `product_name` remains product data, while uploaded site logo/favicon fields do not replace the product mark in application shell chrome.
+- The parser-blocking theme bootstrap and fallback favicon are read from the exact installed `@gouno/ui` release by the Vite build/dev pipeline. Committed `public/ui-bootstrap.js` or `public/gosso-admin.svg` copies are forbidden because they can drift from the installed package.
 
 ## Verification
 

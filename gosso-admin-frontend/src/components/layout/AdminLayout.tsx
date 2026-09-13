@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FileText, Home, KeyRound, LogIn, LogOut, Shield, SlidersHorizontal, User, UserCog, Users } from 'lucide-react';
 import { useSession } from '@gosso/client/react';
+import gossoAdminLogo from '@gouno/ui/brand-icons/gosso-admin.svg';
 import { logout, redirectToAuthorize } from '../../auth';
 import { siteSettingsService } from '../../services';
 import type { SessionSnapshot } from '../../auth';
@@ -10,24 +11,19 @@ import { Button, IconButton } from '@gouno/ui/core';
 import { AppShell, NavigationGroup, PageContainer, navigationItemClass } from '@gouno/ui/gouno';
 import { ThemeToggle } from '@gouno/ui/theme';
 
-const FALLBACK_BRAND_LOGO = '/gosso-admin.svg';
-
 function initials(snapshot: SessionSnapshot) {
   const name = snapshot.profile?.preferred_username || snapshot.profile?.name || 'Guest';
   return name.slice(0, 2).toUpperCase();
 }
 
-function BrandMark({ src }: { src: string }) {
-  if (src !== FALLBACK_BRAND_LOGO) {
-    return <img src={src} alt="" aria-hidden="true" className="size-6 shrink-0 object-contain" />;
-  }
+function BrandMark() {
   return (
     <span
       aria-hidden="true"
       className="inline-block size-6 shrink-0 bg-current"
       style={{
-        WebkitMask: `url("${FALLBACK_BRAND_LOGO}") center / contain no-repeat`,
-        mask: `url("${FALLBACK_BRAND_LOGO}") center / contain no-repeat`,
+        WebkitMask: `url("${gossoAdminLogo}") center / contain no-repeat`,
+        mask: `url("${gossoAdminLogo}") center / contain no-repeat`,
       }}
     />
   );
@@ -38,7 +34,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const session = useSession();
   const [productName, setProductName] = useState('GOSSO');
-  const [productLogo, setProductLogo] = useState(FALLBACK_BRAND_LOGO);
 
   const pageTitles: Record<string, { title: string; description: string }> = useMemo(
     () => ({
@@ -63,7 +58,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       .getPublicSiteBranding()
       .then((branding) => {
         setProductName(branding.product_name || 'GOSSO');
-        setProductLogo(branding.logo_url || branding.favicon_url || FALLBACK_BRAND_LOGO);
       })
       .catch(() => undefined);
   }, []);
@@ -138,8 +132,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     <AppShell
       brand={
         <Link to="/" className="inline-flex min-w-0 items-center gap-2 text-primary">
-          <BrandMark src={productLogo} />
-          <span className="truncate">{productName}</span>
+          <BrandMark />
+          <span className="truncate font-semibold">{productName}</span>
         </Link>
       }
       breadcrumbs={pageLabel}
