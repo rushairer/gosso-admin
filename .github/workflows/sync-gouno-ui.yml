@@ -1,6 +1,4 @@
-name: Sync Gouno UI
-# Editing this workflow intentionally triggers the verified upstream resync path.
-# Last explicit upstream sync target: gouno-ui main@970bc1b0ad49de7b233901a5faf03c63dfa05892 (0.3.0 rollout).
+name: Update Gouno UI Registry Dependency
 
 on:
   push:
@@ -9,21 +7,21 @@ on:
       - .github/workflows/sync-gouno-ui.yml
   workflow_dispatch:
     inputs:
-      ref:
-        description: Gouno UI branch, tag, or commit
+      version:
+        description: Exact @gouno/ui version or npm dist-tag
         required: false
-        default: main
+        default: 0.3.2
 
 permissions:
   contents: write
 
 concurrency:
-  group: sync-gouno-ui
+  group: update-gouno-ui
   cancel-in-progress: false
 
 jobs:
-  sync:
-    name: Build, verify, and vendor Gouno UI
+  update:
+    name: Pin and verify npm registry release
     runs-on: ubuntu-latest
 
     steps:
@@ -32,122 +30,57 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Checkout Gouno UI
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          repository: rushairer/gouno-ui
-          ref: ${{ inputs.ref || 'main' }}
-          path: .gouno-ui
-          persist-credentials: false
-
-      - name: Setup Node.js 24 for Gouno UI
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: .gouno-ui/package-lock.json
-
-      - name: Build Gouno UI package
-        working-directory: .gouno-ui
-        run: |
-          npm ci
-          npm run typecheck
-          npm test -- --run
-          npm run build
-
-      - name: Pack current Gouno UI
-        shell: bash
-        run: |
-          set -euo pipefail
-          VENDOR="$GITHUB_WORKSPACE/gosso-admin-frontend/vendor"
-          FRONTEND_PACKAGE="$GITHUB_WORKSPACE/gosso-admin-frontend/package.json"
-          PACKAGE_VERSION="$(node --input-type=module -e "import { readFile } from 'node:fs/promises'; const pkg = JSON.parse(await readFile('.gouno-ui/package.json', 'utf8')); process.stdout.write(pkg.version);")"
-          ARCHIVE="gouno-ui-${PACKAGE_VERSION}.tgz"
-
-          rm -f "$VENDOR"/gouno-ui-*.tgz
-          PACK_JSON="$(cd .gouno-ui && npm pack --json)"
-          PACK_FILE="$(printf '%s' "$PACK_JSON" | node --input-type=module -e 'let s=""; process.stdin.on("data", c => s += c); process.stdin.on("end", () => { const value = JSON.parse(s); if (!value[0]?.filename) process.exit(1); process.stdout.write(value[0].filename); });')"
-          cp ".gouno-ui/$PACK_FILE" "$VENDOR/$ARCHIVE"
-
-          GOUNO_UI_SHA="$(git -C .gouno-ui rev-parse HEAD)"
-          SHA256="$(sha256sum "$VENDOR/$ARCHIVE" | awk '{print $1}')"
-          INTEGRITY="sha512-$(openssl dgst -sha512 -binary "$VENDOR/$ARCHIVE" | openssl base64 -A)"
-
-          cat > "$VENDOR/gouno-ui-source.txt" <<EOF
-          repository=https://github.com/rushairer/gouno-ui
-          ref=${{ inputs.ref || 'main' }}
-          sha=$GOUNO_UI_SHA
-          EOF
-
-          node --input-type=module - "$FRONTEND_PACKAGE" "$ARCHIVE" <<'EOF'
-          import { readFile, writeFile } from 'node:fs/promises';
-          const [, , path, archive] = process.argv;
-          const pkg = JSON.parse(await readFile(path, 'utf8'));
-          pkg.dependencies['@gouno/ui'] = `file:vendor/${archive}`;
-          await writeFile(path, `${JSON.stringify(pkg, null, 2)}\n`);
-          EOF
-
-          node --input-type=module - "$VENDOR/ui-manifest.json" "$PACKAGE_VERSION" "$ARCHIVE" "$SHA256" "$INTEGRITY" "$GOUNO_UI_SHA" <<'EOF'
-          import { writeFile } from 'node:fs/promises';
-          const [, , path, version, archive, sha256, integrity, sourceSha] = process.argv;
-          const manifest = {
-            name: '@gouno/ui',
-            version,
-            archive,
-            sha256,
-            integrity,
-            source: 'rushairer/gouno-ui',
-            sourceSha,
-          };
-          await writeFile(path, `${JSON.stringify(manifest, null, 2)}\n`);
-          EOF
-
-      - name: Setup Node.js 20 for Gosso Admin
+      - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20
           cache: npm
           cache-dependency-path: gosso-admin-frontend/package-lock.json
+          registry-url: https://registry.npmjs.org
 
-      - name: Refresh lockfile and verify Gosso Admin
-        working-directory: gosso-admin-frontend
+      - name: Resolve published Gouno UI version
+        id: ui
+        shell: bash
+        env:
+          REQUESTED_VERSION: ${{ github.event.inputs.version }}
         run: |
           set -euo pipefail
-          rm -rf node_modules
-          node --input-type=module <<'EOF'
-          import { readFile, writeFile } from 'node:fs/promises';
-          const lock = JSON.parse(await readFile('./package-lock.json', 'utf8'));
-          if (lock.packages) delete lock.packages['node_modules/@gouno/ui'];
-          await writeFile('./package-lock.json', `${JSON.stringify(lock, null, 2)}\n`);
-          EOF
-          npm install --package-lock-only --ignore-scripts --legacy-peer-deps
+          REQUESTED_VERSION="${REQUESTED_VERSION:-0.3.2}"
+          RESOLVED_VERSION="$(npm view "@gouno/ui@${REQUESTED_VERSION}" version)"
+          test -n "$RESOLVED_VERSION"
+          echo "version=$RESOLVED_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Pin registry dependency and refresh lockfile
+        working-directory: gosso-admin-frontend
+        env:
+          GOUNO_UI_VERSION: ${{ steps.ui.outputs.version }}
+        run: |
+          set -euo pipefail
+          npm install --save-exact --package-lock-only --ignore-scripts --legacy-peer-deps "@gouno/ui@${GOUNO_UI_VERSION}"
           npm ci --legacy-peer-deps
+
+      - name: Verify published package contract
+        working-directory: gosso-admin-frontend
+        env:
+          GOUNO_UI_VERSION: ${{ steps.ui.outputs.version }}
+        run: |
           node --input-type=module <<'EOF'
-          import { createHash } from 'node:crypto';
           import { readFile } from 'node:fs/promises';
-
-          const pkg = JSON.parse(await readFile('./package.json', 'utf8'));
-          const manifest = JSON.parse(await readFile('./vendor/ui-manifest.json', 'utf8'));
-          const source = await readFile('./vendor/gouno-ui-source.txt', 'utf8');
-          const archivePath = `./vendor/${manifest.archive}`;
-          const archive = await readFile(archivePath);
+          const manifest = JSON.parse(await readFile('./package.json', 'utf8'));
+          const lock = JSON.parse(await readFile('./package-lock.json', 'utf8'));
           const installed = JSON.parse(await readFile('./node_modules/@gouno/ui/package.json', 'utf8'));
-          const sha256 = createHash('sha256').update(archive).digest('hex');
-          const integrity = `sha512-${createHash('sha512').update(archive).digest('base64')}`;
-
-          if (pkg.dependencies?.['@gouno/ui'] !== `file:vendor/${manifest.archive}`) {
-            throw new Error('package.json Gouno UI dependency does not match vendor manifest archive');
+          const ui = lock.packages?.['node_modules/@gouno/ui'];
+          const source = manifest.dependencies?.['@gouno/ui'];
+          const exactVersion = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
+          if (!exactVersion.test(source || '') || source !== process.env.GOUNO_UI_VERSION) {
+            throw new Error('gosso-admin-frontend must pin the requested exact @gouno/ui registry version');
           }
-          if (installed.version !== manifest.version) {
-            throw new Error('installed Gouno UI version does not match vendor manifest');
+          if (!ui || ui.version !== source || !ui.resolved?.startsWith('https://registry.npmjs.org/@gouno/ui/-/ui-') || !ui.integrity) {
+            throw new Error('gosso-admin-frontend lockfile must resolve @gouno/ui from npm with integrity');
           }
-          if (manifest.sha256 !== sha256 || manifest.integrity !== integrity) {
-            throw new Error('vendored Gouno UI archive digest does not match vendor manifest');
+          if (installed.version !== source) {
+            throw new Error('installed @gouno/ui version does not match the pinned registry version');
           }
-          if (!source.includes(`sha=${manifest.sourceSha}`)) {
-            throw new Error('Gouno UI provenance source SHA does not match vendor manifest');
-          }
-
           const core = await import('@gouno/ui/core');
           const theme = await import('@gouno/ui/theme');
           const gouno = await import('@gouno/ui/gouno');
@@ -158,27 +91,98 @@ jobs:
           ];
           for (const [entrypoint, surface, names] of surfaces) {
             for (const name of names) {
-              if (!surface[name]) throw new Error(`vendored ${entrypoint} is missing canonical export ${name}`);
+              if (!surface[name]) throw new Error(`${entrypoint} is missing canonical export ${name}`);
             }
           }
           EOF
-          npm run quality
-          VITE_APP_BASE_PATH=/identity-admin npm run build
 
-      - name: Commit synchronized package
+      - name: Retire vendored distribution plumbing
         shell: bash
         run: |
           set -euo pipefail
-          git add -A gosso-admin-frontend/vendor \
+          python3 <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f"expected text not found in {path}: {old[:80]!r}")
+              p.write_text(text.replace(old, new, 1))
+
+          ci = Path('.github/workflows/ci.yml')
+          text = ci.read_text()
+          start_marker = '      - name: Verify vendored Gouno UI provenance\n'
+          end_marker = '      - name: Verify shared GOSSO client registry release\n'
+          start = text.find(start_marker)
+          end = text.find(end_marker, start)
+          if start < 0 or end < 0:
+              raise SystemExit('could not locate Gosso Admin CI vendored Gouno UI verification block')
+          replacement_lines = [
+              '      - name: Verify Gouno UI registry release',
+              '        run: |',
+              "          node --input-type=module <<'EOF'",
+              "          import { readFile } from 'node:fs/promises';",
+              "          const manifest = JSON.parse(await readFile('./package.json', 'utf8'));",
+              "          const lock = JSON.parse(await readFile('./package-lock.json', 'utf8'));",
+              "          const ui = lock.packages['node_modules/@gouno/ui'];",
+              "          const source = manifest.dependencies?.['@gouno/ui'];",
+              "          const exactVersion = /^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$/;",
+              "          if (!exactVersion.test(source || '') || !ui || ui.version !== source ||",
+              "              !ui.resolved?.startsWith('https://registry.npmjs.org/@gouno/ui/-/ui-') || !ui.integrity) {",
+              "            throw new Error('gosso-admin-frontend must use an exact @gouno/ui registry version with lockfile integrity');",
+              '          }',
+              '          EOF',
+              '',
+          ]
+          replacement = '\n'.join(replacement_lines) + '\n'
+          ci.write_text(text[:start] + replacement + text[end:])
+
+          replace_once('gosso-admin-frontend/Dockerfile', 'COPY vendor/gouno-ui-*.tgz ./vendor/\n', '')
+
+          rules = Path('APP_RULES.md')
+          text = rules.read_text()
+          replacements = [
+              ('The current vendored `gouno-ui-*.tgz` is a distribution artifact, not a second source of UI truth. Update it only through the repository\'s Gouno UI synchronization workflow and keep `vendor/gouno-ui-source.txt` / the vendor manifest aligned with the exact upstream commit. Do not hand-edit or copy Gouno UI source into this repository.', 'Consume `@gouno/ui` as an exact immutable npm registry version. Keep `package.json` and `package-lock.json` aligned with the same published release and require registry tarball integrity metadata. Do not vendor local UI archives or hand-edit/copy Gouno UI source into this repository.'),
+              ('When Gouno UI registry releases become the stable distribution mechanism, prefer SemVer dependency upgrades plus the existing quality gates over product-side migration forks.', 'Gouno UI registry releases are the stable distribution mechanism. Upgrade through explicit SemVer dependency changes plus the existing quality gates rather than product-side migration forks.'),
+              ('Future Gouno UI changes must flow through the synchronization workflow and be handled as normal dependency upgrades: validate exported contracts, run the full product quality gates, and make only the product-side compatibility or fidelity changes required by an intentional upstream contract change.', 'Future Gouno UI changes must flow through the registry dependency update workflow and be handled as normal dependency upgrades: validate exported contracts, lock the exact registry release, run the full product quality gates, and make only the product-side compatibility or fidelity changes required by an intentional upstream contract change.'),
+          ]
+          for old, new in replacements:
+              if old not in text:
+                  raise SystemExit(f'expected APP_RULES.md text not found: {old[:80]!r}')
+              text = text.replace(old, new, 1)
+          rules.write_text(text)
+          PY
+          rm -rf gosso-admin-frontend/vendor
+
+      - name: Run Gosso Admin quality gates
+        working-directory: gosso-admin-frontend
+        run: |
+          npm run quality
+          VITE_APP_BASE_PATH=/identity-admin npm run build
+
+      - name: Build Gosso Admin frontend container
+        run: docker build -f gosso-admin-frontend/Dockerfile gosso-admin-frontend
+
+      - name: Commit registry dependency migration
+        shell: bash
+        env:
+          GOUNO_UI_VERSION: ${{ steps.ui.outputs.version }}
+        run: |
+          set -euo pipefail
+          git add -A .github/workflows/ci.yml \
+                     APP_RULES.md \
+                     gosso-admin-frontend/Dockerfile \
+                     gosso-admin-frontend/vendor \
                      gosso-admin-frontend/package.json \
                      gosso-admin-frontend/package-lock.json
           if git diff --cached --quiet; then
-            echo "Gouno UI package is already synchronized."
+            echo "@gouno/ui registry dependency is already current."
             exit 0
           fi
-          GOUNO_UI_VERSION="$(node --input-type=module -e "import { readFile } from 'node:fs/promises'; const pkg = JSON.parse(await readFile('gosso-admin-frontend/package.json', 'utf8')); process.stdout.write(pkg.dependencies['@gouno/ui'].match(/gouno-ui-(.+)\.tgz$/)?.[1] || 'unknown');")"
-          GOUNO_UI_SHA="$(git -C .gouno-ui rev-parse --short=12 HEAD)"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(ui): sync gouno ui ${GOUNO_UI_VERSION} ${GOUNO_UI_SHA}"
+          git commit -m "chore(ui): use @gouno/ui ${GOUNO_UI_VERSION} registry release"
+          git fetch origin main
+          git rebase origin/main
           git push origin HEAD:main
