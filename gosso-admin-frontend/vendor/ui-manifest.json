@@ -1,9 +1,0 @@
-{
-  "name": "@gouno/ui",
-  "version": "0.3.0",
-  "archive": "gouno-ui-0.3.0.tgz",
-  "sha256": "1b09702168a5e1c46be59bf56c6786bcf49d109b422362192678aae93f42e30f",
-  "integrity": "sha512-FOMzh7csNhMQhLZJNPOu0X2MlKqFv7sgSMKNj9CDEA7nQUm/t8ehy8fiW3Z0PvPaqbCBPJbnjRUycEcNmEtdJw==",
-  "source": "rushairer/gouno-ui",
-  "sourceSha": "970bc1b0ad49de7b233901a5faf03c63dfa05892"
-}

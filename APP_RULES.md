@@ -21,15 +21,15 @@ Production code must import from explicit supported subpaths such as:
 
 Do not import from the package root `@gouno/ui`. Do not recreate removed compatibility APIs such as `Panel`, `DataTable`, `Feedback`, `ToastProvider`, or `useToast` inside the product.
 
-The current vendored `gouno-ui-*.tgz` is a distribution artifact, not a second source of UI truth. Update it only through the repository's Gouno UI synchronization workflow and keep `vendor/gouno-ui-source.txt` / the vendor manifest aligned with the exact upstream commit. Do not hand-edit or copy Gouno UI source into this repository.
+Consume `@gouno/ui` as an exact immutable npm registry version. Keep `package.json` and `package-lock.json` aligned with the same published release and require registry tarball integrity metadata. Do not vendor local UI archives or hand-edit/copy Gouno UI source into this repository.
 
-When Gouno UI registry releases become the stable distribution mechanism, prefer SemVer dependency upgrades plus the existing quality gates over product-side migration forks.
+Gouno UI registry releases are the stable distribution mechanism. Upgrade through explicit SemVer dependency changes plus the existing quality gates rather than product-side migration forks.
 
 ## Migration Status
 
 The Gosso Admin reverse-migration and design convergence onto canonical Gouno UI is closed as of 2026-09-09. The production application is now a normal consumer of the shared package rather than an active migration target.
 
-Future Gouno UI changes must flow through the synchronization workflow and be handled as normal dependency upgrades: validate exported contracts, run the full product quality gates, and make only the product-side compatibility or fidelity changes required by an intentional upstream contract change.
+Future Gouno UI changes must flow through the registry dependency update workflow and be handled as normal dependency upgrades: validate exported contracts, lock the exact registry release, run the full product quality gates, and make only the product-side compatibility or fidelity changes required by an intentional upstream contract change.
 
 Do not reopen a broad product-side migration program merely because Gouno UI gains new Showcase examples, documentation, tests, Patterns, or unrelated product fixtures. Reopen migration-level work only for an explicit breaking shared contract or an intentional redesign of the Gosso Admin canonical product language.
 
