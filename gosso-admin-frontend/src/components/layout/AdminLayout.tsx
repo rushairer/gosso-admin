@@ -10,23 +10,11 @@ import type { SessionSnapshot } from '../../auth';
 import { Button, IconButton } from '@gouno/ui/core';
 import { AppShell, NavigationGroup, PageContainer, navigationItemClass } from '@gouno/ui/gouno';
 import { ThemeToggle } from '@gouno/ui/theme';
+import { BrandMark } from '../branding/BrandMark';
 
 function initials(snapshot: SessionSnapshot) {
   const name = snapshot.profile?.preferred_username || snapshot.profile?.name || 'Guest';
   return name.slice(0, 2).toUpperCase();
-}
-
-function BrandMark() {
-  return (
-    <span
-      aria-hidden="true"
-      className="inline-block size-6 shrink-0 bg-current"
-      style={{
-        WebkitMask: `url("${gossoAdminLogo}") center / contain no-repeat`,
-        mask: `url("${gossoAdminLogo}") center / contain no-repeat`,
-      }}
-    />
-  );
 }
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -132,7 +120,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     <AppShell
       brand={
         <Link to="/" className="inline-flex min-w-0 items-center gap-2 text-primary">
-          <BrandMark />
+          <BrandMark src={gossoAdminLogo} className="size-6" />
           <span className="truncate font-semibold">{productName}</span>
         </Link>
       }

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { ShieldCheck } from 'lucide-react';
+import gossoLogo from '@gouno/ui/brand-icons/gosso.svg';
 import { Card, Heading, Text } from '@gouno/ui/core';
+import { BrandMark } from '../branding/BrandMark';
 
 export default function AuthPageSurface({
   children,
@@ -20,9 +21,7 @@ export default function AuthPageSurface({
       <div className="relative w-full max-w-md">
         <Card padding="lg" variant="elevated" className="w-full border-border/80 bg-raised/95 backdrop-blur">
           <div className="mb-7 text-center">
-            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <ShieldCheck aria-hidden="true" className="size-6" />
-            </div>
+            <BrandMark src={gossoLogo} className="mx-auto mb-4 size-14 text-primary" />
             <Heading level={1} className="text-2xl font-bold tracking-tight">
               {title}
             </Heading>
