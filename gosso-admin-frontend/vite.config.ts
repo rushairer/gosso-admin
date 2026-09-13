@@ -11,15 +11,20 @@ const gossoAdminFavicon = readFileSync(
   'utf8'
 );
 
-function gounoUiRuntimeAssets(): Plugin {
+function gounoUiRuntimeAssets(command: 'serve' | 'build'): Plugin {
   return {
     name: 'gouno-ui-runtime-assets',
     configureServer(server) {
+      const faviconPath = new URL(
+        'gosso-admin.svg',
+        new URL(server.config.base, 'http://localhost')
+      ).pathname;
+
       server.middlewares.use((request, response, next) => {
         const pathname = request.url
           ? new URL(request.url, 'http://localhost').pathname
           : '';
-        if (!pathname.endsWith('/gosso-admin.svg')) {
+        if (pathname !== faviconPath) {
           next();
           return;
         }
@@ -29,6 +34,7 @@ function gounoUiRuntimeAssets(): Plugin {
       });
     },
     buildStart() {
+      if (command === 'serve') return;
       this.emitFile({
         type: 'asset',
         fileName: 'gosso-admin.svg',
@@ -52,13 +58,13 @@ function gounoUiRuntimeAssets(): Plugin {
 }
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const appBasePath = env.VITE_APP_BASE_PATH || '/';
 
   return {
     base: appBasePath.endsWith('/') ? appBasePath : `${appBasePath}/`,
-    plugins: [gounoUiRuntimeAssets(), tailwindcss(), react()],
+    plugins: [gounoUiRuntimeAssets(command), tailwindcss(), react()],
     server: {
       port: 8083,
       host: '0.0.0.0',
