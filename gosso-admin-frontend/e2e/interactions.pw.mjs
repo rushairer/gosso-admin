@@ -110,8 +110,10 @@ test("site settings preserves real AppShell sticky offset and recovers from load
   expect(geometry.position).toBe("sticky");
   expect(geometry.top).toBe(geometry.headerHeight + 16);
 
+  const expectedFailure = /^error: Failed to load resource: the server responded with a status of 500/;
+  expect(problems.some((problem) => expectedFailure.test(problem))).toBe(true);
+  expect(problems.filter((problem) => !expectedFailure.test(problem))).toEqual([]);
   expect(unknown).toEqual([]);
-  expect(problems).toEqual([]);
 });
 
 test("system status renders degraded readiness and refreshes back to healthy", async ({ page }) => {
