@@ -44,7 +44,7 @@ export default function Home() {
   const { isAdmin: userAdmin, profile: user } = useSession();
   const userName = user?.preferred_username || user?.name || (userAdmin ? 'Administrator' : 'User');
 
-  const adminQuickLinks: QuickLink[] = [
+  const adminQuickLinks: readonly QuickLink[] = [
     {
       to: '/system-management/clients',
       icon: Key,
@@ -65,7 +65,7 @@ export default function Home() {
     },
   ];
 
-  const userQuickLinks: QuickLink[] = [
+  const userQuickLinks: readonly QuickLink[] = [
     {
       to: '/account-settings/profile',
       icon: User,
