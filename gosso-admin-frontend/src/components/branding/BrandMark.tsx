@@ -1,11 +1,10 @@
 import type { CSSProperties } from 'react';
-import { cn } from '@gouno/ui';
 
-export function BrandMark({ src, className }: { src: string; className?: string }) {
+export function BrandMark({ src, className = '' }: { src: string; className?: string }) {
   return (
     <span
       aria-hidden="true"
-      className={cn('inline-block shrink-0 bg-current', className)}
+      className={`inline-block shrink-0 bg-current ${className}`.trim()}
       style={
         {
           WebkitMask: `url("${src}") center / contain no-repeat`,
