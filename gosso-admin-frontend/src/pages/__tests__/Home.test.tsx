@@ -88,14 +88,14 @@ describe('Home page dashboard', () => {
     expect(screen.getByText('home.enterDashboard')).toBeInTheDocument();
     expect(screen.getByText('home.clientRegistry')).toBeInTheDocument();
     expect(screen.getByText('home.userControl')).toBeInTheDocument();
-    expect(screen.getByText('home.mfaAndPasskeys')).toBeInTheDocument();
+    expect(screen.getByText('system.title')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('home.enterDashboard'));
-    expect(mockNavigate).toHaveBeenCalledWith('/system-management');
+    expect(mockNavigate).toHaveBeenCalledWith('/system-management/clients');
 
     expectLinkTarget('home.clientRegistry', '/system-management/clients');
     expectLinkTarget('home.userControl', '/system-management/users');
-    expectLinkTarget('home.mfaAndPasskeys', '/system-management/system');
+    expectLinkTarget('system.title', '/system-management/system');
   });
 
   it('renders tailored user account center view when user is non-admin', () => {
