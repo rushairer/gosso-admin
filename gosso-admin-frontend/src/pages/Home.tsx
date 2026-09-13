@@ -20,10 +20,7 @@ function QuickCard({ link }: { link: QuickLink }) {
       to={link.to}
       className="group flex min-h-32 w-full items-center gap-4 rounded-lg border bg-card px-6 py-5 text-left text-card-foreground shadow-surface transition-[border-color,background-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/40 hover:bg-accent/20 hover:shadow-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      <span
-        className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary ring-1 ring-primary/15"
-        aria-hidden="true"
-      >
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary" aria-hidden="true">
         <Icon className="size-5" />
       </span>
       <span className="min-w-0 flex-1">
@@ -60,8 +57,8 @@ export default function Home() {
     {
       to: '/system-management/system',
       icon: Settings,
-      title: t('home.mfaAndPasskeys'),
-      description: t('home.mfaAndPasskeysDescription'),
+      title: t('system.title'),
+      description: t('system.description'),
     },
   ];
 
@@ -125,7 +122,7 @@ export default function Home() {
             color="primary"
             icon={<ArrowRight className="size-4" />}
             iconPlacement="end"
-            onClick={() => navigate(userAdmin ? '/system-management' : '/account-settings/profile')}
+            onClick={() => navigate(userAdmin ? '/system-management/clients' : '/account-settings/profile')}
           >
             {userAdmin ? t('home.enterDashboard') : t('home.goToAccountSettings')}
           </Button>
