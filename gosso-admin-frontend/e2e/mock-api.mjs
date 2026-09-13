@@ -42,8 +42,8 @@ function isProductRequest(path) {
 export async function installApiFixtures(page, options = {}) {
   const unknown = [];
   const profile = options.profile || adminProfile;
-  let failSettingsOnce = Boolean(options.failSettingsOnce);
-  let failReadinessOnce = Boolean(options.failReadinessOnce);
+  let remainingSettingsFailures = options.failSettingsCount || 0;
+  let remainingReadinessFailures = options.failReadinessCount || 0;
 
   await page.route("**/*", async (route) => {
     const request = route.request();
@@ -71,8 +71,8 @@ export async function installApiFixtures(page, options = {}) {
       return enveloped(route, { items: auditLogs, total: auditLogs.length });
     }
     if (path === "/api/v1/admin/site-settings") {
-      if (failSettingsOnce) {
-        failSettingsOnce = false;
+      if (remainingSettingsFailures > 0) {
+        remainingSettingsFailures -= 1;
         return json(route, { message: "browser injected settings failure" }, 500);
       }
       return enveloped(route, siteSettings);
@@ -83,8 +83,8 @@ export async function installApiFixtures(page, options = {}) {
     if (path === "/api/v1/auth/sessions") return enveloped(route, sessions);
     if (path === "/api/v1/auth/session") return enveloped(route, currentSession);
     if (path === "/readiness") {
-      if (failReadinessOnce) {
-        failReadinessOnce = false;
+      if (remainingReadinessFailures > 0) {
+        remainingReadinessFailures -= 1;
         return json(route, { status: "error", ready: false, checks: {} }, 503);
       }
       return json(route, readiness);
@@ -101,6 +101,7 @@ export async function installApiFixtures(page, options = {}) {
 export async function setTheme(page, theme) {
   await page.addInitScript((mode) => {
     localStorage.setItem("gosso-admin:theme", mode);
+    localStorage.setItem("gosso_lang", "zh");
   }, theme);
   await page.emulateMedia({ colorScheme: theme });
 }
