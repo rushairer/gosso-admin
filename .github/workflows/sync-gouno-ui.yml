@@ -96,65 +96,6 @@ jobs:
           }
           EOF
 
-      - name: Retire vendored distribution plumbing
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 <<'PY'
-          from pathlib import Path
-
-          def replace_once(path, old, new):
-              p = Path(path)
-              text = p.read_text()
-              if old not in text:
-                  raise SystemExit(f"expected text not found in {path}: {old[:80]!r}")
-              p.write_text(text.replace(old, new, 1))
-
-          ci = Path('.github/workflows/ci.yml')
-          text = ci.read_text()
-          start_marker = '      - name: Verify vendored Gouno UI provenance\n'
-          end_marker = '      - name: Verify shared GOSSO client registry release\n'
-          start = text.find(start_marker)
-          end = text.find(end_marker, start)
-          if start < 0 or end < 0:
-              raise SystemExit('could not locate Gosso Admin CI vendored Gouno UI verification block')
-          replacement_lines = [
-              '      - name: Verify Gouno UI registry release',
-              '        run: |',
-              "          node --input-type=module <<'EOF'",
-              "          import { readFile } from 'node:fs/promises';",
-              "          const manifest = JSON.parse(await readFile('./package.json', 'utf8'));",
-              "          const lock = JSON.parse(await readFile('./package-lock.json', 'utf8'));",
-              "          const ui = lock.packages['node_modules/@gouno/ui'];",
-              "          const source = manifest.dependencies?.['@gouno/ui'];",
-              "          const exactVersion = /^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$/;",
-              "          if (!exactVersion.test(source || '') || !ui || ui.version !== source ||",
-              "              !ui.resolved?.startsWith('https://registry.npmjs.org/@gouno/ui/-/ui-') || !ui.integrity) {",
-              "            throw new Error('gosso-admin-frontend must use an exact @gouno/ui registry version with lockfile integrity');",
-              '          }',
-              '          EOF',
-              '',
-          ]
-          replacement = '\n'.join(replacement_lines) + '\n'
-          ci.write_text(text[:start] + replacement + text[end:])
-
-          replace_once('gosso-admin-frontend/Dockerfile', 'COPY vendor/gouno-ui-*.tgz ./vendor/\n', '')
-
-          rules = Path('APP_RULES.md')
-          text = rules.read_text()
-          replacements = [
-              ('The current vendored `gouno-ui-*.tgz` is a distribution artifact, not a second source of UI truth. Update it only through the repository\'s Gouno UI synchronization workflow and keep `vendor/gouno-ui-source.txt` / the vendor manifest aligned with the exact upstream commit. Do not hand-edit or copy Gouno UI source into this repository.', 'Consume `@gouno/ui` as an exact immutable npm registry version. Keep `package.json` and `package-lock.json` aligned with the same published release and require registry tarball integrity metadata. Do not vendor local UI archives or hand-edit/copy Gouno UI source into this repository.'),
-              ('When Gouno UI registry releases become the stable distribution mechanism, prefer SemVer dependency upgrades plus the existing quality gates over product-side migration forks.', 'Gouno UI registry releases are the stable distribution mechanism. Upgrade through explicit SemVer dependency changes plus the existing quality gates rather than product-side migration forks.'),
-              ('Future Gouno UI changes must flow through the synchronization workflow and be handled as normal dependency upgrades: validate exported contracts, run the full product quality gates, and make only the product-side compatibility or fidelity changes required by an intentional upstream contract change.', 'Future Gouno UI changes must flow through the registry dependency update workflow and be handled as normal dependency upgrades: validate exported contracts, lock the exact registry release, run the full product quality gates, and make only the product-side compatibility or fidelity changes required by an intentional upstream contract change.'),
-          ]
-          for old, new in replacements:
-              if old not in text:
-                  raise SystemExit(f'expected APP_RULES.md text not found: {old[:80]!r}')
-              text = text.replace(old, new, 1)
-          rules.write_text(text)
-          PY
-          rm -rf gosso-admin-frontend/vendor
-
       - name: Run Gosso Admin quality gates
         working-directory: gosso-admin-frontend
         run: |
@@ -164,18 +105,13 @@ jobs:
       - name: Build Gosso Admin frontend container
         run: docker build -f gosso-admin-frontend/Dockerfile gosso-admin-frontend
 
-      - name: Commit registry dependency migration
+      - name: Commit registry dependency update
         shell: bash
         env:
           GOUNO_UI_VERSION: ${{ steps.ui.outputs.version }}
         run: |
           set -euo pipefail
-          git add -A .github/workflows/ci.yml \
-                     APP_RULES.md \
-                     gosso-admin-frontend/Dockerfile \
-                     gosso-admin-frontend/vendor \
-                     gosso-admin-frontend/package.json \
-                     gosso-admin-frontend/package-lock.json
+          git add gosso-admin-frontend/package.json gosso-admin-frontend/package-lock.json
           if git diff --cached --quiet; then
             echo "@gouno/ui registry dependency is already current."
             exit 0
