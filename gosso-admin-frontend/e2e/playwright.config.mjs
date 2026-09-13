@@ -3,9 +3,9 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: ".",
   testMatch: ["rendered-matrix.pw.mjs", "interactions.pw.mjs"],
-  fullyParallel: false,
+  fullyParallel: true,
   retries: 1,
-  workers: 1,
+  workers: 2,
   timeout: 30_000,
   expect: {
     timeout: 8_000,
