@@ -125,9 +125,7 @@ export default function Home() {
             color="primary"
             icon={<ArrowRight className="size-4" />}
             iconPlacement="end"
-            onClick={() =>
-              navigate(userAdmin ? '/system-management/clients' : '/account-settings/profile')
-            }
+            onClick={() => navigate(userAdmin ? '/system-management/clients' : '/account-settings/profile')}
           >
             {userAdmin ? t('home.enterDashboard') : t('home.goToAccountSettings')}
           </Button>
