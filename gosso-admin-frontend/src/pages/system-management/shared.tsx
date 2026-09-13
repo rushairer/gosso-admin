@@ -1,12 +1,19 @@
 import type { ReactNode } from 'react';
-import { Alert } from '@gouno/ui/core';
+import { Alert, Text } from '@gouno/ui/core';
 
 export function ManagementPanelLead({ description, actions }: { description?: ReactNode; actions?: ReactNode }) {
   if (!description && !actions) return null;
+
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-      {description ? <p className="m-0 max-w-3xl text-sm leading-6 text-muted-foreground">{description}</p> : <span />}
-      {actions ? <div className="shrink-0">{actions}</div> : null}
+      <div className="min-w-0">
+        {description ? (
+          <Text tone="muted" size="sm" className="max-w-3xl leading-relaxed">
+            {description}
+          </Text>
+        ) : null}
+      </div>
+      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
     </div>
   );
 }
