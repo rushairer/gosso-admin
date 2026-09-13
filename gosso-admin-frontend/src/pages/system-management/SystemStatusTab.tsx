@@ -17,7 +17,7 @@ function DefinitionCard({ title, rows }: { title: ReactNode; rows: Array<[ReactN
         {rows.map(([label, value], index) => (
           <div key={index} className="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-[190px_minmax(0,1fr)] sm:gap-5">
             <dt className="text-sm text-muted-foreground">{label}</dt>
-            <dd className="m-0 min-w-0 break-all text-sm">{value}</dd>
+            <dd className="m-0 min-w-0 break-all font-mono text-sm">{value}</dd>
           </div>
         ))}
       </dl>
@@ -158,7 +158,10 @@ export default function SystemStatusTab() {
               <Database aria-hidden="true" className="size-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="font-medium">{t('system.databaseConnection')}</div>
+              <div className="font-medium">PostgreSQL</div>
+              <Text size="xs" tone="muted">
+                {t('system.databaseConnection')}
+              </Text>
             </div>
             <Tag color={dependencyIsHealthy(systemHealth?.checks?.database) ? 'success' : 'error'}>
               {dependencyLabel(systemHealth?.checks?.database)}
@@ -171,7 +174,10 @@ export default function SystemStatusTab() {
               <Server aria-hidden="true" className="size-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="font-medium">{t('system.redisCacheAndLock')}</div>
+              <div className="font-medium">Redis</div>
+              <Text size="xs" tone="muted">
+                {t('system.redisCacheAndLock')}
+              </Text>
             </div>
             <Tag color={dependencyIsHealthy(systemHealth?.checks?.redis) ? 'success' : 'error'}>
               {dependencyLabel(systemHealth?.checks?.redis)}
