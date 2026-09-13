@@ -1,9 +1,11 @@
 import type { CSSProperties, FormEventHandler, ReactNode } from 'react';
-import { KeyRound, Shield, ShieldCheck } from 'lucide-react';
+import { KeyRound, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
+import gossoLogo from '@gouno/ui/brand-icons/gosso.svg';
 import type { PublicSiteBranding } from '../../types/api';
 import { Alert, Button, Card, FormField, Heading, Input, Tag, Text } from '@gouno/ui/core';
+import { BrandMark } from '../branding/BrandMark';
 
 interface LoginSurfaceProps {
   branding: PublicSiteBranding;
@@ -111,9 +113,7 @@ export default function LoginSurface({
               alt={branding.product_name}
             />
           ) : (
-            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <ShieldCheck aria-hidden="true" className="size-6" />
-            </div>
+            <BrandMark src={gossoLogo} className="mx-auto mb-4 size-14 text-primary" />
           )}
           <Heading level={1} className="text-2xl font-bold tracking-tight">
             {branding.login_title || branding.product_name || t('login.title')}
