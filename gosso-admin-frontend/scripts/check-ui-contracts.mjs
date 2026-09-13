@@ -5,6 +5,7 @@ import ts from "typescript";
 
 const root = fileURLToPath(new URL("../src/", import.meta.url));
 const files = [];
+const retiredProductStyles = new Set(["index.css"]);
 const packageRootImport = /(?:\bfrom\s+|\bimport\s*\(\s*)["']@gouno\/ui["']/;
 
 async function collect(directory) {
@@ -199,6 +200,11 @@ function checkTsxContracts(name, source) {
 for (const path of files) {
   const name = relative(root, path);
   const source = await readFile(path, "utf8");
+  if (retiredProductStyles.has(name)) {
+    failures.push(
+      `${name}: retired legacy stylesheet must not be reintroduced; canonical reset, fonts and primitive styling are owned by @gouno/ui`,
+    );
+  }
   if ((name.endsWith(".ts") || name.endsWith(".tsx")) && packageRootImport.test(source)) {
     failures.push(`${name}: @gouno/ui package-root imports are compatibility-only; use an owned subpath`);
   }
