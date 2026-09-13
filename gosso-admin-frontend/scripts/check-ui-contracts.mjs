@@ -1,12 +1,15 @@
-import { readdir, readFile } from "node:fs/promises";
+import { access, readdir, readFile } from "node:fs/promises";
 import { extname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
+const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const root = fileURLToPath(new URL("../src/", import.meta.url));
 const files = [];
 const retiredProductStyles = new Set(["index.css"]);
+const retiredVendoredAssets = ["public/ui-bootstrap.js", "public/gosso-admin.svg"];
 const packageRootImport = /(?:\bfrom\s+|\bimport\s*\(\s*)["']@gouno\/ui["']/;
+const directRadixImport = /(?:\bfrom\s+|\bimport\s*\(\s*)["']@radix-ui\//;
 
 async function collect(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
@@ -17,8 +20,25 @@ async function collect(directory) {
   }
 }
 
+async function exists(path) {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 await collect(root);
 const failures = [];
+
+for (const relativePath of retiredVendoredAssets) {
+  if (await exists(join(projectRoot, relativePath))) {
+    failures.push(
+      `${relativePath}: vendored Gouno UI runtime/brand asset must not be reintroduced; source it from the installed @gouno/ui release`,
+    );
+  }
+}
 
 function jsxTagName(node, sourceFile) {
   if (ts.isJsxElement(node))
@@ -114,7 +134,6 @@ function checkTsxContracts(name, source) {
     true,
     ts.ScriptKind.TSX,
   );
-  const sharedPrimitive = name.startsWith("components/ui/");
   const standaloneSystemManagement = name === "pages/SystemManagement.tsx";
   const adminLayout = name === "components/layout/AdminLayout.tsx";
 
@@ -134,20 +153,19 @@ function checkTsxContracts(name, source) {
           );
         }
       }
-      if (!sharedPrimitive && tag === "button") {
+      if (tag === "button") {
         failures.push(
           `${name}:${location(sourceFile, node)} native button must use Button, ButtonLink, or IconButton`,
         );
       }
-      if (!sharedPrimitive && tag === "select") {
+      if (tag === "select") {
         failures.push(
           `${name}:${location(sourceFile, node)} native select must use the shared Select component`,
         );
       }
       if (
         ts.isJsxElement(node) &&
-        ["Button", "ButtonLink", "ChoiceButton"].includes(tag) &&
-        !sharedPrimitive
+        ["Button", "ButtonLink", "ChoiceButton"].includes(tag)
       ) {
         for (const child of node.children) {
           const icon = buttonChildIcon(child, sourceFile);
@@ -169,12 +187,12 @@ function checkTsxContracts(name, source) {
         )
           continue;
         const value = staticClassName(attribute);
-        if (!sharedPrimitive && /(^|\s)btn(?:\s|$)/.test(value)) {
+        if (/(^|\s)btn(?:\s|$)/.test(value)) {
           failures.push(
             `${name}:${location(sourceFile, attribute)} shared button classes must use Button or ButtonLink`,
           );
         }
-        if (!sharedPrimitive && /(^|\s)badge(?:\s|$)/.test(value)) {
+        if (/(^|\s)badge(?:\s|$)/.test(value)) {
           failures.push(
             `${name}:${location(sourceFile, attribute)} shared badge classes must use Badge`,
           );
@@ -182,11 +200,7 @@ function checkTsxContracts(name, source) {
       }
     }
 
-    if (
-      !sharedPrimitive &&
-      ts.isIdentifier(node) &&
-      node.text === "buttonClassName"
-    ) {
+    if (ts.isIdentifier(node) && node.text === "buttonClassName") {
       failures.push(
         `${name}:${location(sourceFile, node)} buttonClassName is internal to the shared Button primitive`,
       );
@@ -207,6 +221,9 @@ for (const path of files) {
   }
   if ((name.endsWith(".ts") || name.endsWith(".tsx")) && packageRootImport.test(source)) {
     failures.push(`${name}: @gouno/ui package-root imports are compatibility-only; use an owned subpath`);
+  }
+  if ((name.endsWith(".ts") || name.endsWith(".tsx")) && directRadixImport.test(source)) {
+    failures.push(`${name}: direct @radix-ui imports bypass @gouno/ui ownership; consume the canonical Gouno UI primitive instead`);
   }
   checkTsxContracts(name, source);
 }
