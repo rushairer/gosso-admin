@@ -31,13 +31,16 @@ test(
 
     const shell = page.locator('[data-slot="app-shell"]');
     const header = shell.locator(":scope > header");
+    const sidebar = shell.locator("aside");
     const navigation = shell.getByRole("navigation", { name: "主导航" }).filter({ visible: true });
     const navigationGroups = navigation.locator('[data-slot="navigation-group"]');
 
     await expect(header).not.toContainText("OAuth2 客户端");
+    await expect(header.getByRole("button", { name: "退出登录" })).toHaveCount(0);
     await expect(navigationGroups.first().getByRole("link")).toHaveText(["概览", "账户设置"]);
-    await expect(shell.locator("aside").getByText("Aben Admin", { exact: true })).toBeVisible();
-    await expect(shell.locator("aside").getByText("admin", { exact: true })).toHaveCount(0);
+    await expect(sidebar.getByText("Aben Admin", { exact: true })).toBeVisible();
+    await expect(sidebar.getByText("admin", { exact: true })).toHaveCount(0);
+    await expect(sidebar.getByRole("button", { name: "退出登录" })).toBeVisible();
 
     await navigation.getByRole("link", { name: "账户设置" }).click();
     await expect(page).toHaveURL(/\/account-settings\/profile$/);
@@ -70,6 +73,7 @@ test("mobile AppShell drawer navigates routed management pages and closes", asyn
   await page.getByRole("button", { name: "主导航" }).click();
   const drawerNavigation = page.getByRole("navigation", { name: "主导航" }).filter({ visible: true });
   await expect(drawerNavigation).toBeVisible();
+  await expect(page.getByRole("dialog").getByRole("button", { name: "退出登录" })).toBeVisible();
 
   await drawerNavigation.getByRole("link", { name: "用户账户" }).click();
   await expect(page).toHaveURL(/\/system-management\/users$/);

@@ -162,9 +162,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         />
       }
       account={
-        session.loggedIn ? (
-          <IconButton label={t('nav.signOut')} icon={<LogOut />} onClick={() => logout('/')} />
-        ) : (
+        session.loggedIn ? null : (
           <Button
             variant="solid"
             color="primary"
@@ -180,12 +178,21 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent text-xs font-medium text-primary">
             {session.loggedIn ? initials(session) : <User />}
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <strong className="block truncate text-sm">{userName}</strong>
             <p className="m-0 text-xs text-muted-foreground">
               {session.loggedIn ? (session.isAdmin ? t('nav.administrator') : t('nav.user')) : t('nav.anonymous')}
             </p>
           </div>
+          {session.loggedIn ? (
+            <IconButton
+              className="shrink-0"
+              variant="ghost"
+              label={t('nav.signOut')}
+              icon={<LogOut />}
+              onClick={() => logout('/')}
+            />
+          ) : null}
         </div>
       }
     >
