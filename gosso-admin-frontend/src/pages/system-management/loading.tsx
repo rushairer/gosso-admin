@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { Card, Skeleton, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Text } from '@gouno/ui/core';
+import { Card, Skeleton } from '@gouno/ui/core';
+import { PageSkeleton } from '@gouno/ui/gouno';
 
 type LoadingColumn = {
   header: ReactNode;
@@ -11,7 +12,6 @@ export function SystemCollectionLoading({
   label,
   columns,
   rows = 4,
-  density = 'default',
   showPagination = false,
 }: {
   label: string;
@@ -21,45 +21,13 @@ export function SystemCollectionLoading({
   showPagination?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-3" role="status" aria-live="polite" aria-label={label}>
-      <Text size="sm" tone="muted">
-        {label}
-      </Text>
-      <Table bordered density={density}>
-        <TableHeader>
-          <TableRow>
-            {columns.map((column, index) => (
-              <TableHead key={index} className={column.align === 'right' ? 'text-right' : undefined}>
-                {column.header}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {Array.from({ length: rows }, (_, rowIndex) => (
-            <TableRow key={rowIndex}>
-              {columns.map((column, columnIndex) => {
-                const alignmentClass = column.align === 'right' ? 'ml-auto' : '';
-                return (
-                  <TableCell key={columnIndex}>
-                    <Skeleton className={`${column.skeletonClassName ?? 'h-4 w-24'} ${alignmentClass}`} />
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {showPagination ? (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Skeleton className="h-4 w-32" />
-          <div className="flex gap-2">
-            <Skeleton className="h-8 w-20" />
-            <Skeleton className="h-8 w-20" />
-          </div>
-        </div>
-      ) : null}
-    </div>
+    <PageSkeleton
+      layout="collection"
+      aria-label={label}
+      rows={rows}
+      columns={columns.length}
+      pagination={showPagination}
+    />
   );
 }
 
@@ -109,49 +77,13 @@ export function SiteSettingsLoading({ label }: { label: string }) {
   );
 }
 
-function DefinitionLoadingCard() {
-  return (
-    <Card padding="base">
-      <Skeleton className="mb-4 h-5 w-40" />
-      <div className="divide-y">
-        {Array.from({ length: 4 }, (_, index) => (
-          <div key={index} className="grid gap-2 py-3 first:pt-0 last:pb-0 sm:grid-cols-[190px_minmax(0,1fr)] sm:gap-5">
-            <Skeleton className="h-4 w-28" />
-            <Skeleton className="h-4 w-full max-w-md" />
-          </div>
-        ))}
-      </div>
-    </Card>
-  );
-}
-
 export function SystemStatusLoading({ label }: { label: string }) {
   return (
-    <div className="flex flex-col gap-5" role="status" aria-live="polite" aria-label={label}>
-      <div className="grid gap-4 md:grid-cols-3">
-        {Array.from({ length: 3 }, (_, index) => (
-          <Card key={index} padding="base">
-            <Skeleton className="h-3 w-24" />
-            <Skeleton className="mt-3 h-6 w-32" />
-          </Card>
-        ))}
-      </div>
-
-      <Card padding="base">
-        <Skeleton className="mb-4 h-5 w-44" />
-        <div className="grid gap-3 md:grid-cols-2">
-          {Array.from({ length: 2 }, (_, index) => (
-            <div key={index} className="flex items-center gap-3 rounded-lg border p-4">
-              <Skeleton className="size-10 shrink-0 rounded-lg" />
-              <Skeleton className="h-4 w-36 flex-1" />
-              <Skeleton className="h-6 w-16" />
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <DefinitionLoadingCard />
-      <DefinitionLoadingCard />
-    </div>
+    <PageSkeleton
+      layout="dashboard"
+      aria-label={label}
+      statistics={3}
+      sections={3}
+    />
   );
 }
