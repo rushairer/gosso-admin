@@ -42,12 +42,7 @@ function FieldSkeleton({ width = 'w-28' }: { width?: string }) {
 
 export function SiteSettingsLoading({ label }: { label: string }) {
   return (
-    <div
-      className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]"
-      role="status"
-      aria-live="polite"
-      aria-label={label}
-    >
+    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]" role="status" aria-live="polite" aria-label={label}>
       <Card padding="none" className="gap-0 overflow-clip">
         <div className="flex flex-col gap-5 p-6">
           <FieldSkeleton width="w-24" />
@@ -83,12 +78,5 @@ export function SiteSettingsLoading({ label }: { label: string }) {
 }
 
 export function SystemStatusLoading({ label }: { label: string }) {
-  return (
-    <PageSkeleton
-      layout="dashboard"
-      aria-label={label}
-      statistics={3}
-      sections={3}
-    />
-  );
+  return <PageSkeleton layout="dashboard" aria-label={label} statistics={3} sections={3} />;
 }
