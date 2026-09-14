@@ -110,13 +110,16 @@ describe('UsersTab pagination', () => {
     });
   });
 
-  it('shows a structural table skeleton while the first account request is pending', () => {
+  it('shows the shared collection skeleton while the first account request is pending', () => {
     vi.mocked(apiFetch).mockImplementation(() => new Promise<Response>(() => {}));
 
     renderUsersTab();
 
-    expect(screen.getByRole('status')).toBeInTheDocument();
-    expect(screen.getAllByRole('columnheader')).toHaveLength(4);
+    const loading = screen.getByRole('status', { name: /loading user accounts/i });
+    expect(loading).toHaveAttribute('data-layout', 'collection');
+    expect(loading).toHaveAttribute('aria-busy', 'true');
+    expect(loading.querySelectorAll('[data-slot="table-head"]')).toHaveLength(4);
+    expect(screen.queryByRole('columnheader')).not.toBeInTheDocument();
   });
 
   it('does not render an empty state when the initial account load fails', async () => {
