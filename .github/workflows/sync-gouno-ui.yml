@@ -59,7 +59,7 @@ jobs:
           npm install --save-exact --package-lock-only --ignore-scripts --legacy-peer-deps "@gouno/ui@${GOUNO_UI_VERSION}"
           npm ci --legacy-peer-deps
 
-      - name: Format completed PageSkeleton migration
+      - name: Format completed PageSkeleton migration with project Prettier
         working-directory: gosso-admin-frontend
         run: npx prettier --write src/pages/system-management/loading.tsx
 
