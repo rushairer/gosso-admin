@@ -59,6 +59,10 @@ jobs:
           npm install --save-exact --package-lock-only --ignore-scripts --legacy-peer-deps "@gouno/ui@${GOUNO_UI_VERSION}"
           npm ci --legacy-peer-deps
 
+      - name: Format completed PageSkeleton migration
+        working-directory: gosso-admin-frontend
+        run: npx prettier --write src/pages/system-management/loading.tsx
+
       - name: Verify published package contract
         working-directory: gosso-admin-frontend
         env:
@@ -111,14 +115,17 @@ jobs:
           GOUNO_UI_VERSION: ${{ steps.ui.outputs.version }}
         run: |
           set -euo pipefail
-          git add gosso-admin-frontend/package.json gosso-admin-frontend/package-lock.json
+          git add \
+            gosso-admin-frontend/package.json \
+            gosso-admin-frontend/package-lock.json \
+            gosso-admin-frontend/src/pages/system-management/loading.tsx
           if git diff --cached --quiet; then
-            echo "@gouno/ui registry dependency is already current."
+            echo "@gouno/ui registry dependency and loading alignment are already current."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(ui): use @gouno/ui ${GOUNO_UI_VERSION} registry release"
+          git commit -m "style(ui): format @gouno/ui ${GOUNO_UI_VERSION} loading alignment"
           git fetch origin main
           git rebase origin/main
           git push origin HEAD:main
