@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { SiteSettingsLoading, SystemCollectionLoading, SystemStatusLoading } from './loading';
 
 describe('system management loading states', () => {
-  it('keeps collection table structure visible while rows are loading', () => {
+  it('keeps collection geometry visible without exposing placeholder table semantics', () => {
     const { container } = render(
       <SystemCollectionLoading
         label="Loading clients"
@@ -17,9 +17,11 @@ describe('system management loading states', () => {
       />
     );
 
-    expect(screen.getByRole('status', { name: 'Loading clients' })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: 'Name' })).toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: 'Actions' })).toBeInTheDocument();
+    const loading = screen.getByRole('status', { name: 'Loading clients' });
+    expect(loading).toHaveAttribute('data-layout', 'collection');
+    expect(loading).toHaveAttribute('aria-busy', 'true');
+    expect(loading.querySelectorAll('[data-slot="table-head"]')).toHaveLength(3);
+    expect(screen.queryByRole('columnheader')).not.toBeInTheDocument();
     expect(container.querySelectorAll('[data-slot="skeleton"]').length).toBeGreaterThan(6);
   });
 
