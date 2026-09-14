@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { MessageProvider, Skeleton } from '@gouno/ui/core';
+import { MessageProvider, Spinner } from '@gouno/ui/core';
 import { SudoProvider } from './components/auth/SudoContext';
 import { routerBasename } from './config/appPaths';
 import { GossoProvider, RequireAdmin, RequireAuth } from '@gosso/client/react';
@@ -21,59 +21,33 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 function AppBootstrapLoader() {
   return (
     <div
-      className="min-h-screen bg-background p-6 sm:p-8"
+      className="flex min-h-screen items-center justify-center bg-background p-6"
       role="status"
       aria-live="polite"
       aria-label="Loading application"
     >
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-        <div className="flex items-center justify-between gap-4">
-          <Skeleton className="h-8 w-36" />
-          <Skeleton className="h-9 w-24" />
-        </div>
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-8 w-56" />
-          <Skeleton className="h-4 w-full max-w-2xl" />
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <Skeleton className="h-28 w-full rounded-lg" />
-          <Skeleton className="h-28 w-full rounded-lg" />
-          <Skeleton className="h-28 w-full rounded-lg" />
-        </div>
-        <Skeleton className="h-48 w-full rounded-lg" />
-      </div>
+      <Spinner className="size-6 text-primary" />
     </div>
   );
 }
 
-function PageLoader({ showTabs = false }: { showTabs?: boolean }) {
+function PageLoader() {
   return (
-    <div className="flex flex-col gap-6" role="status" aria-live="polite" aria-label="Loading page">
-      <div className="flex flex-col gap-3">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-4 w-full max-w-2xl" />
-      </div>
-      {showTabs ? (
-        <div className="flex gap-3 overflow-hidden border-b pb-3">
-          <Skeleton className="h-8 w-28 shrink-0" />
-          <Skeleton className="h-8 w-28 shrink-0" />
-          <Skeleton className="h-8 w-28 shrink-0" />
-        </div>
-      ) : null}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Skeleton className="h-24 w-full rounded-lg" />
-        <Skeleton className="h-24 w-full rounded-lg" />
-        <Skeleton className="h-24 w-full rounded-lg" />
-      </div>
-      <Skeleton className="h-44 w-full rounded-lg" />
+    <div
+      className="flex min-h-64 items-center justify-center py-10"
+      role="status"
+      aria-live="polite"
+      aria-label="Loading page"
+    >
+      <Spinner className="size-5 text-primary" />
     </div>
   );
 }
 
-function AccountRoute({ children, showTabs = false }: { children: React.ReactNode; showTabs?: boolean }) {
+function AccountRoute({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   return (
-    <RequireAuth redirectTo={appPath(location.pathname)} fallback={<PageLoader showTabs={showTabs} />}>
+    <RequireAuth redirectTo={appPath(location.pathname)} fallback={<PageLoader />}>
       {children}
     </RequireAuth>
   );
@@ -150,8 +124,8 @@ export default function App() {
                   path="/account-settings/:tab"
                   element={
                     <AdminLayout>
-                      <AccountRoute showTabs>
-                        <Suspense fallback={<PageLoader showTabs />}>
+                      <AccountRoute>
+                        <Suspense fallback={<PageLoader />}>
                           <AccountSettings />
                         </Suspense>
                       </AccountRoute>
