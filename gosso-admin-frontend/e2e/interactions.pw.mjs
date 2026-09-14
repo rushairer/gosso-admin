@@ -22,6 +22,39 @@ async function openWithFixtures(page, path, options = {}) {
   return unknown;
 }
 
+test(
+  "desktop AppShell follows the canonical header, navigation, and display-name contract",
+  async ({ page }, testInfo) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const problems = collectConsoleProblems(page);
+    const unknown = await openWithFixtures(page, "/system-management/clients");
+
+    const shell = page.locator('[data-slot="app-shell"]');
+    const header = shell.locator(":scope > header");
+    const navigation = shell.getByRole("navigation", { name: "主导航" }).filter({ visible: true });
+    const navigationGroups = navigation.locator('[data-slot="navigation-group"]');
+
+    await expect(header).not.toContainText("OAuth2 客户端");
+    await expect(navigationGroups.first().getByRole("link")).toHaveText(["概览", "账户设置"]);
+    await expect(shell.locator("aside").getByText("Aben Admin", { exact: true })).toBeVisible();
+    await expect(shell.locator("aside").getByText("admin", { exact: true })).toHaveCount(0);
+
+    await navigation.getByRole("link", { name: "账户设置" }).click();
+    await expect(page).toHaveURL(/\/account-settings\/profile$/);
+    await expect(page.getByRole("heading", { level: 1, name: "账户设置" })).toBeVisible();
+
+    const screenshotPath = testInfo.outputPath("app-shell-contract.png");
+    await page.screenshot({ path: screenshotPath, fullPage: false });
+    await testInfo.attach("app-shell-contract", {
+      path: screenshotPath,
+      contentType: "image/png",
+    });
+
+    expect(unknown).toEqual([]);
+    expect(problems).toEqual([]);
+  }
+);
+
 test("mobile AppShell drawer navigates routed management pages and closes", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const problems = collectConsoleProblems(page);

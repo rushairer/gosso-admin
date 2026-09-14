@@ -13,7 +13,7 @@ import { ThemeToggle } from '@gouno/ui/theme';
 import { BrandMark } from '../branding/BrandMark';
 
 function initials(snapshot: SessionSnapshot) {
-  const name = snapshot.profile?.preferred_username || snapshot.profile?.name || 'Guest';
+  const name = snapshot.profile?.name || snapshot.profile?.preferred_username || 'Guest';
   return name.slice(0, 2).toUpperCase();
 }
 
@@ -87,7 +87,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     document.title = `${pageLabel} - ${productName} ${t('nav.brandSubtitle')}`;
   }, [pageLabel, productName, t]);
 
-  const userName = session.profile?.preferred_username || session.profile?.name || t('nav.notSignedIn');
+  const userName = session.profile?.name || session.profile?.preferred_username || t('nav.notSignedIn');
   const systemManagementItems = [
     {
       key: 'clients',
@@ -124,7 +124,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <span className="truncate font-semibold">{productName}</span>
         </Link>
       }
-      breadcrumbs={pageLabel}
       navigationLabel={t('nav.primaryNavigation')}
       navigation={(close) => (
         <>
@@ -133,6 +132,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               <Home />
               <span>{t('nav.overview')}</span>
             </NavLink>
+            {session.loggedIn ? (
+              <NavLink to="/account-settings" className={navigationItemClass} onClick={close}>
+                <UserCog />
+                <span>{t('nav.accountSettings')}</span>
+              </NavLink>
+            ) : null}
           </NavigationGroup>
           {session.loggedIn && session.isAdmin ? (
             <NavigationGroup label={t('nav.systemManagement')}>
@@ -142,14 +147,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                   <span>{label}</span>
                 </NavLink>
               ))}
-            </NavigationGroup>
-          ) : null}
-          {session.loggedIn ? (
-            <NavigationGroup>
-              <NavLink to="/account-settings" className={navigationItemClass} onClick={close}>
-                <UserCog />
-                <span>{t('nav.accountSettings')}</span>
-              </NavLink>
             </NavigationGroup>
           ) : null}
         </>
