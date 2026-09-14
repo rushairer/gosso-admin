@@ -43,6 +43,13 @@ test(
     await expect(page).toHaveURL(/\/account-settings\/profile$/);
     await expect(page.getByRole("heading", { level: 1, name: "账户设置" })).toBeVisible();
 
+    const copyButtons = page.getByRole("button", { name: "复制", exact: true });
+    await expect(copyButtons).toHaveCount(2);
+    await copyButtons.first().click();
+    await expect(page.getByText("已复制完整 Subject ID")).toBeVisible();
+    await copyButtons.nth(1).click();
+    await expect(page.getByText("已复制 SSO Issuer")).toBeVisible();
+
     const screenshotPath = testInfo.outputPath("app-shell-contract.png");
     await page.screenshot({ path: screenshotPath, fullPage: false });
     await testInfo.attach("app-shell-contract", {

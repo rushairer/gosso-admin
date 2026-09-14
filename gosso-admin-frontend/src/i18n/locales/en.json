@@ -461,10 +461,10 @@
     "emailVerificationFailed": "Unable to verify the email code.",
     "subjectIdLabel": "Subject Identifier (Subject ID)",
     "copiedSubjectId": "Copied full Subject ID",
-    "copyId": "Copy ID",
+    "copyId": "Copy",
     "ssoIssuerLabel": "Identity Provider (SSO Issuer)",
     "copiedIssuer": "Copied SSO Issuer",
-    "copyIssuer": "Copy Issuer"
+    "copyIssuer": "Copy"
   },
   "password": {
     "title": "Password",

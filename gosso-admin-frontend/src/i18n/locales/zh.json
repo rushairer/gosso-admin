@@ -461,10 +461,10 @@
     "emailVerificationFailed": "无法验证邮箱验证码。",
     "subjectIdLabel": "账号唯一标识 (Subject ID)",
     "copiedSubjectId": "已复制完整 Subject ID",
-    "copyId": "复制 ID",
+    "copyId": "复制",
     "ssoIssuerLabel": "身份认证源 (SSO Issuer)",
     "copiedIssuer": "已复制 SSO Issuer",
-    "copyIssuer": "复制 Issuer"
+    "copyIssuer": "复制"
   },
   "password": {
     "title": "修改密码",
