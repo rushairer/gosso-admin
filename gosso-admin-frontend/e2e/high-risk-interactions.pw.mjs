@@ -126,7 +126,7 @@ test("Passkeys empty state can enter registration and render a registration fail
   await dialog.locator('input[type="text"]').fill("CI Touch ID");
   await dialog.locator('button[type="submit"]').click();
 
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(dialog.getByRole("alert")).toBeVisible();
   await expect(dialog).toBeVisible();
   expect(unknown).toEqual([]);
 });
@@ -137,8 +137,8 @@ test("Sessions revoke action requires a destructive confirmation modal", async (
   await page.getByRole("button", { name: "撤销" }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByText(/终止|撤销/)).toBeVisible();
-  await expect(dialog.getByRole("button", { name: /终止|撤销/ })).toBeVisible();
+  await expect(dialog.getByRole("heading", { name: "终止会话" })).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "终止", exact: true })).toBeVisible();
   await dialog.getByRole("button", { name: "取消" }).click();
   expect(unknown).toEqual([]);
 });
