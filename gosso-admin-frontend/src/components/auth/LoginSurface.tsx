@@ -103,7 +103,7 @@ export default function LoginSurface({
       <Card
         variant="elevated"
         padding="lg"
-        className="relative w-full max-w-md border-border/80 bg-raised/95 backdrop-blur"
+        className="w-full max-w-md border-border/80 bg-raised/95 backdrop-blur"
       >
         <div className="mb-7 text-center">
           {branding.logo_url ? (
