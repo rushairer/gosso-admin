@@ -96,8 +96,8 @@ for (const theme of ["light", "dark"]) {
     const productFormCard = pair.product.locator("form").locator('[data-slot="card"]').first();
     expect(await styleFingerprint(productFormCard)).toEqual(await styleFingerprint(showcaseFormCard));
     const showcasePreview = pair.showcase.getByText("登录页预览", { exact: true }).locator('xpath=ancestor::*[@data-slot="card"][1]');
-    const productPreview = pair.product.getByText(/登录页预览|Login Page Preview/i).locator('xpath=ancestor::*[@data-slot="card"][1]');
-    await expect(productPreview).not.toBeAttached({ attached: false });
+    const productPreview = pair.product.getByText(/登录页预览|Login Page Preview/i).first().locator('xpath=ancestor::*[@data-slot="card"][1]');
+    await expect(productPreview).toBeVisible();
     expect(await styleFingerprint(productPreview)).toEqual(await styleFingerprint(showcasePreview));
     expect(await productPreview.locator("form").count()).toBe(0);
     expect(pair.unknown).toEqual([]);
