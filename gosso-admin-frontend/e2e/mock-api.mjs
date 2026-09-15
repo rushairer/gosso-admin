@@ -44,6 +44,7 @@ export async function installApiFixtures(page, options = {}) {
   const profile = options.profile || adminProfile;
   let remainingSettingsFailures = options.failSettingsCount || 0;
   let remainingReadinessFailures = options.failReadinessCount || 0;
+  let remainingLoginFailures = options.failLoginCount || 0;
 
   await page.route("**/*", async (route) => {
     const request = route.request();
@@ -54,6 +55,16 @@ export async function installApiFixtures(page, options = {}) {
     if (!isProductRequest(path)) {
       await route.continue();
       return;
+    }
+
+    if (path === "/api/v1/auth/login" && method === "POST") {
+      if (remainingLoginFailures > 0) {
+        remainingLoginFailures -= 1;
+        return json(route, { message: "browser injected login failure" }, 401);
+      }
+      if (options.loginRequiresMfa) {
+        return enveloped(route, { requires_mfa: true, mfa_token: "fixture-mfa-token" });
+      }
     }
 
     if (method !== "GET" && method !== "HEAD") {
