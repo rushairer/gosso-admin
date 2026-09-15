@@ -99,6 +99,30 @@ test("login MFA challenge stays inside the canonical auth surface", async ({ pag
   expect(unknown).toEqual([]);
 });
 
+test("login passkey branch renders its failure on the auth surface", async ({ page }) => {
+  await setTheme(page, "light");
+  const unknown = await installApiFixtures(page, { failPasskeyLoginCount: 1 });
+  await page.goto("/login");
+
+  await page.getByRole("button", { name: "使用通行密钥登录" }).click();
+
+  await expect(page.locator('[data-slot="login-surface"]')).toBeVisible();
+  await expect(page.getByRole("alert")).toBeVisible();
+  expect(unknown).toEqual([]);
+});
+
+test("forgot password keeps native validation ownership on the auth surface", async ({ page }) => {
+  await setTheme(page, "light");
+  const unknown = await installApiFixtures(page);
+  await page.goto("/forgot-password");
+
+  const email = page.locator('input[type="email"]');
+  await expect(email).toHaveJSProperty("validity.valid", false);
+  await expect(page.locator('button[type="submit"]')).toBeDisabled();
+  await expect(page.locator('[data-slot="auth-page-surface"]')).toBeVisible();
+  expect(unknown).toEqual([]);
+});
+
 test("reset password invalid token keeps a persistent error and disabled form", async ({ page }) => {
   await setTheme(page, "light");
   const unknown = await installApiFixtures(page);
@@ -106,5 +130,23 @@ test("reset password invalid token keeps a persistent error and disabled form", 
   await expect(page.getByRole("alert")).toBeVisible();
   await expect(page.locator('input[type="password"]')).toHaveCount(2);
   for (const input of await page.locator('input[type="password"]').all()) await expect(input).toBeDisabled();
+  expect(unknown).toEqual([]);
+});
+
+test("OAuth callback shows indeterminate processing before a persistent exchange error", async ({ page }) => {
+  await setTheme(page, "light");
+  await page.addInitScript(() => {
+    sessionStorage.setItem("gosso-admin:auth_state", "fixture-state");
+    sessionStorage.setItem("gosso-admin:pkce_verifier", "fixture-verifier");
+  });
+  const unknown = await installApiFixtures(page, {
+    failTokenExchange: true,
+    tokenExchangeDelayMs: 500,
+  });
+
+  await page.goto("/callback?code=fixture-code&state=fixture-state", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("status")).toBeVisible();
+  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.locator('[data-slot="app-shell"]')).toHaveCount(0);
   expect(unknown).toEqual([]);
 });
