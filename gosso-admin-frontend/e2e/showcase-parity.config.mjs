@@ -1,5 +1,7 @@
 import { defineConfig } from "@playwright/test";
 
+const gounoUiRoot = process.env.GOUNO_UI_ROOT || "../../upstream-gouno-ui";
+
 export default defineConfig({
   testDir: ".",
   testMatch: "showcase-parity.pw.mjs",
@@ -22,7 +24,7 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: "npm --prefix ../../upstream-gouno-ui run showcase:dev -- --host 127.0.0.1 --port 4174",
+      command: `npm --prefix ${gounoUiRoot} run showcase:dev -- --host 127.0.0.1 --port 4174`,
       url: "http://127.0.0.1:4174",
       reuseExistingServer: false,
       timeout: 120_000,
