@@ -100,11 +100,7 @@ export default function LoginSurface({
           className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,color-mix(in_srgb,var(--primary)_18%,transparent),transparent_38%),radial-gradient(circle_at_90%_90%,color-mix(in_srgb,var(--muted-foreground)_10%,transparent),transparent_42%)]"
         />
       ) : null}
-      <Card
-        variant="elevated"
-        padding="lg"
-        className="w-full max-w-md border-border/80 bg-raised/95 backdrop-blur"
-      >
+      <Card variant="elevated" padding="lg" className="w-full max-w-md border-border/80 bg-raised/95 backdrop-blur">
         <div className="mb-7 text-center">
           {branding.logo_url ? (
             <img
