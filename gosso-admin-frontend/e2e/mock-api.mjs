@@ -33,6 +33,7 @@ const enveloped = (route, data, status = 200) =>
 function isProductRequest(path) {
   return (
     path.startsWith("/api/v1/") ||
+    path.startsWith("/oauth2/") ||
     path.startsWith("/oidc/") ||
     path.startsWith("/.well-known/") ||
     path === "/readiness"
@@ -42,8 +43,16 @@ function isProductRequest(path) {
 export async function installApiFixtures(page, options = {}) {
   const unknown = [];
   const profile = options.profile || adminProfile;
+  const fixtureMfaStatus = options.mfaStatus ?? mfaStatus;
+  const fixturePasskeys = options.passkeys ?? passkeys;
+  const fixtureSessions = options.sessions ?? sessions;
+  const fixtureCurrentSession = options.currentSession ?? currentSession;
   let remainingSettingsFailures = options.failSettingsCount || 0;
   let remainingReadinessFailures = options.failReadinessCount || 0;
+  let remainingLoginFailures = options.failLoginCount || 0;
+  let remainingPasswordChangeFailures = options.failPasswordChangeCount || 0;
+  let remainingPasskeyRegisterFailures = options.failPasskeyRegisterCount || 0;
+  let remainingPasskeyLoginFailures = options.failPasskeyLoginCount || 0;
 
   await page.route("**/*", async (route) => {
     const request = route.request();
@@ -54,6 +63,42 @@ export async function installApiFixtures(page, options = {}) {
     if (!isProductRequest(path)) {
       await route.continue();
       return;
+    }
+
+    if (path === "/oauth2/token" && method === "POST" && options.failTokenExchange) {
+      if (options.tokenExchangeDelayMs) {
+        await new Promise((resolve) => setTimeout(resolve, options.tokenExchangeDelayMs));
+      }
+      return json(route, { error: "browser injected token exchange failure" }, 400);
+    }
+
+    if (path === "/api/v1/auth/login" && method === "POST") {
+      if (remainingLoginFailures > 0) {
+        remainingLoginFailures -= 1;
+        return json(route, { message: "browser injected login failure" }, 401);
+      }
+      if (options.loginRequiresMfa) {
+        return enveloped(route, { requires_mfa: true, mfa_token: "fixture-mfa-token" });
+      }
+    }
+
+    if (path === "/api/v1/passkey/login/begin" && method === "POST" && remainingPasskeyLoginFailures > 0) {
+      remainingPasskeyLoginFailures -= 1;
+      return json(route, { message: "browser injected passkey login failure" }, 500);
+    }
+
+    if (path === "/api/v1/auth/password/change" && method === "POST" && remainingPasswordChangeFailures > 0) {
+      remainingPasswordChangeFailures -= 1;
+      return json(route, { message: "recent strong authentication required" }, 403);
+    }
+
+    if (path === "/api/v1/passkey/register/begin" && method === "POST" && remainingPasskeyRegisterFailures > 0) {
+      remainingPasskeyRegisterFailures -= 1;
+      return json(route, { message: "browser injected passkey registration failure" }, 500);
+    }
+
+    if (path === "/api/v1/auth/mfa/enroll" && method === "POST" && options.mfaEnrollment) {
+      return enveloped(route, options.mfaEnrollment);
     }
 
     if (method !== "GET" && method !== "HEAD") {
@@ -78,10 +123,10 @@ export async function installApiFixtures(page, options = {}) {
       return enveloped(route, siteSettings);
     }
     if (path === "/api/v1/admin/security-policy") return enveloped(route, securityPolicy);
-    if (path === "/api/v1/auth/mfa") return enveloped(route, mfaStatus);
-    if (path === "/api/v1/passkeys") return enveloped(route, passkeys);
-    if (path === "/api/v1/auth/sessions") return enveloped(route, sessions);
-    if (path === "/api/v1/auth/session") return enveloped(route, currentSession);
+    if (path === "/api/v1/auth/mfa") return enveloped(route, fixtureMfaStatus);
+    if (path === "/api/v1/passkeys") return enveloped(route, fixturePasskeys);
+    if (path === "/api/v1/auth/sessions") return enveloped(route, fixtureSessions);
+    if (path === "/api/v1/auth/session") return enveloped(route, fixtureCurrentSession);
     if (path === "/readiness") {
       if (remainingReadinessFailures > 0) {
         remainingReadinessFailures -= 1;

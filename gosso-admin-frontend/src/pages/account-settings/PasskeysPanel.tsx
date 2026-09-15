@@ -30,6 +30,12 @@ export default function PasskeysPanel() {
 
   const initialLoading = loading && !hasResolvedInitialLoad;
   const fatalLoadError = Boolean(error) && !hasResolvedInitialLoad;
+  const resolvedError =
+    error === 'credential not found'
+      ? t('passkeys.credentialNotFound')
+      : error === 'credential does not belong to account'
+        ? t('passkeys.credentialOwnershipMismatch')
+        : error;
 
   const handleOpenAddPasskey = async () => {
     setValidationError(null);
@@ -114,18 +120,11 @@ export default function PasskeysPanel() {
         }
       >
         <div className="flex flex-col gap-4">
-          {validationError || error ? (
+          {validationError || (!showPasskeyModal && resolvedError) ? (
             <Alert
               type="error"
               showIcon
-              title={
-                validationError ||
-                (error === 'credential not found'
-                  ? t('passkeys.credentialNotFound')
-                  : error === 'credential does not belong to account'
-                    ? t('passkeys.credentialOwnershipMismatch')
-                    : error)
-              }
+              title={validationError || resolvedError}
               action={
                 fatalLoadError ? (
                   <Button size="small" loading={loading} onClick={() => void reload().catch(() => {})}>
@@ -230,6 +229,7 @@ export default function PasskeysPanel() {
         }
       >
         <form id="register-passkey-form" onSubmit={handleRegisterPasskey} className="flex flex-col gap-4">
+          {resolvedError ? <Alert type="error" showIcon title={resolvedError} /> : null}
           <FormField label={t('passkeys.passkeyNameLabel')} required>
             <Input
               type="text"

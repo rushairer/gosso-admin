@@ -26,6 +26,7 @@ test(
   "desktop AppShell follows the canonical header, navigation, and display-name contract",
   async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 1440, height: 900 });
+    await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
     const problems = collectConsoleProblems(page);
     const unknown = await openWithFixtures(page, "/system-management/clients");
 

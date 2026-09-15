@@ -43,6 +43,21 @@ export default function ProfilePanel() {
     setSuccess(null);
   };
 
+  const handleCopy = async (value: string, successMessage: string) => {
+    setValidationError(null);
+    setSuccess(null);
+    try {
+      await navigator.clipboard.writeText(value);
+      setSuccess(successMessage);
+    } catch {
+      setValidationError(
+        t('common.copyFailed', {
+          defaultValue: '复制失败，请检查浏览器剪贴板权限后重试。',
+        })
+      );
+    }
+  };
+
   return (
     <Section description={t('profile.description')}>
       <div className="flex flex-col gap-4">
@@ -127,10 +142,7 @@ export default function ProfilePanel() {
                 <Button
                   size="small"
                   icon={<Copy />}
-                  onClick={() => {
-                    void navigator.clipboard.writeText(profile.sub);
-                    setSuccess(t('profile.copiedSubjectId'));
-                  }}
+                  onClick={() => void handleCopy(profile.sub, t('profile.copiedSubjectId'))}
                 >
                   {t('profile.copyId')}
                 </Button>
@@ -146,10 +158,7 @@ export default function ProfilePanel() {
               <Button
                 size="small"
                 icon={<Copy />}
-                onClick={() => {
-                  void navigator.clipboard.writeText(window.location.origin);
-                  setSuccess(t('profile.copiedIssuer'));
-                }}
+                onClick={() => void handleCopy(window.location.origin, t('profile.copiedIssuer'))}
               >
                 {t('profile.copyIssuer')}
               </Button>

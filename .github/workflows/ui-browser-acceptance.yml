@@ -7,6 +7,12 @@ on:
     paths:
       - "gosso-admin-frontend/**"
       - ".github/workflows/ui-browser-acceptance.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "gosso-admin-frontend/**"
+      - ".github/workflows/ui-browser-acceptance.yml"
   workflow_dispatch:
 
 permissions:
@@ -20,7 +26,7 @@ jobs:
   browser-acceptance:
     name: Gosso Admin rendered acceptance
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: gosso-admin-frontend
@@ -32,7 +38,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
           cache-dependency-path: gosso-admin-frontend/package-lock.json
 
@@ -57,4 +63,4 @@ jobs:
             gosso-admin-frontend/playwright-report
             gosso-admin-frontend/test-results
           if-no-files-found: warn
-          retention-days: 7
+          retention-days: 14

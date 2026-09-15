@@ -2,7 +2,12 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: ".",
-  testMatch: ["rendered-matrix.pw.mjs", "interactions.pw.mjs"],
+  testMatch: [
+    "rendered-matrix.pw.mjs",
+    "interactions.pw.mjs",
+    "auth-matrix.pw.mjs",
+    "high-risk-interactions.pw.mjs",
+  ],
   fullyParallel: true,
   retries: 1,
   workers: 2,
