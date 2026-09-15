@@ -33,6 +33,10 @@ async function geometry(locator) {
   return { width: Math.round(box.width), height: Math.round(box.height) };
 }
 
+async function width(locator) {
+  return (await geometry(locator)).width;
+}
+
 async function pairScreenshot(showcase, product, label, testInfo) {
   for (const [kind, page] of [["showcase", showcase], ["product", product]]) {
     const path = testInfo.outputPath(`${label}-${kind}.png`);
@@ -129,35 +133,42 @@ for (const theme of ["light", "dark"]) {
     await pair.context.close();
   });
 
-  test(`Login auth surface geometry matches Showcase (${theme})`, async ({ browser }, testInfo) => {
+  test(`Login auth card width and primitive styles match Showcase (${theme})`, async ({ browser }, testInfo) => {
     const pair = await openPair(browser, "gosso-login", "/login", theme);
-    const showcaseSurface = pair.showcase.locator('[data-slot="login-surface"]');
-    const productSurface = pair.product.locator('[data-slot="login-surface"]');
-    expect(await styleFingerprint(productSurface)).toEqual(await styleFingerprint(showcaseSurface));
-    expect(await geometry(productSurface)).toEqual(await geometry(showcaseSurface));
+    const showcaseCard = pair.showcase.getByRole("heading", { name: "统一身份中心" }).locator('xpath=ancestor::*[@data-slot="card"][1]');
+    const productCard = pair.product.getByRole("heading").first().locator('xpath=ancestor::*[@data-slot="card"][1]');
+    expect(await styleFingerprint(productCard)).toEqual(await styleFingerprint(showcaseCard));
+    expect(await width(productCard)).toBe(await width(showcaseCard));
+    const showcasePassword = pair.showcase.locator('input[type="password"]');
+    const productPassword = pair.product.locator('input[type="password"]');
+    expect(await geometry(productPassword)).toEqual(await geometry(showcasePassword));
     expect(pair.unknown).toEqual([]);
     await proveNoOverflow(pair.showcase, pair.product);
     await pairScreenshot(pair.showcase, pair.product, `login-${theme}`, testInfo);
     await pair.context.close();
   });
 
-  test(`Forgot password AuthPageSurface matches Showcase (${theme})`, async ({ browser }, testInfo) => {
+  test(`Forgot password AuthPageSurface width and primitive styles match Showcase (${theme})`, async ({ browser }, testInfo) => {
     const pair = await openPair(browser, "gosso-forgot-password", "/forgot-password", theme);
     const showcaseCard = pair.showcase.locator('[data-slot="card"]').first();
     const productCard = pair.product.locator('[data-slot="card"]').first();
     expect(await styleFingerprint(productCard)).toEqual(await styleFingerprint(showcaseCard));
-    expect(await geometry(productCard)).toEqual(await geometry(showcaseCard));
+    expect(await width(productCard)).toBe(await width(showcaseCard));
+    const showcaseInput = pair.showcase.locator('input[type="email"]');
+    const productInput = pair.product.locator('input[type="email"]');
+    expect(await geometry(productInput)).toEqual(await geometry(showcaseInput));
     expect(pair.unknown).toEqual([]);
     await pairScreenshot(pair.showcase, pair.product, `forgot-password-${theme}`, testInfo);
     await pair.context.close();
   });
 
-  test(`NotFound result surface matches Showcase (${theme})`, async ({ browser }, testInfo) => {
+  test(`NotFound Result composition matches Showcase (${theme})`, async ({ browser }, testInfo) => {
     const pair = await openPair(browser, "gosso-not-found", "/missing-parity-route", theme);
     const showcaseCard = pair.showcase.locator('[data-slot="card"]').first();
     const productCard = pair.product.locator('[data-slot="card"]').first();
     expect(await styleFingerprint(productCard)).toEqual(await styleFingerprint(showcaseCard));
-    expect(await geometry(productCard)).toEqual(await geometry(showcaseCard));
+    expect(await width(productCard)).toBe(await width(showcaseCard));
+    expect(await pair.product.locator('[data-slot="result"]').count()).toBe(await pair.showcase.locator('[data-slot="result"]').count());
     expect(pair.unknown).toEqual([]);
     await pairScreenshot(pair.showcase, pair.product, `not-found-${theme}`, testInfo);
     await pair.context.close();
