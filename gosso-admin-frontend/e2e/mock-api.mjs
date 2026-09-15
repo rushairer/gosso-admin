@@ -33,6 +33,7 @@ const enveloped = (route, data, status = 200) =>
 function isProductRequest(path) {
   return (
     path.startsWith("/api/v1/") ||
+    path.startsWith("/oauth2/") ||
     path.startsWith("/oidc/") ||
     path.startsWith("/.well-known/") ||
     path === "/readiness"
