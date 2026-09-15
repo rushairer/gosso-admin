@@ -1,14 +1,14 @@
 # Loading Ownership
 
-Status: completed against exact registry release `@gouno/ui@0.4.0`, 2026-09-14.
+Status: active contract, verified against exact registry release `@gouno/ui@0.4.1` during the 2026-09-15 Gosso Admin Showcase Parity Hardening pass.
 
-This document records the boundary between application infrastructure loading, unresolved product data, refresh transitions and mutations. It complements `APP_RULES.md` and prevents future migrations from treating every `Skeleton` composition as the same problem.
+This document records the boundary between application infrastructure loading, unresolved product data, refresh transitions and mutations. It complements `APP_RULES.md` and prevents future work from treating every loading state as the same problem.
 
 ## Infrastructure loading
 
 Session bootstrap, auth guards and React lazy-chunk boundaries are infrastructure concerns. They do not know the eventual page's business data and must not fabricate PageHeader, Tabs, cards or table geometry.
 
-`gosso-admin-frontend/src/App.tsx` therefore uses private Spinner fallbacks for:
+`gosso-admin-frontend/src/App.tsx` therefore keeps private Spinner fallbacks for:
 
 - `GossoProvider` session initialization;
 - `RequireAuth` / `RequireAdmin` guard resolution;
@@ -16,52 +16,53 @@ Session bootstrap, auth guards and React lazy-chunk boundaries are infrastructur
 
 These fallbacks retain one localized/named status region and remain separate from Gouno `PageSkeleton`.
 
-## Adopted PageSkeleton boundaries
+## Page-data loading
 
-The approved runtime migration is now complete through the exact immutable npm registry release `@gouno/ui@0.4.0`; the component is not vendored or copied locally.
+Known future structure uses `Skeleton` / `PageSkeleton` only when the unresolved region has stable anatomy. Shell, PageHeader and Account Settings Tabs should remain mounted whenever their ownership is already known.
 
 ### System collections — `layout="collection"`
 
 File: `gosso-admin-frontend/src/pages/system-management/loading.tsx`
 
-`SystemCollectionLoading` now delegates the shared unresolved collection geometry to `PageSkeleton`. Clients, Users and Audit Logs retain product-owned headings, filtering, pagination, selection, row actions and API state.
+`SystemCollectionLoading` delegates shared unresolved collection geometry to `PageSkeleton`. Clients, Users and Audit Logs retain product-owned headings, filtering, pagination, selection, row actions and API state.
 
-The PageSkeleton visual table is intentionally `aria-hidden`; assistive technology receives the named `role="status"` loading region rather than placeholder column semantics. Product tests should assert that contract instead of treating skeleton cells as real data-table headers.
+The PageSkeleton visual table is intentionally `aria-hidden`; assistive technology receives the named `role="status"` loading region rather than placeholder column semantics. Product tests assert that contract instead of treating skeleton cells as real data-table headers.
 
 ### System status — `layout="dashboard"`
 
-`SystemStatusLoading` now delegates statistic cards plus larger read-dominant health/configuration placeholders to the dashboard PageSkeleton layout. The management panel lead and route structure remain visible outside the loading region.
+`SystemStatusLoading` delegates statistic cards plus read-dominant health/configuration placeholders to the dashboard PageSkeleton layout. The management panel lead and route structure remain visible outside the loading region.
 
 ### Account profile
 
-The Showcase fixture proves that a generic profile/settings initial read can match `layout="form"`, but the real Gosso Admin profile flow should migrate only if a genuine unresolved initial-read state exists at the page boundary.
+A generic profile/settings unresolved read may use `layout="form"` when the real page boundary is genuinely unresolved. Save/mutation loading must never replace an already resolved form with a skeleton; control-level loading stays with the initiating action.
 
-Do not replace save/mutation loading with a form skeleton. Control-level save loading remains owned by the form/button.
+## Product-local state anatomy
 
-## Keep product-local
+These loaders remain product-owned unless independent evidence proves a reusable pattern:
 
-These loaders intentionally remain local unless independent future evidence changes their anatomy:
+- Site Settings: settings editor plus LoginPreview is a two-region product layout.
+- MFA enrollment: security-state machine plus QR/verification/recovery-code lifecycle.
+- Passkeys: FIDO2/WebAuthn credential collection and device interaction.
+- Sessions: current/other session semantics and destructive actions.
+- Authentication pages: protocol/security state remains product-owned.
 
-- Site Settings: settings editor plus login-page live preview is a product-specific two-region layout.
-- MFA enrollment: security-state machine and QR/verification lifecycle are domain-specific.
-- Passkeys: FIDO2 credential collection and actions are security-specific.
-- Sessions: session/device semantics and destructive actions are security-specific.
-- Authentication/callback pages: auth protocol state must not become page-data skeleton policy.
+OAuth callback is an explicit exception to “known structure → Skeleton”: token/code exchange is genuinely indeterminate processing, so a canonical `Spinner` is appropriate while the callback state machine is unresolved.
 
 ## Initial, refresh and mutation rules
 
-- Initial request with no usable data: use an admitted structural skeleton when the page anatomy matches.
-- Same-query refresh with usable data: keep the resolved data visible; mark the affected region busy when useful and let the initiating control expose loading/disabled state.
+- Initial request with no usable data: use an admitted structural skeleton when the future anatomy is known.
+- Same-query refresh with usable data: keep resolved data visible; mark the affected owner busy and let the initiating control expose loading/disabled state.
 - Query-changing transition: previous rows may no longer represent the active filter/page, so the product may replace the unresolved collection region with structural loading rather than display semantically stale rows.
-- Mutation: preserve unrelated page content and use the canonical control loading/disabled state plus product feedback.
-- Initial read failure: fail closed into the page's error/retry state; do not convert an unavailable resource into Empty.
+- Mutation: preserve unrelated page content and use canonical control loading/disabled state plus Gosso feedback.
+- Initial read failure: fail into the page's error/retry state; do not convert unavailable data into Empty.
+- Empty: only after a successful read proves there is no content.
 
-## Release gate
+## Release and parity gate
 
-For this migration, the gate has been satisfied by `@gouno/ui@0.4.0` and the registry-sync workflow. Future shared-loading changes must continue to:
+The current exact package baseline is `@gouno/ui@0.4.1`, generated by the registry-sync workflow with npm registry tarball/integrity verification. Future shared-loading changes must continue to:
 
 1. upgrade an exact `@gouno/ui` dependency and lockfile through the registry-sync path;
 2. keep specialized security/settings loaders local unless their ownership boundary genuinely changes;
 3. preserve accessible loading names and all error/empty/retry behavior;
-4. run frontend quality, exact registry checks, subpath build, security checks and browser acceptance where the workflow supports it;
-5. commit and push each narrow migration stage independently.
+4. run frontend quality, `/identity-admin` subpath build, normal security checks, browser acceptance and direct Showcase parity;
+5. keep fixture-only state controls out of real auth/business state machines.
