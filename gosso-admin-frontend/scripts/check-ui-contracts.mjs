@@ -8,11 +8,7 @@ const root = fileURLToPath(new URL("../src/", import.meta.url));
 const files = [];
 const retiredProductStyles = new Set(["index.css"]);
 const retiredVendoredAssets = ["public/ui-bootstrap.js", "public/gosso-admin.svg"];
-const allowedGounoEntrypoints = new Set([
-  "@gouno/ui/core",
-  "@gouno/ui/gouno",
-  "@gouno/ui/theme",
-]);
+const allowedGounoEntrypoints = new Set(["@gouno/ui/core", "@gouno/ui/gouno", "@gouno/ui/theme"]);
 const directRadixImport = /(?:\bfrom\s+|\bimport\s*\(\s*)["']@radix-ui\//;
 
 async function collect(directory) {
@@ -22,23 +18,13 @@ async function collect(directory) {
     else if ([".css", ".ts", ".tsx"].includes(extname(entry.name))) files.push(path);
   }
 }
-
 async function exists(path) {
-  try {
-    await access(path);
-    return true;
-  } catch {
-    return false;
-  }
+  try { await access(path); return true; } catch { return false; }
 }
-
 await collect(root);
 const failures = [];
-
 for (const relativePath of retiredVendoredAssets) {
-  if (await exists(join(projectRoot, relativePath))) {
-    failures.push(`${relativePath}: vendored Gouno UI runtime/brand asset must not be reintroduced; source it from the installed @gouno/ui release`);
-  }
+  if (await exists(join(projectRoot, relativePath))) failures.push(`${relativePath}: vendored Gouno UI runtime/brand asset must not be reintroduced; source it from the installed @gouno/ui release`);
 }
 
 function jsxTagName(node, sourceFile) {
@@ -46,11 +32,7 @@ function jsxTagName(node, sourceFile) {
   if (ts.isJsxSelfClosingElement(node)) return node.tagName.getText(sourceFile);
   return null;
 }
-
-function location(sourceFile, node) {
-  return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
-}
-
+function location(sourceFile, node) { return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1; }
 function buttonChildIcon(node, sourceFile) {
   let icon = null;
   function visitChild(child) {
@@ -58,20 +40,13 @@ function buttonChildIcon(node, sourceFile) {
     if (ts.isParenthesizedExpression(child)) return visitChild(child.expression);
     if (ts.isJsxFragment(child)) return child.children.forEach(visitChild);
     const tag = jsxTagName(child, sourceFile);
-    if (tag && (tag === "svg" || /^[A-Z]/.test(tag))) {
-      icon = child;
-      return;
-    }
+    if (tag && (tag === "svg" || /^[A-Z]/.test(tag))) { icon = child; return; }
     if (ts.isJsxExpression(child) && child.expression) return visitChild(child.expression);
-    if (ts.isConditionalExpression(child)) {
-      visitChild(child.whenTrue);
-      visitChild(child.whenFalse);
-    }
+    if (ts.isConditionalExpression(child)) { visitChild(child.whenTrue); visitChild(child.whenFalse); }
   }
   visitChild(node);
   return icon;
 }
-
 function staticClassName(attribute) {
   const initializer = attribute.initializer;
   if (!initializer) return "";
@@ -79,7 +54,6 @@ function staticClassName(attribute) {
   if (ts.isJsxExpression(initializer) && initializer.expression && (ts.isStringLiteral(initializer.expression) || ts.isNoSubstitutionTemplateLiteral(initializer.expression))) return initializer.expression.text;
   return "";
 }
-
 function staticJsxAttributeValue(node, attributeName) {
   const attributes = ts.isJsxElement(node) ? node.openingElement.attributes : node.attributes;
   for (const attribute of attributes.properties) {
@@ -91,7 +65,6 @@ function staticJsxAttributeValue(node, attributeName) {
   }
   return "";
 }
-
 function nearestJsxAncestor(node, sourceFile, wanted) {
   let current = node.parent;
   while (current) {
@@ -100,16 +73,15 @@ function nearestJsxAncestor(node, sourceFile, wanted) {
   }
   return null;
 }
-
+function isSupportedGounoImport(specifier) {
+  return allowedGounoEntrypoints.has(specifier) || specifier.startsWith("@gouno/ui/brand-icons/");
+}
 function checkImports(name, sourceFile) {
   for (const statement of sourceFile.statements) {
     if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue;
     const specifier = statement.moduleSpecifier.text;
-    if (specifier === "@gouno/ui") {
-      failures.push(`${name}:${location(sourceFile, statement)} @gouno/ui package-root imports are compatibility-only; use an owned subpath`);
-    } else if (specifier.startsWith("@gouno/ui/") && !allowedGounoEntrypoints.has(specifier)) {
-      failures.push(`${name}:${location(sourceFile, statement)} unsupported @gouno/ui entrypoint ${specifier}; use core, gouno, or theme`);
-    }
+    if (specifier === "@gouno/ui") failures.push(`${name}:${location(sourceFile, statement)} @gouno/ui package-root imports are compatibility-only; use an owned subpath`);
+    else if (specifier.startsWith("@gouno/ui/") && !isSupportedGounoImport(specifier)) failures.push(`${name}:${location(sourceFile, statement)} unsupported @gouno/ui entrypoint ${specifier}; use an explicitly supported package subpath`);
   }
 }
 
@@ -122,7 +94,6 @@ function checkTsxContracts(name, source) {
   const siteSettings = name === "pages/system-management/SiteSettingsTab.tsx";
   let pageHeaders = 0;
   let tabs = 0;
-
   checkImports(name, sourceFile);
 
   function visit(node) {
@@ -130,33 +101,25 @@ function checkTsxContracts(name, source) {
       const tag = jsxTagName(node, sourceFile);
       if (tag === "PageHeader") pageHeaders += 1;
       if (tag === "Tabs") tabs += 1;
-
-      if (standaloneSystemManagement && tag === "Tabs") {
-        failures.push(`${name}:${location(sourceFile, node)} system management domains are standalone Sidebar routes and must not add a route-family Tabs layer`);
-      }
+      if (standaloneSystemManagement && tag === "Tabs") failures.push(`${name}:${location(sourceFile, node)} system management domains are standalone Sidebar routes and must not add a route-family Tabs layer`);
       if (adminLayout && tag === "NavLink") {
         const target = staticJsxAttributeValue(node, "to");
         if (/^\/account-settings\/.+/.test(target)) failures.push(`${name}:${location(sourceFile, node)} account settings Tabs are page-local navigation; Sidebar must link only to /account-settings`);
       }
-      if (["button", "select", "textarea"].includes(tag)) {
-        failures.push(`${name}:${location(sourceFile, node)} native ${tag} must use the canonical @gouno/ui primitive`);
-      }
+      if (["button", "select", "textarea"].includes(tag)) failures.push(`${name}:${location(sourceFile, node)} native ${tag} must use the canonical @gouno/ui primitive`);
       if (tag === "input") {
         const type = staticJsxAttributeValue(node, "type");
         const className = staticJsxAttributeValue(node, "className");
         const intentionallyHiddenFileInput = type === "file" && /(?:^|\s)(?:hidden|sr-only)(?:\s|$)/.test(className);
         if (!intentionallyHiddenFileInput) failures.push(`${name}:${location(sourceFile, node)} visible native input must use the shared Input/Checkbox/Radio primitive`);
       }
-      if (siteSettings && tag === "LoginPreview" && nearestJsxAncestor(node, sourceFile, "form")) {
-        failures.push(`${name}:${location(sourceFile, node)} LoginPreview must remain a sibling of the real settings form; preview controls cannot participate in validation or submit`);
-      }
+      if (siteSettings && tag === "LoginPreview" && nearestJsxAncestor(node, sourceFile, "form")) failures.push(`${name}:${location(sourceFile, node)} LoginPreview must remain a sibling of the real settings form; preview controls cannot participate in validation or submit`);
       if (ts.isJsxElement(node) && ["Button", "ButtonLink", "ChoiceButton"].includes(tag)) {
         for (const child of node.children) {
           const icon = buttonChildIcon(child, sourceFile);
           if (icon) failures.push(`${name}:${location(sourceFile, icon)} ${tag} icons must use the icon prop, not children`);
         }
       }
-
       const attributes = ts.isJsxElement(node) ? node.openingElement.attributes : node.attributes;
       for (const attribute of attributes.properties) {
         if (!ts.isJsxAttribute(attribute) || attribute.name.text !== "className") continue;
@@ -166,14 +129,10 @@ function checkTsxContracts(name, source) {
         if (/(^|\s)fixed(?:\s|$)/.test(value)) failures.push(`${name}:${location(sourceFile, attribute)} raw fixed overlays are product-owned recreation; use Modal/Drawer/Message or another canonical overlay primitive`);
       }
     }
-
-    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && ["alert", "confirm", "prompt"].includes(node.expression.text)) {
-      failures.push(`${name}:${location(sourceFile, node)} browser ${node.expression.text}() is forbidden; use canonical feedback or confirmation primitives`);
-    }
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && ["alert", "confirm", "prompt"].includes(node.expression.text)) failures.push(`${name}:${location(sourceFile, node)} browser ${node.expression.text}() is forbidden; use canonical feedback or confirmation primitives`);
     if (ts.isIdentifier(node) && node.text === "buttonClassName") failures.push(`${name}:${location(sourceFile, node)} buttonClassName is internal to the shared Button primitive`);
     ts.forEachChild(node, visit);
   }
-
   visit(sourceFile);
   if (accountSettings && (pageHeaders !== 1 || tabs !== 1)) failures.push(`${name}: Account Settings canonical grammar requires exactly one PageHeader followed by one page-local Tabs owner`);
 }
