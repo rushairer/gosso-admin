@@ -9,11 +9,11 @@ const viewports = [
 ];
 const themes = ["light", "dark"];
 const routes = [
-  { name: "login", path: "/login", selector: '[data-slot="login-surface"]' },
-  { name: "forgot-password", path: "/forgot-password", selector: "h1" },
-  { name: "reset-password", path: "/reset-password#token=fixture-reset-token", selector: "h1" },
-  { name: "callback", path: "/callback", selector: "h1" },
-  { name: "not-found", path: "/this-route-does-not-exist", selector: "h1" },
+  { name: "login", path: "/login", selector: '[data-slot="login-surface"]', appShell: false },
+  { name: "forgot-password", path: "/forgot-password", selector: "h1", appShell: false },
+  { name: "reset-password", path: "/reset-password#token=fixture-reset-token", selector: "h1", appShell: false },
+  { name: "callback", path: "/callback", selector: "h1", appShell: false },
+  { name: "not-found", path: "/this-route-does-not-exist", selector: "h1", appShell: true },
 ];
 
 function collectRuntimeFailures(page) {
@@ -38,10 +38,12 @@ for (const viewport of viewports) {
         await expect(page.locator(routeCase.selector).first()).toBeVisible();
         await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
         await expect(page.locator("html")).toHaveAttribute("data-brand", "gosso-admin");
-        await expect(page.locator('[data-slot="app-shell"]')).toHaveCount(0);
+        await expect(page.locator('[data-slot="app-shell"]')).toHaveCount(routeCase.appShell ? 1 : 0);
         await expect(page.locator('[data-slot="page-loader"]')).toHaveCount(0);
 
-        const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+        const horizontalOverflow = await page.evaluate(
+          () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1
+        );
         expect(horizontalOverflow).toBe(false);
         expect(unknown, `unknown mocked API requests on ${routeCase.path}`).toEqual([]);
         expect(runtimeFailures, `runtime failures on ${routeCase.path}`).toEqual([]);
@@ -55,13 +57,45 @@ for (const viewport of viewports) {
   }
 }
 
-test("login validation feedback remains on the auth surface", async ({ page }) => {
+test("login required fields stay on the auth surface without submitting", async ({ page }) => {
   await setTheme(page, "light");
   const unknown = await installApiFixtures(page);
   await page.goto("/login");
+
   await page.getByRole("button", { name: /login|sign in|登录/i }).first().click();
+
+  await expect(page.locator('input[type="text"]').first()).toHaveJSProperty("validity.valid", false);
+  await expect(page.locator('input[type="password"]').first()).toHaveJSProperty("validity.valid", false);
+  await expect(page.locator('[data-slot="login-surface"]')).toBeVisible();
+  expect(unknown).toEqual([]);
+});
+
+test("login backend error remains persistent on the auth surface", async ({ page }) => {
+  await setTheme(page, "light");
+  const unknown = await installApiFixtures(page, { failLoginCount: 1 });
+  await page.goto("/login");
+
+  await page.locator('input[type="text"]').first().fill("admin");
+  await page.locator('input[type="password"]').first().fill("wrong-password");
+  await page.getByRole("button", { name: /login|sign in|登录/i }).first().click();
+
   await expect(page.getByRole("alert")).toBeVisible();
   await expect(page.locator('[data-slot="login-surface"]')).toBeVisible();
+  expect(unknown).toEqual([]);
+});
+
+test("login MFA challenge stays inside the canonical auth surface", async ({ page }) => {
+  await setTheme(page, "light");
+  const unknown = await installApiFixtures(page, { loginRequiresMfa: true });
+  await page.goto("/login");
+
+  await page.locator('input[type="text"]').first().fill("admin");
+  await page.locator('input[type="password"]').first().fill("correct-password");
+  await page.getByRole("button", { name: /login|sign in|登录/i }).first().click();
+
+  await expect(page.locator('[data-slot="login-surface"]')).toBeVisible();
+  await expect(page.locator('input[inputmode="numeric"]')).toBeVisible();
+  await expect(page.getByRole("alert")).toBeVisible();
   expect(unknown).toEqual([]);
 });
 
