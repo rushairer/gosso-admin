@@ -119,7 +119,8 @@ test("forgot password keeps native validation ownership on the auth surface", as
   const email = page.locator('input[type="email"]');
   await expect(email).toHaveJSProperty("validity.valid", false);
   await expect(page.locator('button[type="submit"]')).toBeDisabled();
-  await expect(page.locator('[data-slot="auth-page-surface"]')).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(page.locator('[data-slot="app-shell"]')).toHaveCount(0);
   expect(unknown).toEqual([]);
 });
 
