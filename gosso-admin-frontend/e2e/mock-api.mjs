@@ -51,6 +51,7 @@ export async function installApiFixtures(page, options = {}) {
   let remainingLoginFailures = options.failLoginCount || 0;
   let remainingPasswordChangeFailures = options.failPasswordChangeCount || 0;
   let remainingPasskeyRegisterFailures = options.failPasskeyRegisterCount || 0;
+  let remainingPasskeyLoginFailures = options.failPasskeyLoginCount || 0;
 
   await page.route("**/*", async (route) => {
     const request = route.request();
@@ -63,6 +64,13 @@ export async function installApiFixtures(page, options = {}) {
       return;
     }
 
+    if (path === "/oauth2/token" && method === "POST" && options.failTokenExchange) {
+      if (options.tokenExchangeDelayMs) {
+        await new Promise((resolve) => setTimeout(resolve, options.tokenExchangeDelayMs));
+      }
+      return json(route, { error: "browser injected token exchange failure" }, 400);
+    }
+
     if (path === "/api/v1/auth/login" && method === "POST") {
       if (remainingLoginFailures > 0) {
         remainingLoginFailures -= 1;
@@ -71,6 +79,11 @@ export async function installApiFixtures(page, options = {}) {
       if (options.loginRequiresMfa) {
         return enveloped(route, { requires_mfa: true, mfa_token: "fixture-mfa-token" });
       }
+    }
+
+    if (path === "/api/v1/passkey/login/begin" && method === "POST" && remainingPasskeyLoginFailures > 0) {
+      remainingPasskeyLoginFailures -= 1;
+      return json(route, { message: "browser injected passkey login failure" }, 500);
     }
 
     if (path === "/api/v1/auth/password/change" && method === "POST" && remainingPasswordChangeFailures > 0) {
