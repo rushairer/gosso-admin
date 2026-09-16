@@ -21,7 +21,8 @@ import { SessionsLoading } from './loading';
 import { Section, StatusMessage } from './shared';
 
 export default function SessionsPanel() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const chinese = i18n.resolvedLanguage?.startsWith('zh') ?? false;
   const { sessions, currentSession, loading, error, reload, revoke } = useSessions();
   const [success, setSuccess] = useState<string | null>(null);
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
@@ -58,7 +59,7 @@ export default function SessionsPanel() {
               action={
                 fatalLoadError ? (
                   <Button size="small" loading={loading} onClick={() => void reload().catch(() => {})}>
-                    {t('common.retry')}
+                    {chinese ? '重新载入' : 'Reload'}
                   </Button>
                 ) : undefined
               }
