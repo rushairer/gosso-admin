@@ -38,27 +38,30 @@ export default function PasswordPanel() {
   };
 
   const isDirty = Boolean(currentPassword || newPassword || confirmPassword);
-  const currentPasswordVisibilityLabel = showCurrentPwd
-    ? chinese
-      ? '隐藏当前密码'
-      : 'Hide current password'
-    : chinese
-      ? '显示当前密码'
-      : 'Show current password';
-  const newPasswordVisibilityLabel = showNewPwd
-    ? chinese
-      ? '隐藏新密码'
-      : 'Hide new password'
-    : chinese
-      ? '显示新密码'
-      : 'Show new password';
+  let currentPasswordVisibilityLabel = showCurrentPwd
+    ? 'Hide current password'
+    : 'Show current password';
+  let newPasswordVisibilityLabel = showNewPwd
+    ? 'Hide new password'
+    : 'Show new password';
+  let changeStatus = 'No pending changes.';
+
+  if (chinese) {
+    currentPasswordVisibilityLabel = showCurrentPwd ? '隐藏当前密码' : '显示当前密码';
+    newPasswordVisibilityLabel = showNewPwd ? '隐藏新密码' : '显示新密码';
+    changeStatus = '当前没有待提交的修改。';
+  }
+  if (isDirty) changeStatus = t('site.unsavedChanges');
 
   return (
     <Section description={t('password.description')}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <div className="flex max-w-xl flex-col gap-5">
           {validationError || profileError ? (
-            <StatusMessage type="error" message={validationError || profileError} />
+            <StatusMessage
+              type="error"
+              message={validationError || profileError}
+            />
           ) : null}
           {success ? <StatusMessage message={success} /> : null}
 
@@ -82,7 +85,11 @@ export default function PasswordPanel() {
             />
           </FormField>
 
-          <FormField label={t('password.newPasswordLabel')} required hint={t('password.newPasswordPlaceholder')}>
+          <FormField
+            label={t('password.newPasswordLabel')}
+            required
+            hint={t('password.newPasswordPlaceholder')}
+          >
             <Input
               type={showNewPwd ? 'text' : 'password'}
               required
@@ -118,11 +125,7 @@ export default function PasswordPanel() {
 
         <div className="flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
           <Text size="sm" tone="muted" aria-live="polite">
-            {isDirty
-              ? t('site.unsavedChanges')
-              : chinese
-                ? '当前没有待提交的修改。'
-                : 'No pending changes.'}
+            {changeStatus}
           </Text>
           <Button
             variant="solid"
@@ -132,7 +135,9 @@ export default function PasswordPanel() {
             disabled={!currentPassword || !newPassword || !confirmPassword}
             icon={<Lock />}
           >
-            {loading ? t('password.changePasswordLoading') : t('password.changePasswordButton')}
+            {loading
+              ? t('password.changePasswordLoading')
+              : t('password.changePasswordButton')}
           </Button>
         </div>
       </form>
