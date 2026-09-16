@@ -4,8 +4,9 @@ import { ArrowLeft, Home } from 'lucide-react';
 import { Button, Card, Result, Text } from '@gouno/ui/core';
 
 export default function NotFound() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const chinese = i18n.resolvedLanguage?.startsWith('zh') ?? false;
 
   return (
     <div className="flex min-h-[520px] items-center justify-center py-8">
@@ -18,7 +19,7 @@ export default function NotFound() {
           extra={
             <div className="flex flex-wrap justify-center gap-2">
               <Button variant="solid" color="primary" icon={<Home />} onClick={() => navigate('/')}>
-                {t('notFound.goHome')}
+                {chinese ? '返回概览' : 'Back to overview'}
               </Button>
               <Button icon={<ArrowLeft />} onClick={() => navigate(-1)}>
                 {t('notFound.goBack')}
