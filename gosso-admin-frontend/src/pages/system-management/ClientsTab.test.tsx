@@ -78,7 +78,7 @@ describe('ClientsTab', () => {
     expect(apiFetch).toHaveBeenCalledWith('/api/v1/oauth2/clients');
   });
 
-  it('shows only the load error before a successful retry', async () => {
+  it('shows only the load error before a successful reload', async () => {
     vi.mocked(apiFetch)
       .mockResolvedValueOnce({ ok: false, json: async () => ({ message: 'Client API unavailable' }) } as Response)
       .mockResolvedValueOnce({ ok: true, json: async () => ({ data: [] }) } as Response);
@@ -89,10 +89,10 @@ describe('ClientsTab', () => {
       </MessageProvider>
     );
 
-    const retry = await screen.findByRole('button', { name: /retry|重试/i });
+    const reload = await screen.findByRole('button', { name: /reload|重新载入/i });
     expect(screen.queryByText(/No Clients Registered|暂无已注册的客户端/i)).not.toBeInTheDocument();
 
-    await userEvent.click(retry);
+    await userEvent.click(reload);
 
     await waitFor(() => {
       expect(apiFetch).toHaveBeenCalledTimes(2);
