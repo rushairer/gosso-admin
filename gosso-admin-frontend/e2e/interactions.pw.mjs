@@ -27,8 +27,10 @@ test("desktop AppShell follows the canonical header, navigation, and account con
   await expect(shell).toBeVisible();
   await expect(shell.locator("header").getByRole("link", { name: "GOSSO" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "主导航" })).toBeVisible();
-  await expect(page.getByText("Admin User", { exact: true })).toBeVisible();
-  await expect(page.getByText("管理员", { exact: true })).toBeVisible();
+  const sidebar = shell.locator("aside");
+  await expect(sidebar.getByText("Aben Admin", { exact: true })).toBeVisible();
+  await expect(sidebar.getByText("管理员", { exact: true })).toBeVisible();
+  await expect(sidebar.getByRole("button", { name: "退出登录" })).toBeVisible();
   expect(unknown).toEqual([]);
   expect(problems).toEqual([]);
 });
