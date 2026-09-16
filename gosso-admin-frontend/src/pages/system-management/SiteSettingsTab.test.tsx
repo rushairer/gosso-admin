@@ -44,7 +44,7 @@ describe('SiteSettingsTab', () => {
     expect(screen.queryByRole('button', { name: /save settings/i })).not.toBeInTheDocument();
     expect(screen.queryByText('1440 × 900')).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: /retry/i }));
+    await userEvent.click(screen.getByRole('button', { name: /reload|重新载入/i }));
     expect(await screen.findByDisplayValue('Acme Identity')).toBeInTheDocument();
   });
 
