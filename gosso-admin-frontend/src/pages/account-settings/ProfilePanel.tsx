@@ -7,9 +7,12 @@ import { EmailChangeModal } from './EmailChangeModal';
 import { Section, SettingRow, StatusMessage } from './shared';
 
 export default function ProfilePanel() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const profile = useUserProfile();
   const { loading, error: profileError, updateDisplayName } = useProfileManager();
+  const chinese = i18n.resolvedLanguage?.startsWith('zh') ?? false;
+  const saveDisplayNameLabel = chinese ? '保存显示名称' : 'Save display name';
+  const cancelDisplayNameLabel = chinese ? '取消编辑显示名称' : 'Cancel editing display name';
 
   const [validationError, setValidationError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -84,7 +87,7 @@ export default function ProfilePanel() {
                   autoFocus
                 />
                 <IconButton
-                  label="Save display name"
+                  label={saveDisplayNameLabel}
                   icon={<Check />}
                   variant="solid"
                   color="primary"
@@ -92,7 +95,7 @@ export default function ProfilePanel() {
                   disabled={loading}
                 />
                 <IconButton
-                  label="Cancel"
+                  label={cancelDisplayNameLabel}
                   icon={<XIcon />}
                   type="button"
                   onClick={() => setIsEditingName(false)}
