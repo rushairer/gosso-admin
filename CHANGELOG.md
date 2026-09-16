@@ -6,7 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.7.25] - 2026-09-16
+
 ### Changed
+- Upgrade the canonical UI dependency to `@gouno/ui` 0.4.2.
+
 - Standardize Modal structure and design system alignment: add `description` prop to `Modal`, move modal action buttons out of form bodies into unified sticky `footer` prop across all modals (Client Editor, Email Change, MFA Disable, Passkeys Registration, User Creation, Password Reset, User Consents), and maintain stable close button geometry anchored to the title bar regardless of subtitle presence.
 
 ### Fixed
