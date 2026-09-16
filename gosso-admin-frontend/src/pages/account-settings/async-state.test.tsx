@@ -87,9 +87,7 @@ describe('account settings async state semantics', () => {
     const view = renderPanel(<MFAPanel />);
 
     expect(screen.getByText('mfa.mfaNotEnrolledDescription')).toBeInTheDocument();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('mfa.loadingMfa')).not.toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.queryByLabelText('mfa.loadingMfa')).not.toBeInTheDocument());
 
     hookState.mfa.loading = true;
     view.rerender(
@@ -118,9 +116,7 @@ describe('account settings async state semantics', () => {
     const view = renderPanel(<PasskeysPanel />);
 
     expect(screen.getByText('passkeys.noPasskeysTitle')).toBeInTheDocument();
-    await waitFor(() =>
-      expect(screen.queryByLabelText('passkeys.loadingPasskeys')).not.toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.queryByLabelText('passkeys.loadingPasskeys')).not.toBeInTheDocument());
 
     hookState.passkeys.loading = true;
     view.rerender(
