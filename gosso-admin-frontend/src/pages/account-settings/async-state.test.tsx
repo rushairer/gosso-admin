@@ -18,7 +18,10 @@ vi.mock('@gosso/client/react', () => ({
 }));
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: { resolvedLanguage: 'en' },
+  }),
 }));
 
 vi.mock('../../components/auth/SudoContext', () => ({
@@ -74,7 +77,7 @@ describe('account settings async state semantics', () => {
     renderPanel(<MFAPanel />);
 
     expect(screen.getByText('MFA API unavailable')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'common.retry' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reload' })).toBeInTheDocument();
     expect(screen.queryByText('mfa.statusDisabled')).not.toBeInTheDocument();
     expect(screen.queryByText('mfa.mfaNotEnrolledDescription')).not.toBeInTheDocument();
   });
