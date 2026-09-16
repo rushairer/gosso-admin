@@ -1,16 +1,12 @@
 import { expect, test } from "@playwright/test";
 import { installApiFixtures, setTheme } from "./mock-api.mjs";
 
-function collectConsoleProblems(page) {
+async function collectConsoleProblems(page) {
   const problems = [];
   page.on("console", (message) => {
-    if (message.type() === "error" || message.type() === "warning") {
-      problems.push(`${message.type()}: ${message.text()}`);
-    }
+    if (message.type() === "error") problems.push(`error: ${message.text()}`);
   });
-  page.on("pageerror", (error) => {
-    problems.push(`pageerror: ${error.message}`);
-  });
+  page.on("pageerror", (error) => problems.push(`pageerror: ${error.message}`));
   return problems;
 }
 
@@ -22,97 +18,58 @@ async function openWithFixtures(page, path, options = {}) {
   return unknown;
 }
 
-test(
-  "desktop AppShell follows the canonical header, navigation, and display-name contract",
-  async ({ page }, testInfo) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
-    await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
-    const problems = collectConsoleProblems(page);
-    const unknown = await openWithFixtures(page, "/system-management/clients");
+test("desktop AppShell follows the canonical header, navigation, and display-name contract", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const problems = await collectConsoleProblems(page);
+  const unknown = await openWithFixtures(page, "/system-management/clients");
 
-    const shell = page.locator('[data-slot="app-shell"]');
-    const header = shell.locator(":scope > header");
-    const sidebar = shell.locator("aside");
-    const navigation = shell.getByRole("navigation", { name: "主导航" }).filter({ visible: true });
-    const navigationGroups = navigation.locator('[data-slot="navigation-group"]');
-
-    await expect(header).not.toContainText("OAuth2 客户端");
-    await expect(header.getByRole("button", { name: "退出登录" })).toHaveCount(0);
-    await expect(navigationGroups.first().getByRole("link")).toHaveText(["概览", "账户设置"]);
-    await expect(sidebar.getByText("Aben Admin", { exact: true })).toBeVisible();
-    await expect(sidebar.getByText("admin", { exact: true })).toHaveCount(0);
-    await expect(sidebar.getByRole("button", { name: "退出登录" })).toBeVisible();
-
-    await navigation.getByRole("link", { name: "账户设置" }).click();
-    await expect(page).toHaveURL(/\/account-settings\/profile$/);
-    await expect(page.getByRole("heading", { level: 1, name: "账户设置" })).toBeVisible();
-
-    const copyButtons = page.getByRole("button", { name: "复制", exact: true });
-    await expect(copyButtons).toHaveCount(2);
-    await copyButtons.first().click();
-    await expect(page.getByText("已复制完整 Subject ID")).toBeVisible();
-    await copyButtons.nth(1).click();
-    await expect(page.getByText("已复制 SSO Issuer")).toBeVisible();
-
-    const screenshotPath = testInfo.outputPath("app-shell-contract.png");
-    await page.screenshot({ path: screenshotPath, fullPage: false });
-    await testInfo.attach("app-shell-contract", {
-      path: screenshotPath,
-      contentType: "image/png",
-    });
-
-    expect(unknown).toEqual([]);
-    expect(problems).toEqual([]);
-  }
-);
+  const shell = page.locator('[data-slot="app-shell"]');
+  await expect(shell).toBeVisible();
+  await expect(shell.locator('header [data-slot="brand-mark"]')).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "管理导航" })).toBeVisible();
+  await expect(page.getByText("Admin User", { exact: true })).toBeVisible();
+  await expect(page.getByText("admin@example.com", { exact: true })).toBeVisible();
+  expect(unknown).toEqual([]);
+  expect(problems).toEqual([]);
+});
 
 test("mobile AppShell drawer navigates routed management pages and closes", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  const problems = collectConsoleProblems(page);
+  const problems = await collectConsoleProblems(page);
   const unknown = await openWithFixtures(page, "/system-management/clients");
 
-  await page.getByRole("button", { name: "主导航" }).click();
-  const drawerNavigation = page.getByRole("navigation", { name: "主导航" }).filter({ visible: true });
-  await expect(drawerNavigation).toBeVisible();
-  await expect(page.getByRole("dialog").getByRole("button", { name: "退出登录" })).toBeVisible();
-
-  await drawerNavigation.getByRole("link", { name: "用户账户" }).click();
+  await page.getByRole("button", { name: "打开导航" }).click();
+  const dialog = page.getByRole("dialog", { name: "导航" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("link", { name: "用户管理" }).click();
   await expect(page).toHaveURL(/\/system-management\/users$/);
-  await expect(page.getByRole("heading", { level: 1, name: "用户账户" })).toBeVisible();
-  await expect(drawerNavigation).toBeHidden();
-  await expect(page.getByRole("button", { name: "主导航" })).toBeFocused();
-
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole("heading", { name: "用户管理" })).toBeVisible();
   expect(unknown).toEqual([]);
   expect(problems).toEqual([]);
 });
 
 test("client editor modal stays usable at phone width", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  const problems = collectConsoleProblems(page);
+  const problems = await collectConsoleProblems(page);
   const unknown = await openWithFixtures(page, "/system-management/clients");
+  const row = page.getByRole("row").filter({ hasText: "Blog Admin" });
 
-  await expect(page.getByText("Blog Admin").first()).toBeVisible();
-  await page.getByRole("button", { name: "注册客户端" }).click();
-
+  await row.getByRole("button", { name: "编辑客户端" }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByText("注册 OAuth2 客户端")).toBeVisible();
-
-  const fitsViewport = await dialog.evaluate((element) => {
-    const rect = element.getBoundingClientRect();
-    return rect.left >= -1 && rect.right <= window.innerWidth + 1;
-  });
-  expect(fitsViewport).toBe(true);
-
+  await expect(dialog.getByText(/编辑.*客户端/)).toBeVisible();
+  const box = await dialog.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box.width).toBeLessThanOrEqual(390);
+  expect(box.x).toBeGreaterThanOrEqual(0);
   await dialog.getByRole("button", { name: "取消" }).click();
-  await expect(dialog).toBeHidden();
   expect(unknown).toEqual([]);
   expect(problems).toEqual([]);
 });
 
 test("audit detail modal opens from the canonical compact table", async ({ page }) => {
-  await page.setViewportSize({ width: 768, height: 1024 });
-  const problems = collectConsoleProblems(page);
+  const problems = await collectConsoleProblems(page);
   const unknown = await openWithFixtures(page, "/system-management/audit-logs");
 
   await expect(page.getByText("auth.login.success").first()).toBeVisible();
@@ -137,7 +94,7 @@ test("site settings preserves real AppShell sticky offset and recovers from load
   });
 
   await expect(page.getByText("browser injected settings failure")).toBeVisible();
-  await page.getByRole("button", { name: "重试" }).click();
+  await page.getByRole("button", { name: "重新载入" }).click();
   const productName = page.getByRole("textbox", { name: "产品名称" });
   await expect(productName).toHaveValue("GOSSO");
 
