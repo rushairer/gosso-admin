@@ -16,6 +16,7 @@ export interface Account {
 }
 
 export interface OAuth2Client {
+  account_id: string;
   client_id: string;
   name: string;
   description: string;

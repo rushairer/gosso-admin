@@ -18,6 +18,7 @@ export const publicBranding = {
 
 export const clients = [
   {
+    account_id: "account-admin-001",
     client_id: "blog-admin",
     name: "Blog Admin",
     description: "Gouno Blog administration console",
@@ -29,6 +30,7 @@ export const clients = [
     allowed_resources: ["https://blog.example.com/api"],
   },
   {
+    account_id: "account-user-002",
     client_id: "developer-spa",
     name: "Developer SPA",
     description: "Public PKCE client",

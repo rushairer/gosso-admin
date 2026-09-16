@@ -3,7 +3,7 @@ import { installApiFixtures, setTheme } from "./mock-api.mjs";
 
 const routeCases = [
   { path: "/", endpoint: "/oidc/userinfo" },
-  { path: "/system-management/clients", endpoint: "/api/v1/oauth2/clients" },
+  { path: "/system-management/clients", endpoint: "/api/v1/admin/oauth2/clients" },
   { path: "/system-management/users", endpoint: "/api/v1/admin/accounts" },
   { path: "/system-management/audit-logs", endpoint: "/api/v1/admin/audit-logs" },
   { path: "/system-management/site-settings", endpoint: "/api/v1/admin/site-settings" },

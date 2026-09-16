@@ -108,7 +108,7 @@ export async function installApiFixtures(page, options = {}) {
 
     if (path === "/oidc/userinfo") return json(route, profile);
     if (path === "/api/v1/public/site-branding") return enveloped(route, publicBranding);
-    if (path === "/api/v1/oauth2/clients") return enveloped(route, clients);
+    if (path === "/api/v1/admin/oauth2/clients") return enveloped(route, clients);
     if (path === "/api/v1/admin/accounts") {
       return enveloped(route, { items: accounts, total: accounts.length });
     }

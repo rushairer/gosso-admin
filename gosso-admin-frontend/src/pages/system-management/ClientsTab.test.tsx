@@ -75,7 +75,7 @@ describe('ClientsTab', () => {
     );
 
     expect(await screen.findByText(/No Clients Registered|暂无已注册的客户端/i)).toBeInTheDocument();
-    expect(apiFetch).toHaveBeenCalledWith('/api/v1/oauth2/clients');
+    expect(apiFetch).toHaveBeenCalledWith('/api/v1/admin/oauth2/clients');
   });
 
   it('shows only the load error before a successful reload', async () => {

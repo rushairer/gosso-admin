@@ -113,9 +113,9 @@ export default function ClientsTab() {
         setShowClientModal(false);
         if (clientForm.is_confidential && result.client_secret) {
           setNewClientDetails({
-            client_id: result.client.client_id,
+            client_id: result.client_id,
             client_secret: result.client_secret,
-            name: result.client.name,
+            name: result.name,
           });
           setShowSecretModal(true);
         } else {
@@ -267,6 +267,11 @@ export default function ClientsTab() {
                     >
                       {client.client_id}
                     </code>
+                    {client.account_id ? (
+                      <Text size="xs" tone="muted" className="mt-1 block" title={client.account_id}>
+                        {t('clients.owner')}: {client.account_id}
+                      </Text>
+                    ) : null}
                     {client.description ? (
                       <Text size="xs" tone="muted" className="mt-1">
                         {client.description}

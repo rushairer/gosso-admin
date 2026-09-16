@@ -82,11 +82,11 @@ if [ -n "$SMOKE_ACCESS_TOKEN" ] || [ -n "$ADMIN_PASSWORD" ]; then
     if [ "$SMOKE_MUTATE" = "true" ]; then
       suffix="$(date +%s)"
       client_payload="$(printf '{"name":"Smoke Test Client %s","description":"Temporary P0 smoke client","redirect_uris":["http://localhost:8080/callback"],"grant_types":["authorization_code"],"scopes":["openid","profile","email"],"is_confidential":false}' "$suffix")"
-      client_status="$(curl -ksS -o /tmp/gosso-smoke-client.json -w '%{http_code}' -H "Authorization: Bearer $token" -H 'Content-Type: application/json' -d "$client_payload" "$BASE_URL/api/v1/oauth2/clients" || true)"
+      client_status="$(curl -ksS -o /tmp/gosso-smoke-client.json -w '%{http_code}' -H "Authorization: Bearer $token" -H 'Content-Type: application/json' -d "$client_payload" "$BASE_URL/api/v1/admin/oauth2/clients" || true)"
       if [ "$client_status" = "201" ] || [ "$client_status" = "200" ]; then
         client_id="$(json_value data.client_id < /tmp/gosso-smoke-client.json)"
         printf '[ok] OAuth2 client create\n'
-        delete_client_status="$(curl -ksS -o /tmp/gosso-smoke-client-delete.json -w '%{http_code}' -X DELETE -H "Authorization: Bearer $token" "$BASE_URL/api/v1/oauth2/clients/$client_id" || true)"
+        delete_client_status="$(curl -ksS -o /tmp/gosso-smoke-client-delete.json -w '%{http_code}' -X DELETE -H "Authorization: Bearer $token" "$BASE_URL/api/v1/admin/oauth2/clients/$client_id" || true)"
         if [ "$delete_client_status" = "200" ]; then
           printf '[ok] OAuth2 client cleanup\n'
         else
