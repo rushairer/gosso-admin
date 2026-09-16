@@ -107,7 +107,7 @@ describe('account settings async state semantics', () => {
     renderPanel(<PasskeysPanel />);
 
     expect(screen.getByText('Passkey API unavailable')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'common.retry' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reload' })).toBeInTheDocument();
     expect(screen.queryByText('passkeys.noPasskeysTitle')).not.toBeInTheDocument();
   });
 
@@ -136,7 +136,7 @@ describe('account settings async state semantics', () => {
     renderPanel(<SessionsPanel />);
 
     expect(screen.getByText('Session API unavailable')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'common.retry' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reload' })).toBeInTheDocument();
     expect(screen.queryByText('sessions.noSessionsTitle')).not.toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
