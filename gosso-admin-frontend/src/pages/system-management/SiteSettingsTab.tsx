@@ -24,7 +24,8 @@ import { SiteSettingsLoading } from './loading';
 const MAX_LOGIN_BACKGROUND_SOURCE_LENGTH = 8 * 1024 * 1024;
 
 export default function SiteSettingsTab() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const chinese = i18n.resolvedLanguage?.startsWith('zh') ?? false;
   const message = useMessage();
   const { requireSudo } = useSudo();
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
@@ -95,7 +96,7 @@ export default function SiteSettingsTab() {
               title={error}
               action={
                 <Button size="small" onClick={() => void load()}>
-                  {t('common.retry')}
+                  {chinese ? '重新载入' : 'Reload'}
                 </Button>
               }
             />
@@ -168,7 +169,11 @@ export default function SiteSettingsTab() {
                   </CardContent>
                   <CardFooter className="sticky bottom-0 z-10 justify-between border-t bg-card/95 px-6 py-4 backdrop-blur">
                     <Text size="sm" tone="muted" aria-live="polite">
-                      {dirty ? t('site.unsavedChanges') : ''}
+                      {dirty
+                        ? t('site.unsavedChanges')
+                        : chinese
+                          ? '所有修改已保存'
+                          : 'All changes saved'}
                     </Text>
                     <Button
                       type="submit"
