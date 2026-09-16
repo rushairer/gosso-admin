@@ -56,7 +56,8 @@ type PendingAction =
   | null;
 
 export default function UsersTab() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const chinese = i18n.resolvedLanguage?.startsWith('zh') ?? false;
   const message = useMessage();
   const { requireSudo } = useSudo();
   const {
@@ -272,6 +273,34 @@ export default function UsersTab() {
             })
     : '';
 
+  const actionConfirmLabel = pendingAction
+    ? pendingAction.type === 'status'
+      ? pendingAction.account.status === 'active'
+        ? chinese
+          ? '确认停用'
+          : 'Confirm suspension'
+        : chinese
+          ? '确认启用'
+          : 'Confirm activation'
+      : pendingAction.type === 'unlock'
+        ? chinese
+          ? '确认解锁'
+          : 'Confirm unlock'
+        : pendingAction.type === 'reset-mfa'
+          ? chinese
+            ? '确认重置 MFA'
+            : 'Confirm MFA reset'
+          : chinese
+            ? '确认删除'
+            : 'Confirm deletion'
+    : '';
+
+  const actionColor =
+    pendingAction?.type === 'unlock' ||
+    (pendingAction?.type === 'status' && pendingAction.account.status !== 'active')
+      ? 'primary'
+      : 'error';
+
   return (
     <div className="flex flex-col gap-5">
       <ManagementPanelLead
@@ -296,7 +325,7 @@ export default function UsersTab() {
           title={error}
           action={
             <Button size="small" onClick={() => void fetchAccounts()}>
-              {t('common.retry')}
+              {chinese ? '重新载入' : 'Reload'}
             </Button>
           }
         />
@@ -344,7 +373,11 @@ export default function UsersTab() {
                     <TableCell className="min-w-64 whitespace-normal">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-semibold">{account.display_name || account.username}</span>
-                        {isSelf ? <Tag color="primary">{t('nav.administrator')}</Tag> : null}
+                        {isSelf ? (
+                          <Tag color="primary">
+                            {chinese ? '当前管理员' : 'Current admin'}
+                          </Tag>
+                        ) : null}
                       </div>
                       <Text size="xs" tone="muted" className="mt-1 font-mono">
                         {account.username} · {account.id}
@@ -489,11 +522,11 @@ export default function UsersTab() {
           if (!next) setPendingAction(null);
         }}
         onOk={() => void confirmPendingAction()}
-        okText={t('common.continue')}
+        okText={actionConfirmLabel}
         cancelText={t('common.cancel')}
         okButtonProps={{
           variant: 'solid',
-          color: pendingAction?.type === 'unlock' ? 'primary' : 'error',
+          color: actionColor,
         }}
       />
     </div>
