@@ -14,7 +14,8 @@ interface PendingRemoval {
 }
 
 export default function PasskeysPanel() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const chinese = i18n.resolvedLanguage?.startsWith('zh') ?? false;
   const { passkeys, loading, error, reload, register, remove } = usePasskeys();
   const { requireSudo, clearSudo } = useSudo();
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -128,7 +129,7 @@ export default function PasskeysPanel() {
               action={
                 fatalLoadError ? (
                   <Button size="small" loading={loading} onClick={() => void reload().catch(() => {})}>
-                    {t('common.retry')}
+                    {chinese ? '重新载入' : 'Reload'}
                   </Button>
                 ) : undefined
               }
