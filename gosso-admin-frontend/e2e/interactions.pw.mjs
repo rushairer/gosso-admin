@@ -18,33 +18,34 @@ async function openWithFixtures(page, path, options = {}) {
   return unknown;
 }
 
-test("desktop AppShell follows the canonical header, navigation, and display-name contract", async ({ page }) => {
+test("desktop AppShell follows the canonical header, navigation, and account contract", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const problems = collectConsoleProblems(page);
   const unknown = await openWithFixtures(page, "/system-management/clients");
 
   const shell = page.locator('[data-slot="app-shell"]');
   await expect(shell).toBeVisible();
-  await expect(shell.locator('header [data-slot="brand-mark"]')).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "管理导航" })).toBeVisible();
+  await expect(shell.locator("header").getByRole("link", { name: "GOSSO" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "主导航" })).toBeVisible();
   await expect(page.getByText("Admin User", { exact: true })).toBeVisible();
-  await expect(page.getByText("admin@example.com", { exact: true })).toBeVisible();
+  await expect(page.getByText("管理员", { exact: true })).toBeVisible();
   expect(unknown).toEqual([]);
   expect(problems).toEqual([]);
 });
 
-test("mobile AppShell drawer navigates routed management pages and closes", async ({ page }) => {
+test("mobile AppShell drawer uses navigationLabel and closes after routed navigation", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const problems = collectConsoleProblems(page);
   const unknown = await openWithFixtures(page, "/system-management/clients");
 
-  await page.getByRole("button", { name: "打开导航" }).click();
-  const dialog = page.getByRole("dialog", { name: "导航" });
+  await page.getByRole("button", { name: "主导航" }).click();
+  const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
-  await dialog.getByRole("link", { name: "用户管理" }).click();
+  await expect(dialog.getByRole("navigation", { name: "主导航" })).toBeVisible();
+  await dialog.getByRole("link", { name: "用户账户" }).click();
   await expect(page).toHaveURL(/\/system-management\/users$/);
   await expect(dialog).toBeHidden();
-  await expect(page.getByRole("heading", { name: "用户管理" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "用户账户" })).toBeVisible();
   expect(unknown).toEqual([]);
   expect(problems).toEqual([]);
 });
