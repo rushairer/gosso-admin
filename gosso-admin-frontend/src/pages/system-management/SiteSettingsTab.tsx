@@ -14,10 +14,7 @@ import {
   useMessage,
 } from '@gouno/ui/core';
 import { siteSettingsService } from '../../services';
-import {
-  DEFAULT_SITE_SETTINGS,
-  mergeSiteSettings,
-} from '../../config/site-defaults';
+import { DEFAULT_SITE_SETTINGS, mergeSiteSettings } from '../../config/site-defaults';
 import type { SiteSettings } from '../../types/api';
 import LoginPreview from '../../components/auth/LoginPreview';
 import { useSudo } from '../../components/auth/SudoContext';
@@ -41,9 +38,7 @@ export default function SiteSettingsTab() {
     try {
       setLoading(true);
       setError(null);
-      const nextSettings = mergeSiteSettings(
-        await siteSettingsService.getSiteSettings(),
-      );
+      const nextSettings = mergeSiteSettings(await siteSettingsService.getSiteSettings());
       setSettings(nextSettings);
       setBaseline(JSON.stringify(nextSettings));
     } catch (reason: unknown) {
@@ -57,10 +52,7 @@ export default function SiteSettingsTab() {
     void load();
   }, []);
 
-  const update = <K extends keyof SiteSettings>(
-    key: K,
-    value: SiteSettings[K],
-  ) => {
+  const update = <K extends keyof SiteSettings>(key: K, value: SiteSettings[K]) => {
     setSettings((current) => ({ ...current, [key]: value }));
   };
 
@@ -77,16 +69,12 @@ export default function SiteSettingsTab() {
       onSuccess: async () => {
         try {
           setSaving(true);
-          const updated = mergeSiteSettings(
-            await siteSettingsService.updateSiteSettings(settings),
-          );
+          const updated = mergeSiteSettings(await siteSettingsService.updateSiteSettings(settings));
           setSettings(updated);
           setBaseline(JSON.stringify(updated));
           message.success(t('site.saved'));
         } catch (reason: unknown) {
-          message.error(
-            reason instanceof Error ? reason.message : t('site.saveFailed'),
-          );
+          message.error(reason instanceof Error ? reason.message : t('site.saveFailed'));
         } finally {
           setSaving(false);
         }
@@ -116,10 +104,7 @@ export default function SiteSettingsTab() {
           ) : null}
 
           {fatalLoadError ? null : (
-            <div
-              className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]"
-              aria-busy={loading}
-            >
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]" aria-busy={loading}>
               <form onSubmit={save} className="min-w-0">
                 <Card padding="none" className="gap-0 overflow-clip">
                   <CardContent className="flex flex-col gap-5 p-6">
@@ -128,9 +113,7 @@ export default function SiteSettingsTab() {
                         required
                         maxLength={120}
                         value={settings.product_name}
-                        onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                          update('product_name', event.target.value)
-                        }
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => update('product_name', event.target.value)}
                       />
                     </FormField>
                     <FormField label={t('site.logoUrl')}>
@@ -138,9 +121,7 @@ export default function SiteSettingsTab() {
                         type="text"
                         placeholder={t('site.logoUrlPlaceholder')}
                         value={settings.logo_url}
-                        onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                          update('logo_url', event.target.value)
-                        }
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => update('logo_url', event.target.value)}
                       />
                     </FormField>
                     <FormField label={t('site.faviconUrl')}>
@@ -148,9 +129,7 @@ export default function SiteSettingsTab() {
                         type="text"
                         placeholder={t('site.faviconUrlPlaceholder')}
                         value={settings.favicon_url}
-                        onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                          update('favicon_url', event.target.value)
-                        }
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => update('favicon_url', event.target.value)}
                       />
                     </FormField>
                     <FormField label={t('site.loginTitle')}>
@@ -158,9 +137,7 @@ export default function SiteSettingsTab() {
                         maxLength={160}
                         placeholder={settings.product_name || 'GOSSO'}
                         value={settings.login_title}
-                        onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                          update('login_title', event.target.value)
-                        }
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => update('login_title', event.target.value)}
                       />
                     </FormField>
                     <FormField label={t('site.loginDescription')}>
@@ -212,10 +189,7 @@ export default function SiteSettingsTab() {
               <div className="xl:sticky xl:top-20 xl:self-start">
                 <Card padding="base" className="overflow-hidden">
                   <div className="mb-4 flex items-center gap-2">
-                    <Image
-                      aria-hidden="true"
-                      className="size-4 text-muted-foreground"
-                    />
+                    <Image aria-hidden="true" className="size-4 text-muted-foreground" />
                     <Text size="sm" className="font-medium">
                       {t('site.preview')}
                     </Text>

@@ -99,20 +99,11 @@ export default function UsersTab() {
   const performStatusToggle = async (account: Account) => {
     const isActivating = account.status !== 'active';
     try {
-      await accountService.updateAccountStatus(
-        account.id,
-        isActivating ? 'active' : 'suspended',
-      );
-      message.success(
-        isActivating
-          ? t('users.userActivatedSuccess')
-          : t('users.userSuspendedSuccess'),
-      );
+      await accountService.updateAccountStatus(account.id, isActivating ? 'active' : 'suspended');
+      message.success(isActivating ? t('users.userActivatedSuccess') : t('users.userSuspendedSuccess'));
       void fetchAccounts();
     } catch (err: unknown) {
-      message.error(
-        err instanceof Error ? err.message : t('users.statusUpdateFailed'),
-      );
+      message.error(err instanceof Error ? err.message : t('users.statusUpdateFailed'));
     }
   };
 
@@ -125,9 +116,7 @@ export default function UsersTab() {
           message.success(t('users.userDeletedSuccess'));
           void fetchAccounts();
         } catch (err: unknown) {
-          message.error(
-            err instanceof Error ? err.message : t('users.deleteUserFailed'),
-          );
+          message.error(err instanceof Error ? err.message : t('users.deleteUserFailed'));
         }
       },
     });
@@ -139,9 +128,7 @@ export default function UsersTab() {
       message.success(t('users.lockoutClearedSuccess'));
       void fetchAccounts();
     } catch (err: unknown) {
-      message.error(
-        err instanceof Error ? err.message : t('users.unlockAccountFailed'),
-      );
+      message.error(err instanceof Error ? err.message : t('users.unlockAccountFailed'));
     }
   };
 
@@ -154,13 +141,11 @@ export default function UsersTab() {
           message.success(
             t('users.mfaResetSuccess', {
               username: account.display_name || account.username,
-            }),
+            })
           );
           void fetchAccounts();
         } catch (err: unknown) {
-          message.error(
-            err instanceof Error ? err.message : t('users.resetMfaFailed'),
-          );
+          message.error(err instanceof Error ? err.message : t('users.resetMfaFailed'));
         }
       },
     });
@@ -191,17 +176,11 @@ export default function UsersTab() {
         try {
           await accountService.assignRole(selectedAccount.id, roleId);
           message.success(t('users.roleAssignedSuccess'));
-          const updatedRoles = await accountService.fetchAccountRoles(
-            selectedAccount.id,
-          );
-          setSelectedAccount((prev) =>
-            prev ? { ...prev, roles: updatedRoles } : null,
-          );
+          const updatedRoles = await accountService.fetchAccountRoles(selectedAccount.id);
+          setSelectedAccount((prev) => (prev ? { ...prev, roles: updatedRoles } : null));
           void fetchAccounts();
         } catch (err: unknown) {
-          message.error(
-            err instanceof Error ? err.message : t('users.assignRoleFailed'),
-          );
+          message.error(err instanceof Error ? err.message : t('users.assignRoleFailed'));
           throw err;
         }
       },
@@ -218,17 +197,11 @@ export default function UsersTab() {
         try {
           await accountService.removeRole(selectedAccount.id, roleId);
           message.success(t('users.roleRemovedSuccess'));
-          const updatedRoles = await accountService.fetchAccountRoles(
-            selectedAccount.id,
-          );
-          setSelectedAccount((prev) =>
-            prev ? { ...prev, roles: updatedRoles } : null,
-          );
+          const updatedRoles = await accountService.fetchAccountRoles(selectedAccount.id);
+          setSelectedAccount((prev) => (prev ? { ...prev, roles: updatedRoles } : null));
           void fetchAccounts();
         } catch (err: unknown) {
-          message.error(
-            err instanceof Error ? err.message : t('users.removeRoleFailed'),
-          );
+          message.error(err instanceof Error ? err.message : t('users.removeRoleFailed'));
         }
       },
     });
@@ -259,9 +232,7 @@ export default function UsersTab() {
     try {
       setConsentsList(await accountService.fetchAccountConsents(account.id));
     } catch (err: unknown) {
-      message.error(
-        err instanceof Error ? err.message : t('users.loadConsentsFailed'),
-      );
+      message.error(err instanceof Error ? err.message : t('users.loadConsentsFailed'));
     } finally {
       setConsentsLoading(false);
     }
@@ -272,13 +243,9 @@ export default function UsersTab() {
     try {
       await accountService.revokeConsent(selectedAccount.id, clientId);
       message.success(t('users.consentRevokedSuccess'));
-      setConsentsList(
-        await accountService.fetchAccountConsents(selectedAccount.id),
-      );
+      setConsentsList(await accountService.fetchAccountConsents(selectedAccount.id));
     } catch (err: unknown) {
-      message.error(
-        err instanceof Error ? err.message : t('users.revokeConsentFailed'),
-      );
+      message.error(err instanceof Error ? err.message : t('users.revokeConsentFailed'));
     }
   };
 
@@ -288,8 +255,7 @@ export default function UsersTab() {
   let actionColor: 'primary' | 'error' = 'error';
 
   if (pendingAction) {
-    const accountName =
-      pendingAction.account.display_name || pendingAction.account.username;
+    const accountName = pendingAction.account.display_name || pendingAction.account.username;
 
     if (pendingAction.type === 'status') {
       if (pendingAction.account.status === 'active') {
@@ -376,19 +342,11 @@ export default function UsersTab() {
         />
       ) : fatalLoadError ? null : accounts.length === 0 ? (
         <Empty
-          icon={
-            <UserIcon
-              aria-hidden="true"
-              className="size-6 text-muted-foreground"
-            />
-          }
+          icon={<UserIcon aria-hidden="true" className="size-6 text-muted-foreground" />}
           title={t('users.noUsersTitle')}
           description={t('users.noUsersDescription')}
           action={
-            <Button
-              icon={<PlusIcon />}
-              onClick={() => setShowCreateUserModal(true)}
-            >
+            <Button icon={<PlusIcon />} onClick={() => setShowCreateUserModal(true)}>
               {t('users.addUser')}
             </Button>
           }
@@ -401,9 +359,7 @@ export default function UsersTab() {
                 <TableHead>{t('users.colUser')}</TableHead>
                 <TableHead>{t('users.colStatus')}</TableHead>
                 <TableHead>{t('users.colRoles')}</TableHead>
-                <TableHead className="text-right">
-                  {t('users.colActions')}
-                </TableHead>
+                <TableHead className="text-right">{t('users.colActions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -413,32 +369,16 @@ export default function UsersTab() {
                   <TableRow key={account.id}>
                     <TableCell className="min-w-64 whitespace-normal">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-semibold">
-                          {account.display_name || account.username}
-                        </span>
-                        {isSelf ? (
-                          <Tag color="primary">
-                            {chinese ? '当前管理员' : 'Current admin'}
-                          </Tag>
-                        ) : null}
+                        <span className="font-semibold">{account.display_name || account.username}</span>
+                        {isSelf ? <Tag color="primary">{chinese ? '当前管理员' : 'Current admin'}</Tag> : null}
                       </div>
-                      <Text
-                        size="xs"
-                        tone="muted"
-                        className="mt-1 font-mono"
-                      >
+                      <Text size="xs" tone="muted" className="mt-1 font-mono">
                         {account.username} · {account.id}
                       </Text>
                     </TableCell>
                     <TableCell>
-                      <Tag
-                        color={
-                          account.status === 'active' ? 'success' : 'error'
-                        }
-                      >
-                        {account.status === 'active'
-                          ? t('users.statusActive')
-                          : t('users.statusSuspended')}
+                      <Tag color={account.status === 'active' ? 'success' : 'error'}>
+                        {account.status === 'active' ? t('users.statusActive') : t('users.statusSuspended')}
                       </Tag>
                     </TableCell>
                     <TableCell className="min-w-48 whitespace-normal">
@@ -447,9 +387,7 @@ export default function UsersTab() {
                           account.roles.map((role) => (
                             <Tag
                               key={role.id}
-                              color={
-                                role.name === 'admin' ? 'warning' : 'default'
-                              }
+                              color={role.name === 'admin' ? 'warning' : 'default'}
                               title={role.description}
                             >
                               {role.name}
@@ -478,49 +416,25 @@ export default function UsersTab() {
                           disabled={isSelf}
                         />
                         <IconButton
-                          label={
-                            account.status === 'active'
-                              ? t('users.suspendUser')
-                              : t('users.activateUser')
-                          }
+                          label={account.status === 'active' ? t('users.suspendUser') : t('users.activateUser')}
                           variant="ghost"
-                          color={
-                            account.status === 'active' ? 'error' : 'primary'
-                          }
-                          icon={
-                            account.status === 'active' ? (
-                              <LockIcon />
-                            ) : (
-                              <UnlockIcon />
-                            )
-                          }
-                          onClick={() =>
-                            setPendingAction({ type: 'status', account })
-                          }
+                          color={account.status === 'active' ? 'error' : 'primary'}
+                          icon={account.status === 'active' ? <LockIcon /> : <UnlockIcon />}
+                          onClick={() => setPendingAction({ type: 'status', account })}
                           disabled={isSelf}
                         />
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <IconButton
-                              label={t('users.colActions')}
-                              variant="ghost"
-                              icon={<MoreHorizontal />}
-                            />
+                            <IconButton label={t('users.colActions')} variant="ghost" icon={<MoreHorizontal />} />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onSelect={() =>
-                                void handleOpenConsentModal(account)
-                              }
-                            >
+                            <DropdownMenuItem onSelect={() => void handleOpenConsentModal(account)}>
                               <ConsentIcon />
                               {t('users.manageConsents')}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               disabled={isSelf}
-                              onSelect={() =>
-                                setPendingAction({ type: 'unlock', account })
-                              }
+                              onSelect={() => setPendingAction({ type: 'unlock', account })}
                             >
                               <UnlockIcon />
                               {t('users.unlockAccount')}
@@ -541,9 +455,7 @@ export default function UsersTab() {
                             <DropdownMenuItem
                               variant="destructive"
                               disabled={isSelf}
-                              onSelect={() =>
-                                setPendingAction({ type: 'delete', account })
-                              }
+                              onSelect={() => setPendingAction({ type: 'delete', account })}
                             >
                               <TrashIcon />
                               {t('users.deleteUser')}
@@ -562,9 +474,7 @@ export default function UsersTab() {
             total={totalAccounts}
             pageSize={pageSize}
             onChange={(nextPage) => setPage(nextPage)}
-            showTotal={(total) =>
-              t('users.paginationSummary', { page, total })
-            }
+            showTotal={(total) => t('users.paginationSummary', { page, total })}
             prevText={t('common.previous')}
             nextText={t('common.next')}
             disabled={loading}

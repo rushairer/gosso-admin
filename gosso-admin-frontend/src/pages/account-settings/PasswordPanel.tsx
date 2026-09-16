@@ -38,12 +38,8 @@ export default function PasswordPanel() {
   };
 
   const isDirty = Boolean(currentPassword || newPassword || confirmPassword);
-  let currentPasswordVisibilityLabel = showCurrentPwd
-    ? 'Hide current password'
-    : 'Show current password';
-  let newPasswordVisibilityLabel = showNewPwd
-    ? 'Hide new password'
-    : 'Show new password';
+  let currentPasswordVisibilityLabel = showCurrentPwd ? 'Hide current password' : 'Show current password';
+  let newPasswordVisibilityLabel = showNewPwd ? 'Hide new password' : 'Show new password';
   let changeStatus = 'No pending changes.';
 
   if (chinese) {
@@ -58,10 +54,7 @@ export default function PasswordPanel() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <div className="flex max-w-xl flex-col gap-5">
           {validationError || profileError ? (
-            <StatusMessage
-              type="error"
-              message={validationError || profileError}
-            />
+            <StatusMessage type="error" message={validationError || profileError} />
           ) : null}
           {success ? <StatusMessage message={success} /> : null}
 
@@ -85,11 +78,7 @@ export default function PasswordPanel() {
             />
           </FormField>
 
-          <FormField
-            label={t('password.newPasswordLabel')}
-            required
-            hint={t('password.newPasswordPlaceholder')}
-          >
+          <FormField label={t('password.newPasswordLabel')} required hint={t('password.newPasswordPlaceholder')}>
             <Input
               type={showNewPwd ? 'text' : 'password'}
               required
@@ -135,9 +124,7 @@ export default function PasswordPanel() {
             disabled={!currentPassword || !newPassword || !confirmPassword}
             icon={<Lock />}
           >
-            {loading
-              ? t('password.changePasswordLoading')
-              : t('password.changePasswordButton')}
+            {loading ? t('password.changePasswordLoading') : t('password.changePasswordButton')}
           </Button>
         </div>
       </form>
