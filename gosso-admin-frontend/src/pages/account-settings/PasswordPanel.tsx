@@ -6,8 +6,9 @@ import { Button, FormField, IconButton, Input, Text } from '@gouno/ui/core';
 import { Section, StatusMessage } from './shared';
 
 export default function PasswordPanel() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { loading, error: profileError, changePassword } = useProfileManager();
+  const chinese = i18n.resolvedLanguage?.startsWith('zh') ?? false;
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -37,6 +38,20 @@ export default function PasswordPanel() {
   };
 
   const isDirty = Boolean(currentPassword || newPassword || confirmPassword);
+  const currentPasswordVisibilityLabel = showCurrentPwd
+    ? chinese
+      ? '隐藏当前密码'
+      : 'Hide current password'
+    : chinese
+      ? '显示当前密码'
+      : 'Show current password';
+  const newPasswordVisibilityLabel = showNewPwd
+    ? chinese
+      ? '隐藏新密码'
+      : 'Hide new password'
+    : chinese
+      ? '显示新密码'
+      : 'Show new password';
 
   return (
     <Section description={t('password.description')}>
@@ -57,7 +72,7 @@ export default function PasswordPanel() {
               autoComplete="current-password"
               suffix={
                 <IconButton
-                  label="Toggle current password visibility"
+                  label={currentPasswordVisibilityLabel}
                   icon={showCurrentPwd ? <EyeOff /> : <Eye />}
                   variant="ghost"
                   type="button"
@@ -78,7 +93,7 @@ export default function PasswordPanel() {
               autoComplete="new-password"
               suffix={
                 <IconButton
-                  label="Toggle new password visibility"
+                  label={newPasswordVisibilityLabel}
                   icon={showNewPwd ? <EyeOff /> : <Eye />}
                   variant="ghost"
                   type="button"
@@ -103,7 +118,11 @@ export default function PasswordPanel() {
 
         <div className="flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
           <Text size="sm" tone="muted" aria-live="polite">
-            {isDirty ? t('site.unsavedChanges') : ''}
+            {isDirty
+              ? t('site.unsavedChanges')
+              : chinese
+                ? '当前没有待提交的修改。'
+                : 'No pending changes.'}
           </Text>
           <Button
             variant="solid"
