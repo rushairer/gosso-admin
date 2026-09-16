@@ -34,6 +34,12 @@ const mfa = await source('pages/account-settings/MFAPanel.tsx');
 requireText(mfa, "chinese ? '重新生成' : 'Regenerate'", 'MFAPanel.tsx: regenerate confirmation must name the action');
 requireText(mfa, "chinese ? '重新载入' : 'Reload'", 'MFAPanel.tsx: persistent load failure must use reload grammar');
 
+const passkeys = await source('pages/account-settings/PasskeysPanel.tsx');
+requireText(passkeys, "chinese ? '重新载入' : 'Reload'", 'PasskeysPanel.tsx: persistent load failure must use reload grammar');
+
+const sessions = await source('pages/account-settings/SessionsPanel.tsx');
+requireText(sessions, "chinese ? '重新载入' : 'Reload'", 'SessionsPanel.tsx: persistent load failure must use reload grammar');
+
 const clients = await source('pages/system-management/ClientsTab.tsx');
 for (const label of ['确认删除', '确认轮换', '复制重定向 URI']) {
   requireText(clients, label, `ClientsTab.tsx: missing action-specific wording ${label}`);
