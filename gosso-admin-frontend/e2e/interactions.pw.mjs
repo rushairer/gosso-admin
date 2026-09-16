@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { installApiFixtures, setTheme } from "./mock-api.mjs";
 
-async function collectConsoleProblems(page) {
+function collectConsoleProblems(page) {
   const problems = [];
   page.on("console", (message) => {
     if (message.type() === "error") problems.push(`error: ${message.text()}`);
@@ -20,7 +20,7 @@ async function openWithFixtures(page, path, options = {}) {
 
 test("desktop AppShell follows the canonical header, navigation, and display-name contract", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  const problems = await collectConsoleProblems(page);
+  const problems = collectConsoleProblems(page);
   const unknown = await openWithFixtures(page, "/system-management/clients");
 
   const shell = page.locator('[data-slot="app-shell"]');
@@ -35,7 +35,7 @@ test("desktop AppShell follows the canonical header, navigation, and display-nam
 
 test("mobile AppShell drawer navigates routed management pages and closes", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  const problems = await collectConsoleProblems(page);
+  const problems = collectConsoleProblems(page);
   const unknown = await openWithFixtures(page, "/system-management/clients");
 
   await page.getByRole("button", { name: "打开导航" }).click();
@@ -51,7 +51,7 @@ test("mobile AppShell drawer navigates routed management pages and closes", asyn
 
 test("client editor modal stays usable at phone width", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  const problems = await collectConsoleProblems(page);
+  const problems = collectConsoleProblems(page);
   const unknown = await openWithFixtures(page, "/system-management/clients");
   const row = page.getByRole("row").filter({ hasText: "Blog Admin" });
 
@@ -69,7 +69,7 @@ test("client editor modal stays usable at phone width", async ({ page }) => {
 });
 
 test("audit detail modal opens from the canonical compact table", async ({ page }) => {
-  const problems = await collectConsoleProblems(page);
+  const problems = collectConsoleProblems(page);
   const unknown = await openWithFixtures(page, "/system-management/audit-logs");
 
   await expect(page.getByText("auth.login.success").first()).toBeVisible();
