@@ -21,9 +21,10 @@ import { MfaLoadingContent } from './loading';
 import { Section, StatusMessage } from './shared';
 
 export default function MFAPanel() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const message = useMessage();
   const { requireSudo } = useSudo();
+  const chinese = i18n.resolvedLanguage?.startsWith('zh') ?? false;
   const {
     status: mfaStatus,
     enrollment: mfaEnrollment,
@@ -110,7 +111,7 @@ export default function MFAPanel() {
           title={error ?? ''}
           action={
             <Button size="small" loading={loading} onClick={() => void reload().catch(() => {})}>
-              {t('common.retry')}
+              {chinese ? '重新载入' : 'Reload'}
             </Button>
           }
         />
@@ -261,7 +262,7 @@ export default function MFAPanel() {
         description={t('mfa.regenerateConfirmMessage')}
         onOpenChange={setShowRegenerateModal}
         onOk={() => void handleRegenerateBackupCodes()}
-        okText={t('common.continue')}
+        okText={chinese ? '重新生成' : 'Regenerate'}
         cancelText={t('common.cancel')}
         okButtonProps={{ variant: 'solid', color: 'primary' }}
       />
