@@ -49,7 +49,8 @@ function isAdminScope(scope: string) {
 }
 
 export default function ClientsTab() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const chinese = i18n.resolvedLanguage?.startsWith('zh') ?? false;
   const message = useMessage();
   const { requireSudo } = useSudo();
   const { clients, loading, error, refresh: fetchClients } = useClients(t('clients.errorLoadingClients'));
@@ -179,6 +180,15 @@ export default function ClientsTab() {
     setClientForm((prev) => toggleClientFormSelection(prev, field, value));
   };
 
+  const pendingActionLabel =
+    pendingAction?.type === 'delete'
+      ? chinese
+        ? '确认删除'
+        : 'Confirm deletion'
+      : chinese
+        ? '确认轮换'
+        : 'Confirm rotation';
+
   return (
     <div className="flex flex-col gap-5">
       <ManagementPanelLead
@@ -203,7 +213,7 @@ export default function ClientsTab() {
           title={error}
           action={
             <Button size="small" onClick={() => void fetchClients()}>
-              {t('common.retry')}
+              {chinese ? '重新载入' : 'Reload'}
             </Button>
           }
         />
@@ -278,7 +288,7 @@ export default function ClientsTab() {
                         >
                           <code className="min-w-0 flex-1 truncate text-xs">{uri}</code>
                           <IconButton
-                            label={t('common.copy', { defaultValue: '复制' })}
+                            label={chinese ? `复制重定向 URI：${uri}` : `Copy redirect URI: ${uri}`}
                             size="small"
                             icon={<CopyIcon />}
                             onClick={() => void handleCopyUri(uri)}
@@ -372,7 +382,7 @@ export default function ClientsTab() {
           if (!next) setPendingAction(null);
         }}
         onOk={() => void confirmPendingAction()}
-        okText={t('common.continue')}
+        okText={pendingActionLabel}
         cancelText={t('common.cancel')}
         okButtonProps={{
           variant: 'solid',
