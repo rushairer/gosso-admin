@@ -52,7 +52,7 @@ test("Clients edit and destructive confirmation stay in canonical modals", async
   await row.getByRole("button", { name: "删除客户端" }).click();
   dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole("button", { name: "继续" })).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "确认删除" })).toBeVisible();
   await dialog.getByRole("button", { name: "取消" }).click();
   expect(unknown).toEqual([]);
 });
@@ -67,7 +67,7 @@ test("Users destructive action presents confirmation before Sudo verification", 
   let dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText(/永久删除用户/)).toBeVisible();
-  await dialog.getByRole("button", { name: "继续" }).click();
+  await dialog.getByRole("button", { name: "确认删除" }).click();
 
   dialog = page.getByRole("dialog");
   await expect(dialog.getByText("安全提权验证 (Sudo Mode)")).toBeVisible();
