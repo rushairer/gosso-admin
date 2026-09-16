@@ -17,6 +17,18 @@ function forbidText(sourceText, text, message) {
   if (sourceText.includes(text)) failures.push(message);
 }
 
+const zhLocale = JSON.parse(await source('i18n/locales/zh.json'));
+if (zhLocale.nav?.primaryNavigation !== '主导航') {
+  failures.push('zh.json: canonical AppShell primary navigation label must remain 主导航');
+}
+
+const adminLayout = await source('components/layout/AdminLayout.tsx');
+requireText(
+  adminLayout,
+  "navigationLabel={t('nav.primaryNavigation')}",
+  'AdminLayout.tsx: AppShell must receive the canonical localized primary-navigation label',
+);
+
 const profile = await source('pages/account-settings/ProfilePanel.tsx');
 requireText(profile, '保存显示名称', 'ProfilePanel.tsx: localized save-display-name accessible action is required');
 requireText(profile, '取消编辑显示名称', 'ProfilePanel.tsx: localized cancel-edit accessible action is required');
