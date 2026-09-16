@@ -58,7 +58,11 @@ export default function SessionsPanel() {
               title={error}
               action={
                 fatalLoadError ? (
-                  <Button size="small" loading={loading} onClick={() => void reload().catch(() => {})}>
+                  <Button
+                    size="small"
+                    loading={loading}
+                    onClick={() => void reload().catch(() => {})}
+                  >
                     {chinese ? '重新载入' : 'Reload'}
                   </Button>
                 ) : undefined
