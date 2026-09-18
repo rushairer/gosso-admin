@@ -18,22 +18,28 @@ function QuickCard({ link }: { link: QuickLink }) {
   return (
     <Link
       to={link.to}
-      className="group flex min-h-32 w-full items-center gap-4 rounded-lg border bg-card px-6 py-5 text-left text-card-foreground shadow-surface transition-[border-color,background-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/40 hover:bg-accent/20 hover:shadow-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="group block rounded-lg no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      <span
-        className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary"
-        aria-hidden="true"
+      <Card
+        interactive
+        padding="none"
+        className="min-h-32 w-full flex-row items-center gap-4 px-6 py-5 text-left hover:bg-accent/20"
       >
-        <Icon className="size-5" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-base font-semibold">{title}</span>
-        <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{description}</span>
-      </span>
-      <ArrowRight
-        aria-hidden="true"
-        className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
-      />
+        <span
+          className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary"
+          aria-hidden="true"
+        >
+          <Icon className="size-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-base font-semibold">{title}</span>
+          <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{description}</span>
+        </span>
+        <ArrowRight
+          aria-hidden="true"
+          className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+        />
+      </Card>
     </Link>
   );
 }
