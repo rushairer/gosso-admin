@@ -142,6 +142,14 @@ for (const path of files) {
   const source = await readFile(path, "utf8");
   if (retiredProductStyles.has(name)) failures.push(`${name}: retired legacy stylesheet must not be reintroduced; canonical reset, fonts and primitive styling are owned by @gouno/ui`);
   if ((name.endsWith(".ts") || name.endsWith(".tsx")) && directRadixImport.test(source)) failures.push(`${name}: direct @radix-ui imports bypass @gouno/ui ownership; consume the canonical Gouno UI primitive instead`);
+  if (name === "pages/Home.tsx") {
+    if (!source.includes("<Card\n        interactive\n        padding=\"none\"")) {
+      failures.push(`${name}: Overview quick links must keep the canonical interactive Card composition`);
+    }
+    if (/shadow-surface[\s\S]{0,160}hover:shadow-raised/.test(source)) {
+      failures.push(`${name}: Overview quick links must not recreate interactive Card surface/elevation on the outer link`);
+    }
+  }
   checkTsxContracts(name, source);
 }
 
