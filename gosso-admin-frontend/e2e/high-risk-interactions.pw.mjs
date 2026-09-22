@@ -76,6 +76,47 @@ test("Users destructive action presents confirmation before Sudo verification", 
   expect(unknown).toEqual([]);
 });
 
+test("Users role assignment Select keeps accessible Modal ownership", async ({ page }, testInfo) => {
+  const unknown = await openWithFixtures(page, "/system-management/users");
+  const row = page.getByRole("row").filter({ hasText: "Demo User" });
+
+  await row.getByRole("button", { name: "管理角色" }).click();
+
+  const dialog = page.getByRole("dialog", { name: /管理角色 - Demo User/ });
+  await expect(dialog).toBeVisible();
+
+  const roleSelect = dialog.getByRole("combobox", { name: "分配新角色" });
+  await expect(roleSelect).toBeVisible();
+  await expect(roleSelect).toHaveAttribute("id", "assign-role");
+  await expect(roleSelect).toHaveAttribute("aria-labelledby", "assign-role-label");
+  await expect(dialog.locator('label[for="assign-role"]')).toHaveText("分配新角色");
+
+  await roleSelect.click();
+  await expect(dialog).toBeVisible();
+
+  const option = page.getByRole("option", { name: /admin \(role-adm\)/ });
+  await expect(option).toBeVisible();
+  await option.click();
+
+  await expect(dialog).toBeVisible();
+  await expect(roleSelect).toContainText("admin (role-adm)");
+  await expect(dialog.getByRole("button", { name: "分配" })).toBeEnabled();
+
+  const screenshotPath = testInfo.outputPath("users-role-select-inside-modal.png");
+  await page.screenshot({
+    path: screenshotPath,
+    fullPage: true,
+    animations: "disabled",
+    caret: "hide",
+  });
+  await testInfo.attach("users-role-select-inside-modal", {
+    path: screenshotPath,
+    contentType: "image/png",
+  });
+
+  expect(unknown).toEqual([]);
+});
+
 test("Password recent-auth failure remains persistent inside the password panel", async ({ page }) => {
   await addCsrfCookie(page);
   const unknown = await openWithFixtures(page, "/account-settings/password", {

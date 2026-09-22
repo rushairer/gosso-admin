@@ -72,6 +72,17 @@ const semanticTypographyContracts = new Map([
     required: ['family="mono"'],
     forbidden: ['className="font-mono"'],
   }],
+  ["pages/system-management/users/AssignRolesModal.tsx", {
+    required: [
+      '<Text as="div" weight="semibold">',
+      'className="flex flex-col gap-2 sm:flex-row sm:items-end"',
+      '<FormField id="assign-role" label={t(\'users.assignNewRoleLabel\')} className="min-w-0 flex-1">',
+    ],
+    forbidden: [
+      '<Text as="div" className="font-semibold">',
+      '<FormField id="assign-role" label={t(\'users.assignNewRoleLabel\')}>\n              <div',
+    ],
+  }],
 ]);
 
 
