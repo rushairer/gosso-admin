@@ -113,7 +113,7 @@ export default function ResetPassword() {
       ) : null}
 
       <div className="mt-5 text-center">
-        <Link to="/login" className="text-sm font-medium text-primary hover:underline">
+        <Link to="/login" className="type-body-sm type-weight-medium text-primary hover:underline">
           {t('passwordReset.backToLogin')}
         </Link>
       </div>

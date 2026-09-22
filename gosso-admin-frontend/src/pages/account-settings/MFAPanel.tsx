@@ -133,7 +133,7 @@ export default function MFAPanel() {
 
           {!mfaStatus.enabled && !mfaEnrollment ? (
             <div className="flex flex-col items-start gap-4 py-2">
-              <Text tone="muted" size="sm" className="max-w-2xl leading-relaxed">
+              <Text tone="muted" size="sm" leading="relaxed" className="max-w-2xl">
                 {t('mfa.mfaNotEnrolledDescription')}
               </Text>
               <Button
@@ -156,15 +156,15 @@ export default function MFAPanel() {
                 </div>
                 <div className="flex flex-col gap-4">
                   <div>
-                    <Heading level={2} className="text-base">
+                    <Heading level={2} variant="compact">
                       {t('mfa.setupTitle')}
                     </Heading>
-                    <Text size="sm" tone="muted" className="mt-1 leading-relaxed">
+                    <Text size="sm" tone="muted" leading="relaxed" className="mt-1">
                       {t('mfa.scanQrStep1')} {t('mfa.manualEntryStep2')}
                     </Text>
                   </div>
                   <div className="flex max-w-lg items-center justify-between gap-3 rounded-md border bg-muted/30 p-3">
-                    <code className="min-w-0 truncate font-mono text-xs">{mfaEnrollment.secret}</code>
+                    <code className="min-w-0 truncate type-family-mono type-caption">{mfaEnrollment.secret}</code>
                     <IconButton
                       label={t('mfa.copySecret')}
                       icon={<Copy />}
@@ -225,7 +225,7 @@ export default function MFAPanel() {
             <section className="flex flex-col gap-4 border-t pt-5" aria-labelledby="backup-codes-heading">
               <div className="flex items-center gap-2 text-warning">
                 <AlertTriangle aria-hidden="true" className="size-4" />
-                <Heading id="backup-codes-heading" level={2} className="text-base">
+                <Heading id="backup-codes-heading" level={2} variant="compact">
                   {t('mfa.recoveryBackupCodesTitle')}
                 </Heading>
               </div>
@@ -234,7 +234,7 @@ export default function MFAPanel() {
               </Text>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {backupCodes.map((code) => (
-                  <code key={code} className="rounded-md border bg-muted/30 px-3 py-2 text-center font-mono text-sm">
+                  <code key={code} className="rounded-md border bg-muted/30 px-3 py-2 text-center type-family-mono type-body-sm">
                     {code}
                   </code>
                 ))}

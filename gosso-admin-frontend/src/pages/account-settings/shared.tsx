@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Alert, Card } from '@gouno/ui/core';
+import { Alert, Card, Text } from '@gouno/ui/core';
 
 interface SectionProps {
   description?: ReactNode;
@@ -15,15 +15,21 @@ interface SettingRowProps {
 
 export function Section({ description, actions, surface = 'card', children }: SectionProps) {
   return (
-    <div className="flex flex-col gap-5">
+    <div data-pattern="settings-composition" className="flex flex-col gap-5">
       {description || actions ? (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          {description ? (
-            <p className="m-0 max-w-3xl text-sm leading-6 text-muted-foreground">{description}</p>
-          ) : (
-            <span />
-          )}
-          {actions ? <div className="shrink-0">{actions}</div> : null}
+        <div
+          data-slot="gosso-tab-panel-lead"
+          data-pattern="tab-panel-lead"
+          className="flex min-h-9 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
+        >
+          <div className="min-w-0">
+            {description ? (
+              <Text tone="muted" size="sm" leading="relaxed" className="max-w-3xl">
+                {description}
+              </Text>
+            ) : null}
+          </div>
+          {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
         </div>
       ) : null}
       {surface === 'card' ? (
@@ -40,8 +46,8 @@ export function Section({ description, actions, surface = 'card', children }: Se
 export function SettingRow({ label, children }: SettingRowProps) {
   return (
     <div className="grid gap-2 border-t py-4 first:border-t-0 first:pt-0 last:pb-0 sm:grid-cols-[180px_minmax(0,1fr)] sm:gap-6">
-      <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
-      <dd className="m-0 min-w-0 text-sm">{children}</dd>
+      <dt className="type-body-sm type-weight-medium text-muted-foreground">{label}</dt>
+      <dd className="m-0 min-w-0 type-body-sm">{children}</dd>
     </div>
   );
 }

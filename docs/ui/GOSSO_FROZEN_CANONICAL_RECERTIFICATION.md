@@ -62,6 +62,8 @@ The fixes are presentation-only. They do not alter API calls, auth/security beha
 
 `check-ui-contracts.mjs` now retains reviewed required/forbidden markers for these Product files so the same raw typography drift cannot silently return.
 
+The same preflight found Account Settings still using the older hand-built panel lead rather than the frozen Showcase composition. The candidate now keeps that helper Product-local but aligns its ownership and geometry to the canonical `settings-composition` / `tab-panel-lead` grammar, including semantic Text, `min-h-9`, wrapped actions and semantic SettingRow typography. Profile, MFA, Passkeys, Sessions and Auth recovery links were normalized to their frozen semantic typography equivalents without changing their real security/business state machines.
+
 ## Required evidence
 
 Before promotion to verified/manual-reviewed status, the same candidate head must pass:

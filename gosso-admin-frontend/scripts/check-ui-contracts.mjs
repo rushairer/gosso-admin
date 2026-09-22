@@ -36,6 +36,38 @@ const semanticTypographyContracts = new Map([
     required: ['variant="compact"', "type-body-sm", "type-family-mono type-body-sm", "type-body-lg type-weight-semibold", "type-weight-medium"],
     forbidden: ["text-base", "font-mono text-xs", "text-lg font-semibold", 'className="font-medium"'],
   }],
+  ["pages/account-settings/shared.tsx", {
+    required: ['data-pattern="settings-composition"', 'data-pattern="tab-panel-lead"', 'leading="relaxed"', "type-body-sm type-weight-medium"],
+    forbidden: ["text-sm leading-6", "text-sm font-medium", 'className="shrink-0"'],
+  }],
+  ["pages/account-settings/ProfilePanel.tsx", {
+    required: ["type-weight-medium", "type-family-mono type-caption"],
+    forbidden: ["font-medium", "font-mono text-xs"],
+  }],
+  ["pages/account-settings/MFAPanel.tsx", {
+    required: ['variant="compact"', 'leading="relaxed"', "type-family-mono type-caption", "type-family-mono type-body-sm"],
+    forbidden: ["text-base", "font-mono text-xs", "font-mono text-sm", "leading-relaxed"],
+  }],
+  ["pages/account-settings/PasskeysPanel.tsx", {
+    required: ['weight="semibold"', "type-caption"],
+    forbidden: ["font-semibold", "text-xs"],
+  }],
+  ["pages/account-settings/SessionsPanel.tsx", {
+    required: ["type-weight-medium", "type-family-mono type-caption"],
+    forbidden: ['className="font-medium"', "font-mono text-xs"],
+  }],
+  ["pages/ForgotPassword.tsx", {
+    required: ["type-body-sm type-weight-medium text-primary hover:underline"],
+    forbidden: ["text-sm font-medium text-primary hover:underline"],
+  }],
+  ["pages/ResetPassword.tsx", {
+    required: ["type-body-sm type-weight-medium text-primary hover:underline"],
+    forbidden: ["text-sm font-medium text-primary hover:underline"],
+  }],
+  ["pages/NotFound.tsx", {
+    required: ['family="mono"'],
+    forbidden: ['className="font-mono"'],
+  }],
 ]);
 
 

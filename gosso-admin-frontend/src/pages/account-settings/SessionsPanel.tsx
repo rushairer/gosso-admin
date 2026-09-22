@@ -97,12 +97,12 @@ export default function SessionsPanel() {
                         <TableCell>
                           <div className="flex min-w-52 items-center gap-2">
                             <Laptop aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
-                            <span className="font-medium">{parseUserAgent(session.user_agent)}</span>
+                            <span className="type-weight-medium">{parseUserAgent(session.user_agent)}</span>
                             {isCurrent ? <Tag color="success">{t('sessions.currentSession')}</Tag> : null}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1.5 type-family-mono type-caption text-muted-foreground">
                             <MapPin aria-hidden="true" className="size-3" />
                             {session.ip}
                           </span>
