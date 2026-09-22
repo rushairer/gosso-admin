@@ -1,6 +1,6 @@
 # Gosso Admin Frozen Canonical Recertification
 
-Status: **verified / manual-reviewed**
+Status: **verified baseline / corrective follow-up candidate**
 
 Date: 2026-09-22
 
@@ -162,6 +162,29 @@ These divergences do not authorize Product-local recreation of shared primitive 
 This recertification does not change OAuth2/OIDC semantics, Authorization Code + PKCE, callback/token exchange behavior, JWT/session lifecycle, RequireAuth/RequireAdmin, Sudo/recent-MFA, MFA enrollment/recovery, Passkey/WebAuthn, password-reset security, session revocation, OAuth client credentials, permissions, audit logging, API contracts, backend behavior, CSP or cookie policy.
 
 Fixture/browser evidence proves presentation and interaction ownership only.
+
+## Corrective follow-up: role Select inside Modal
+
+Status: **candidate / awaiting fresh rendered evidence**
+
+The stale pre-0.4.8 PR #66 contained one useful idea that was not part of the merged recertification: exercising the Product's real role-assignment `Select` inside `AssignRolesModal`.
+
+Its original test failed for a real accessibility reason, not because the 0.4.8 Select overlay fix was missing. `AssignRolesModal` wrapped the real `Select` / fallback `Input` inside an extra `div` beneath `FormField`. The Foundation-level A11Y-D001 fix correctly transfers label/required/description semantics to the direct child control owner, so this Product composition prevented the visible combobox from receiving the `分配新角色` accessible name.
+
+The corrective candidate:
+
+- makes `Select` or `Input` the direct `FormField` child;
+- keeps the submit Button as a sibling in the same responsive row with bottom alignment;
+- preserves the visible label and stable `assign-role` id;
+- verifies `aria-labelledby="assign-role-label"` and the native label `for="assign-role"` relationship;
+- opens the portaled Select options while the parent Modal remains visible;
+- chooses the `admin` role option and verifies the parent Modal remains the interaction owner after selection;
+- retains a passing rendered screenshot;
+- locks the reviewed composition in `check-ui-contracts.mjs`.
+
+The Product role-name typography is also normalized from raw `font-semibold` to semantic `Text weight="semibold"`.
+
+This follow-up does not alter authorization rules, Sudo/recent-MFA behavior, account APIs or role-assignment business semantics.
 
 ## Certification conclusion
 

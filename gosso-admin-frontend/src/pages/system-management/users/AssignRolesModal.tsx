@@ -63,7 +63,7 @@ export function AssignRolesModal({
                     <ShieldIcon aria-hidden="true" className="size-4" />
                   </span>
                   <div className="min-w-0">
-                    <Text as="div" className="font-semibold">
+                    <Text as="div" weight="semibold">
                       {role.name}
                     </Text>
                     {role.description ? (
@@ -91,45 +91,43 @@ export function AssignRolesModal({
 
         {!isSelf ? (
           <form onSubmit={handleAddRoleSubmit} className="border-t pt-5">
-            <FormField id="assign-role" label={t('users.assignNewRoleLabel')}>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <div className="min-w-0 flex-1">
-                  {discoveredRoles.length > 0 ? (
-                    <Select
-                      id="assign-role"
-                      value={newRoleInput}
-                      onChange={(value) => setNewRoleInput(Array.isArray(value) ? (value[0] ?? '') : value)}
-                    >
-                      <option value="">{t('users.selectDiscoveredRole')}</option>
-                      {discoveredRoles
-                        .filter((role) => !account.roles?.some((assigned) => assigned.id === role.id))
-                        .map((role) => (
-                          <option key={role.id} value={role.id}>
-                            {role.name} ({role.id.substring(0, 8)})
-                          </option>
-                        ))}
-                    </Select>
-                  ) : (
-                    <Input
-                      id="assign-role"
-                      type="text"
-                      placeholder={t('users.enterRoleUuid')}
-                      value={newRoleInput}
-                      onChange={(event) => setNewRoleInput(event.target.value)}
-                    />
-                  )}
-                </div>
-                <Button
-                  type="submit"
-                  variant="solid"
-                  color="primary"
-                  loading={assigning}
-                  disabled={!newRoleInput || assigning}
-                >
-                  {t('common.assign')}
-                </Button>
-              </div>
-            </FormField>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <FormField id="assign-role" label={t('users.assignNewRoleLabel')} className="min-w-0 flex-1">
+                {discoveredRoles.length > 0 ? (
+                  <Select
+                    id="assign-role"
+                    value={newRoleInput}
+                    onChange={(value) => setNewRoleInput(Array.isArray(value) ? (value[0] ?? '') : value)}
+                  >
+                    <option value="">{t('users.selectDiscoveredRole')}</option>
+                    {discoveredRoles
+                      .filter((role) => !account.roles?.some((assigned) => assigned.id === role.id))
+                      .map((role) => (
+                        <option key={role.id} value={role.id}>
+                          {role.name} ({role.id.substring(0, 8)})
+                        </option>
+                      ))}
+                  </Select>
+                ) : (
+                  <Input
+                    id="assign-role"
+                    type="text"
+                    placeholder={t('users.enterRoleUuid')}
+                    value={newRoleInput}
+                    onChange={(event) => setNewRoleInput(event.target.value)}
+                  />
+                )}
+              </FormField>
+              <Button
+                type="submit"
+                variant="solid"
+                color="primary"
+                loading={assigning}
+                disabled={!newRoleInput || assigning}
+              >
+                {t('common.assign')}
+              </Button>
+            </div>
           </form>
         ) : null}
       </div>
