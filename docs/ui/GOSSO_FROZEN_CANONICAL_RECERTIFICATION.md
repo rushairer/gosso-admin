@@ -208,3 +208,22 @@ Gosso Admin is **verified / manual-reviewed** against the frozen Gouno UI baseli
 The final follow-up certification commit changes only this review record, not the manually reviewed Product or parity source paths. The repository gates must still pass on that final PR head before merge.
 
 Any later change to the exact `@gouno/ui` package baseline or to the reviewed Product/canonical ownership paths requires fresh validation under the same manual-first discipline.
+
+
+## Machine-readable freshness governance
+
+The durable machine-readable authority for this certification is `docs/ui/showcase-parity-certifications.json`; `gosso-admin-frontend/scripts/check-showcase-parity-certification.mjs` enforces it.
+
+The accepted post-merge Product baseline is `f76086bd493fefc441ec045adc0c30879e9e0deb`. That exact main ref was revalidated with CI, Images, Security, Gosso Showcase Parity and UI Browser Acceptance after merge.
+
+Freshness is fail-closed:
+
+- certified Product-owned path changes make the current entry stale;
+- an exact `@gouno/ui` version change makes the current entry stale;
+- certified Gouno UI canonical path changes make the current entry stale when paired parity checks current upstream main;
+- a change in the frozen Gosso Product id set makes the current entry stale;
+- automated registry verification cannot write an uncertified package upgrade to `main`.
+
+A future PR may explicitly demote the ledger to `needs-manual-recertification` while work is in progress. It may restore `verified` only with new reviewed refs and fresh browser/parity evidence.
+
+This governance layer is the final post-freeze hardening step. It prevents another broad reverse-migration sweep by making certification invalidation narrow, explicit and automatically observable.
