@@ -46,14 +46,6 @@ jobs:
           path: upstream-gouno-ui
           fetch-depth: 0
 
-      - name: Verify frozen certification freshness
-        working-directory: gosso-admin-frontend
-        env:
-          PARITY_STRICT_HISTORY: "1"
-          PARITY_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          GOUNO_UI_CANONICAL_ROOT: ../upstream-gouno-ui
-        run: node scripts/check-showcase-parity-certification.mjs
-
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -62,6 +54,14 @@ jobs:
           cache-dependency-path: |
             gosso-admin-frontend/package-lock.json
             upstream-gouno-ui/package-lock.json
+
+      - name: Verify frozen certification freshness
+        working-directory: gosso-admin-frontend
+        env:
+          PARITY_STRICT_HISTORY: "1"
+          PARITY_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GOUNO_UI_CANONICAL_ROOT: ../upstream-gouno-ui
+        run: node scripts/check-showcase-parity-certification.mjs
 
       - name: Install Gosso Admin
         working-directory: gosso-admin-frontend
