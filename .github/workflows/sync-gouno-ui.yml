@@ -15,12 +15,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: update-gouno-ui
+  group: verify-gouno-ui
   cancel-in-progress: false
 
 jobs:
   update:
-    name: Pin and verify npm registry release
+    name: Verify certified npm registry release
     runs-on: ubuntu-latest
 
     steps:
