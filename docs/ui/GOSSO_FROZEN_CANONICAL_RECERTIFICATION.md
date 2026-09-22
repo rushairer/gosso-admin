@@ -1,6 +1,6 @@
 # Gosso Admin Frozen Canonical Recertification
 
-Status: **candidate / awaiting fresh package, rendered and manual review evidence**
+Status: **verified / manual-reviewed**
 
 Date: 2026-09-22
 
@@ -8,25 +8,26 @@ Date: 2026-09-22
 
 This review renews Gosso Admin Showcase parity after Gouno UI completed CSA-5 and froze `canonical-showcase.json`.
 
-The 2026-09-15 hardening program remains historical engineering evidence, but it is not current certification evidence:
+The 2026-09-15 hardening program remains historical engineering evidence rather than current certification evidence:
 
 - it closed against `@gouno/ui@0.4.1`;
-- Gosso Admin subsequently moved to `0.4.7`;
-- the frozen consumer baseline is the published `@gouno/ui@0.4.8`;
-- the current Gouno UI frozen main is `059bc2806689f70be7178c16fc50a339f6526405`;
-- the frozen Gosso Product matrix now contains 12 Product Showcase ids.
+- Gosso Admin later moved through `0.4.7`;
+- the accepted frozen consumer baseline is the published `@gouno/ui@0.4.8`;
+- the accepted Gouno UI frozen main is `059bc2806689f70be7178c16fc50a339f6526405`;
+- the frozen Gosso Product matrix contains 12 Product Showcase ids.
 
-This is a normal explicit dependency upgrade and recertification, not a broad product-side migration restart.
+This is an explicit dependency upgrade and manual-first recertification, not a broad product-side migration restart.
 
-## Starting baselines
+## Accepted baselines
 
-- Gosso Admin starting main: `a322644c97142bb26af37a93128a6ca2e3c60360`.
+- Gosso Admin manually reviewed Product/parity ref: `fd5f23852a721829fb01c32bc063108bce4d41a0`.
+- Gosso Admin starting main before this recertification: `a322644c97142bb26af37a93128a6ca2e3c60360`.
 - Previous exact package pin: `@gouno/ui@0.4.7`.
-- Candidate exact package pin: `@gouno/ui@0.4.8`.
-- Gouno UI frozen main: `059bc2806689f70be7178c16fc50a339f6526405`.
-- Browser plugin: not available in this session; repository Playwright/GitHub Actions is the rendered validation path.
+- Accepted exact package pin: `@gouno/ui@0.4.8`.
+- Gouno UI frozen ref: `059bc2806689f70be7178c16fc50a339f6526405`.
+- Browser plugin: not available in this session; repository Playwright/GitHub Actions was the rendered validation path.
 
-The package change from 0.4.7 to 0.4.8 is intentionally small: Gouno UI changed shared Modal/Drawer nested-overlay interaction handling and associated tests. That makes a fresh Product quality/parity pass necessary even though the package API surface remains compatible.
+The 0.4.7 → 0.4.8 package change is intentionally small and includes shared Modal/Drawer nested-overlay interaction handling. A fresh Product quality/parity pass was therefore required even though the package API surface remained compatible.
 
 ## Frozen Showcase scope
 
@@ -47,59 +48,125 @@ The 12 frozen Gosso Admin Product ids are:
 
 The Product has 16 real visual routes because the single frozen Account Settings Showcase page owns five real Product subroutes: Profile, Password, MFA, Passkeys and Sessions.
 
-## Manual preflight findings
+## Manual preflight findings and fixes
 
-Before accepting browser evidence, source-by-source comparison against the frozen Showcase found Product-only typography drift in Overview and several System Management routes. The candidate normalizes these locations to the same semantic typography vocabulary already used by the canonical owner:
+Source-by-source comparison against the frozen Showcase found Product-only semantic typography drift in Overview and several System Management routes. The accepted candidate normalized these locations to the same semantic vocabulary already owned by the canonical surfaces:
 
 - Overview Hero, quick-link title/description and quick-navigation label;
 - Clients names, client ids and redirect URI code;
 - Users identity typography;
 - Audit Logs mono/caption cells;
 - Site Settings preview label;
-- System Status section headings, definition rows, endpoint code, status metrics and dependency labels.
+- System Status compact section headings, definition rows, endpoint code, status metrics and dependency labels.
 
-The fixes are presentation-only. They do not alter API calls, auth/security behavior, permissions or route ownership.
+The same pass found both Product-local panel-lead helpers still using pre-canonical hand-built geometry:
 
-`check-ui-contracts.mjs` now retains reviewed required/forbidden markers for these Product files so the same raw typography drift cannot silently return.
+- System Management now follows the frozen `tab-panel-lead` ownership: `min-h-9`, semantic `Text leading="relaxed"` and wrapped actions.
+- Account Settings keeps its helper Product-local, but now follows frozen `settings-composition` / `tab-panel-lead` ownership and semantic SettingRow typography.
 
-A follow-up parity failure also exposed that the Product's shared System Management panel lead still used the pre-canonical hand-built geometry. The candidate now aligns that Product-local helper to the same frozen `tab-panel-lead` ownership (`min-h-9`, semantic `Text leading="relaxed"`, wrapped actions) and locks the contract in `check-ui-contracts.mjs`.
+Profile, MFA, Passkeys, Sessions, Forgot Password, Reset Password and Not Found were also normalized to the semantic typography equivalents already used by their frozen canonical owners.
 
-The same preflight found Account Settings still using the older hand-built panel lead rather than the frozen Showcase composition. The candidate now keeps that helper Product-local but aligns its ownership and geometry to the canonical `settings-composition` / `tab-panel-lead` grammar, including semantic Text, `min-h-9`, wrapped actions and semantic SettingRow typography. Profile, MFA, Passkeys, Sessions and Auth recovery links were normalized to their frozen semantic typography equivalents without changing their real security/business state machines.
+These fixes are presentation-only. They do not alter API calls, permissions, auth/security state machines or route ownership.
+
+`check-ui-contracts.mjs` now contains reviewed required/forbidden markers for these Product files. A final source differential pass found no Product-only raw typography token remaining across the reviewed frozen page families.
 
 ## Parity harness corrections
 
-Fresh paired testing showed three evidence-model bugs rather than Product runtime failures:
+Fresh paired testing exposed evidence-model defects that were corrected without weakening Product/canonical contracts:
 
-- System Status refresh parity was localized by button copy even though Product copy is `刷新` and Showcase copy is `刷新状态`; the harness now scopes the first action button inside the shared canonical panel-lead owner.
-- Passkeys and Sessions are direct collection surfaces, not Card surfaces. The harness now compares the passkey bordered list and sessions Table respectively instead of fabricating a Card requirement.
-- Password remains a Card-backed account-settings surface and keeps its existing Card parity assertion.
-- System Status refresh button width is intentionally text-driven: frozen Showcase uses `刷新状态` while Product localization uses `刷新`. The contract therefore compares Button style/padding and height, not text-dependent width.
+- System Status refresh parity no longer depends on localized button copy. Product uses `刷新` while Showcase uses `刷新状态`; the harness scopes the action inside the shared panel-lead owner.
+- System Status Button style/padding and height must match; text-driven width may differ because the localized labels differ.
+- Passkeys and Sessions are direct collection surfaces, not Card surfaces. The harness compares the bordered passkey list and Sessions Table respectively.
+- Password remains a Card-backed Account Settings surface and keeps its Card parity assertion.
+- Direct paired parity was expanded from the historical representative subset to all 12 frozen Gosso Product ids, with all five real Account Settings routes exercised under the single frozen owner.
 
-These corrections strengthen the evidence model without weakening any Product/canonical contract.
+## Fresh exact-candidate evidence
 
-## Required evidence
+The manually reviewed candidate `fd5f23852a721829fb01c32bc063108bce4d41a0` passed all required gates:
 
-Before promotion to verified/manual-reviewed status, the same candidate head must pass:
+- CI `35680543564` — success;
+- Images `35680543523` — success;
+- Security `35680543531` — success;
+- Gosso Release Compatibility `35680543529` — success;
+- Gosso Showcase Parity `35680543528` — success, **32 / 32** paired tests;
+- UI Browser Acceptance `35680543624` — success, **149 / 149** rendered Product tests.
 
-- Gosso Admin CI / frontend quality;
-- Security;
-- Images;
-- Gosso Showcase Parity against current frozen Gouno UI main;
-- UI Browser Acceptance;
-- exact registry/lock integrity and `/identity-admin` subpath build.
+Retained artifacts:
 
-Manual review must inspect the new paired and Product rendered artifacts directly.
+- paired parity artifact `10674532972` — `gosso-showcase-parity`, SHA-256 `eb23caa56325b8d0800e8d1ca376c2f97326f4eb896f161f89c5f2a0d3105c91`;
+- Product browser artifact `10675002476` — `gosso-admin-browser-acceptance`, SHA-256 `a11dfec8fcda16f63b80cf2f814bc4646816a2f2810fdf2fbe02b09b2acbbd77`.
 
-The direct parity harness must cover all 12 frozen Product ids, not only the historical eight representative pairs. Account Settings must also exercise all five real Product subroutes under the single frozen canonical owner.
+The paired workflow used current `gouno-ui/main`, which remained `059bc2806689f70be7178c16fc50a339f6526405` through this review.
+
+### Browser coverage
+
+The Product acceptance suite exercised:
+
+- 5 authentication/recovery routes × desktop, tablet-landscape, tablet-portrait and mobile × light/dark;
+- login validation, backend error, MFA challenge, Passkey failure, reset-token failure and OAuth callback processing/error ownership;
+- Account Settings route switching, password recent-auth failure, MFA enrollment transition, Passkey registration failure and Session revoke confirmation;
+- Clients edit/destructive Modal, Users destructive confirmation/Sudo boundary, Audit filters/detail, Site Settings failure/recovery and System Status degraded→healthy refresh;
+- 11 AppShell Product routes × 1440 / 1024 / 768 / 390 widths × light/dark.
+
+No document-level horizontal overflow, framework error overlay, broken route shell or unresolved interaction-state failure was found in the accepted run.
+
+## Manual rendered review
+
+Green workflows were not treated as visual proof by themselves. The retained paired and Product artifacts were inspected directly.
+
+### Overview
+
+The Product Hero, role/status placement and quick-link Card family preserve the frozen composition, spacing, surface depth and typography. Real current-user data and Product navigation copy remain Product-owned.
+
+### System Management
+
+Clients, Users and Audit Logs preserve canonical collection/Table ownership, compact row-action geometry and semantic identity/mono typography.
+
+Site Settings keeps the settings form and LoginPreview as sibling surfaces. The preview does not become part of the real settings form or native validation ownership.
+
+System Status preserves the shared panel lead, three status summary Cards, infrastructure Card, OIDC definition surfaces, capability tags and security-policy presentation. Live service values and localized copy are intentionally Product-specific.
+
+### Account Settings
+
+The page-local Tabs remain the single secondary navigation owner. Profile and Password retain canonical form/Card hierarchy.
+
+Passkeys correctly uses the direct bordered collection instead of inventing a wrapper Card. Sessions correctly uses the direct Table collection. MFA preserves the real enrollment/recovery state machine inside the same canonical section hierarchy.
+
+The 390px Product captures were checked for Profile, Password, MFA, Passkeys and Sessions in light and dark mode; the content stacks cleanly without page-level horizontal overflow.
+
+### Authentication / recovery
+
+Login, Forgot Password, Reset Password, OAuth Callback and Not Found preserve the canonical raised AuthPageSurface/Result family across desktop, tablet and 390px mobile layouts in light/dark mode.
+
+The Product keeps real OAuth callback exchange behavior, password-reset token handling, validation and session semantics instead of copying Showcase fixtures.
+
+### Responsive and dark mode
+
+Representative 390px light/dark Product captures for Overview, System Management and Account Settings were inspected directly. Long tables/collections remain contained by their intended region, page shells do not overflow the document, actions remain reachable, and no overlay or z-index regression was observed.
+
+## Intentional Product divergences
+
+The certification explicitly permits:
+
+- real Product API data, account/client/session/passkey/audit cardinality and timestamps instead of Showcase fixture values;
+- translated Product copy where semantics remain equivalent to frozen Showcase copy;
+- System Status Product label `刷新` versus Showcase label `刷新状态`, with text-driven Button width allowed to differ while primitive styling/height remains canonical;
+- Product-only security actions and Sudo/recent-MFA/WebAuthn/OAuth state machines;
+- real GOSSO API loading/error/mutation behavior;
+- five Product Account Settings routes represented by one frozen canonical page-local Tabs owner.
+
+These divergences do not authorize Product-local recreation of shared primitive styling, surface hierarchy or navigation grammar.
 
 ## Security boundary
 
-This recertification does not change OAuth2/OIDC semantics, Authorization Code + PKCE, callback/token exchange behavior, JWT/session lifecycle, RequireAuth/RequireAdmin, Sudo/recent-MFA, MFA enrollment/recovery, Passkey/WebAuthn, password reset security, session revocation, OAuth client credentials, permissions, audit logging, API contracts, backend behavior, CSP or cookie policy.
+This recertification does not change OAuth2/OIDC semantics, Authorization Code + PKCE, callback/token exchange behavior, JWT/session lifecycle, RequireAuth/RequireAdmin, Sudo/recent-MFA, MFA enrollment/recovery, Passkey/WebAuthn, password-reset security, session revocation, OAuth client credentials, permissions, audit logging, API contracts, backend behavior, CSP or cookie policy.
 
 Fixture/browser evidence proves presentation and interaction ownership only.
 
-## Promotion rule
+## Certification conclusion
 
-Do not claim Gosso Admin is re-certified merely because builds are green.
+Gosso Admin is **verified / manual-reviewed** against the frozen Gouno UI baseline above.
 
-If fresh evidence finds a canonical defect, reopen/fix the canonical owner first. If it finds Product-only drift, fix Gosso Admin and rerun the same exact-head gates. Only after direct artifact inspection may the review move from candidate to verified.
+The final certification commit changes only this review record, not the manually reviewed Product or parity source paths. The repository gates must still pass on that final PR head before merge.
+
+Any later change to the exact `@gouno/ui` package baseline or to the reviewed Product/canonical ownership paths requires fresh validation under the same manual-first discipline.
