@@ -73,6 +73,7 @@ Fresh paired testing showed three evidence-model bugs rather than Product runtim
 - System Status refresh parity was localized by button copy even though Product copy is `刷新` and Showcase copy is `刷新状态`; the harness now scopes the first action button inside the shared canonical panel-lead owner.
 - Passkeys and Sessions are direct collection surfaces, not Card surfaces. The harness now compares the passkey bordered list and sessions Table respectively instead of fabricating a Card requirement.
 - Password remains a Card-backed account-settings surface and keeps its existing Card parity assertion.
+- System Status refresh button width is intentionally text-driven: frozen Showcase uses `刷新状态` while Product localization uses `刷新`. The contract therefore compares Button style/padding and height, not text-dependent width.
 
 These corrections strengthen the evidence model without weakening any Product/canonical contract.
 

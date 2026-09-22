@@ -138,7 +138,8 @@ for (const theme of ["light", "dark"]) {
 
     const showcaseRefresh = showcaseLead.getByRole("button").first();
     const productRefresh = productLead.getByRole("button").first();
-    expect(await geometry(productRefresh)).toEqual(await geometry(showcaseRefresh));
+    expect(await styleFingerprint(productRefresh)).toEqual(await styleFingerprint(showcaseRefresh));
+    expect((await geometry(productRefresh)).height).toBe((await geometry(showcaseRefresh)).height);
 
     expect(pair.unknown).toEqual([]);
     await proveNoOverflow(pair.showcase, pair.product);
