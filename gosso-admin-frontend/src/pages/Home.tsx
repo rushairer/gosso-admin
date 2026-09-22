@@ -32,8 +32,8 @@ function QuickCard({ link }: { link: QuickLink }) {
           <Icon className="size-5" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-base font-semibold">{title}</span>
-          <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{description}</span>
+          <span className="block type-body type-weight-semibold">{title}</span>
+          <span className="mt-1 block type-caption type-leading-relaxed text-muted-foreground">{description}</span>
         </span>
         <ArrowRight
           aria-hidden="true"
@@ -111,7 +111,7 @@ export default function Home() {
               )}
             </div>
             <div className="flex min-w-0 flex-wrap items-center gap-3 sm:gap-4">
-              <Heading level={1} className="text-2xl sm:text-3xl">
+              <Heading level={1} variant="hero">
                 {userAdmin ? t('home.title') : t('home.userTitle')}
               </Heading>
               <Tag color="success">
@@ -122,7 +122,7 @@ export default function Home() {
             </div>
           </div>
 
-          <Text tone="muted" className="max-w-3xl leading-relaxed">
+          <Text tone="muted" leading="relaxed" className="max-w-3xl">
             {userAdmin ? t('home.description') : t('home.userDescription')}
           </Text>
 
@@ -153,7 +153,7 @@ export default function Home() {
       ) : null}
 
       <section aria-labelledby="home-quick-navigation" className="flex flex-col gap-5">
-        <Heading id="home-quick-navigation" level={2} className="text-sm font-semibold text-muted-foreground">
+        <Heading id="home-quick-navigation" level={2} variant="label" className="text-muted-foreground">
           {t('home.quickNavigation')}
         </Heading>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">

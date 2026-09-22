@@ -47,6 +47,21 @@ The 12 frozen Gosso Admin Product ids are:
 
 The Product has 16 real visual routes because the single frozen Account Settings Showcase page owns five real Product subroutes: Profile, Password, MFA, Passkeys and Sessions.
 
+## Manual preflight findings
+
+Before accepting browser evidence, source-by-source comparison against the frozen Showcase found Product-only typography drift in Overview and several System Management routes. The candidate normalizes these locations to the same semantic typography vocabulary already used by the canonical owner:
+
+- Overview Hero, quick-link title/description and quick-navigation label;
+- Clients names, client ids and redirect URI code;
+- Users identity typography;
+- Audit Logs mono/caption cells;
+- Site Settings preview label;
+- System Status section headings, definition rows, endpoint code, status metrics and dependency labels.
+
+The fixes are presentation-only. They do not alter API calls, auth/security behavior, permissions or route ownership.
+
+`check-ui-contracts.mjs` now retains reviewed required/forbidden markers for these Product files so the same raw typography drift cannot silently return.
+
 ## Required evidence
 
 Before promotion to verified/manual-reviewed status, the same candidate head must pass:

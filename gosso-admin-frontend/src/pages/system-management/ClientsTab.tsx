@@ -260,9 +260,9 @@ export default function ClientsTab() {
               {clients.map((client) => (
                 <TableRow key={client.client_id}>
                   <TableCell className="min-w-56 whitespace-normal">
-                    <div className="font-semibold">{client.name}</div>
+                    <div className="type-weight-semibold">{client.name}</div>
                     <code
-                      className="mt-1 block max-w-64 truncate text-xs text-muted-foreground"
+                      className="mt-1 block max-w-64 truncate type-family-mono type-caption text-muted-foreground"
                       title={client.client_id}
                     >
                       {client.client_id}
@@ -291,7 +291,7 @@ export default function ClientsTab() {
                           className="flex items-center gap-2 rounded-md bg-muted/60 px-2 py-1.5"
                           title={uri}
                         >
-                          <code className="min-w-0 flex-1 truncate text-xs">{uri}</code>
+                          <code className="min-w-0 flex-1 truncate type-family-mono type-caption">{uri}</code>
                           <IconButton
                             label={chinese ? `复制重定向 URI：${uri}` : `Copy redirect URI: ${uri}`}
                             size="small"

@@ -11,6 +11,34 @@ const retiredVendoredAssets = ["public/ui-bootstrap.js", "public/gosso-admin.svg
 const allowedGounoEntrypoints = new Set(["@gouno/ui/core", "@gouno/ui/gouno", "@gouno/ui/theme"]);
 const directRadixImport = /(?:\bfrom\s+|\bimport\s*\(\s*)["']@radix-ui\//;
 
+const semanticTypographyContracts = new Map([
+  ["pages/Home.tsx", {
+    required: ["type-body type-weight-semibold", "type-caption type-leading-relaxed", 'variant="hero"', 'leading="relaxed"', 'variant="label"'],
+    forbidden: ["text-base font-semibold", "text-xs leading-relaxed", "text-2xl sm:text-3xl", "max-w-3xl leading-relaxed", "text-sm font-semibold text-muted-foreground"],
+  }],
+  ["pages/system-management/ClientsTab.tsx", {
+    required: ["type-weight-semibold", "type-family-mono type-caption"],
+    forbidden: ["font-semibold", "truncate text-xs"],
+  }],
+  ["pages/system-management/UsersTab.tsx", {
+    required: ["type-weight-semibold", 'family="mono"'],
+    forbidden: ['className="font-semibold"', 'className="mt-1 font-mono"'],
+  }],
+  ["pages/system-management/AuditLogsTab.tsx", {
+    required: ["type-family-mono type-caption"],
+    forbidden: ["font-mono text-xs"],
+  }],
+  ["pages/system-management/SiteSettingsTab.tsx", {
+    required: ['<Text size="sm" weight="medium">'],
+    forbidden: ['<Text size="sm" className="font-medium">'],
+  }],
+  ["pages/system-management/SystemStatusTab.tsx", {
+    required: ['variant="compact"', "type-body-sm", "type-family-mono type-body-sm", "type-body-lg type-weight-semibold", "type-weight-medium"],
+    forbidden: ["text-base", "font-mono text-xs", "text-lg font-semibold", 'className="font-medium"'],
+  }],
+]);
+
+
 async function collect(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const path = join(directory, entry.name);
@@ -142,6 +170,15 @@ for (const path of files) {
   const source = await readFile(path, "utf8");
   if (retiredProductStyles.has(name)) failures.push(`${name}: retired legacy stylesheet must not be reintroduced; canonical reset, fonts and primitive styling are owned by @gouno/ui`);
   if ((name.endsWith(".ts") || name.endsWith(".tsx")) && directRadixImport.test(source)) failures.push(`${name}: direct @radix-ui imports bypass @gouno/ui ownership; consume the canonical Gouno UI primitive instead`);
+  const typographyContract = semanticTypographyContracts.get(name);
+  if (typographyContract) {
+    for (const marker of typographyContract.required) {
+      if (!source.includes(marker)) failures.push(`${name}: missing reviewed semantic typography marker ${marker}`);
+    }
+    for (const marker of typographyContract.forbidden) {
+      if (source.includes(marker)) failures.push(`${name}: reviewed raw typography drift must not return: ${marker}`);
+    }
+  }
   if (name === "pages/Home.tsx") {
     if (!source.includes("<Card\n        interactive\n        padding=\"none\"")) {
       failures.push(`${name}: Overview quick links must keep the canonical interactive Card composition`);

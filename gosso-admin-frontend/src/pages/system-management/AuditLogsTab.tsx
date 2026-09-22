@@ -143,14 +143,14 @@ export default function AuditLogsTab() {
             <TableBody>
               {auditLogs.map((log) => (
                 <TableRow key={log.id}>
-                  <TableCell className="whitespace-nowrap font-mono text-xs text-muted-foreground">
+                  <TableCell className="whitespace-nowrap type-family-mono type-caption text-muted-foreground">
                     {log.created_at ? new Date(log.created_at).toLocaleString() : '-'}
                   </TableCell>
                   <TableCell>
                     <Tag>{log.action}</Tag>
                   </TableCell>
-                  <TableCell className="font-mono text-xs">{log.actor}</TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">{log.account_id || '-'}</TableCell>
+                  <TableCell className="type-family-mono type-caption">{log.actor}</TableCell>
+                  <TableCell className="type-family-mono type-caption text-muted-foreground">{log.account_id || '-'}</TableCell>
                   <TableCell className="text-right">
                     <Button size="small" onClick={() => setSelectedAuditLog(log)} disabled={auditLoading}>
                       {t('common.view')}
