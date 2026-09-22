@@ -11,7 +11,7 @@
     {
       "id": "gosso-admin-frozen",
       "scope": "All 12 frozen Gosso Admin Product Showcase pages and their 16 real Product routes",
-      "status": "verified",
+      "status": "needs-manual-recertification",
       "reviewMethod": "manual-first",
       "reviewDate": "2026-09-22",
       "manualReview": "docs/ui/GOSSO_FROZEN_CANONICAL_RECERTIFICATION.md",
