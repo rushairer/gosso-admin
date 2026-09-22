@@ -16,10 +16,10 @@
       "reviewDate": "2026-09-22",
       "manualReview": "docs/ui/GOSSO_FROZEN_CANONICAL_RECERTIFICATION.md",
       "reviewedRefs": {
-        "gossoAdmin": "f76086bd493fefc441ec045adc0c30879e9e0deb",
-        "gounoUi": "059bc2806689f70be7178c16fc50a339f6526405"
+        "gossoAdmin": "f128d3804afea5a2213dc2d09ca1b3b0180f1af8",
+        "gounoUi": "4495147ae0b9807d2e5c9137187cfdc3e906cceb"
       },
-      "gounoUiPackageVersion": "0.4.8",
+      "gounoUiPackageVersion": "0.4.9",
       "canonicalIds": [
         "gosso-overview",
         "gosso-account-settings",
@@ -75,40 +75,45 @@
         "runs": [
           {
             "name": "CI",
-            "id": 35682284551,
+            "id": 35721916967,
             "result": "success"
           },
           {
             "name": "Images",
-            "id": 35682284514,
+            "id": 35721916904,
             "result": "success"
           },
           {
             "name": "Security",
-            "id": 35682284521,
+            "id": 35721916949,
+            "result": "success"
+          },
+          {
+            "name": "Gosso Release Compatibility",
+            "id": 35721917002,
             "result": "success"
           },
           {
             "name": "Gosso Showcase Parity",
-            "id": 35682284735,
+            "id": 35721917007,
             "result": "success"
           },
           {
             "name": "UI Browser Acceptance",
-            "id": 35682284516,
+            "id": 35721916916,
             "result": "success"
           }
         ],
         "artifacts": [
           {
-            "id": 10675965048,
+            "id": 10692151262,
             "name": "gosso-showcase-parity",
-            "sha256": "6facc26d49c8d73fb6e9b8d80de05181b692c26a5de878bf3afdbb1c5d731ea4"
+            "sha256": "44524f8698a8fb49412ce7d0a8d620e8fea78cb903896cbb653987ff8068d70c"
           },
           {
-            "id": 10675400816,
+            "id": 10691971354,
             "name": "gosso-admin-browser-acceptance",
-            "sha256": "c111c991cc5a8b2654c8819b4e1b57dd6f85fb10f41750b8da5cd7ac08af498b"
+            "sha256": "f0bcf01b17401ad8508fbe53349fdf71e9b8c9040ac97a7464269cad3f6a2efe"
           }
         ]
       },
