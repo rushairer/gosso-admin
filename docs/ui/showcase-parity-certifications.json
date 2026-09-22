@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "policy": "manual-first-v1",
+  "authority": "Gosso Admin frozen Showcase parity certification. Product business, API and security semantics remain owned by gosso-admin.",
+  "statuses": [
+    "needs-manual-recertification",
+    "verified",
+    "blocked"
+  ],
+  "certifications": [
+    {
+      "id": "gosso-admin-frozen",
+      "scope": "All 12 frozen Gosso Admin Product Showcase pages and their 16 real Product routes",
+      "status": "verified",
+      "reviewMethod": "manual-first",
+      "reviewDate": "2026-09-22",
+      "manualReview": "docs/ui/GOSSO_FROZEN_CANONICAL_RECERTIFICATION.md",
+      "reviewedRefs": {
+        "gossoAdmin": "f76086bd493fefc441ec045adc0c30879e9e0deb",
+        "gounoUi": "059bc2806689f70be7178c16fc50a339f6526405"
+      },
+      "gounoUiPackageVersion": "0.4.8",
+      "canonicalIds": [
+        "gosso-overview",
+        "gosso-account-settings",
+        "gosso-not-found",
+        "gosso-system-clients",
+        "gosso-system-users",
+        "gosso-system-audit-logs",
+        "gosso-system-site-settings",
+        "gosso-system-status",
+        "gosso-login",
+        "gosso-forgot-password",
+        "gosso-reset-password",
+        "gosso-callback"
+      ],
+      "stateCoverage": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "feedback",
+        "collection",
+        "modal",
+        "auth",
+        "responsive",
+        "dark-mode"
+      ],
+      "reviewDimensions": [
+        "composition",
+        "typography",
+        "spacing",
+        "feedback",
+        "interaction",
+        "responsive"
+      ],
+      "ownedPaths": [
+        "gosso-admin-frontend/src/App.tsx",
+        "gosso-admin-frontend/src/main.tsx",
+        "gosso-admin-frontend/src/components/auth/",
+        "gosso-admin-frontend/src/components/branding/",
+        "gosso-admin-frontend/src/components/layout/",
+        "gosso-admin-frontend/src/pages/",
+        "gosso-admin-frontend/src/styles/",
+        "gosso-admin-frontend/src/i18n/"
+      ],
+      "canonicalPaths": [
+        "canonical-showcase.json",
+        "showcase/demos/products/gosso-admin/",
+        "showcase/components/tab-panel-lead.tsx",
+        "showcase/components/brand-mark.tsx",
+        "showcase/app/page-router.tsx"
+      ],
+      "browserEvidence": {
+        "runs": [
+          { "name": "CI", "id": 35682284551, "result": "success" },
+          { "name": "Images", "id": 35682284514, "result": "success" },
+          { "name": "Security", "id": 35682284521, "result": "success" },
+          { "name": "Gosso Showcase Parity", "id": 35682284735, "result": "success" },
+          { "name": "UI Browser Acceptance", "id": 35682284516, "result": "success" }
+        ],
+        "artifacts": [
+          {
+            "id": 10675965048,
+            "name": "gosso-showcase-parity",
+            "sha256": "6facc26d49c8d73fb6e9b8d80de05181b692c26a5de878bf3afdbb1c5d731ea4"
+          },
+          {
+            "id": 10675400816,
+            "name": "gosso-admin-browser-acceptance",
+            "sha256": "c111c991cc5a8b2654c8819b4e1b57dd6f85fb10f41750b8da5cd7ac08af498b"
+          }
+        ]
+      },
+      "intentionalDivergences": [
+        "Real Product API data, account/client/session/passkey/audit cardinality, timestamps and localized copy replace Showcase fixture values.",
+        "The single frozen Account Settings canonical page owns five real Product subroutes: Profile, Password, MFA, Passkeys and Sessions.",
+        "Security state machines such as OAuth callback exchange, Sudo/recent-MFA, WebAuthn/Passkeys, password reset and session revocation remain Product-owned behavior.",
+        "System Status Product copy may be shorter than Showcase fixture copy while preserving the same primitive styling, hierarchy and responsive ownership."
+      ]
+    }
+  ]
+}

@@ -14,9 +14,10 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "quality": "npm run format:check && npm run lint && npm run lint:ui && npm run lint:css && npm run typecheck && npm run test:coverage && npm run build",
+    "quality": "npm run format:check && npm run lint && npm run lint:ui && npm run lint:css && npm run check:showcase-certification && npm run typecheck && npm run test:coverage && npm run build",
     "preview": "vite preview",
-    "lint:css": "node scripts/check-css-cascade.mjs"
+    "lint:css": "node scripts/check-css-cascade.mjs",
+    "check:showcase-certification": "node scripts/check-showcase-parity-certification.mjs"
   },
   "dependencies": {
     "@gosso/client": "0.9.3",

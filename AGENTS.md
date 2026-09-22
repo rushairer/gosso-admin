@@ -31,3 +31,13 @@ This document defines the **immutable architectural rules, security baselines, a
 
 - Follow Semantic Versioning (SemVer).
 - Dependent on `@gosso/client` and `gosso`. Changes in GOSSO API contract must be reflected here before releasing downstream projects.
+
+### UI Certification Freshness
+
+Before changing `@gouno/ui` or a certified Gosso Admin UI owner, read `docs/ui/showcase-parity-certifications.json`.
+
+- `verified` is valid only for the recorded Product ref, Gouno UI ref, exact package version, owned paths and canonical paths.
+- If a certified Product path or package version changes, demote the entry to `needs-manual-recertification` in the same PR unless fresh manual-first evidence is completed there.
+- Restore `verified` only after paired Showcase parity, Product browser acceptance and direct rendered review.
+- Never use the registry verification workflow to push an uncertified `@gouno/ui` upgrade directly to `main`.
+- If current `gouno-ui/main` changes a certified canonical path, stop propagation and recertify from the canonical owner rather than patching around the difference locally.

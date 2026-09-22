@@ -25,11 +25,25 @@ Consume `@gouno/ui` as an exact immutable npm registry version. Keep `package.js
 
 Gouno UI registry releases are the stable distribution mechanism. Upgrade through explicit SemVer dependency changes plus the existing quality gates rather than product-side migration forks.
 
+## Showcase Certification Freshness
+
+The machine-readable certification authority is `docs/ui/showcase-parity-certifications.json`. The narrative evidence remains `docs/ui/GOSSO_FROZEN_CANONICAL_RECERTIFICATION.md`.
+
+A `verified` certification is valid only for the exact combination recorded in the ledger: the reviewed Gosso Admin Product ref, the reviewed Gouno UI Canonical ref, the exact `@gouno/ui` registry version, the listed Product-owned paths, the listed canonical Showcase paths, and the frozen Gosso Product id set.
+
+Any change to a certified Product-owned path, the exact `@gouno/ui` version, or a certified canonical path makes the previous evidence stale. The same PR must either demote the entry to `needs-manual-recertification` or renew `verified` only after fresh paired parity, Product browser evidence and direct manual rendered review.
+
+CI checks Product/package freshness from Git history. Gosso Showcase Parity checks current `gouno-ui/main` against the reviewed canonical ref and frozen matrix. Scheduled parity therefore turns red when upstream Canonical changes even if this repository has not changed.
+
+The registry verification workflow must never push a new `@gouno/ui` version directly to `main`. A version different from the certified baseline requires a normal manual recertification PR first.
+
+Do not restore `verified` merely because automated tests are green. Manual rendered evidence remains part of the certification contract.
+
 ## Migration Status
 
 The Gosso Admin reverse-migration and design convergence onto canonical Gouno UI is closed as of 2026-09-09. The production application is now a normal consumer of the shared package rather than an active migration target.
 
-Future Gouno UI changes must flow through the registry dependency update workflow and be handled as normal dependency upgrades: validate exported contracts, lock the exact registry release, run the full product quality gates, and make only the product-side compatibility or fidelity changes required by an intentional upstream contract change.
+Future Gouno UI changes must flow through a normal manual recertification PR and be handled as explicit dependency upgrades: validate exported contracts, lock the exact registry release, run the full product quality/parity/browser gates, directly review rendered evidence, and make only the product-side compatibility or fidelity changes required by an intentional upstream contract change. The registry workflow verifies a certified pin; it does not bypass certification by writing upgrades directly to main.
 
 Do not reopen a broad product-side migration program merely because Gouno UI gains new Showcase examples, documentation, tests, Patterns, or unrelated product fixtures. Reopen migration-level work only for an explicit breaking shared contract or an intentional redesign of the Gosso Admin canonical product language.
 
