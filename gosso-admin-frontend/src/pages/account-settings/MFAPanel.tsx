@@ -234,7 +234,10 @@ export default function MFAPanel() {
               </Text>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {backupCodes.map((code) => (
-                  <code key={code} className="rounded-md border bg-muted/30 px-3 py-2 text-center type-family-mono type-body-sm">
+                  <code
+                    key={code}
+                    className="rounded-md border bg-muted/30 px-3 py-2 text-center type-family-mono type-body-sm"
+                  >
                     {code}
                   </code>
                 ))}

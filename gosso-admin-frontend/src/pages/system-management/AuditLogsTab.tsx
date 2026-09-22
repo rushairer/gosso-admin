@@ -150,7 +150,9 @@ export default function AuditLogsTab() {
                     <Tag>{log.action}</Tag>
                   </TableCell>
                   <TableCell className="type-family-mono type-caption">{log.actor}</TableCell>
-                  <TableCell className="type-family-mono type-caption text-muted-foreground">{log.account_id || '-'}</TableCell>
+                  <TableCell className="type-family-mono type-caption text-muted-foreground">
+                    {log.account_id || '-'}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button size="small" onClick={() => setSelectedAuditLog(log)} disabled={auditLoading}>
                       {t('common.view')}
