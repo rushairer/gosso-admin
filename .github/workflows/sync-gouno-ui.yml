@@ -1,4 +1,4 @@
-name: Update Gouno UI Registry Dependency
+name: Verify Gouno UI Registry Dependency
 
 on:
   push:
@@ -8,11 +8,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Exact @gouno/ui version or npm dist-tag; leave blank to verify the currently pinned version
+        description: Exact @gouno/ui version or npm dist-tag to verify; versions different from the certified baseline require a manual recertification PR
         required: false
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: update-gouno-ui
@@ -54,14 +54,27 @@ jobs:
           test -n "$RESOLVED_VERSION"
           echo "version=$RESOLVED_VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Pin registry dependency and refresh lockfile
-        working-directory: gosso-admin-frontend
+      - name: Enforce manual-first certification baseline
         env:
           GOUNO_UI_VERSION: ${{ steps.ui.outputs.version }}
         run: |
-          set -euo pipefail
-          npm install --save-exact --package-lock-only --ignore-scripts --legacy-peer-deps "@gouno/ui@${GOUNO_UI_VERSION}"
-          npm ci --legacy-peer-deps
+          node --input-type=module <<'EOF'
+          import { readFile } from 'node:fs/promises';
+          const ledger = JSON.parse(await readFile('docs/ui/showcase-parity-certifications.json', 'utf8'));
+          const entry = ledger.certifications?.find((item) => item.id === 'gosso-admin-frozen');
+          if (!entry || entry.status !== 'verified') {
+            throw new Error('Registry verification is blocked while Gosso Showcase parity is not verified. Use a manual recertification PR.');
+          }
+          if (entry.gounoUiPackageVersion !== process.env.GOUNO_UI_VERSION) {
+            throw new Error(
+              `Requested @gouno/ui ${process.env.GOUNO_UI_VERSION} differs from certified ${entry.gounoUiPackageVersion}. Create a manual recertification PR; automated main updates are intentionally blocked.`,
+            );
+          }
+          EOF
+
+      - name: Install certified registry dependency
+        working-directory: gosso-admin-frontend
+        run: npm ci --legacy-peer-deps
 
       - name: Verify published package contract
         working-directory: gosso-admin-frontend
@@ -108,21 +121,3 @@ jobs:
 
       - name: Build Gosso Admin frontend container
         run: docker build -f gosso-admin-frontend/Dockerfile gosso-admin-frontend
-
-      - name: Commit registry dependency update
-        shell: bash
-        env:
-          GOUNO_UI_VERSION: ${{ steps.ui.outputs.version }}
-        run: |
-          set -euo pipefail
-          git add gosso-admin-frontend/package.json gosso-admin-frontend/package-lock.json
-          if git diff --cached --quiet; then
-            echo "@gouno/ui registry dependency is already current."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(ui): use @gouno/ui ${GOUNO_UI_VERSION} registry release"
-          git fetch origin main
-          git rebase origin/main
-          git push origin HEAD:main
