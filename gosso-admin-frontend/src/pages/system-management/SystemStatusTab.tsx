@@ -52,18 +52,12 @@ export default function SystemStatusTab() {
 
   const oidcRows: Array<[ReactNode, ReactNode]> = oidcConfig
     ? [
-        [
-          t('system.issuerLabel'),
-          <code className="type-family-mono type-body-sm">{oidcConfig.issuer}</code>,
-        ],
+        [t('system.issuerLabel'), <code className="type-family-mono type-body-sm">{oidcConfig.issuer}</code>],
         [
           t('system.authorizationEndpoint'),
           <code className="type-family-mono type-body-sm">{oidcConfig.authorization_endpoint}</code>,
         ],
-        [
-          t('system.tokenEndpoint'),
-          <code className="type-family-mono type-body-sm">{oidcConfig.token_endpoint}</code>,
-        ],
+        [t('system.tokenEndpoint'), <code className="type-family-mono type-body-sm">{oidcConfig.token_endpoint}</code>],
         [
           t('system.userinfoEndpoint'),
           <code className="type-family-mono type-body-sm">{oidcConfig.userinfo_endpoint}</code>,
