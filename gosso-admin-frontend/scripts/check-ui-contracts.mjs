@@ -36,6 +36,10 @@ const semanticTypographyContracts = new Map([
     required: ['variant="compact"', "type-body-sm", "type-family-mono type-body-sm", "type-body-lg type-weight-semibold", "type-weight-medium"],
     forbidden: ["text-base", "font-mono text-xs", "text-lg font-semibold", 'className="font-medium"'],
   }],
+  ["pages/system-management/shared.tsx", {
+    required: ['data-pattern="tab-panel-lead"', "min-h-9", 'leading="relaxed"'],
+    forbidden: ['className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"', "max-w-3xl leading-relaxed"],
+  }],
   ["pages/account-settings/shared.tsx", {
     required: ['data-pattern="settings-composition"', 'data-pattern="tab-panel-lead"', 'leading="relaxed"', "type-body-sm type-weight-medium"],
     forbidden: ["text-sm leading-6", "text-sm font-medium", 'className="shrink-0"'],

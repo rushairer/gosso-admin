@@ -62,7 +62,19 @@ The fixes are presentation-only. They do not alter API calls, auth/security beha
 
 `check-ui-contracts.mjs` now retains reviewed required/forbidden markers for these Product files so the same raw typography drift cannot silently return.
 
+A follow-up parity failure also exposed that the Product's shared System Management panel lead still used the pre-canonical hand-built geometry. The candidate now aligns that Product-local helper to the same frozen `tab-panel-lead` ownership (`min-h-9`, semantic `Text leading="relaxed"`, wrapped actions) and locks the contract in `check-ui-contracts.mjs`.
+
 The same preflight found Account Settings still using the older hand-built panel lead rather than the frozen Showcase composition. The candidate now keeps that helper Product-local but aligns its ownership and geometry to the canonical `settings-composition` / `tab-panel-lead` grammar, including semantic Text, `min-h-9`, wrapped actions and semantic SettingRow typography. Profile, MFA, Passkeys, Sessions and Auth recovery links were normalized to their frozen semantic typography equivalents without changing their real security/business state machines.
+
+## Parity harness corrections
+
+Fresh paired testing showed three evidence-model bugs rather than Product runtime failures:
+
+- System Status refresh parity was localized by button copy even though Product copy is `刷新` and Showcase copy is `刷新状态`; the harness now scopes the first action button inside the shared canonical panel-lead owner.
+- Passkeys and Sessions are direct collection surfaces, not Card surfaces. The harness now compares the passkey bordered list and sessions Table respectively instead of fabricating a Card requirement.
+- Password remains a Card-backed account-settings surface and keeps its existing Card parity assertion.
+
+These corrections strengthen the evidence model without weakening any Product/canonical contract.
 
 ## Required evidence
 

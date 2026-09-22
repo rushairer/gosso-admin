@@ -132,8 +132,12 @@ for (const theme of ["light", "dark"]) {
     const productCard = pair.product.locator('[data-slot="card"]').first();
     expect(await styleFingerprint(productCard)).toEqual(await styleFingerprint(showcaseCard));
 
-    const showcaseRefresh = pair.showcase.getByRole("button", { name: /刷新状态/ }).first();
-    const productRefresh = pair.product.getByRole("button", { name: /刷新状态|Refresh/i }).first();
+    const showcaseLead = pair.showcase.locator('[data-pattern="tab-panel-lead"]').first();
+    const productLead = pair.product.locator('[data-pattern="tab-panel-lead"]').first();
+    expect(await styleFingerprint(productLead)).toEqual(await styleFingerprint(showcaseLead));
+
+    const showcaseRefresh = showcaseLead.getByRole("button").first();
+    const productRefresh = productLead.getByRole("button").first();
     expect(await geometry(productRefresh)).toEqual(await geometry(showcaseRefresh));
 
     expect(pair.unknown).toEqual([]);
@@ -170,30 +174,62 @@ for (const theme of ["light", "dark"]) {
     await pair.context.close();
   });
 
-  for (const accountCase of [
-    { key: "password", label: /修改密码/, path: "/account-settings/password", screenshot: "account-password" },
-    { key: "passkeys", label: /通行密钥/, path: "/account-settings/passkeys", screenshot: "account-passkeys" },
-    { key: "sessions", label: /活跃会话/, path: "/account-settings/sessions", screenshot: "account-sessions" },
-  ]) {
-    test(`Account Settings ${accountCase.key} surface matches Showcase (${theme})`, async ({ browser }, testInfo) => {
-      const pair = await openPair(browser, "gosso-account-settings", accountCase.path, theme);
-      await pair.showcase.getByRole("tab", { name: accountCase.label }).click();
+  test(`Account Settings password surface matches Showcase (${theme})`, async ({ browser }, testInfo) => {
+    const pair = await openPair(browser, "gosso-account-settings", "/account-settings/password", theme);
+    await pair.showcase.getByRole("tab", { name: /修改密码/ }).click();
 
-      const showcaseTab = pair.showcase.getByRole("tab", { name: accountCase.label });
-      const productTab = pair.product.getByRole("tab", { name: accountCase.label });
-      await expect(showcaseTab).toHaveAttribute("aria-selected", "true");
-      await expect(productTab).toHaveAttribute("aria-selected", "true");
-      expect(await styleFingerprint(productTab)).toEqual(await styleFingerprint(showcaseTab));
+    const showcaseTab = pair.showcase.getByRole("tab", { name: /修改密码/ });
+    const productTab = pair.product.getByRole("tab", { name: /修改密码|Password/i });
+    await expect(showcaseTab).toHaveAttribute("aria-selected", "true");
+    await expect(productTab).toHaveAttribute("aria-selected", "true");
+    expect(await styleFingerprint(productTab)).toEqual(await styleFingerprint(showcaseTab));
 
-      const showcaseSurface = pair.showcase.locator('[data-slot="card"]').first();
-      const productSurface = pair.product.locator('[data-slot="card"]').first();
-      expect(await styleFingerprint(productSurface)).toEqual(await styleFingerprint(showcaseSurface));
-      expect(pair.unknown).toEqual([]);
-      await proveNoOverflow(pair.showcase, pair.product);
-      await pairScreenshot(pair.showcase, pair.product, `${accountCase.screenshot}-${theme}`, testInfo);
-      await pair.context.close();
-    });
-  }
+    const showcaseSurface = pair.showcase.locator('[data-slot="card"]').first();
+    const productSurface = pair.product.locator('[data-slot="card"]').first();
+    expect(await styleFingerprint(productSurface)).toEqual(await styleFingerprint(showcaseSurface));
+    expect(pair.unknown).toEqual([]);
+    await proveNoOverflow(pair.showcase, pair.product);
+    await pairScreenshot(pair.showcase, pair.product, `account-password-${theme}`, testInfo);
+    await pair.context.close();
+  });
+
+  test(`Account Settings passkeys collection matches Showcase (${theme})`, async ({ browser }, testInfo) => {
+    const pair = await openPair(browser, "gosso-account-settings", "/account-settings/passkeys", theme);
+    await pair.showcase.getByRole("tab", { name: /通行密钥/ }).click();
+
+    const showcaseTab = pair.showcase.getByRole("tab", { name: /通行密钥/ });
+    const productTab = pair.product.getByRole("tab", { name: /通行密钥|Passkey/i });
+    await expect(showcaseTab).toHaveAttribute("aria-selected", "true");
+    await expect(productTab).toHaveAttribute("aria-selected", "true");
+    expect(await styleFingerprint(productTab)).toEqual(await styleFingerprint(showcaseTab));
+
+    const showcaseList = pair.showcase.locator("ul").filter({ has: pair.showcase.locator("li") }).first();
+    const productList = pair.product.locator("ul").filter({ has: pair.product.locator("li") }).first();
+    expect(await styleFingerprint(productList)).toEqual(await styleFingerprint(showcaseList));
+    expect(pair.unknown).toEqual([]);
+    await proveNoOverflow(pair.showcase, pair.product);
+    await pairScreenshot(pair.showcase, pair.product, `account-passkeys-${theme}`, testInfo);
+    await pair.context.close();
+  });
+
+  test(`Account Settings sessions collection matches Showcase (${theme})`, async ({ browser }, testInfo) => {
+    const pair = await openPair(browser, "gosso-account-settings", "/account-settings/sessions", theme);
+    await pair.showcase.getByRole("tab", { name: /活跃会话/ }).click();
+
+    const showcaseTab = pair.showcase.getByRole("tab", { name: /活跃会话/ });
+    const productTab = pair.product.getByRole("tab", { name: /活跃会话|Session/i });
+    await expect(showcaseTab).toHaveAttribute("aria-selected", "true");
+    await expect(productTab).toHaveAttribute("aria-selected", "true");
+    expect(await styleFingerprint(productTab)).toEqual(await styleFingerprint(showcaseTab));
+
+    const showcaseTable = pair.showcase.locator("table").first();
+    const productTable = pair.product.locator("table").first();
+    expect(await styleFingerprint(productTable)).toEqual(await styleFingerprint(showcaseTable));
+    expect(pair.unknown).toEqual([]);
+    await proveNoOverflow(pair.showcase, pair.product);
+    await pairScreenshot(pair.showcase, pair.product, `account-sessions-${theme}`, testInfo);
+    await pair.context.close();
+  });
 
   test(`MFA state surface stays composition-compatible (${theme})`, async ({ browser }, testInfo) => {
     const pair = await openPair(browser, "gosso-account-settings", "/account-settings/mfa", theme);
