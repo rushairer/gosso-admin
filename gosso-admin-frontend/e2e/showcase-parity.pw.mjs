@@ -94,6 +94,59 @@ for (const theme of ["light", "dark"]) {
     await pair.context.close();
   });
 
+  test(`Users collection and row-action geometry match Showcase (${theme})`, async ({ browser }, testInfo) => {
+    const pair = await openPair(browser, "gosso-system-users", "/system-management/users", theme);
+    const showcaseTable = pair.showcase.locator("table").first();
+    const productTable = pair.product.locator("table").first();
+    expect(await styleFingerprint(productTable)).toEqual(await styleFingerprint(showcaseTable));
+
+    const showcaseAction = showcaseTable.locator("tbody tr").first().getByRole("button").first();
+    const productAction = productTable.locator("tbody tr").first().getByRole("button").first();
+    expect(await geometry(productAction)).toEqual(await geometry(showcaseAction));
+
+    expect(pair.unknown).toEqual([]);
+    await proveNoOverflow(pair.showcase, pair.product);
+    await pairScreenshot(pair.showcase, pair.product, `users-${theme}`, testInfo);
+    await pair.context.close();
+  });
+
+  test(`Audit log filters and collection match Showcase (${theme})`, async ({ browser }, testInfo) => {
+    const pair = await openPair(browser, "gosso-system-audit-logs", "/system-management/audit-logs", theme);
+    const showcaseFilter = pair.showcase.locator('[data-slot="card"]').first();
+    const productFilter = pair.product.locator('[data-slot="card"]').first();
+    expect(await styleFingerprint(productFilter)).toEqual(await styleFingerprint(showcaseFilter));
+
+    const showcaseTable = pair.showcase.locator("table").first();
+    const productTable = pair.product.locator("table").first();
+    expect(await styleFingerprint(productTable)).toEqual(await styleFingerprint(showcaseTable));
+
+    expect(pair.unknown).toEqual([]);
+    await proveNoOverflow(pair.showcase, pair.product);
+    await pairScreenshot(pair.showcase, pair.product, `audit-logs-${theme}`, testInfo);
+    await pair.context.close();
+  });
+
+  test(`System status surfaces match Showcase (${theme})`, async ({ browser }, testInfo) => {
+    const pair = await openPair(browser, "gosso-system-status", "/system-management/system", theme);
+    const showcaseCard = pair.showcase.locator('[data-slot="card"]').first();
+    const productCard = pair.product.locator('[data-slot="card"]').first();
+    expect(await styleFingerprint(productCard)).toEqual(await styleFingerprint(showcaseCard));
+
+    const showcaseLead = pair.showcase.locator('[data-pattern="tab-panel-lead"]').first();
+    const productLead = pair.product.locator('[data-pattern="tab-panel-lead"]').first();
+    expect(await styleFingerprint(productLead)).toEqual(await styleFingerprint(showcaseLead));
+
+    const showcaseRefresh = showcaseLead.getByRole("button").first();
+    const productRefresh = productLead.getByRole("button").first();
+    expect(await styleFingerprint(productRefresh)).toEqual(await styleFingerprint(showcaseRefresh));
+    expect((await geometry(productRefresh)).height).toBe((await geometry(showcaseRefresh)).height);
+
+    expect(pair.unknown).toEqual([]);
+    await proveNoOverflow(pair.showcase, pair.product);
+    await pairScreenshot(pair.showcase, pair.product, `system-status-${theme}`, testInfo);
+    await pair.context.close();
+  });
+
   test(`Site Settings form and LoginPreview sibling surfaces match Showcase (${theme})`, async ({ browser }, testInfo) => {
     const pair = await openPair(browser, "gosso-system-site-settings", "/system-management/site-settings", theme);
     const showcaseFormCard = pair.showcase.locator("form").locator('[data-slot="card"]').first();
@@ -119,6 +172,63 @@ for (const theme of ["light", "dark"]) {
     await expect(pair.product.getByRole("tab", { name: /个人资料|Profile/i })).toHaveAttribute("aria-selected", "true");
     expect(pair.unknown).toEqual([]);
     await pairScreenshot(pair.showcase, pair.product, `account-tabs-${theme}`, testInfo);
+    await pair.context.close();
+  });
+
+  test(`Account Settings password surface matches Showcase (${theme})`, async ({ browser }, testInfo) => {
+    const pair = await openPair(browser, "gosso-account-settings", "/account-settings/password", theme);
+    await pair.showcase.getByRole("tab", { name: /修改密码/ }).click();
+
+    const showcaseTab = pair.showcase.getByRole("tab", { name: /修改密码/ });
+    const productTab = pair.product.getByRole("tab", { name: /修改密码|Password/i });
+    await expect(showcaseTab).toHaveAttribute("aria-selected", "true");
+    await expect(productTab).toHaveAttribute("aria-selected", "true");
+    expect(await styleFingerprint(productTab)).toEqual(await styleFingerprint(showcaseTab));
+
+    const showcaseSurface = pair.showcase.locator('[data-slot="card"]').first();
+    const productSurface = pair.product.locator('[data-slot="card"]').first();
+    expect(await styleFingerprint(productSurface)).toEqual(await styleFingerprint(showcaseSurface));
+    expect(pair.unknown).toEqual([]);
+    await proveNoOverflow(pair.showcase, pair.product);
+    await pairScreenshot(pair.showcase, pair.product, `account-password-${theme}`, testInfo);
+    await pair.context.close();
+  });
+
+  test(`Account Settings passkeys collection matches Showcase (${theme})`, async ({ browser }, testInfo) => {
+    const pair = await openPair(browser, "gosso-account-settings", "/account-settings/passkeys", theme);
+    await pair.showcase.getByRole("tab", { name: /通行密钥/ }).click();
+
+    const showcaseTab = pair.showcase.getByRole("tab", { name: /通行密钥/ });
+    const productTab = pair.product.getByRole("tab", { name: /通行密钥|Passkey/i });
+    await expect(showcaseTab).toHaveAttribute("aria-selected", "true");
+    await expect(productTab).toHaveAttribute("aria-selected", "true");
+    expect(await styleFingerprint(productTab)).toEqual(await styleFingerprint(showcaseTab));
+
+    const showcaseList = pair.showcase.locator("ul").filter({ has: pair.showcase.locator("li") }).first();
+    const productList = pair.product.locator("ul").filter({ has: pair.product.locator("li") }).first();
+    expect(await styleFingerprint(productList)).toEqual(await styleFingerprint(showcaseList));
+    expect(pair.unknown).toEqual([]);
+    await proveNoOverflow(pair.showcase, pair.product);
+    await pairScreenshot(pair.showcase, pair.product, `account-passkeys-${theme}`, testInfo);
+    await pair.context.close();
+  });
+
+  test(`Account Settings sessions collection matches Showcase (${theme})`, async ({ browser }, testInfo) => {
+    const pair = await openPair(browser, "gosso-account-settings", "/account-settings/sessions", theme);
+    await pair.showcase.getByRole("tab", { name: /活跃会话/ }).click();
+
+    const showcaseTab = pair.showcase.getByRole("tab", { name: /活跃会话/ });
+    const productTab = pair.product.getByRole("tab", { name: /活跃会话|Session/i });
+    await expect(showcaseTab).toHaveAttribute("aria-selected", "true");
+    await expect(productTab).toHaveAttribute("aria-selected", "true");
+    expect(await styleFingerprint(productTab)).toEqual(await styleFingerprint(showcaseTab));
+
+    const showcaseTable = pair.showcase.locator("table").first();
+    const productTable = pair.product.locator("table").first();
+    expect(await styleFingerprint(productTable)).toEqual(await styleFingerprint(showcaseTable));
+    expect(pair.unknown).toEqual([]);
+    await proveNoOverflow(pair.showcase, pair.product);
+    await pairScreenshot(pair.showcase, pair.product, `account-sessions-${theme}`, testInfo);
     await pair.context.close();
   });
 
@@ -160,6 +270,63 @@ for (const theme of ["light", "dark"]) {
     expect(pair.unknown).toEqual([]);
     await pairScreenshot(pair.showcase, pair.product, `forgot-password-${theme}`, testInfo);
     await pair.context.close();
+  });
+
+  test(`Reset password AuthPageSurface matches Showcase (${theme})`, async ({ browser }, testInfo) => {
+    const pair = await openPair(browser, "gosso-reset-password", "/reset-password#token=fixture-reset-token", theme);
+    const showcaseCard = pair.showcase.locator('[data-slot="card"]').first();
+    const productCard = pair.product.locator('[data-slot="card"]').first();
+    expect(await styleFingerprint(productCard)).toEqual(await styleFingerprint(showcaseCard));
+    expect(await width(productCard)).toBe(await width(showcaseCard));
+
+    const showcasePassword = pair.showcase.locator('input[type="password"]').first();
+    const productPassword = pair.product.locator('input[type="password"]').first();
+    expect(await geometry(productPassword)).toEqual(await geometry(showcasePassword));
+
+    expect(pair.unknown).toEqual([]);
+    await proveNoOverflow(pair.showcase, pair.product);
+    await pairScreenshot(pair.showcase, pair.product, `reset-password-${theme}`, testInfo);
+    await pair.context.close();
+  });
+
+  test(`OAuth callback processing surface matches Showcase (${theme})`, async ({ browser }, testInfo) => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const showcase = await context.newPage();
+    const product = await context.newPage();
+    await setTheme(showcase, theme);
+    await setTheme(product, theme);
+    await product.addInitScript(() => {
+      sessionStorage.setItem("gosso-admin:auth_state", "fixture-state");
+      sessionStorage.setItem("gosso-admin:pkce_verifier", "fixture-verifier");
+    });
+    const unknown = await installApiFixtures(product, {
+      failTokenExchange: true,
+      tokenExchangeDelayMs: 1000,
+    });
+
+    await showcase.goto(
+      `${showcaseOrigin}/?embedded=1&workspace=gosso-admin&brand=gosso-admin#gosso-callback`,
+      { waitUntil: "networkidle" },
+    );
+    await product.goto(
+      "http://127.0.0.1:4173/callback?code=fixture-code&state=fixture-state",
+      { waitUntil: "domcontentloaded" },
+    );
+
+    await expect(product.getByRole("status")).toBeVisible();
+    const showcaseCard = showcase.locator('[data-slot="card"]').first();
+    const productCard = product.locator('[data-slot="card"]').first();
+    expect(await styleFingerprint(productCard)).toEqual(await styleFingerprint(showcaseCard));
+    expect(await width(productCard)).toBe(await width(showcaseCard));
+
+    const showcaseSpinner = showcase.getByRole("status").first();
+    const productSpinner = product.getByRole("status").first();
+    expect(await geometry(productSpinner)).toEqual(await geometry(showcaseSpinner));
+
+    expect(unknown).toEqual([]);
+    await proveNoOverflow(showcase, product);
+    await pairScreenshot(showcase, product, `callback-processing-${theme}`, testInfo);
+    await context.close();
   });
 
   test(`NotFound Result composition matches Showcase (${theme})`, async ({ browser }, testInfo) => {

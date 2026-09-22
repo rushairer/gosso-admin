@@ -166,10 +166,10 @@ export default function PasskeysPanel() {
                       <Key aria-hidden="true" className="size-4" />
                     </span>
                     <div className="min-w-0">
-                      <Text as="div" className="truncate font-semibold">
+                      <Text as="div" weight="semibold" className="truncate">
                         {passkey.name}
                       </Text>
-                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 type-caption text-muted-foreground">
                         <span>{t('passkeys.registeredDevice')}</span>
                         {passkey.created_at ? (
                           <span className="flex items-center gap-1">

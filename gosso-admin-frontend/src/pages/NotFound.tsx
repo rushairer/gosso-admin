@@ -27,7 +27,7 @@ export default function NotFound() {
             </div>
           }
         >
-          <Text as="div" size="sm" tone="muted" className="font-mono">
+          <Text as="div" size="sm" tone="muted" family="mono">
             {window.location.pathname}
           </Text>
         </Result>

@@ -71,7 +71,7 @@ export default function ProfilePanel() {
 
         <dl>
           <SettingRow label={t('profile.usernameLabel')}>
-            <span className="font-medium">{profile?.preferred_username || '-'}</span>
+            <span className="type-weight-medium">{profile?.preferred_username || '-'}</span>
           </SettingRow>
 
           <SettingRow label={t('profile.displayNameLabel')}>
@@ -104,7 +104,7 @@ export default function ProfilePanel() {
               </form>
             ) : (
               <div className="flex max-w-xl items-center justify-between gap-4">
-                <span className="min-w-0 truncate font-medium">{profile?.name || '-'}</span>
+                <span className="min-w-0 truncate type-weight-medium">{profile?.name || '-'}</span>
                 <Button size="small" icon={<EditIcon />} onClick={handleStartEditName}>
                   {t('common.edit')}
                 </Button>
@@ -116,7 +116,7 @@ export default function ProfilePanel() {
             <div className="flex max-w-xl items-center justify-between gap-4">
               <span className="flex min-w-0 items-center gap-2">
                 <Mail aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
-                <span className={profile?.email ? 'truncate font-medium' : 'truncate text-muted-foreground'}>
+                <span className={profile?.email ? 'truncate type-weight-medium' : 'truncate text-muted-foreground'}>
                   {profile?.email || t('profile.notConfigured')}
                 </span>
               </span>
@@ -138,7 +138,7 @@ export default function ProfilePanel() {
 
           <SettingRow label={t('profile.subjectIdLabel')}>
             <div className="flex max-w-xl items-center justify-between gap-4">
-              <code className="min-w-0 truncate rounded bg-muted px-2 py-1 font-mono text-xs">
+              <code className="min-w-0 truncate rounded bg-muted px-2 py-1 type-family-mono type-caption">
                 {profile?.sub || '-'}
               </code>
               {profile?.sub ? (
@@ -155,7 +155,7 @@ export default function ProfilePanel() {
 
           <SettingRow label={t('profile.ssoIssuerLabel')}>
             <div className="flex max-w-xl items-center justify-between gap-4">
-              <code className="min-w-0 truncate rounded bg-muted px-2 py-1 font-mono text-xs">
+              <code className="min-w-0 truncate rounded bg-muted px-2 py-1 type-family-mono type-caption">
                 {window.location.origin}
               </code>
               <Button

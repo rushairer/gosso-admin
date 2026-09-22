@@ -190,7 +190,7 @@ export default function SiteSettingsTab() {
                 <Card padding="base" className="overflow-hidden">
                   <div className="mb-4 flex items-center gap-2">
                     <Image aria-hidden="true" className="size-4 text-muted-foreground" />
-                    <Text size="sm" className="font-medium">
+                    <Text size="sm" weight="medium">
                       {t('site.preview')}
                     </Text>
                   </div>

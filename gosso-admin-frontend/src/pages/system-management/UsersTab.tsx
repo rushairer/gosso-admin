@@ -369,10 +369,10 @@ export default function UsersTab() {
                   <TableRow key={account.id}>
                     <TableCell className="min-w-64 whitespace-normal">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-semibold">{account.display_name || account.username}</span>
+                        <span className="type-weight-semibold">{account.display_name || account.username}</span>
                         {isSelf ? <Tag color="primary">{chinese ? '当前管理员' : 'Current admin'}</Tag> : null}
                       </div>
-                      <Text size="xs" tone="muted" className="mt-1 font-mono">
+                      <Text size="xs" tone="muted" family="mono" className="mt-1">
                         {account.username} · {account.id}
                       </Text>
                     </TableCell>

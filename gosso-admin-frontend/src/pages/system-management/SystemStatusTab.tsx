@@ -10,14 +10,14 @@ import { SystemStatusLoading } from './loading';
 function DefinitionCard({ title, rows }: { title: ReactNode; rows: Array<[ReactNode, ReactNode]> }) {
   return (
     <Card padding="base">
-      <Heading level={2} className="mb-4 text-base">
+      <Heading level={2} variant="compact" className="mb-4">
         {title}
       </Heading>
       <dl className="divide-y">
         {rows.map(([label, value], index) => (
           <div key={index} className="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-[190px_minmax(0,1fr)] sm:gap-5">
-            <dt className="text-sm text-muted-foreground">{label}</dt>
-            <dd className="m-0 min-w-0 break-all font-mono text-sm">{value}</dd>
+            <dt className="type-body-sm text-muted-foreground">{label}</dt>
+            <dd className="m-0 min-w-0 break-all type-family-mono type-body-sm">{value}</dd>
           </div>
         ))}
       </dl>
@@ -52,20 +52,23 @@ export default function SystemStatusTab() {
 
   const oidcRows: Array<[ReactNode, ReactNode]> = oidcConfig
     ? [
-        [t('system.issuerLabel'), <code className="font-mono text-xs">{oidcConfig.issuer}</code>],
+        [t('system.issuerLabel'), <code className="type-family-mono type-body-sm">{oidcConfig.issuer}</code>],
         [
           t('system.authorizationEndpoint'),
-          <code className="font-mono text-xs">{oidcConfig.authorization_endpoint}</code>,
+          <code className="type-family-mono type-body-sm">{oidcConfig.authorization_endpoint}</code>,
         ],
-        [t('system.tokenEndpoint'), <code className="font-mono text-xs">{oidcConfig.token_endpoint}</code>],
-        [t('system.userinfoEndpoint'), <code className="font-mono text-xs">{oidcConfig.userinfo_endpoint}</code>],
+        [t('system.tokenEndpoint'), <code className="type-family-mono type-body-sm">{oidcConfig.token_endpoint}</code>],
+        [
+          t('system.userinfoEndpoint'),
+          <code className="type-family-mono type-body-sm">{oidcConfig.userinfo_endpoint}</code>,
+        ],
         [
           t('system.jwksUri'),
           <a
             href={oidcConfig.jwks_uri}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-xs text-primary hover:underline"
+            className="type-family-mono type-body-sm text-primary hover:underline"
           >
             {oidcConfig.jwks_uri}
           </a>,
@@ -124,7 +127,7 @@ export default function SystemStatusTab() {
           <Text size="xs" tone="muted">
             {t('system.checkedAtLabel')}
           </Text>
-          <div className="mt-2 text-lg font-semibold">
+          <div className="mt-2 type-body-lg type-weight-semibold">
             {formatHealthTimestamp(systemHealth?.checked_at || systemHealth?.fetched_at)}
           </div>
         </Card>
@@ -132,13 +135,15 @@ export default function SystemStatusTab() {
           <Text size="xs" tone="muted">
             {t('system.httpStatusLabel')}
           </Text>
-          <div className="mt-2 text-lg font-semibold">{systemHealth?.http_status || t('common.notAvailable')}</div>
+          <div className="mt-2 type-body-lg type-weight-semibold">
+            {systemHealth?.http_status || t('common.notAvailable')}
+          </div>
         </Card>
         <Card padding="base">
           <Text size="xs" tone="muted">
             {t('system.probeDurationLabel')}
           </Text>
-          <div className="mt-2 text-lg font-semibold">
+          <div className="mt-2 type-body-lg type-weight-semibold">
             {typeof systemHealth?.duration_ms === 'number'
               ? `${systemHealth.duration_ms} ms`
               : t('common.notAvailable')}
@@ -147,7 +152,7 @@ export default function SystemStatusTab() {
       </div>
 
       <Card padding="base">
-        <Heading level={2} className="mb-4 text-base">
+        <Heading level={2} variant="compact" className="mb-4">
           {t('system.infrastructureHealthSection')}
         </Heading>
         <div className="grid gap-3 md:grid-cols-2">
@@ -158,7 +163,7 @@ export default function SystemStatusTab() {
               <Database aria-hidden="true" className="size-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="font-medium">PostgreSQL</div>
+              <div className="type-weight-medium">PostgreSQL</div>
               <Text size="xs" tone="muted">
                 {t('system.databaseConnection')}
               </Text>
@@ -174,7 +179,7 @@ export default function SystemStatusTab() {
               <Server aria-hidden="true" className="size-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="font-medium">Redis</div>
+              <div className="type-weight-medium">Redis</div>
               <Text size="xs" tone="muted">
                 {t('system.redisCacheAndLock')}
               </Text>
@@ -192,7 +197,7 @@ export default function SystemStatusTab() {
           <Card padding="base">
             <div className="mb-4 flex items-center gap-2">
               <ShieldCheck aria-hidden="true" className="size-5 text-primary" />
-              <Heading level={2} className="text-base">
+              <Heading level={2} variant="compact">
                 {t('system.oidcProfileSection')}
               </Heading>
             </div>

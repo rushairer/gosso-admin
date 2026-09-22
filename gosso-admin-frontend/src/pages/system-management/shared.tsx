@@ -5,10 +5,14 @@ export function ManagementPanelLead({ description, actions }: { description?: Re
   if (!description && !actions) return null;
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div
+      data-slot="gosso-management-panel-lead"
+      data-pattern="tab-panel-lead"
+      className="flex min-h-9 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
+    >
       <div className="min-w-0">
         {description ? (
-          <Text tone="muted" size="sm" className="max-w-3xl leading-relaxed">
+          <Text tone="muted" size="sm" leading="relaxed" className="max-w-3xl">
             {description}
           </Text>
         ) : null}
