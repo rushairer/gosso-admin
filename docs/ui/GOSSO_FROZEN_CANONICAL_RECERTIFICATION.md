@@ -227,3 +227,35 @@ Freshness is fail-closed:
 A future PR may explicitly demote the ledger to `needs-manual-recertification` while work is in progress. It may restore `verified` only with new reviewed refs and fresh browser/parity evidence.
 
 This governance layer is the final post-freeze hardening step. It prevents another broad reverse-migration sweep by making certification invalidation narrow, explicit and automatically observable.
+
+## 0.4.9 package recertification
+
+Status: **verified / manual-reviewed**
+
+The exact Consumer package baseline is now `@gouno/ui@0.4.9`, published from Gouno UI release source `4495147ae0b9807d2e5c9137187cfdc3e906cceb`. The Product candidate reviewed with that package is `41917781efaba0dc1a6577febd1c7391bc6bf824`.
+
+The `v0.4.8...v0.4.9` runtime diff is deliberately narrow: Core Cascader, Image preview toolbar stacking, shared picker trigger internals, Select, Steps and TreeSelect. Gosso Admin does not consume TreeSelect, Cascader, multi-value Select or Core Steps in the certified Product routes. Its relevant picker exposure is the real role-assignment Select inside `AssignRolesModal`, which remains the high-risk nested-overlay case.
+
+### Fresh 0.4.9 evidence
+
+The exact 0.4.9 Product candidate passed:
+
+- CI `35721292374` — success;
+- Images `35721292341` — success;
+- Security `35721292409` — success;
+- Gosso Showcase Parity `35721292332` — success, **32 / 32** paired tests;
+- UI Browser Acceptance `35721292425` — success, **150 / 150** rendered Product tests.
+
+Fresh retained artifacts:
+
+- `10692235049` — `gosso-showcase-parity`, SHA-256 `bf606c667c97291c8ed7c70c13290569c2e1d87b6761d2a6f4d1d888f3bfb91b`;
+- `10691229679` — `gosso-admin-browser-acceptance`, SHA-256 `011959cf422671b13f26084f10debed4e377ef3978e34993f1e4a690843681a6`.
+
+### Manual rendered review
+
+The fresh retained browser evidence was inspected directly rather than treating green workflows as visual proof. In particular, the `Users role assignment Select keeps accessible Modal ownership` capture was reviewed after installing 0.4.9. The role-management Modal remains the visible interaction owner; the Select control, trailing chevron, focus border, label relationship and adjacent assign action remain aligned; choosing `admin (role-adm)` leaves the parent Modal open and the action enabled. No popup-layer, focus, width or trailing-icon regression was observed.
+
+Representative matrix coverage also remained green across the 16 real visual routes, responsive widths and light/dark states. The 0.4.9 package upgrade therefore changes no Product API, security state machine, authorization rule, route ownership or intentional divergence recorded above.
+
+This is a package-baseline renewal, not a new migration wave. Any later `@gouno/ui` version change or certified Product/canonical-path change again invalidates this certification until fresh manual-first evidence is recorded.
+
