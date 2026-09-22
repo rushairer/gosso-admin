@@ -57,6 +57,7 @@
       "ownedPaths": [
         "gosso-admin-frontend/src/App.tsx",
         "gosso-admin-frontend/src/main.tsx",
+        "gosso-admin-frontend/src/components/ErrorBoundary.tsx",
         "gosso-admin-frontend/src/components/auth/",
         "gosso-admin-frontend/src/components/branding/",
         "gosso-admin-frontend/src/components/layout/",
@@ -68,16 +69,35 @@
         "canonical-showcase.json",
         "showcase/demos/products/gosso-admin/",
         "showcase/components/tab-panel-lead.tsx",
-        "showcase/components/brand-mark.tsx",
-        "showcase/app/page-router.tsx"
+        "showcase/components/brand-mark.tsx"
       ],
       "browserEvidence": {
         "runs": [
-          { "name": "CI", "id": 35682284551, "result": "success" },
-          { "name": "Images", "id": 35682284514, "result": "success" },
-          { "name": "Security", "id": 35682284521, "result": "success" },
-          { "name": "Gosso Showcase Parity", "id": 35682284735, "result": "success" },
-          { "name": "UI Browser Acceptance", "id": 35682284516, "result": "success" }
+          {
+            "name": "CI",
+            "id": 35682284551,
+            "result": "success"
+          },
+          {
+            "name": "Images",
+            "id": 35682284514,
+            "result": "success"
+          },
+          {
+            "name": "Security",
+            "id": 35682284521,
+            "result": "success"
+          },
+          {
+            "name": "Gosso Showcase Parity",
+            "id": 35682284735,
+            "result": "success"
+          },
+          {
+            "name": "UI Browser Acceptance",
+            "id": 35682284516,
+            "result": "success"
+          }
         ],
         "artifacts": [
           {
