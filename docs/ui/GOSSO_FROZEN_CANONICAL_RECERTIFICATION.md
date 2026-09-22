@@ -1,6 +1,6 @@
 # Gosso Admin Frozen Canonical Recertification
 
-Status: **verified baseline / corrective follow-up candidate**
+Status: **verified / manual-reviewed**
 
 Date: 2026-09-22
 
@@ -20,7 +20,8 @@ This is an explicit dependency upgrade and manual-first recertification, not a b
 
 ## Accepted baselines
 
-- Gosso Admin manually reviewed Product/parity ref: `fd5f23852a721829fb01c32bc063108bce4d41a0`.
+- Original frozen recertification Product/parity ref: `fd5f23852a721829fb01c32bc063108bce4d41a0`.
+- Latest corrective Product/browser reviewed ref: `88963c804d371ca5b1f5025acd81c7ec1e160d2e`.
 - Gosso Admin starting main before this recertification: `a322644c97142bb26af37a93128a6ca2e3c60360`.
 - Previous exact package pin: `@gouno/ui@0.4.7`.
 - Accepted exact package pin: `@gouno/ui@0.4.8`.
@@ -165,31 +166,45 @@ Fixture/browser evidence proves presentation and interaction ownership only.
 
 ## Corrective follow-up: role Select inside Modal
 
-Status: **candidate / awaiting fresh rendered evidence**
+Status: **accepted / manual-reviewed**
 
-The stale pre-0.4.8 PR #66 contained one useful idea that was not part of the merged recertification: exercising the Product's real role-assignment `Select` inside `AssignRolesModal`.
+The stale pre-0.4.8 PR #66 contained one useful idea that was not part of the original frozen recertification: exercising the Product's real role-assignment `Select` inside `AssignRolesModal`.
 
 Its original test failed for a real accessibility reason, not because the 0.4.8 Select overlay fix was missing. `AssignRolesModal` wrapped the real `Select` / fallback `Input` inside an extra `div` beneath `FormField`. The Foundation-level A11Y-D001 fix correctly transfers label/required/description semantics to the direct child control owner, so this Product composition prevented the visible combobox from receiving the `分配新角色` accessible name.
 
-The corrective candidate:
+The accepted correction:
 
 - makes `Select` or `Input` the direct `FormField` child;
 - keeps the submit Button as a sibling in the same responsive row with bottom alignment;
 - preserves the visible label and stable `assign-role` id;
-- verifies `aria-labelledby="assign-role-label"` and the native label `for="assign-role"` relationship;
+- verifies `aria-labelledby="assign-role-label"` and native label `for="assign-role"` ownership;
 - opens the portaled Select options while the parent Modal remains visible;
-- chooses the `admin` role option and verifies the parent Modal remains the interaction owner after selection;
-- retains a passing rendered screenshot;
+- chooses `admin (role-adm)` and verifies the parent Modal remains the interaction owner after selection;
+- normalizes the Product role-name typography from raw `font-semibold` to semantic `Text weight="semibold"`;
 - locks the reviewed composition in `check-ui-contracts.mjs`.
 
-The Product role-name typography is also normalized from raw `font-semibold` to semantic `Text weight="semibold"`.
+Fresh exact-head evidence for `88963c804d371ca5b1f5025acd81c7ec1e160d2e`:
 
-This follow-up does not alter authorization rules, Sudo/recent-MFA behavior, account APIs or role-assignment business semantics.
+- CI `35681805962` — success;
+- Images `35681805959` — success;
+- Security `35681805975` — success;
+- Gosso Showcase Parity `35681806007` — success, the full frozen paired suite remains green;
+- UI Browser Acceptance `35681805949` — success, **150 / 150** rendered Product tests;
+- the new high-risk case `Users role assignment Select keeps accessible Modal ownership` passed in 1.3s.
+
+Retained follow-up artifacts:
+
+- paired parity artifact `10674994702` — `gosso-showcase-parity`, SHA-256 `67cf83d9e51359dcd405c89f1755376b1b06442bc346f6be81b3b3381772689c`;
+- Product browser artifact `10674388514` — `gosso-admin-browser-acceptance`, SHA-256 `43429e57a5662b2e31a31f64679fde7a5d54ab770f2f3e197ca8a556325e352a`.
+
+The retained passing screenshot was inspected directly. The role Modal remains the visible owner, the labelled Select is aligned with the assign action, selecting `admin (role-adm)` leaves the parent Modal open, and the assign action becomes enabled without overlay or focus-layer breakage.
+
+This follow-up changes no authorization rule, Sudo/recent-MFA behavior, account API or role-assignment business semantics.
 
 ## Certification conclusion
 
-Gosso Admin is **verified / manual-reviewed** against the frozen Gouno UI baseline above.
+Gosso Admin is **verified / manual-reviewed** against the frozen Gouno UI baseline above, including the accepted role-assignment Modal/Select corrective follow-up.
 
-The final certification commit changes only this review record, not the manually reviewed Product or parity source paths. The repository gates must still pass on that final PR head before merge.
+The final follow-up certification commit changes only this review record, not the manually reviewed Product or parity source paths. The repository gates must still pass on that final PR head before merge.
 
 Any later change to the exact `@gouno/ui` package baseline or to the reviewed Product/canonical ownership paths requires fresh validation under the same manual-first discipline.
