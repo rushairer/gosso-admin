@@ -11,7 +11,7 @@
     {
       "id": "gosso-admin-frozen",
       "scope": "All 12 frozen Gosso Admin Product Showcase pages and their 16 real Product routes",
-      "status": "verified",
+      "status": "needs-manual-recertification",
       "reviewMethod": "manual-first",
       "reviewDate": "2026-09-22",
       "manualReview": "docs/ui/GOSSO_FROZEN_CANONICAL_RECERTIFICATION.md",
@@ -122,7 +122,9 @@
         "The single frozen Account Settings canonical page owns five real Product subroutes: Profile, Password, MFA, Passkeys and Sessions.",
         "Security state machines such as OAuth callback exchange, Sudo/recent-MFA, WebAuthn/Passkeys, password reset and session revocation remain Product-owned behavior.",
         "System Status Product copy may be shorter than Showcase fixture copy while preserving the same primitive styling, hierarchy and responsive ownership."
-      ]
+      ],
+      "pendingManualReview": "docs/ui/GOSSO_ADMIN_ECOSYSTEM_ALIGN_RECERTIFICATION_2026_11_03.md",
+      "recertificationReason": "As of 2026-11-03 canonical-showcase.json changed since reviewed Gouno UI ref 4495147a; seven post-freeze Blog amendments did not touch Gosso-specific Showcase JSX, but canonicalPaths freshness invalidates the old manual certification. React/Vite updates also need new browser review."
     }
   ]
 }
