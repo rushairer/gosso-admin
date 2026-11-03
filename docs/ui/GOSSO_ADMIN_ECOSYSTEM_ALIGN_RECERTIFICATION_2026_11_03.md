@@ -12,7 +12,7 @@ This candidate also updates the GOSSO Admin frontend dependency and runtime laye
 ## Security reason for the batch
 
 - Dependabot #78 moves compatible same-major React, Vite and related frontend libraries and includes source-map-js 1.2.2, addressing high-severity GHSA-68fv-2mgg-jv7q from 1.2.1.
-- Dependabot #77 uses Go 1.27.3 instead of 1.27.0 in the Seed builder, addressing scanner-observed fixed standard-library vulnerabilities including CVE-2026-111943.
+- Dependabot #77 uses Go 1.27.3 instead of 1.27.0 in the Seed builder, addressing scanner-observed fixed standard-library vulnerabilities including CVE-2026-111943. The Security workflow also used Go 1.26.6 from seed/go.mod and detected two code-reachable crypto/x509 and crypto/tls findings (GO-2026-6809, GO-2026-6607). The minimum Seed Go toolchain is now 1.26.10, the published patch containing both fixes; no audit or govulncheck suppression was added.
 - Both Playwright workflow runners pin ubuntu-24.04. The previous ubuntu-latest selected ubuntu26.04-x64, unsupported by this Playwright version. Assertions, coverage and visual thresholds are unchanged.
 
 ## Exact-head gates
