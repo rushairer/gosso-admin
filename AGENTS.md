@@ -49,3 +49,8 @@ Before changing `@gouno/ui` or a certified Gosso Admin UI owner, read `docs/ui/s
 - TypeScript 6 remains the JavaScript Compiler API provider for scripts/check-ui-contracts.mjs, which imports typescript and calls ts.createSourceFile. Do not upgrade the typescript package to v7 as a simple version bump. A future TypeScript 7 CLI migration must preserve the TypeScript 6 API through an explicit alias or migrate the AST script with regression tests.
 - Any Node major migration must update Docker builders, CI setup, package engines, lockfile metadata, @types/node, and the browser/Showcase/image-security gates together. Node 24 and Node 26 are both LTS today; do not mix majors across runtime, types, and CI as an isolated dependency update.
 - Pin all GitHub Actions by full commit SHA and keep setup-node/setup-go on the approved current majors. Security scans must fail closed: retry transient npm audit failures, but never convert an unavailable audit service into a successful security result.
+
+## Nested-scroll parity evidence
+
+- A `fullPage` screenshot is not sufficient for pages whose Showcase or Product content uses nested scroll containers. Scroll each governed below-the-fold semantic section into view on both sides, assert it is rendered and visible, and retain viewport screenshots of those sections.
+- Compare shared structure and semantic data, not identical localized copy or fixture-only capabilities. Product-owned localization and live OIDC metadata may legitimately differ from Showcase fixtures; document intentional differences rather than forcing Product output to mimic demo data.
