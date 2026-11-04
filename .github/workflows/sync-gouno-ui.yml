@@ -1,10 +1,9 @@
 name: Verify Gouno UI Registry Dependency
 
+# Registry verification is an explicit operator action. It must not run on
+# unrelated workflow-maintenance pushes while the manual-first certification
+# ledger is pending recertification.
 on:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/sync-gouno-ui.yml
   workflow_dispatch:
     inputs:
       version:
