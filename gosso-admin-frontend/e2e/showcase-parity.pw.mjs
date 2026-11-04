@@ -45,6 +45,14 @@ async function pairScreenshot(showcase, product, label, testInfo) {
   }
 }
 
+async function pairViewportScreenshot(showcase, product, label, testInfo) {
+  for (const [kind, page] of [["showcase", showcase], ["product", product]]) {
+    const path = testInfo.outputPath(`${label}-${kind}.png`);
+    await page.screenshot({ path });
+    await testInfo.attach(`${label}-${kind}`, { path, contentType: "image/png" });
+  }
+}
+
 async function openPair(browser, fixtureId, productPath, theme = "light", viewport = { width: 1440, height: 900 }) {
   const context = await browser.newContext({ viewport });
   const showcase = await context.newPage();
@@ -126,7 +134,7 @@ for (const theme of ["light", "dark"]) {
     await pair.context.close();
   });
 
-  test(`System status surfaces match Showcase (${theme})`, async ({ browser }, testInfo) => {
+  test(`System status summary, capabilities and security panels match Showcase (${theme})`, async ({ browser }, testInfo) => {
     const pair = await openPair(browser, "gosso-system-status", "/system-management/system", theme);
     const showcaseCard = pair.showcase.locator('[data-slot="card"]').first();
     const productCard = pair.product.locator('[data-slot="card"]').first();
@@ -140,6 +148,57 @@ for (const theme of ["light", "dark"]) {
     const productRefresh = productLead.getByRole("button").first();
     expect(await styleFingerprint(productRefresh)).toEqual(await styleFingerprint(showcaseRefresh));
     expect((await geometry(productRefresh)).height).toBe((await geometry(showcaseRefresh)).height);
+
+    const showcaseCapabilities = pair.showcase.getByRole("heading", { name: "支持能力", exact: true });
+    const productCapabilities = pair.product.getByRole("heading", { name: "OpenID Connect 身份提供者配置", exact: true }).nth(1);
+    await expect(showcaseCapabilities).toBeAttached();
+    await expect(productCapabilities).toBeAttached();
+    await showcaseCapabilities.scrollIntoViewIfNeeded();
+    await productCapabilities.scrollIntoViewIfNeeded();
+    await expect(showcaseCapabilities).toBeVisible();
+    await expect(productCapabilities).toBeVisible();
+    const showcaseCapabilitiesCard = showcaseCapabilities.locator('xpath=ancestor::*[@data-slot="card"][1]');
+    const productCapabilitiesCard = productCapabilities.locator('xpath=ancestor::*[@data-slot="card"][1]');
+    expect(await styleFingerprint(productCapabilitiesCard)).toEqual(await styleFingerprint(showcaseCapabilitiesCard));
+    for (const value of ["openid", "profile", "email", "admin", "authorization_code", "refresh_token", "client_credentials"]) {
+      await expect(showcaseCapabilitiesCard.getByText(value, { exact: true })).toBeVisible();
+      await expect(productCapabilitiesCard.getByText(value, { exact: true })).toBeVisible();
+    }
+    await expect(showcaseCapabilitiesCard.getByText("device_code", { exact: true })).toBeVisible();
+    await pairViewportScreenshot(pair.showcase, pair.product, `system-status-capabilities-${theme}`, testInfo);
+
+    const showcasePolicy = pair.showcase.getByRole("heading", { name: "安全策略", exact: true });
+    const productPolicy = pair.product.getByRole("heading", { name: "当前安全策略", exact: true });
+    await expect(showcasePolicy).toBeAttached();
+    await expect(productPolicy).toBeAttached();
+    await showcasePolicy.scrollIntoViewIfNeeded();
+    await productPolicy.scrollIntoViewIfNeeded();
+    await expect(showcasePolicy).toBeVisible();
+    await expect(productPolicy).toBeVisible();
+    const showcasePolicyCard = showcasePolicy.locator('xpath=ancestor::*[@data-slot="card"][1]');
+    const productPolicyCard = productPolicy.locator('xpath=ancestor::*[@data-slot="card"][1]');
+    expect(await styleFingerprint(productPolicyCard)).toEqual(await styleFingerprint(showcasePolicyCard));
+    expect(await showcasePolicyCard.locator("dl > div").count()).toBe(5);
+    expect(await productPolicyCard.locator("dl > div").count()).toBe(5);
+    for (const value of ["12 hours", "10", "15 min / 30 days"]) {
+      await expect(showcasePolicyCard.getByText(value, { exact: true })).toBeVisible();
+      await expect(productPolicyCard.getByText(value, { exact: true })).toBeVisible();
+    }
+    const showcaseLoginRate = showcasePolicyCard.locator("dl > div").nth(3);
+    const productLoginRate = productPolicyCard.locator("dl > div").nth(3);
+    const showcaseMfaRate = showcasePolicyCard.locator("dl > div").nth(4);
+    const productMfaRate = productPolicyCard.locator("dl > div").nth(4);
+    for (const row of [showcaseLoginRate, productLoginRate]) {
+      await expect(row).toContainText("8");
+      await expect(row).toContainText("15 min");
+    }
+    for (const row of [showcaseMfaRate, productMfaRate]) {
+      await expect(row).toContainText("6");
+      await expect(row).toContainText("10 min");
+    }
+    await showcaseMfaRate.scrollIntoViewIfNeeded();
+    await productMfaRate.scrollIntoViewIfNeeded();
+    await pairViewportScreenshot(pair.showcase, pair.product, `system-status-security-${theme}`, testInfo);
 
     expect(pair.unknown).toEqual([]);
     await proveNoOverflow(pair.showcase, pair.product);
