@@ -41,3 +41,10 @@ Before changing `@gouno/ui` or a certified Gosso Admin UI owner, read `docs/ui/s
 - Restore `verified` only after paired Showcase parity, Product browser acceptance and direct rendered review.
 - Never use the registry verification workflow to push an uncertified `@gouno/ui` upgrade directly to `main`.
 - If current `gouno-ui/main` changes a certified canonical path, stop propagation and recertify from the canonical owner rather than patching around the difference locally.
+
+## Frontend toolchain baseline
+
+- The admin frontend build/runtime baseline is Node 24 LTS, with Node >=24.15 and <25. Keep the Docker builder and CI setup on Node 24, declare the same range in package.json/package-lock.json, and keep @types/node on major 24.
+- TypeScript 6 remains the JavaScript Compiler API provider for scripts/check-ui-contracts.mjs, which imports typescript and calls ts.createSourceFile. Do not upgrade the typescript package to v7 as a simple version bump. A future TypeScript 7 CLI migration must preserve the TypeScript 6 API through an explicit alias or migrate the AST script with regression tests.
+- Any Node major migration must update Docker builders, CI setup, package engines, lockfile metadata, @types/node, and the browser/Showcase/image-security gates together. Node 24 and Node 26 are both LTS today; do not mix majors across runtime, types, and CI as an isolated dependency update.
+- Pin all GitHub Actions by full commit SHA and keep setup-node/setup-go on the approved current majors. Security scans must fail closed: retry transient npm audit failures, but never convert an unavailable audit service into a successful security result.
