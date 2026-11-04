@@ -54,3 +54,4 @@ Before changing `@gouno/ui` or a certified Gosso Admin UI owner, read `docs/ui/s
 
 - A `fullPage` screenshot is not sufficient for pages whose Showcase or Product content uses nested scroll containers. Scroll each governed below-the-fold semantic section into view on both sides, assert it is rendered and visible, and retain viewport screenshots of those sections.
 - Compare shared structure and semantic data, not identical localized copy or fixture-only capabilities. Product-owned localization and live OIDC metadata may legitimately differ from Showcase fixtures; document intentional differences rather than forcing Product output to mimic demo data.
+- For OIDC parity, assert the intersection of Product and Showcase capabilities. Fixture-only grant types (for example, `device_code`) must be documented as fixture-only and must never be injected into real Product metadata merely to satisfy visual parity.
