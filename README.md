@@ -122,6 +122,8 @@ For a hardened deployment, start from `docker-compose.production.yml` and `.env.
 
 ## Development
 
+Frontend build and CI use Node.js 24 LTS (Node >=24.15 and <25). Use the same Node 24 major for local npm commands and Docker builds.
+
 Frontend:
 
 ```bash
