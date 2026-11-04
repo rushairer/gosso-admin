@@ -180,10 +180,24 @@ for (const theme of ["light", "dark"]) {
     expect(await styleFingerprint(productPolicyCard)).toEqual(await styleFingerprint(showcasePolicyCard));
     expect(await showcasePolicyCard.locator("dl > div").count()).toBe(5);
     expect(await productPolicyCard.locator("dl > div").count()).toBe(5);
-    for (const value of ["12 hours", "10", "15 min / 30 days", "8 / 15 min", "6 / 10 min"]) {
+    for (const value of ["12 hours", "10", "15 min / 30 days"]) {
       await expect(showcasePolicyCard.getByText(value, { exact: true })).toBeVisible();
       await expect(productPolicyCard.getByText(value, { exact: true })).toBeVisible();
     }
+    const showcaseLoginRate = showcasePolicyCard.locator("dl > div").nth(3);
+    const productLoginRate = productPolicyCard.locator("dl > div").nth(3);
+    const showcaseMfaRate = showcasePolicyCard.locator("dl > div").nth(4);
+    const productMfaRate = productPolicyCard.locator("dl > div").nth(4);
+    for (const row of [showcaseLoginRate, productLoginRate]) {
+      await expect(row).toContainText("8");
+      await expect(row).toContainText("15 min");
+    }
+    for (const row of [showcaseMfaRate, productMfaRate]) {
+      await expect(row).toContainText("6");
+      await expect(row).toContainText("10 min");
+    }
+    await showcaseMfaRate.scrollIntoViewIfNeeded();
+    await productMfaRate.scrollIntoViewIfNeeded();
     await pairViewportScreenshot(pair.showcase, pair.product, `system-status-security-${theme}`, testInfo);
 
     expect(pair.unknown).toEqual([]);
