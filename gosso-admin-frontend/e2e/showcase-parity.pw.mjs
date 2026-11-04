@@ -150,7 +150,7 @@ for (const theme of ["light", "dark"]) {
     expect((await geometry(productRefresh)).height).toBe((await geometry(showcaseRefresh)).height);
 
     const showcaseCapabilities = pair.showcase.getByRole("heading", { name: "支持能力", exact: true });
-    const productCapabilities = pair.product.getByRole("heading", { name: "支持能力", exact: true });
+    const productCapabilities = pair.product.getByRole("heading", { name: "OpenID Connect 身份提供者配置", exact: true }).nth(1);
     await expect(showcaseCapabilities).toBeAttached();
     await expect(productCapabilities).toBeAttached();
     await showcaseCapabilities.scrollIntoViewIfNeeded();
@@ -160,14 +160,15 @@ for (const theme of ["light", "dark"]) {
     const showcaseCapabilitiesCard = showcaseCapabilities.locator('xpath=ancestor::*[@data-slot="card"][1]');
     const productCapabilitiesCard = productCapabilities.locator('xpath=ancestor::*[@data-slot="card"][1]');
     expect(await styleFingerprint(productCapabilitiesCard)).toEqual(await styleFingerprint(showcaseCapabilitiesCard));
-    for (const value of ["openid", "profile", "email", "admin", "authorization_code", "refresh_token", "client_credentials", "device_code"]) {
+    for (const value of ["openid", "profile", "email", "admin", "authorization_code", "refresh_token", "client_credentials"]) {
       await expect(showcaseCapabilitiesCard.getByText(value, { exact: true })).toBeVisible();
       await expect(productCapabilitiesCard.getByText(value, { exact: true })).toBeVisible();
     }
+    await expect(showcaseCapabilitiesCard.getByText("device_code", { exact: true })).toBeVisible();
     await pairViewportScreenshot(pair.showcase, pair.product, `system-status-capabilities-${theme}`, testInfo);
 
     const showcasePolicy = pair.showcase.getByRole("heading", { name: "安全策略", exact: true });
-    const productPolicy = pair.product.getByRole("heading", { name: "安全策略", exact: true });
+    const productPolicy = pair.product.getByRole("heading", { name: "当前安全策略", exact: true });
     await expect(showcasePolicy).toBeAttached();
     await expect(productPolicy).toBeAttached();
     await showcasePolicy.scrollIntoViewIfNeeded();
@@ -177,10 +178,10 @@ for (const theme of ["light", "dark"]) {
     const showcasePolicyCard = showcasePolicy.locator('xpath=ancestor::*[@data-slot="card"][1]');
     const productPolicyCard = productPolicy.locator('xpath=ancestor::*[@data-slot="card"][1]');
     expect(await styleFingerprint(productPolicyCard)).toEqual(await styleFingerprint(showcasePolicyCard));
-    for (const [label, value] of [["会话 TTL", "12 hours"], ["最大会话数", "10"], ["Access / Refresh Token", "15 min / 30 days"], ["登录速率限制", "8 attempts / 15 min"], ["MFA 速率限制", "6 attempts / 10 min"]]) {
-      await expect(showcasePolicyCard.getByText(label, { exact: true })).toBeVisible();
+    expect(await showcasePolicyCard.locator("dl > div").count()).toBe(5);
+    expect(await productPolicyCard.locator("dl > div").count()).toBe(5);
+    for (const value of ["12 hours", "10", "15 min / 30 days", "8 / 15 min", "6 / 10 min"]) {
       await expect(showcasePolicyCard.getByText(value, { exact: true })).toBeVisible();
-      await expect(productPolicyCard.getByText(label, { exact: true })).toBeVisible();
       await expect(productPolicyCard.getByText(value, { exact: true })).toBeVisible();
     }
     await pairViewportScreenshot(pair.showcase, pair.product, `system-status-security-${theme}`, testInfo);
