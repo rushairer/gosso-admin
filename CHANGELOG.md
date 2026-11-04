@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [Unreleased]
 
 ### Changed
+- Make the Gouno UI registry verification workflow operator-triggered only; its manual-first certification guard remains unchanged and still blocks unverified package updates.
+
+### Changed
 - Declare and enforce the Node 24 LTS frontend toolchain baseline (Node >=24.15 and <25), aligned across Docker, CI, npm engines, and @types/node major 24.
 - Align setup-node, setup-go, checkout, and dependency-review actions to current SHA-pinned releases; make the npm audit gate fail closed after transient service retries.
 
