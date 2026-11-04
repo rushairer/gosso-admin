@@ -40,6 +40,7 @@ Before changing `@gouno/ui` or a certified Gosso Admin UI owner, read `docs/ui/s
 - If a certified Product path or package version changes, demote the entry to `needs-manual-recertification` in the same PR unless fresh manual-first evidence is completed there.
 - Restore `verified` only after paired Showcase parity, Product browser acceptance and direct rendered review.
 - Never use the registry verification workflow to push an uncertified `@gouno/ui` upgrade directly to `main`.
+- The Gouno UI registry verification workflow is intentionally `workflow_dispatch`-only. Run it explicitly for an exact published package version after the manual-first certification ledger is `verified`; do not auto-run it on workflow-maintenance pushes while recertification is pending.
 - If current `gouno-ui/main` changes a certified canonical path, stop propagation and recertify from the canonical owner rather than patching around the difference locally.
 
 ## Frontend toolchain baseline
