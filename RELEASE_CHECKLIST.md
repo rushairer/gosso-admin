@@ -44,3 +44,12 @@ Use this checklist before tagging a release, publishing an image, or handing the
 - [ ] Rollback image/tag and database restore point are available.
 - [ ] Every promoted image is referenced by digest, has SPDX and CycloneDX SBOMs, build provenance, and a verifiable keyless Cosign signature.
 - [ ] Release tag matches `gosso-admin-frontend/package.json`, and the compatibility matrix names the exact Gosso API/schema line.
+
+## v0.7.25 release-train blockers (2026-11-05)
+
+- [x] Version metadata pins 0.7.25; frontend dependencies pin @gouno/ui 0.4.9 and @gosso/client 0.9.3.
+- [ ] Renew `docs/ui/showcase-parity-certifications.json` through manual-first rendered review and a PR; current status is `needs-manual-recertification`.
+- [ ] Validate the global `/api/v1/admin/oauth2/clients` surface against the published Gosso v1.7.0 immutable image. The existing v1.6.1 seed/OIDC smoke does not exercise global client governance.
+- [ ] Complete the deployment, secret, backup/restore and operator gates above against an identified staging environment. No production deployment is authorized by this release task.
+
+No v0.7.25 tag may be created while these gates remain open. Historical green CI/browser/parity evidence is supporting evidence, not manual certification or staging acceptance.

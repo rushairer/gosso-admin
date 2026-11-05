@@ -6,23 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-### Changed
-- Make the Gouno UI registry verification workflow operator-triggered only; its manual-first certification guard remains unchanged and still blocks unverified package updates.
-- Declare and enforce the Node 24 LTS frontend toolchain baseline (Node >=24.15 and <25), aligned across Docker, CI, npm engines, and @types/node major 24.
-- Align setup-node, setup-go, checkout, and dependency-review actions to current SHA-pinned releases; make the npm audit gate fail closed after transient service retries.
-- Expand System Status parity coverage to scroll and verify the lower capability and security-policy panels in both Showcase and Product, including their contents and retained viewport evidence.
+## [0.7.25] - 2026-11-05
 
-## [0.7.25] - 2026-09-16
+### Added
+- Manage OAuth2 clients globally through Gosso's administrator governance API: list, create, update, delete and rotate secrets across client owners. This surface requires Gosso v1.7.0; the older v1.6.1 compatibility smoke does not certify these endpoints.
 
 ### Changed
-- Upgrade the canonical UI dependency to `@gouno/ui` 0.4.2.
-
-- Standardize Modal structure and design system alignment: add `description` prop to `Modal`, move modal action buttons out of form bodies into unified sticky `footer` prop across all modals (Client Editor, Email Change, MFA Disable, Passkeys Registration, User Creation, Password Reset, User Consents), and maintain stable close button geometry anchored to the title bar regardless of subtitle presence.
+- Consume exact published `@gouno/ui` 0.4.9 and `@gosso/client` 0.9.3. Replace historical vendored UI and local design-system styling with canonical registry components, AppShell navigation and direct surface ownership.
+- Align account, authentication and system-management pages with the frozen Showcase, including Modal footers, explicit recovery/action copy, stable loading and refresh states, and lower System Status capability/security panels.
+- Make UI registry verification operator-triggered and preserve manual-first certification freshness checks. The current certification ledger remains `needs-manual-recertification`; automated parity alone does not renew it.
+- Require Node 24 LTS (>=24.15 and <25) consistently across Docker, CI, package metadata and Node types; retain the TypeScript 6 compiler API used by governance checks.
 
 ### Fixed
-- Fix `.panel-header`, `.panel-body`, and `.plain-section` margin and padding across `.admin-panel` and `.workspace-panel` to eliminate redundant internal gutters, double border lines, and excessive 64px vertical canyon gaps below panel headers.
-- Unify table cell padding and edge alignment (`th:first-child`, `td:first-child` at `padding-left: 0`; `th:last-child`, `td:last-child` at `padding-right: 0`), ensuring table text and actions align seamlessly with panel headers and card boundaries.
-- Align Toast notification layout: vertically center icon and text, set `flex: 1` on message container, and push close button to the far right (`margin-left: auto`).
+- Keep passkey errors in their owning modal, handle clipboard failures, and align authentication, destructive confirmation and collection recovery behavior with tested product interactions.
+
+### Security
+- Refresh frontend and Seed security dependencies, including the patched undici dependency chain; align SHA-pinned Actions and make npm audit fail closed after transient-service retries.
 
 ## [0.7.24] - 2026-09-04
 
