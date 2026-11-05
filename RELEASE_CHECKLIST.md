@@ -49,7 +49,9 @@ Use this checklist before tagging a release, publishing an image, or handing the
 
 - [x] Version metadata pins 0.7.25; frontend dependencies pin @gouno/ui 0.4.9 and @gosso/client 0.9.3.
 - [ ] Renew `docs/ui/showcase-parity-certifications.json` through manual-first rendered review and a PR; current status is `needs-manual-recertification`.
-- [ ] Validate the global `/api/v1/admin/oauth2/clients` surface against the published Gosso v1.7.0 immutable image. The existing v1.6.1 seed/OIDC smoke does not exercise global client governance.
+- [x] Validate the global `/api/v1/admin/oauth2/clients` surface against signed Gosso v1.7.0@sha256:b88b0475af7633afa8d6fda8ca7c3f4297d235a36e88219d9010818e76ff889a. The isolated runner passed list/create/update/rotate/delete as well as seed, cookie-session and PKCE acceptance.
 - [ ] Complete the deployment, secret, backup/restore and operator gates above against an identified staging environment. No production deployment is authorized by this release task.
 
 No v0.7.25 tag may be created while these gates remain open. Historical green CI/browser/parity evidence is supporting evidence, not manual certification or staging acceptance.
+
+Evidence: [main compatibility run 42015649627](https://github.com/rushairer/gosso-admin/actions/runs/42015649627) accepted `64f4c437898eec66962cb966c840588eb331c9e1`; the same main SHA passed CI, Security and Images. [PR #88](https://github.com/rushairer/gosso-admin/pull/88) passed its pre-merge gates. Manual Showcase status remains `needs-manual-recertification`; target staging, backup/restore and operator gates remain open. No v0.7.25 tag was created.
