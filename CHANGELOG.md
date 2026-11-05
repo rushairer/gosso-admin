@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [0.7.25] - 2026-11-05
 
 ### Added
+- Verify global Client list/create/update/secret rotation/delete against the signed Gosso v1.7.0 immutable release image in the isolated compatibility runner.
 - Manage OAuth2 clients globally through Gosso's administrator governance API: list, create, update, delete and rotate secrets across client owners. This surface requires Gosso v1.7.0; the older v1.6.1 compatibility smoke does not certify these endpoints.
 
 ### Changed

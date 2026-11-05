@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GOSSO_RELEASE_VERSION="${GOSSO_RELEASE_VERSION:-1.6.1}"
-GOSSO_RELEASE_DIGEST="${GOSSO_RELEASE_DIGEST:-sha256:cf3c321279b9860bbbcf30735dcd0d3a3465151075420d8fa70d6d66e580838b}"
+GOSSO_RELEASE_VERSION="${GOSSO_RELEASE_VERSION:-1.7.0}"
+GOSSO_RELEASE_DIGEST="${GOSSO_RELEASE_DIGEST:-sha256:b88b0475af7633afa8d6fda8ca7c3f4297d235a36e88219d9010818e76ff889a}"
 GOSSO_COMPAT_PORT="${GOSSO_COMPAT_PORT:-18080}"
 ADMIN_USERNAME="${ADMIN_USERNAME:-compat-admin}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-CompatAdminPassword123}"
@@ -114,6 +114,29 @@ fi
 curl -fsS -H "Authorization: Bearer ${access_token}" \
   "http://127.0.0.1:${GOSSO_COMPAT_PORT}/api/v1/admin/accounts?page_size=1" >/tmp/gosso-compat-accounts.json
 printf '[ok] live user-session principal can access Admin control plane\n'
+
+# Exercise the global governance surface introduced by Gosso v1.7.0. The older
+# account/seed/OIDC smoke cannot establish these endpoints exist.
+governance_url="http://127.0.0.1:${GOSSO_COMPAT_PORT}/api/v1/admin/oauth2/clients"
+curl -fsS -H "Authorization: Bearer ${access_token}" "$governance_url" \
+  | python3 -c 'import json,sys; assert isinstance(json.load(sys.stdin)["data"], list)'
+governance_json="$(curl -fsS -H "Authorization: Bearer ${access_token}" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Release governance smoke","redirect_uris":["https://compat.example.test/callback"],"grant_types":["authorization_code","refresh_token"],"scopes":["openid"],"is_confidential":true}' \
+  "$governance_url")"
+governance_client_id="$(printf '%s' "$governance_json" | python3 -c 'import json,sys; d=json.load(sys.stdin)["data"]; assert d["client_secret"]; print(d["client_id"])')"
+curl -fsS -X PUT -H "Authorization: Bearer ${access_token}" \
+  -H 'Content-Type: application/json' -d '{"name":"Release governance updated"}' \
+  "${governance_url}/${governance_client_id}" \
+  | python3 -c 'import json,sys; assert json.load(sys.stdin)["data"]["name"] == "Release governance updated"'
+curl -fsS -X POST -H "Authorization: Bearer ${access_token}" \
+  "${governance_url}/${governance_client_id}/rotate-secret" \
+  | python3 -c 'import json,sys; assert json.load(sys.stdin)["data"]["client_secret"]'
+curl -fsS -X DELETE -H "Authorization: Bearer ${access_token}" \
+  "${governance_url}/${governance_client_id}" >/dev/null
+curl -fsS -H "Authorization: Bearer ${access_token}" "$governance_url" \
+  | python3 -c 'import json,sys; client_id=sys.argv[1]; assert all(c["client_id"] != client_id for c in json.load(sys.stdin)["data"])' "$governance_client_id"
+printf '[ok] global OAuth2 client list/create/update/rotate/delete acceptance passed\n'
 
 curl -fsS -D /tmp/gosso-compat-cookie-headers.txt -o /tmp/gosso-compat-cookie-login.json \
   -H 'Content-Type: application/json' \
