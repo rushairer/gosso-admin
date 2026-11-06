@@ -9,6 +9,7 @@ ADMIN_PASSWORD="${ADMIN_PASSWORD:-CompatAdminPassword123}"
 
 export GOSSO_IMAGE_TAG="v${GOSSO_RELEASE_VERSION}@${GOSSO_RELEASE_DIGEST}"
 key_dir="$(mktemp -d)"
+response_dir="$(mktemp -d)"
 override_file="$(mktemp)"
 cat >"$override_file" <<EOF
 services:
@@ -33,7 +34,7 @@ cleanup() {
   fi
   "${compose[@]}" down -v --remove-orphans >/dev/null 2>&1 || true
   sudo chown -R "$(id -u):$(id -g)" "$key_dir" 2>/dev/null || true
-  rm -rf "$key_dir" "$override_file"
+  rm -rf "$key_dir" "$override_file" "$response_dir"
   exit "$rc"
 }
 trap cleanup EXIT
@@ -137,6 +138,70 @@ curl -fsS -X DELETE -H "Authorization: Bearer ${access_token}" \
 curl -fsS -H "Authorization: Bearer ${access_token}" "$governance_url" \
   | python3 -c 'import json,sys; client_id=sys.argv[1]; assert all(c["client_id"] != client_id for c in json.load(sys.stdin)["data"])' "$governance_client_id"
 printf '[ok] global OAuth2 client list/create/update/rotate/delete acceptance passed\n'
+
+# Use a real second account and the released API, not browser fixtures or SQL
+# ownership changes. Every denied mutation must leave the owned client intact.
+api_base="http://127.0.0.1:${GOSSO_COMPAT_PORT}/api/v1"
+owner_account="$(curl -fsS -H "Authorization: Bearer ${access_token}" \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"compat-owner","display_name":"Compatibility Owner","email":"compat-owner@example.test","password":"CompatOwnerPassword123"}' \
+  "${api_base}/admin/accounts")"
+owner_id="$(printf '%s' "$owner_account" | python3 -c 'import json,sys; print(json.load(sys.stdin)["data"]["id"])')"
+owner_login="$(curl -fsS -H 'Content-Type: application/json' \
+  -d '{"username":"compat-owner","password":"CompatOwnerPassword123"}' "${api_base}/auth/login")"
+owner_token="$(printf '%s' "$owner_login" | python3 -c 'import json,sys; token=json.load(sys.stdin)["data"]["access_token"]; assert token; print(token)')"
+owner_client="$(curl -fsS -H "Authorization: Bearer ${owner_token}" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Cross-owner release smoke","redirect_uris":["https://owner.example.test/callback"],"grant_types":["authorization_code"],"scopes":["openid"],"is_confidential":true}' \
+  "${api_base}/oauth2/clients")"
+owner_client_id="$(printf '%s' "$owner_client" | python3 -c 'import json,sys; d=json.load(sys.stdin)["data"]; assert d["client_secret"]; print(d["client_id"])')"
+
+expect_status() {
+  expected="$1"
+  label="$2"
+  shift 2
+  actual="$(curl -sS -o "$response_dir/response.json" -w '%{http_code}' "$@")"
+  if [ "$actual" != "$expected" ]; then
+    printf '[compat] %s: expected HTTP %s, got %s\n' "$label" "$expected" "$actual" >&2
+    return 1
+  fi
+}
+
+expect_status 401 'anonymous global list' "$governance_url"
+expect_status 403 'non-admin global list' -H "Authorization: Bearer ${owner_token}" "$governance_url"
+expect_status 403 'non-admin global create' -H "Authorization: Bearer ${owner_token}" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Forbidden","redirect_uris":["https://owner.example.test/callback"]}' "$governance_url"
+expect_status 403 'non-admin global update' -X PUT -H "Authorization: Bearer ${owner_token}" \
+  -H 'Content-Type: application/json' -d '{"name":"Forbidden update"}' "${governance_url}/${owner_client_id}"
+expect_status 403 'non-admin global rotation' -X POST -H "Authorization: Bearer ${owner_token}" \
+  "${governance_url}/${owner_client_id}/rotate-secret"
+expect_status 403 'non-admin global delete' -X DELETE -H "Authorization: Bearer ${owner_token}" \
+  "${governance_url}/${owner_client_id}"
+# Admin authority belongs to the global surface; it must not silently expand
+# the owner-scoped controller's resource boundary.
+expect_status 403 'admin owner-scoped cross-account read' -H "Authorization: Bearer ${access_token}" \
+  "${api_base}/oauth2/clients/${owner_client_id}"
+
+curl -fsS -H "Authorization: Bearer ${access_token}" "$governance_url" \
+  | python3 -c 'import json,sys; matches=[c for c in json.load(sys.stdin)["data"] if c["client_id"]==sys.argv[1]]; assert len(matches)==1; c=matches[0]; assert c["account_id"]==sys.argv[2]; assert c["name"]=="Cross-owner release smoke"; assert not any("secret" in k.lower() for k in c)' "$owner_client_id" "$owner_id"
+curl -fsS -X PUT -H "Authorization: Bearer ${access_token}" \
+  -H 'Content-Type: application/json' -d '{"name":"Cross-owner admin updated"}' \
+  "${governance_url}/${owner_client_id}" \
+  | python3 -c 'import json,sys; d=json.load(sys.stdin)["data"]; assert d["name"]=="Cross-owner admin updated"; assert d["account_id"]==sys.argv[1]' "$owner_id"
+curl -fsS -H "Authorization: Bearer ${owner_token}" "${api_base}/oauth2/clients/${owner_client_id}" \
+  | python3 -c 'import json,sys; assert json.load(sys.stdin)["data"]["name"]=="Cross-owner admin updated"'
+rotated_secret="$(curl -fsS -X POST -H "Authorization: Bearer ${access_token}" \
+  "${governance_url}/${owner_client_id}/rotate-secret" \
+  | python3 -c 'import json,sys; s=json.load(sys.stdin)["data"]["client_secret"]; assert s; print(s)')"
+printf '%s' "$owner_client" | python3 -c 'import json,sys; assert json.load(sys.stdin)["data"]["client_secret"]!=sys.argv[1]' "$rotated_secret"
+curl -fsS -X DELETE -H "Authorization: Bearer ${access_token}" "${governance_url}/${owner_client_id}" >/dev/null
+curl -fsS -H "Authorization: Bearer ${access_token}" "$governance_url" \
+  | python3 -c 'import json,sys; assert all(c["client_id"]!=sys.argv[1] for c in json.load(sys.stdin)["data"])' "$owner_client_id"
+expect_status 200 'owner live session' -H "Authorization: Bearer ${owner_token}" "${api_base}/auth/session"
+expect_status 200 'owner logout' -X POST -H "Authorization: Bearer ${owner_token}" "${api_base}/auth/logout"
+expect_status 401 'revoked owner session' -H "Authorization: Bearer ${owner_token}" "${api_base}/auth/session"
+printf '[ok] cross-owner governance, denied privilege escalation, secret rotation and session revocation passed\n'
 
 curl -fsS -D /tmp/gosso-compat-cookie-headers.txt -o /tmp/gosso-compat-cookie-login.json \
   -H 'Content-Type: application/json' \
