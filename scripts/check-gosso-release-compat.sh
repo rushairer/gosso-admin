@@ -144,11 +144,11 @@ printf '[ok] global OAuth2 client list/create/update/rotate/delete acceptance pa
 api_base="http://127.0.0.1:${GOSSO_COMPAT_PORT}/api/v1"
 owner_account="$(curl -fsS -H "Authorization: Bearer ${access_token}" \
   -H 'Content-Type: application/json' \
-  -d '{"username":"compat-owner","display_name":"Compatibility Owner","email":"compat-owner@example.test","password":"CompatOwnerPassword123"}' \
+  -d '{"username":"compat-owner","display_name":"Compatibility Owner","email":"compat-owner@example.test","password":"CompatOwnerPassword123!"}' \
   "${api_base}/admin/accounts")"
 owner_id="$(printf '%s' "$owner_account" | python3 -c 'import json,sys; print(json.load(sys.stdin)["data"]["id"])')"
 owner_login="$(curl -fsS -H 'Content-Type: application/json' \
-  -d '{"username":"compat-owner","password":"CompatOwnerPassword123"}' "${api_base}/auth/login")"
+  -d '{"username":"compat-owner","password":"CompatOwnerPassword123!"}' "${api_base}/auth/login")"
 owner_token="$(printf '%s' "$owner_login" | python3 -c 'import json,sys; token=json.load(sys.stdin)["data"]["access_token"]; assert token; print(token)')"
 owner_client="$(curl -fsS -H "Authorization: Bearer ${owner_token}" \
   -H 'Content-Type: application/json' \
