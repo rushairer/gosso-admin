@@ -41,7 +41,10 @@ printf '[info] Running smoke checks against %s\n' "$BASE_URL"
 check "readiness" GET "/readiness" 200
 check "OIDC discovery" GET "/.well-known/openid-configuration" 200
 check "JWKS" GET "/.well-known/jwks.json" 200
-check "Swagger route" GET "/swagger" 307
+# Release smoke targets the non-debug deployment contract. A public Swagger
+# redirect is not evidence that the production documentation surface is closed.
+check "Swagger route disabled" GET "/swagger" 404
+check "Swagger UI disabled" GET "/swagger/index.html" 404
 
 if [ -n "$SMOKE_ACCESS_TOKEN" ] || [ -n "$ADMIN_PASSWORD" ]; then
   printf '[info] Admin credentials provided; running authenticated admin API smoke checks\n'
