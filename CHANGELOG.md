@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 - Extend the pinned Gosso v1.7.0 compatibility acceptance with a real second owner, global-governance privilege denials, owner-boundary checks, secret replacement and session revocation. These automated checks do not replace manual Showcase certification or Staging acceptance.
 
+### Fixed
+- Read authenticated smoke responses from standard input correctly and retain TLS certificate verification; exercise the authenticated mutation/cleanup smoke against the isolated released Gosso image.
+
 ## [0.7.25] - 2026-11-05
 
 ### Added

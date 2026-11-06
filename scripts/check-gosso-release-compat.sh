@@ -257,4 +257,8 @@ case "$authorize_status" in
 esac
 printf '[ok] seeded Admin SPA is accepted for Authorization Code + PKCE S256\n'
 
+BASE_URL="http://127.0.0.1:${GOSSO_COMPAT_PORT}" \
+  ADMIN_USERNAME="$ADMIN_USERNAME" ADMIN_PASSWORD="$ADMIN_PASSWORD" \
+  SMOKE_MUTATE=true bash scripts/smoke.sh
+
 printf '\nGosso v%s compatibility acceptance passed.\n' "$GOSSO_RELEASE_VERSION"

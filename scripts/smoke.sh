@@ -15,7 +15,7 @@ check() {
   local path="$3"
   local expected="$4"
   local status
-  status="$(curl -ksS -o /tmp/gosso-smoke-response.txt -w '%{http_code}' -X "$method" "$BASE_URL$path" || true)"
+  status="$(curl -sS -o /tmp/gosso-smoke-response.txt -w '%{http_code}' -X "$method" "$BASE_URL$path" || true)"
   if [ "$status" = "$expected" ]; then
     printf '[ok] %s (%s %s -> %s)\n' "$name" "$method" "$path" "$status"
   else
@@ -26,14 +26,14 @@ check() {
 }
 
 json_value() {
-  python3 - "$1" <<'PY'
+  python3 -c '
 import json, sys
 path = sys.argv[1].split(".")
 data = json.load(sys.stdin)
 for key in path:
     data = data[key]
 print(data)
-PY
+' "$1"
 }
 
 printf '[info] Running smoke checks against %s\n' "$BASE_URL"
@@ -48,7 +48,7 @@ if [ -n "$SMOKE_ACCESS_TOKEN" ] || [ -n "$ADMIN_PASSWORD" ]; then
   token="$SMOKE_ACCESS_TOKEN"
   if [ -z "$token" ]; then
     login_payload="$(printf '{"username":"%s","password":"%s"}' "$ADMIN_USERNAME" "$ADMIN_PASSWORD")"
-    login_status="$(curl -ksS -o /tmp/gosso-smoke-login.json -w '%{http_code}' -H 'Content-Type: application/json' -d "$login_payload" "$BASE_URL/api/v1/auth/login" || true)"
+    login_status="$(curl -sS -o /tmp/gosso-smoke-login.json -w '%{http_code}' -H 'Content-Type: application/json' -d "$login_payload" "$BASE_URL/api/v1/auth/login" || true)"
     if [ "$login_status" != "200" ]; then
       failures=$((failures + 1))
       printf '[fail] admin login expected 200 got %s\n' "$login_status"
@@ -63,7 +63,7 @@ if [ -n "$SMOKE_ACCESS_TOKEN" ] || [ -n "$ADMIN_PASSWORD" ]; then
   fi
 
   if [ -n "$token" ]; then
-    accounts_status="$(curl -ksS -o /tmp/gosso-smoke-accounts.json -w '%{http_code}' -H "Authorization: Bearer $token" "$BASE_URL/api/v1/admin/accounts?page_size=1" || true)"
+    accounts_status="$(curl -sS -o /tmp/gosso-smoke-accounts.json -w '%{http_code}' -H "Authorization: Bearer $token" "$BASE_URL/api/v1/admin/accounts?page_size=1" || true)"
     if [ "$accounts_status" = "200" ]; then
       printf '[ok] admin accounts API\n'
     else
@@ -71,7 +71,7 @@ if [ -n "$SMOKE_ACCESS_TOKEN" ] || [ -n "$ADMIN_PASSWORD" ]; then
       printf '[fail] admin accounts API expected 200 got %s\n' "$accounts_status"
     fi
 
-    audit_status="$(curl -ksS -o /tmp/gosso-smoke-audit.json -w '%{http_code}' -H "Authorization: Bearer $token" "$BASE_URL/api/v1/admin/audit-logs?page_size=1" || true)"
+    audit_status="$(curl -sS -o /tmp/gosso-smoke-audit.json -w '%{http_code}' -H "Authorization: Bearer $token" "$BASE_URL/api/v1/admin/audit-logs?page_size=1" || true)"
     if [ "$audit_status" = "200" ]; then
       printf '[ok] admin audit API\n'
     else
@@ -82,11 +82,11 @@ if [ -n "$SMOKE_ACCESS_TOKEN" ] || [ -n "$ADMIN_PASSWORD" ]; then
     if [ "$SMOKE_MUTATE" = "true" ]; then
       suffix="$(date +%s)"
       client_payload="$(printf '{"name":"Smoke Test Client %s","description":"Temporary P0 smoke client","redirect_uris":["http://localhost:8080/callback"],"grant_types":["authorization_code"],"scopes":["openid","profile","email"],"is_confidential":false}' "$suffix")"
-      client_status="$(curl -ksS -o /tmp/gosso-smoke-client.json -w '%{http_code}' -H "Authorization: Bearer $token" -H 'Content-Type: application/json' -d "$client_payload" "$BASE_URL/api/v1/admin/oauth2/clients" || true)"
+      client_status="$(curl -sS -o /tmp/gosso-smoke-client.json -w '%{http_code}' -H "Authorization: Bearer $token" -H 'Content-Type: application/json' -d "$client_payload" "$BASE_URL/api/v1/admin/oauth2/clients" || true)"
       if [ "$client_status" = "201" ] || [ "$client_status" = "200" ]; then
         client_id="$(json_value data.client_id < /tmp/gosso-smoke-client.json)"
         printf '[ok] OAuth2 client create\n'
-        delete_client_status="$(curl -ksS -o /tmp/gosso-smoke-client-delete.json -w '%{http_code}' -X DELETE -H "Authorization: Bearer $token" "$BASE_URL/api/v1/admin/oauth2/clients/$client_id" || true)"
+        delete_client_status="$(curl -sS -o /tmp/gosso-smoke-client-delete.json -w '%{http_code}' -X DELETE -H "Authorization: Bearer $token" "$BASE_URL/api/v1/admin/oauth2/clients/$client_id" || true)"
         if [ "$delete_client_status" = "200" ]; then
           printf '[ok] OAuth2 client cleanup\n'
         else
@@ -100,11 +100,11 @@ if [ -n "$SMOKE_ACCESS_TOKEN" ] || [ -n "$ADMIN_PASSWORD" ]; then
       fi
 
       user_payload="$(printf '{"username":"smoke-%s","display_name":"Smoke Test User","email":"smoke-%s@example.test","password":"SmokeTestPassw0rd!"}' "$suffix" "$suffix")"
-      user_status="$(curl -ksS -o /tmp/gosso-smoke-user.json -w '%{http_code}' -H "Authorization: Bearer $token" -H 'Content-Type: application/json' -d "$user_payload" "$BASE_URL/api/v1/admin/accounts" || true)"
+      user_status="$(curl -sS -o /tmp/gosso-smoke-user.json -w '%{http_code}' -H "Authorization: Bearer $token" -H 'Content-Type: application/json' -d "$user_payload" "$BASE_URL/api/v1/admin/accounts" || true)"
       if [ "$user_status" = "201" ]; then
         account_id="$(json_value data.id < /tmp/gosso-smoke-user.json)"
         printf '[ok] admin user create\n'
-        delete_user_status="$(curl -ksS -o /tmp/gosso-smoke-user-delete.json -w '%{http_code}' -X DELETE -H "Authorization: Bearer $token" "$BASE_URL/api/v1/admin/accounts/$account_id" || true)"
+        delete_user_status="$(curl -sS -o /tmp/gosso-smoke-user-delete.json -w '%{http_code}' -X DELETE -H "Authorization: Bearer $token" "$BASE_URL/api/v1/admin/accounts/$account_id" || true)"
         if [ "$delete_user_status" = "200" ]; then
           printf '[ok] admin user cleanup\n'
         else
