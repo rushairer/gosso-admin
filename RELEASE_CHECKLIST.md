@@ -55,3 +55,19 @@ Use this checklist before tagging a release, publishing an image, or handing the
 No v0.7.25 tag may be created while these gates remain open. Historical green CI/browser/parity evidence is supporting evidence, not manual certification or staging acceptance.
 
 Evidence: [main compatibility run 42015649627](https://github.com/rushairer/gosso-admin/actions/runs/42015649627) accepted `64f4c437898eec66962cb966c840588eb331c9e1`; the same main SHA passed CI, Security and Images. [PR #88](https://github.com/rushairer/gosso-admin/pull/88) passed its pre-merge gates. Manual Showcase status remains `needs-manual-recertification`; target staging, backup/restore and operator gates remain open. No v0.7.25 tag was created.
+
+## November 6 closeout evidence (still blocked)
+
+See [the final ecosystem audit](docs/quality/ecosystem-release-final-2026-11.md).
+Main `51fe7448e3ff526e961630133443221507e9633f` passed fresh
+[Browser Acceptance, 150 tests](https://github.com/rushairer/gosso-admin/actions/runs/42195385357)
+and [Showcase Parity, 32 tests](https://github.com/rushairer/gosso-admin/actions/runs/42195392313).
+[PR #97](https://github.com/rushairer/gosso-admin/pull/97) adds real cross-owner
+privilege/session coverage and repairs authenticated release smoke; its final
+head must pass compatibility, CI, Security and Images before review/merge.
+
+These results do not check off the manual or operational gates. Direct Chromium
+inspection found broken font delivery in the Canonical Showcase while Product
+fonts load. The certification ledger remains pending, and an authorized Staging
+target, maintainer approval, actual backup restore and rollback receipts are
+still missing. No v0.7.25 tag, target image or deployment is asserted.

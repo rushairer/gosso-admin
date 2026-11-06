@@ -64,3 +64,28 @@ Assistant visual inspection of the retained paired screenshots found no structur
 - Rate-limit values use localized/compact Product formatting (`8 / 15 min`, `6 / 10 min`) versus explanatory Showcase formatting (`8 attempts / 15 min`, `6 attempts / 10 min`). Numeric limits and windows match.
 
 This is AI-assisted artifact inspection, not a maintainer's live interaction sign-off. The required human review of important loading, error, empty, feedback and interaction states remains pending. Do not change the certification ledger to `verified` based on these CI results or this artifact inspection alone.
+
+## 2026-11-06 fresh evidence and Canonical delivery blocker
+
+Status remains **needs-manual-recertification**. Product main:
+`51fe7448e3ff526e961630133443221507e9633f`; UI main:
+`b706b6c25c6252c7f55500b69eb08e17c1de554b`; package pins unchanged.
+
+- [Browser run 42195385357](https://github.com/rushairer/gosso-admin/actions/runs/42195385357): 150 passed; artifact `13491912782`, archive SHA-256 independently downloaded and matched: `1f888510c94c9872bc6f05bfd5d70144ba95cf08e083a6f890f9b646e92cd41a`.
+- [Paired run 42195392313](https://github.com/rushairer/gosso-admin/actions/runs/42195392313): 32 passed; artifact `13491852965`, archive SHA-256 independently downloaded and matched: `c7cd55aad8edb7370af20cb5993cac101e113d9f11f21b02d6596deb128cbf7d`.
+- Fresh supplemental real-browser captures include desktop light/mobile dark
+  System Status with actual scrolling to the lower capability/security panels.
+  Deterministic API fixtures are presentation evidence, not real Staging or MFA.
+- The public Canonical Showcase and the unmodified local reference fail to load
+  Inter and JetBrains Mono. Public requests resolve under
+  `https://rushairer.github.io/src/fonts/` and return 404; `document.fonts`
+  reports `error`. Product registry-delivered fonts load. Passing geometry
+  assertions did not establish font-delivery parity.
+
+Do not adapt Product fonts, refresh golden images or restore verified to hide
+this defect. Resolve Canonical delivery within an authorized upstream scope,
+then repeat visual acceptance and complete the maintainer's live review. Full
+state coverage, focus/accessibility and operator Staging acceptance remain
+required. Local evidence is retained outside the repositories in workspace
+`docs/quality/final-evidence-2026-11/`; the final audit describes its scope and
+limits. No new human reviewer or approval is claimed.
