@@ -203,12 +203,27 @@ printf '%s' "$owner_client" | python3 -c 'import json,sys; assert json.load(sys.
 # client authentication only with the replacement secret; no token is issued.
 original_secret="$(printf '%s' "$owner_client" | python3 -c 'import json,sys; print(json.load(sys.stdin)["data"]["client_secret"])')"
 invalid_code_payload='grant_type=authorization_code&code=release-compat-nonexistent-code&redirect_uri=https%3A%2F%2Fowner.example.test%2Fcallback'
-expect_status 401 'retired client secret rejected' -u "${owner_client_id}:${original_secret}" \
-  -d "$invalid_code_payload" "http://127.0.0.1:${GOSSO_COMPAT_PORT}/oauth2/token"
-python3 -c 'import json,sys; assert json.load(sys.stdin)["error"]=="invalid_client"' < "$response_dir/response.json"
-expect_status 400 'replacement client secret authenticated' -u "${owner_client_id}:${rotated_secret}" \
-  -d "$invalid_code_payload" "http://127.0.0.1:${GOSSO_COMPAT_PORT}/oauth2/token"
-python3 -c 'import json,sys; assert json.load(sys.stdin)["error"]=="invalid_grant"' < "$response_dir/response.json"
+old_secret_status="$(curl -sS -o "$response_dir/old-secret.json" -w '%{http_code}' \
+  -u "${owner_client_id}:${original_secret}" -d "$invalid_code_payload" \
+  "http://127.0.0.1:${GOSSO_COMPAT_PORT}/oauth2/token")"
+new_secret_status="$(curl -sS -o "$response_dir/new-secret.json" -w '%{http_code}' \
+  -u "${owner_client_id}:${rotated_secret}" -d "$invalid_code_payload" \
+  "http://127.0.0.1:${GOSSO_COMPAT_PORT}/oauth2/token")"
+python3 - "$response_dir" "$old_secret_status" "$new_secret_status" <<'PY'
+import json
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1])
+old_error = json.loads((root / "old-secret.json").read_text()).get("error")
+new_error = json.loads((root / "new-secret.json").read_text()).get("error")
+# Emit only fixed public OAuth classifications, never response bodies or tokens.
+def safe(error):
+    return error if error in {"invalid_client", "invalid_grant", "invalid_request", "unauthorized_client"} else "unrecognized"
+print(f"[compat] retired secret HTTP {sys.argv[2]} / {safe(old_error)}; replacement HTTP {sys.argv[3]} / {safe(new_error)}", flush=True)
+assert (sys.argv[2], old_error) == ("401", "invalid_client"), "retired secret still authenticates or rejection contract failed"
+assert (sys.argv[3], new_error) == ("400", "invalid_grant"), "replacement secret cannot authenticate"
+PY
 curl -fsS -X DELETE -H "Authorization: Bearer ${access_token}" "${governance_url}/${owner_client_id}" >/dev/null
 curl -fsS -H "Authorization: Bearer ${access_token}" "$governance_url" \
   | python3 -c 'import json,sys; assert all(c["client_id"]!=sys.argv[1] for c in json.load(sys.stdin)["data"])' "$owner_client_id"
