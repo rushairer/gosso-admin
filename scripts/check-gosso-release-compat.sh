@@ -198,6 +198,17 @@ rotated_secret="$(curl -fsS -X POST -H "Authorization: Bearer ${access_token}" \
   "${governance_url}/${owner_client_id}/rotate-secret" \
   | python3 -c 'import json,sys; s=json.load(sys.stdin)["data"]["client_secret"]; assert s; print(s)')"
 printf '%s' "$owner_client" | python3 -c 'import json,sys; assert json.load(sys.stdin)["data"]["client_secret"]!=sys.argv[1]' "$rotated_secret"
+# Prove the credential changed at the real token endpoint, rather than merely
+# receiving a different string. A deliberately nonexistent code must get past
+# client authentication only with the replacement secret; no token is issued.
+original_secret="$(printf '%s' "$owner_client" | python3 -c 'import json,sys; print(json.load(sys.stdin)["data"]["client_secret"])')"
+invalid_code_payload='grant_type=authorization_code&code=release-compat-nonexistent-code&redirect_uri=https%3A%2F%2Fowner.example.test%2Fcallback'
+expect_status 401 'retired client secret rejected' -u "${owner_client_id}:${original_secret}" \
+  -d "$invalid_code_payload" "http://127.0.0.1:${GOSSO_COMPAT_PORT}/oauth2/token"
+python3 -c 'import json,sys; assert json.load(sys.stdin)["error"]=="invalid_client"' < "$response_dir/response.json"
+expect_status 400 'replacement client secret authenticated' -u "${owner_client_id}:${rotated_secret}" \
+  -d "$invalid_code_payload" "http://127.0.0.1:${GOSSO_COMPAT_PORT}/oauth2/token"
+python3 -c 'import json,sys; assert json.load(sys.stdin)["error"]=="invalid_grant"' < "$response_dir/response.json"
 curl -fsS -X DELETE -H "Authorization: Bearer ${access_token}" "${governance_url}/${owner_client_id}" >/dev/null
 curl -fsS -H "Authorization: Bearer ${access_token}" "$governance_url" \
   | python3 -c 'import json,sys; assert all(c["client_id"]!=sys.argv[1] for c in json.load(sys.stdin)["data"])' "$owner_client_id"
