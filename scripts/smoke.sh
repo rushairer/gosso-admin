@@ -50,7 +50,7 @@ if [ -n "$SMOKE_ACCESS_TOKEN" ] || [ -n "$ADMIN_PASSWORD" ]; then
   printf '[info] Admin credentials provided; running authenticated admin API smoke checks\n'
   token="$SMOKE_ACCESS_TOKEN"
   if [ -z "$token" ]; then
-    login_payload="$(printf '{"username":"%s","password":"%s"}' "$ADMIN_USERNAME" "$ADMIN_PASSWORD")"
+    login_payload="$(printf '%s\0%s' "$ADMIN_USERNAME" "$ADMIN_PASSWORD" | python3 -c 'import json,sys; username,password=sys.stdin.read().split("\0",1); print(json.dumps({"username":username,"password":password}))')"
     login_status="$(curl -sS -o /tmp/gosso-smoke-login.json -w '%{http_code}' -H 'Content-Type: application/json' -d "$login_payload" "$BASE_URL/api/v1/auth/login" || true)"
     if [ "$login_status" != "200" ]; then
       failures=$((failures + 1))

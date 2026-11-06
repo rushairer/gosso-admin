@@ -5,7 +5,10 @@ GOSSO_RELEASE_VERSION="${GOSSO_RELEASE_VERSION:-1.7.0}"
 GOSSO_RELEASE_DIGEST="${GOSSO_RELEASE_DIGEST:-sha256:b88b0475af7633afa8d6fda8ca7c3f4297d235a36e88219d9010818e76ff889a}"
 GOSSO_COMPAT_PORT="${GOSSO_COMPAT_PORT:-18080}"
 ADMIN_USERNAME="${ADMIN_USERNAME:-compat-admin}"
-ADMIN_PASSWORD="${ADMIN_PASSWORD:-CompatAdminPassword123}"
+# Exercise real credential JSON encoding with quotes/backslashes, not only an
+# alphanumeric fixture. This is a disposable runner password, never a secret.
+default_admin_password='CompatAdmin"Password\123!'
+ADMIN_PASSWORD="${ADMIN_PASSWORD:-$default_admin_password}"
 
 export GOSSO_IMAGE_TAG="v${GOSSO_RELEASE_VERSION}@${GOSSO_RELEASE_DIGEST}"
 key_dir="$(mktemp -d)"
@@ -105,7 +108,7 @@ jwks="$(curl -fsS "http://127.0.0.1:${GOSSO_COMPAT_PORT}/.well-known/jwks.json")
 printf '%s' "$jwks" | python3 -c 'import json,sys; d=json.load(sys.stdin); assert len(d.get("keys", [])) >= 1; assert all(k.get("kty") == "RSA" for k in d["keys"])'
 printf '[ok] discovery, PKCE metadata, and JWKS are available\n'
 
-login_payload="$(printf '{"username":"%s","password":"%s"}' "$ADMIN_USERNAME" "$ADMIN_PASSWORD")"
+login_payload="$(printf '%s\0%s' "$ADMIN_USERNAME" "$ADMIN_PASSWORD" | python3 -c 'import json,sys; username,password=sys.stdin.read().split("\0",1); print(json.dumps({"username":username,"password":password}))')"
 login_json="$(curl -fsS -H 'Content-Type: application/json' -d "$login_payload" "http://127.0.0.1:${GOSSO_COMPAT_PORT}/api/v1/auth/login")"
 access_token="$(printf '%s' "$login_json" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["data"]["access_token"])')"
 if [ -z "$access_token" ]; then
