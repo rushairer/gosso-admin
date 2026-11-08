@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Extend the pinned Gosso v1.7.0 compatibility acceptance with a real second owner, global-governance privilege denials, owner-boundary checks, secret replacement and session revocation. The token endpoint must reject the retired secret and authenticate its replacement before rejecting a deliberately nonexistent authorization code. These automated checks do not replace manual Showcase certification or Staging acceptance.
 
 ### Fixed
+
+- Retain complete System Status security-panel screenshots in Showcase parity: scroll the whole nested panel and require full viewport intersection before capture, so the final MFA policy row cannot be clipped. No Product rendering or certification status change.
 - JSON-encode smoke credentials containing quotes or backslashes, read authenticated smoke responses from standard input correctly, retain TLS certificate verification and require Swagger to be disabled for release smoke; exercise authenticated mutation/cleanup against the isolated released Gosso image.
 
 ## [0.7.25] - 2026-11-05
