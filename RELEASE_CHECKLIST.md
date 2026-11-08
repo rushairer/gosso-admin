@@ -49,7 +49,7 @@ Use this checklist before tagging a release, publishing an image, or handing the
 
 - [x] Version metadata pins 0.7.25; frontend dependencies pin @gouno/ui 0.4.9 and @gosso/client 0.9.3.
 - [ ] Renew `docs/ui/showcase-parity-certifications.json` through manual-first rendered review and a PR; current status is `needs-manual-recertification`.
-- [x] Validate the global `/api/v1/admin/oauth2/clients` surface against signed Gosso v1.7.0@sha256:b88b0475af7633afa8d6fda8ca7c3f4297d235a36e88219d9010818e76ff889a. The isolated runner passed list/create/update/rotate/delete as well as seed, cookie-session and PKCE acceptance.
+- [ ] Validate the complete global `/api/v1/admin/oauth2/clients` contract, including retired-secret rejection and replacement-secret authentication, against the signed published immutable Gosso release. Earlier v1.7.0 smoke observed a rotation response but did not verify credential behavior; the stronger November 6 acceptance proves the published image is defective. See the November 8 audit and repair proposal.
 - [ ] Complete the deployment, secret, backup/restore and operator gates above against an identified staging environment. No production deployment is authorized by this release task.
 
 No v0.7.25 tag may be created while these gates remain open. Historical green CI/browser/parity evidence is supporting evidence, not manual certification or staging acceptance.
@@ -71,3 +71,9 @@ inspection found broken font delivery in the Canonical Showcase while Product
 fonts load. The certification ledger remains pending, and an authorized Staging
 target, maintainer approval, actual backup restore and rollback receipts are
 still missing. No v0.7.25 tag, target image or deployment is asserted.
+
+## November 8 resumed closeout — mandatory blockers retained
+
+Canonical font delivery is repaired in [UI PR #161](https://github.com/rushairer/gouno-ui/pull/161); exact UI main d171541 passes normal Golden (187), both consumers and Pages. Real public Chromium font-load/network verification succeeded November 8. This closes the delivery defect only; the ledger still requires maintainer direct rendered review and a separate approval.
+
+[Released-image acceptance 42203332667](https://github.com/rushairer/gosso-admin/actions/runs/42203332667) **fails**: old secret still authenticates, returned replacement does not. Keep the full governance checkbox open and retain the failing test. [The concrete local Gosso repair proposal](docs/quality/proposals/gosso-v1.7.1-local-proposal.md) passes local race/integration/security checks, but Gosso is read-only until a scope exception; no v1.7.1 publication or baseline is asserted. No Staging, backup restore, rollback or maintainer certification box may be checked from these tests.

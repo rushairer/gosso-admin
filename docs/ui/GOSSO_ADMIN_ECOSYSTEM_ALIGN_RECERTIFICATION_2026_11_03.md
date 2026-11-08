@@ -89,3 +89,9 @@ state coverage, focus/accessibility and operator Staging acceptance remain
 required. Local evidence is retained outside the repositories in workspace
 `docs/quality/final-evidence-2026-11/`; the final audit describes its scope and
 limits. No new human reviewer or approval is claimed.
+
+## November 8 — Canonical delivery resolved, certification pending
+
+The November 6 missing-font observation above is historical. [UI PR #161](https://github.com/rushairer/gouno-ui/pull/161) is merged at `d17154139bb217be9cd61b140c78db73b1430b3e`; normal Golden run42206493211 passed187, both Product consumer gates and Pages passed. Public Chromium on November8 confirmed HTTP200 for both fonts, loaded faces and font-byte equivalence with released @gouno/ui0.4.9. No npm/runtime release was needed.
+
+Use this repaired Canonical ref for the maintainer's fresh state-by-state review, including actual lower-panel scrolling, focus/accessibility and interaction. Earlier missing-font images cannot establish present parity. The ledger remains needs-manual-recertification, with no new human sign-off claimed. The separate published-Gosso rotation defect and unavailable authorized Staging acceptance remain release blockers; see the final ecosystem audit.

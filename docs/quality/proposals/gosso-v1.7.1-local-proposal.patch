@@ -1,0 +1,441 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index abf78e5..5cc4bf4 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -250,7 +250,7 @@ jobs:
+           cache-dependency-path: go.sum
+ 
+       - name: Run integration tests
+-        run: go test -p 1 -tags=integration -v -count=1 -timeout=180s ./internal/auth/service/ ./internal/session/service/ ./internal/token/service/ ./internal/account/ ./middleware/ ./tests/http/
++        run: go test -p 1 -race -tags=integration -v -count=1 -timeout=180s ./internal/auth/service/ ./internal/session/service/ ./internal/token/service/ ./internal/oauth2/service/ ./internal/account/ ./middleware/ ./tests/http/
+         env:
+           GOUNO_DATABASE_DRIVERS_POSTGRES_DSN: "host=127.0.0.1 user=gosso password=${{ env.TEST_POSTGRES_PASSWORD }} dbname=gosso_test port=5434 sslmode=disable"
+           GOUNO_REDIS_DSN: "redis://127.0.0.1:6381/0"
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 92be3c6..f47e3f9 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
+ 
+ ## [Unreleased]
+ 
++### Security
++- Persist confidential OAuth2 Client secret rotations with optimistic concurrency protection so replacement credentials authenticate and retired credentials are rejected. Keep ordinary metadata updates unable to restore an older secret hash.
++
++### Fixed
++- Pass the stable request context through authorization-consent persistence instead of retaining a pooled Gin context beyond the response lifetime.
++- Synchronize the back-channel logout receiver in HTTP integration tests while preserving the existing 500ms delivery bound; run integration CI with the race detector.
++
+ ## [1.7.0] - 2026-11-05
+ 
+ ### Added
+diff --git a/internal/oauth2/controller/oauth2_authorize.go b/internal/oauth2/controller/oauth2_authorize.go
+index 19241aa..26e93c5 100644
+--- a/internal/oauth2/controller/oauth2_authorize.go
++++ b/internal/oauth2/controller/oauth2_authorize.go
+@@ -321,6 +321,9 @@ type ConsentRequest struct {
+ 
+ // SubmitConsent POST /oauth2/authorize
+ func (c *OAuth2Controller) SubmitConsent(ctx *gin.Context) {
++	// Database/cache work must not retain a pooled Gin context after the response.
++	// The request context already carries trusted audit metadata and cancellation.
++	requestCtx := ctx.Request.Context()
+ 	// Defense-in-depth: reject oversized form bodies early.
+ 	if ctx.Request.ContentLength > oauth2MaxFormBodySize {
+ 		ctx.JSON(http.StatusRequestEntityTooLarge, gin.H{
+@@ -366,7 +369,7 @@ func (c *OAuth2Controller) SubmitConsent(ctx *gin.Context) {
+ 
+ 	if !req.Approved {
+ 		// Validate redirect_uri against client registration before redirecting
+-		client, clientErr := c.clientSvc.FindByClientID(ctx, req.ClientID)
++		client, clientErr := c.clientSvc.FindByClientID(requestCtx, req.ClientID)
+ 		if clientErr != nil || !client.ValidateRedirectURI(req.RedirectURI) {
+ 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid_client", "error_description": "invalid client or redirect_uri"})
+ 			return
+@@ -397,7 +400,7 @@ func (c *OAuth2Controller) SubmitConsent(ctx *gin.Context) {
+ 		return
+ 	}
+ 	stateKey := consentStateKeyPrefix + req.ConsentID
+-	stateData, err := c.redis.GetDel(ctx, stateKey)
++	stateData, err := c.redis.GetDel(requestCtx, stateKey)
+ 	if err != nil {
+ 		if errors.Is(err, cache.ErrKeyNotFound) {
+ 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request", "error_description": "invalid or expired consent session"})
+@@ -430,7 +433,7 @@ func (c *OAuth2Controller) SubmitConsent(ctx *gin.Context) {
+ 	}
+ 
+ 	// Validate client exists
+-	client, err := c.clientSvc.FindByClientID(ctx, req.ClientID)
++	client, err := c.clientSvc.FindByClientID(requestCtx, req.ClientID)
+ 	if err != nil {
+ 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid_client"})
+ 		return
+@@ -453,7 +456,7 @@ func (c *OAuth2Controller) SubmitConsent(ctx *gin.Context) {
+ 
+ 	// Verify account is still active before generating authorization code.
+ 	// The account may have been suspended between the GET (consent page) and POST (approval).
+-	if !c.accountValidator.IsAccountActive(ctx, accountIDStr) {
++	if !c.accountValidator.IsAccountActive(requestCtx, accountIDStr) {
+ 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "unauthorized_client", "error_description": "account is not active"})
+ 		return
+ 	}
+@@ -463,14 +466,14 @@ func (c *OAuth2Controller) SubmitConsent(ctx *gin.Context) {
+ 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request"})
+ 		return
+ 	}
+-	if saveErr := c.consentSvc.SaveConsent(ctx, consent); saveErr != nil {
++	if saveErr := c.consentSvc.SaveConsent(requestCtx, consent); saveErr != nil {
+ 		c.logger.Error("Failed to save consent", zap.Error(saveErr))
+ 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "server_error"})
+ 		return
+ 	}
+ 
+ 	sessionID := sessionIDFromContext(ctx)
+-	code, err := c.authCodeSvc.GenerateCode(ctx, req.ClientID, accountIDStr, req.RedirectURI, scopes, req.CodeChallenge, req.CodeChallengeMethod, req.Nonce, sessionID, stored.Resource)
++	code, err := c.authCodeSvc.GenerateCode(requestCtx, req.ClientID, accountIDStr, req.RedirectURI, scopes, req.CodeChallenge, req.CodeChallengeMethod, req.Nonce, sessionID, stored.Resource)
+ 	if err != nil {
+ 		c.logger.Error("Failed to generate authorization code after consent approval", zap.Error(err))
+ 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "server_error"})
+diff --git a/internal/oauth2/repository/client_repository.go b/internal/oauth2/repository/client_repository.go
+index 7ea364b..4b85d76 100644
+--- a/internal/oauth2/repository/client_repository.go
++++ b/internal/oauth2/repository/client_repository.go
+@@ -18,6 +18,9 @@ type OAuth2ClientRepository interface {
+ 	// Update persists changes to an OAuth2 client with optimistic locking.
+ 	// expectedUpdatedAt must match the current row value; returns domain.ErrClientConcurrentModification on mismatch.
+ 	Update(ctx context.Context, tx *sql.Tx, client *domain.OAuth2Client, expectedUpdatedAt time.Time) error
++	// UpdateSecret persists only the credential hash and timestamp with the same
++	// optimistic lock. Metadata updates must never restore a caller's stale hash.
++	UpdateSecret(ctx context.Context, tx *sql.Tx, client *domain.OAuth2Client, expectedUpdatedAt time.Time) error
+ 	SoftDelete(ctx context.Context, tx *sql.Tx, id string, deletedAt time.Time) error
+ 	SoftDeleteByAccountID(ctx context.Context, tx *sql.Tx, accountID string, deletedAt time.Time) error
+ 	// FindFrontchannelLogoutClientsByAccountID returns clients that have a
+diff --git a/internal/oauth2/repository/client_repository_impl.go b/internal/oauth2/repository/client_repository_impl.go
+index bd033e3..019abcf 100644
+--- a/internal/oauth2/repository/client_repository_impl.go
++++ b/internal/oauth2/repository/client_repository_impl.go
+@@ -227,6 +227,23 @@ func (r *oauth2ClientRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, cli
+ 	return nil
+ }
+ 
++func (r *oauth2ClientRepositoryImpl) UpdateSecret(ctx context.Context, tx *sql.Tx, client *domain.OAuth2Client, expectedUpdatedAt time.Time) error {
++	err := tx.QueryRowContext(ctx, `
++		UPDATE oauth2_clients SET client_secret_hash = $1, updated_at = $2
++		WHERE id = $3 AND deleted_at IS NULL AND updated_at = $4
++		RETURNING updated_at`, client.ClientSecretHash, time.Now(), client.ID, expectedUpdatedAt).Scan(&client.UpdatedAt)
++	if errors.Is(err, sql.ErrNoRows) {
++		if _, findErr := findByClientID(ctx, tx.QueryRowContext, client.ClientID); findErr != nil {
++			return findErr
++		}
++		return fmt.Errorf("%w: %s", domain.ErrClientConcurrentModification, client.ID)
++	}
++	if err != nil {
++		return fmt.Errorf("update oauth2_client secret: %w", err)
++	}
++	return nil
++}
++
+ func (r *oauth2ClientRepositoryImpl) SoftDelete(ctx context.Context, tx *sql.Tx, id string, deletedAt time.Time) error {
+ 	query := `UPDATE oauth2_clients SET deleted_at = $1, updated_at = $1, client_secret_hash = '' WHERE id = $2 AND deleted_at IS NULL`
+ 	result, err := tx.ExecContext(ctx, query, deletedAt, id)
+diff --git a/internal/oauth2/repository/client_secret_update_test.go b/internal/oauth2/repository/client_secret_update_test.go
+new file mode 100644
+index 0000000..bcd990c
+--- /dev/null
++++ b/internal/oauth2/repository/client_secret_update_test.go
+@@ -0,0 +1,62 @@
++package repository
++
++import (
++	"context"
++	"database/sql"
++	"errors"
++	"testing"
++	"time"
++
++	"github.com/DATA-DOG/go-sqlmock"
++	"github.com/stretchr/testify/require"
++
++	"github.com/rushairer/gosso/internal/oauth2/domain"
++)
++
++func TestUpdateSecret(t *testing.T) {
++	storageFailure := errors.New("synthetic storage failure")
++	for _, kind := range []string{"success", "missing", "concurrent", "storage"} {
++		t.Run(kind, func(t *testing.T) {
++			db, mock, err := sqlmock.New()
++			require.NoError(t, err)
++			t.Cleanup(func() { _ = db.Close() })
++			mock.ExpectBegin()
++			tx, err := db.Begin()
++			require.NoError(t, err)
++			client := newTestOAuth2Client()
++			expected := time.Now().Add(-time.Hour)
++			updated := time.Now()
++			query := mock.ExpectQuery("UPDATE oauth2_clients SET client_secret_hash = ").
++				WithArgs(client.ClientSecretHash, sqlmock.AnyArg(), client.ID, expected)
++			switch kind {
++			case "success":
++				query.WillReturnRows(sqlmock.NewRows([]string{"updated_at"}).AddRow(updated))
++			case "storage":
++				query.WillReturnError(storageFailure)
++			default:
++				query.WillReturnRows(sqlmock.NewRows([]string{"updated_at"}))
++				lookup := mock.ExpectQuery("SELECT (.+) FROM oauth2_clients").WithArgs(client.ClientID)
++				if kind == "missing" {
++					lookup.WillReturnError(sql.ErrNoRows)
++				} else {
++					lookup.WillReturnRows(sqlmock.NewRows(clientColumns()).AddRow(clientRowValues(client)...))
++				}
++			}
++			err = NewOAuth2ClientRepository(db).UpdateSecret(context.Background(), tx, client, expected)
++			switch kind {
++			case "success":
++				require.NoError(t, err)
++				require.Equal(t, updated, client.UpdatedAt)
++			case "missing":
++				require.ErrorIs(t, err, domain.ErrClientNotFound)
++			case "concurrent":
++				require.ErrorIs(t, err, domain.ErrClientConcurrentModification)
++			case "storage":
++				require.ErrorIs(t, err, storageFailure)
++			}
++			mock.ExpectRollback()
++			require.NoError(t, tx.Rollback())
++			require.NoError(t, mock.ExpectationsWereMet())
++		})
++	}
++}
+diff --git a/internal/oauth2/service/client_rotation_integration_test.go b/internal/oauth2/service/client_rotation_integration_test.go
+new file mode 100644
+index 0000000..63c6584
+--- /dev/null
++++ b/internal/oauth2/service/client_rotation_integration_test.go
+@@ -0,0 +1,164 @@
++//go:build integration
++
++package service_test
++
++import (
++	"context"
++	"testing"
++	"time"
++
++	"github.com/stretchr/testify/require"
++	"go.uber.org/zap"
++	"golang.org/x/crypto/bcrypt"
++
++	"github.com/rushairer/gosso/internal/oauth2/domain"
++	"github.com/rushairer/gosso/internal/oauth2/repository"
++	"github.com/rushairer/gosso/internal/oauth2/service"
++	"github.com/rushairer/gosso/internal/testutil"
++)
++
++type rotationFixture struct {
++	env          *testutil.TestEnv
++	repo         repository.OAuth2ClientRepository
++	svc          service.OAuth2ClientService
++	owner, actor string
++	client       *domain.OAuth2Client
++	original     string
++}
++
++func newRotationFixture(t *testing.T) rotationFixture {
++	t.Helper()
++	env := testutil.SetupTestEnvT(t)
++	ctx := context.Background()
++	var owner, actor string
++	require.NoError(t, env.DB.QueryRowContext(ctx,
++		`INSERT INTO accounts(display_name) VALUES('Rotation owner') RETURNING id`).Scan(&owner))
++	require.NoError(t, env.DB.QueryRowContext(ctx,
++		`INSERT INTO accounts(display_name) VALUES('Rotation administrator') RETURNING id`).Scan(&actor))
++	repo := repository.NewOAuth2ClientRepository(env.DB)
++	svc := service.NewOAuth2ClientService(env.DB, repo, nil, zap.NewNop())
++	client, original, err := svc.RegisterClient(ctx, &service.RegisterClientRequest{
++		AccountID: owner, Name: "Secret rotation regression",
++		RedirectURIs: []string{"https://rotation.example.test/callback"},
++		GrantTypes:   []string{domain.GrantTypeAuthorizationCode},
++		Scopes:       []string{"openid"}, IsConfidential: true,
++	})
++	require.NoError(t, err)
++	t.Cleanup(func() {
++		_, cleanupErr := env.DB.ExecContext(ctx, `DELETE FROM oauth2_clients WHERE client_id=$1`, client.ClientID)
++		require.NoError(t, cleanupErr)
++		_, cleanupErr = env.DB.ExecContext(ctx, `DELETE FROM accounts WHERE id IN ($1,$2)`, owner, actor)
++		require.NoError(t, cleanupErr)
++	})
++	return rotationFixture{env: env, repo: repo, svc: svc, owner: owner, actor: actor, client: client, original: original}
++}
++
++func assertCredential(t *testing.T, f rotationFixture, accepted, rejected string) {
++	t.Helper()
++	current, err := f.repo.FindByClientID(context.Background(), f.client.ClientID)
++	require.NoError(t, err)
++	authenticator := &service.ClientAuthenticator{}
++	require.NoError(t, authenticator.AuthenticateClient(current, accepted), "replacement must authenticate from a fresh database read")
++	require.ErrorIs(t, authenticator.AuthenticateClient(current, rejected), service.ErrInvalidClientSecret, "retired credential must be rejected")
++}
++
++func TestClientSecretRotationPersistence(t *testing.T) {
++	for _, mode := range []string{"owner", "administrator"} {
++		t.Run(mode, func(t *testing.T) {
++			f := newRotationFixture(t)
++			ctx := context.Background()
++			// Keep a pre-rotation object to prove later ordinary metadata writes
++			// cannot accidentally restore its retired credential hash.
++			stale, err := f.repo.FindByClientID(ctx, f.client.ClientID)
++			require.NoError(t, err)
++			var replacement string
++			if mode == "owner" {
++				replacement, err = f.svc.RotateClientSecret(ctx, f.owner, f.client.ClientID)
++			} else {
++				replacement, err = f.svc.RotateClientSecretAsAdmin(ctx, f.actor, f.client.ClientID)
++			}
++			require.NoError(t, err)
++			assertCredential(t, f, replacement, f.original)
++			stale.Name = "Metadata after credential rotation"
++			require.NoError(t, f.svc.UpdateClient(ctx, stale))
++			assertCredential(t, f, replacement, f.original)
++			current, err := f.repo.FindByClientID(ctx, f.client.ClientID)
++			require.NoError(t, err)
++			require.Equal(t, stale.Name, current.Name)
++			require.Equal(t, f.owner, current.AccountID, "administration must preserve ownership")
++		})
++	}
++}
++
++func TestClientSecretRotationOwnershipDenied(t *testing.T) {
++	f := newRotationFixture(t)
++	_, err := f.svc.RotateClientSecret(context.Background(), f.actor, f.client.ClientID)
++	require.ErrorIs(t, err, service.ErrClientAccessDenied)
++	current, err := f.repo.FindByClientID(context.Background(), f.client.ClientID)
++	require.NoError(t, err)
++	require.NoError(t, (&service.ClientAuthenticator{}).AuthenticateClient(current, f.original))
++}
++
++func TestClientSecretRotationRollback(t *testing.T) {
++	f := newRotationFixture(t)
++	ctx := context.Background()
++	current, err := f.repo.FindByClientID(ctx, f.client.ClientID)
++	require.NoError(t, err)
++	expected := current.UpdatedAt
++	const replacement = "synthetic-rollback-secret"
++	hash, err := bcrypt.GenerateFromPassword([]byte(replacement), bcrypt.MinCost)
++	require.NoError(t, err)
++	current.ClientSecretHash = string(hash)
++	tx, err := f.env.DB.BeginTx(ctx, nil)
++	require.NoError(t, err)
++	t.Cleanup(func() { _ = tx.Rollback() })
++	require.NoError(t, f.repo.UpdateSecret(ctx, tx, current, expected))
++	require.NoError(t, tx.Rollback())
++	assertCredential(t, f, f.original, replacement)
++}
++
++func TestClientSecretRotationConcurrentCAS(t *testing.T) {
++	f := newRotationFixture(t)
++	ctx := context.Background()
++	tx1, err := f.env.DB.BeginTx(ctx, nil)
++	require.NoError(t, err)
++	t.Cleanup(func() { _ = tx1.Rollback() })
++	tx2, err := f.env.DB.BeginTx(ctx, nil)
++	require.NoError(t, err)
++	t.Cleanup(func() { _ = tx2.Rollback() })
++	first, err := f.repo.FindByClientIDTx(ctx, tx1, f.client.ClientID)
++	require.NoError(t, err)
++	second, err := f.repo.FindByClientIDTx(ctx, tx2, f.client.ClientID)
++	require.NoError(t, err)
++	expected1, expected2 := first.UpdatedAt, second.UpdatedAt
++	const winner, loser = "synthetic-first-secret", "synthetic-stale-secret"
++	hash, err := bcrypt.GenerateFromPassword([]byte(winner), bcrypt.MinCost)
++	require.NoError(t, err)
++	first.ClientSecretHash = string(hash)
++	hash, err = bcrypt.GenerateFromPassword([]byte(loser), bcrypt.MinCost)
++	require.NoError(t, err)
++	second.ClientSecretHash = string(hash)
++	require.NoError(t, f.repo.UpdateSecret(ctx, tx1, first, expected1))
++	require.NoError(t, tx1.Commit())
++	require.ErrorIs(t, f.repo.UpdateSecret(ctx, tx2, second, expected2), domain.ErrClientConcurrentModification)
++	require.NoError(t, tx2.Rollback())
++	assertCredential(t, f, winner, loser)
++	assertCredential(t, f, winner, f.original)
++}
++
++func TestClientSecretRotationDeletedClient(t *testing.T) {
++	f := newRotationFixture(t)
++	ctx := context.Background()
++	current, err := f.repo.FindByClientID(ctx, f.client.ClientID)
++	require.NoError(t, err)
++	tx, err := f.env.DB.BeginTx(ctx, nil)
++	require.NoError(t, err)
++	t.Cleanup(func() { _ = tx.Rollback() })
++	require.NoError(t, f.repo.SoftDelete(ctx, tx, current.ID, time.Now()))
++	require.NoError(t, tx.Commit())
++	tx, err = f.env.DB.BeginTx(ctx, nil)
++	require.NoError(t, err)
++	t.Cleanup(func() { _ = tx.Rollback() })
++	require.ErrorIs(t, f.repo.UpdateSecret(ctx, tx, current, current.UpdatedAt), domain.ErrClientNotFound)
++	require.NoError(t, tx.Rollback())
++}
+diff --git a/internal/oauth2/service/client_service.go b/internal/oauth2/service/client_service.go
+index a13058a..4e9489c 100644
+--- a/internal/oauth2/service/client_service.go
++++ b/internal/oauth2/service/client_service.go
+@@ -91,7 +91,7 @@ func (s *oauth2ClientServiceImpl) rotateClientSecret(ctx context.Context, actorA
+ 		expectedUpdatedAt := client.UpdatedAt
+ 		client.ClientSecretHash = string(hash)
+ 		client.UpdatedAt = time.Now()
+-		return s.clientRepo.Update(ctx, tx, client, expectedUpdatedAt)
++		return s.clientRepo.UpdateSecret(ctx, tx, client, expectedUpdatedAt)
+ 	})
+ 	if err != nil {
+ 		return "", err
+diff --git a/internal/oidc/controller/oidc_controller_test.go b/internal/oidc/controller/oidc_controller_test.go
+index e315953..73394ca 100644
+--- a/internal/oidc/controller/oidc_controller_test.go
++++ b/internal/oidc/controller/oidc_controller_test.go
+@@ -177,6 +177,9 @@ func (m *mockClientRepo) FindAll(_ context.Context) ([]*oauth2Domain.OAuth2Clien
+ func (m *mockClientRepo) Update(_ context.Context, _ *sql.Tx, _ *oauth2Domain.OAuth2Client, _ time.Time) error {
+ 	return nil
+ }
++func (m *mockClientRepo) UpdateSecret(_ context.Context, _ *sql.Tx, _ *oauth2Domain.OAuth2Client, _ time.Time) error {
++	return nil
++}
+ func (m *mockClientRepo) SoftDelete(_ context.Context, _ *sql.Tx, _ string, _ time.Time) error {
+ 	return nil
+ }
+diff --git a/tests/http/oauth2_http_integration_test.go b/tests/http/oauth2_http_integration_test.go
+index 3079c4b..743a8b5 100644
+--- a/tests/http/oauth2_http_integration_test.go
++++ b/tests/http/oauth2_http_integration_test.go
+@@ -635,10 +635,13 @@ func TestHTTP_BackChannelLogout(t *testing.T) {
+ 	ctx := context.Background()
+ 
+ 	// Set up a local HTTP server to receive the back-channel logout token
+-	var receivedLogoutToken string
++	receivedLogoutTokens := make(chan string, 1)
+ 	receiverServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+ 		if err := r.ParseForm(); err == nil {
+-			receivedLogoutToken = r.FormValue("logout_token")
++			select {
++			case receivedLogoutTokens <- r.FormValue("logout_token"):
++			default:
++			}
+ 		}
+ 		w.WriteHeader(http.StatusOK)
+ 	}))
+@@ -683,8 +686,13 @@ func TestHTTP_BackChannelLogout(t *testing.T) {
+ 	})
+ 	assert.Equal(t, http.StatusOK, logoutResp.StatusCode)
+ 
+-	// Wait for async back-channel logout to complete
+-	time.Sleep(500 * time.Millisecond)
++	// Synchronize the async receiver without weakening the existing 500ms bound.
++	var receivedLogoutToken string
++	select {
++	case receivedLogoutToken = <-receivedLogoutTokens:
++	case <-time.After(500 * time.Millisecond):
++		t.Fatal("back-channel logout token was not received within 500ms")
++	}
+ 
+ 	// Verify the logout token was received
+ 	assert.NotEmpty(t, receivedLogoutToken, "back-channel logout token should have been received")
