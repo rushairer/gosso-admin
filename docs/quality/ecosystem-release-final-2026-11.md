@@ -24,8 +24,8 @@ Admin target v0.7.25 and Blog target v1.6.0 are **ABSENT**. No Gosso v1.7.1 tag 
 
 | State | GOSSO Admin v0.7.25 | Gouno Blog v1.6.0 |
 | --- | --- | --- |
-| Code Ready | Candidate; release tests expose an unresolved upstream defect; final merged SHA pending | Candidate; final release-diff acceptance pending; Connector freeze preserved |
-| CI Ready | **NO**: required released-Gosso rotation acceptance fails; other quality/security/image checks pass at the recorded test head | Existing exact-main CI/BFF/browser/parity pass; eventual final merged SHA requires its own checks |
+| Code Ready | Candidate; release tests expose an unresolved upstream defect; final merged SHA pending | Candidate with minimal x/net/zlib security remediation in PR #415; final acceptance pending; Connector freeze preserved |
+| CI Ready | **NO**: required released-Gosso rotation acceptance fails; other quality/security/image checks pass at the recorded test head | Historical main CI/BFF/browser/parity pass; resumed scans find real vulnerabilities; repaired source-head gates pending |
 | Manual Certification Ready | **NO**: gosso-admin-frozen needs maintainer direct review and separate sign-off | **NO**: blog-admin-ai remains needs-manual-recertification |
 | Staging Ready | **NO**: no identified authorized target or real restore/rollback acceptance receipt | **NO**: same operational gap; upstream Admin release also pending |
 | Release Published | **NO**, formal version stays v0.7.24 | **NO**, formal version stays v1.5.26 |
@@ -80,6 +80,15 @@ Retained independent database evidence confirms 21 packages, 115 required test n
 
 The v1.5.26-to-main inventory is 781 paths (90,440 insertions / 37,713 deletions). Focused inspection covers approval transactions/quarantined uncertainty, fenced image recovery without replay, live Owner authorization under advisory lock, safe error transport and blocked external schema loading. This is not a claim of exhaustive final human release-diff acceptance. New capabilities justify minor v1.6.0. Connector behavior remains frozen; no architecture, product or dependency expansion was made here.
 
+
+### Resumed image-scan remediation on Blog source head
+
+The fresh November8 image run [42440708333](https://github.com/rushairer/gouno-blog/actions/runs/42440708333), documentation head `82c644ac0a3a1bd2e021956d307cdde6b4cd3ed6`, failed backend Trivy HIGH on x/net0.60.0 CVE-2026-78661, plus frontend/Seed Grype Critical on zlib1.3.2-r1 CVE-2026-4738. Earlier green images cannot substitute for this fresh security result. Primary sources: [Go advisory GO-2026-6860](https://pkg.go.dev/vuln/GO-2026-6860), [zlib1.4 release notes](https://zlib.net/).
+
+[Blog PR #415](https://github.com/rushairer/gouno-blog/pull/415) now includes minimal fixes at source commit `562d5d0a2c74077acdd1a90d91560dd04ac9929f`: x/net0.62.0, matching checksums, a stronger downgrade guard and all three runtime zlib pins1.4-r0. Unrelated inherited dependencies, Core/UI/Client pins, immutable bases, both scanners and severity cutoffs remain intact. Local full backend race/vet/module verification pass; govulncheck reports zero reachable and one unused required-module finding. Positive/downgrade probes and five image contract tests pass. Actual package installs on unchanged Alpine/Nginx bases and nginx -t pass. None is a final image-publication or Staging receipt.
+
+Final source-head runs are [CI42441029750](https://github.com/rushairer/gouno-blog/actions/runs/42441029750), [Images42441029645](https://github.com/rushairer/gouno-blog/actions/runs/42441029645), [BFF42441029741](https://github.com/rushairer/gouno-blog/actions/runs/42441029741), [Browser42441029642](https://github.com/rushairer/gouno-blog/actions/runs/42441029642) and [Parity42441029684](https://github.com/rushairer/gouno-blog/actions/runs/42441029684). They were pending/in progress when this documentation batch was prepared; query their completed conclusions before acceptance. Admin evidence head `efed156c21ebf50a32a1714c1b4c5403f2fd4704` passed [CI42440697191](https://github.com/rushairer/gosso-admin/actions/runs/42440697191), [Security42440697154](https://github.com/rushairer/gosso-admin/actions/runs/42440697154), [Images42440697278](https://github.com/rushairer/gosso-admin/actions/runs/42440697278) and again **failed** actual official-image rotation [42440697157](https://github.com/rushairer/gosso-admin/actions/runs/42440697157). Fresh Admin browser/parity checks against the repaired Canonical are also running; no certification is inferred.
+
 ## 5. Showcase repair and manual certification
 
 UI [PR #162](https://github.com/rushairer/gouno-ui/pull/162) added a read-only, exact-branch/SHA proposal-artifact workflow without pushing baselines. Pages no longer uses an orphan/force push. [PR #161](https://github.com/rushairer/gouno-ui/pull/161) repaired Showcase font resolution and asserts actual font load before golden capture. Existing source/dependency/package runtime pins are unchanged; **no v0.4.10** was published.
@@ -117,7 +126,7 @@ Browser-plugin tools were unavailable; native repository Playwright was the docu
 | CLI v1.3.0 | Template v1.4.0 bootstrap |
 | Gosso v1.7.0 | Core v1.4.0; signed release exists but rotation defect blocks full governance acceptance |
 | Admin v0.7.25 candidate | UI 0.4.9, Client 0.9.3, Node >=24.15 <25; no baseline switch to an unpublished patch |
-| Blog v1.6.0 candidate | Core v1.4.0, UI 0.4.9, Client 0.9.3, patched Go 1.27.x, Node 24; independent BFF acceptance required |
+| Blog v1.6.0 candidate | Core v1.4.0, UI 0.4.9, Client 0.9.3, patched Go 1.27.x, Node 24; candidate x/net0.62.0 and runtime zlib1.4-r0; independent BFF acceptance required |
 | UI v0.4.9 | Same published runtime/API; Showcase delivery repaired without new npm version |
 | Doc v1.3.1 | Formal matrix retains Admin v0.7.24 / Blog v1.5.26; targets are candidates |
 | Agent Demo v0.3.0 | Core v1.4.0; already published |
