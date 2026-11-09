@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+- Accept the independently signature-verified Gosso v1.7.1 release image for persisted Client Secret rotation; retain full real old/new credential regression checks and existing authorization boundaries.
+
 ### Added
 - Extend the pinned Gosso v1.7.0 compatibility acceptance with a real second owner, global-governance privilege denials, owner-boundary checks, secret replacement and session revocation. The token endpoint must reject the retired secret and authenticate its replacement before rejecting a deliberately nonexistent authorization code. These automated checks do not replace manual Showcase certification or Staging acceptance.
 
