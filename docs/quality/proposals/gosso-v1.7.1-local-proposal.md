@@ -1,5 +1,7 @@
 # Gosso secret rotation repair — local proposal
 
+Latest proposal: [November 9 security-baseline and coverage refresh](gosso-v1.7.1-local-proposal-2026-11-09.md). The following November 8 patch and receipt are preserved as historical evidence; they are not the latest proposed dependency baseline.
+
 Status: **not submitted to Gosso, not published**. The task limits Gosso to read-only. This text patch makes the required scope decision reviewable without changing that repository or its remote. Proposed SemVer is v1.7.1; no published section, Chart version or target tag has been changed.
 
 - Base: official v1.7.0 commit `5bd45c8f9946662274117c4644b31ce90a003464`.

@@ -1,0 +1,257 @@
+{
+  "status": "local-proposal-only-not-submitted-not-released",
+  "date": "2026-11-09",
+  "base_official_sha": "5bd45c8f9946662274117c4644b31ce90a003464",
+  "local_source_sha": "cb0035c013bf3f9552e7ba125cb66a2ce90aef14",
+  "remote_count": 0,
+  "patch_sha256": "fa833ed305dada05f0d27b93fa5e47d58182824b4da0e8ddf3b7d8aa496d0191",
+  "patch_files": 12,
+  "dependencies": {
+    "core": "v1.4.0 unchanged",
+    "x_net": "v0.62.0 security patch with tidy/verified sums",
+    "other_requirements": "unchanged"
+  },
+  "toolchain": "Tests/Vet/coverage/gosec/govulncheck: go1.26.10 darwin/arm64; pinned golangci-lint2.15.0: go1.27.3",
+  "checks": {
+    "module_verify": "passed",
+    "unit_race_all_packages": "passed",
+    "vet": "passed",
+    "lint_v2_15_0": "passed explicit go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0; 0 issues",
+    "gosec_v2_27_1": {
+      "files": 149,
+      "lines": 28526,
+      "nosec": 19,
+      "found": 0
+    },
+    "govulncheck_v1_6_0": {
+      "reachable_findings": 0,
+      "imported_package_findings": 0,
+      "unused_required_module_findings": 1,
+      "remaining_advisory": "GO-2026-5932 in unused golang.org/x/crypto/openpgp; not a zero-module finding claim"
+    },
+    "ci_coverage_percent": 70.0,
+    "ci_coverage_floor_percent": 70,
+    "critical_package_percent": {
+      "auth": 63.7,
+      "oauth2": 60.4,
+      "token": 81.6,
+      "oidc": 74.4,
+      "session": 74.5
+    },
+    "integration": {
+      "counts": {
+        "pass": 571,
+        "skip": 20
+      },
+      "packages": [
+        {
+          "package": "github.com/rushairer/gosso/internal/auth/service",
+          "result": "pass"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/session/service",
+          "result": "pass"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/token/service",
+          "result": "pass"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/oauth2/service",
+          "result": "pass"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/account",
+          "result": "skip"
+        },
+        {
+          "package": "github.com/rushairer/gosso/middleware",
+          "result": "pass"
+        },
+        {
+          "package": "github.com/rushairer/gosso/tests/http",
+          "result": "pass"
+        }
+      ],
+      "rotation_tests": [
+        {
+          "test": "TestClientSecretRotationPersistence/owner",
+          "result": "pass"
+        },
+        {
+          "test": "TestClientSecretRotationPersistence/administrator",
+          "result": "pass"
+        },
+        {
+          "test": "TestClientSecretRotationPersistence",
+          "result": "pass"
+        },
+        {
+          "test": "TestClientSecretRotationOwnershipDenied",
+          "result": "pass"
+        },
+        {
+          "test": "TestClientSecretRotationRollback",
+          "result": "pass"
+        },
+        {
+          "test": "TestClientSecretRotationConcurrentCAS",
+          "result": "pass"
+        },
+        {
+          "test": "TestClientSecretRotationDeletedClient",
+          "result": "pass"
+        }
+      ],
+      "skipped_existing_tests": [
+        {
+          "package": "github.com/rushairer/gosso/internal/auth/service",
+          "test": "TestVerifyAndReset_InvalidToken"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/auth/service",
+          "test": "TestVerifyAndReset_TokenExhausted"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/auth/service",
+          "test": "TestVerifyCode_Success"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/auth/service",
+          "test": "TestVerifyCode_Wrong"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/auth/service",
+          "test": "TestVerifyCode_Exhausted"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/auth/service",
+          "test": "TestVerifyCode_Expired"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/auth/service",
+          "test": "TestVerifyCode_CodeReuse"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/auth/service",
+          "test": "TestVerifyCodeForAccount_Success"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/auth/service",
+          "test": "TestVerifyCodeForAccount_WrongAccount"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/session/service",
+          "test": "TestSessionService_EnforceSessionLimit"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/session/service",
+          "test": "TestSessionService_EnforceSessionLimit_PreservesProtectedSessionOnTimestampTie"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/oauth2/service",
+          "test": "TestDeviceCodeService_Authorize"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/oauth2/service",
+          "test": "TestDeviceCodeService_Deny"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/oauth2/service",
+          "test": "TestDeviceCodeService_PollRate"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/oauth2/service",
+          "test": "TestClaimAuthorizedDeviceCode_Success"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/oauth2/service",
+          "test": "TestClaimAuthorizedDeviceCode_AlreadyUsed"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/oauth2/service",
+          "test": "TestClaimAuthorizedDeviceCode_PendingNotClaimable"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/oauth2/service",
+          "test": "TestClaimAuthorizedDeviceCode_DeniedNotClaimable"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/oauth2/service",
+          "test": "TestAuthorizeDeviceCode_AlreadyDenied"
+        },
+        {
+          "package": "github.com/rushairer/gosso/internal/oauth2/service",
+          "test": "TestDenyDeviceCode_AlreadyAuthorized"
+        }
+      ],
+      "failed": []
+    }
+  },
+  "limitations": [
+    "No upstream Gosso branch, PR, tag, image or release was changed or published; read-only scope exception remains pending.",
+    "Coverage floors and scanner findings are reported as measured; no policy was relaxed.",
+    "Local integration is not Staging, maintainer certification or official released-image compatibility.",
+    "Published CHANGELOG sections and Chart version remain unchanged; v1.7.1 is proposed only.",
+    "Official upstream CI, packaging and release supply-chain acceptance remain required after authorization.",
+    "Initial host-default lint binary was 2.12.2, not the required 2.15.0; its result is excluded. The separately pinned 2.15.0 rerun passes."
+  ],
+  "local_log_receipts": {
+    "gosso-proposal-nov09-unit-race.log": {
+      "sha256": "7aa9c41721a874349073a04070f2396b8da7b2ff0086bc87cbd46c0b6529a2d0",
+      "bytes": 2764
+    },
+    "gosso-proposal-nov09-vet-confirmed.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "gosso-proposal-nov09-lint.log": {
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "bytes": 10
+    },
+    "gosso-proposal-nov09-gosec.log": {
+      "sha256": "9438c66ed877eddf0af7081f708fa7efd64abefa11b941980f6bcc2f209b6160",
+      "bytes": 27073
+    },
+    "gosso-proposal-nov09-gosec.json": {
+      "sha256": "01d71a05bbbd2ec9de6cfb22c21b179e02996a8850d1600ced9d0457c1fe6733",
+      "bytes": 141
+    },
+    "gosso-proposal-nov09-govulncheck.log": {
+      "sha256": "b5ae54ddcfa4cb39e85f84ad2d9e43556bd817c480eaab2a71bab63bfc29353b",
+      "bytes": 299
+    },
+    "gosso-proposal-nov09-govulncheck-verbose.log": {
+      "sha256": "6d5bed00a0b692717fec8f2ead1c8db2ae644f7381034b6ed1592b7b992ca514",
+      "bytes": 6435
+    },
+    "gosso-proposal-nov09-coverage.log": {
+      "sha256": "9484ce33be88185aa82bba42364aa21d9fac9e7c452ba3bb84be6897eb16cf07",
+      "bytes": 2906
+    },
+    "gosso-proposal-nov09-coverage-summary.txt": {
+      "sha256": "1cc85762eb73e1ccc4fd08bbb72aacbd1029a24b01285e6fe88be21651d91b39",
+      "bytes": 81614
+    },
+    "gosso-proposal-nov09-critical-coverage.log": {
+      "sha256": "732d0271b20db548e1de06fdf889c2275f09338d5f6e383022cb1f4fa8278768",
+      "bytes": 463
+    },
+    "gosso-proposal-nov09-integration.jsonl": {
+      "sha256": "e410b937644a4c7ca38f0e14fb71e8e6d878179486ea5c87e1d9cef4170c435a",
+      "bytes": 557121
+    },
+    "gosso-proposal-nov09-integration.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "gosso-proposal-nov09-lint-pinned-version.log": {
+      "sha256": "3e5bb01ad0ec1ff9ee3da0b1594b83e7fab9226ca203cb64ef475ef2958b7ddc",
+      "bytes": 154
+    },
+    "gosso-proposal-nov09-lint-pinned.log": {
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "bytes": 10
+    }
+  }
+}

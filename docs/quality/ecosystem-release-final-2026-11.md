@@ -1,10 +1,10 @@
-# Gouno Ecosystem 1.4 — final closeout audit, 2026-11-08
+# Gouno Ecosystem 1.4 — final closeout audit, 2026-11-09
 
 **Release Complete: NO.** GOSSO Admin v0.7.25 and Gouno Blog v1.6.0 are unpublished candidates. Neither target tag nor release exists in the freshly queried remote state. No target image, deployment or maintainer certification is asserted. The UI delivery defect is resolved; the real published Gosso v1.7.0 Client Secret rotation defect is a release blocker.
 
 ## 1. Remote state and formal versions
 
-Origin main, tags, GitHub Releases, Actions and open PRs were queried again on November 8. Original worktrees remain clean and preserved; work uses isolated clones and PR branches. Existing tags were never rewritten. The table distinguishes main from the existing formal release's peeled commit.
+Origin main and formal Releases were re-queried on November 9; target-tag and workflow receipts are retained separately. Latest Blog main includes the documentation-only PR #421 merge. Original worktrees remain clean and preserved; work uses isolated clones and PR branches. Existing tags were never rewritten. The table distinguishes main from the existing formal release's peeled commit.
 
 | Repository | Formal version | Audited main SHA | Formal tag peeled commit SHA | GitHub Release |
 | --- | --- | --- | --- | --- |
@@ -13,18 +13,18 @@ Origin main, tags, GitHub Releases, Actions and open PRs were queried again on N
 | gouno-cli | v1.3.0 | `a3930d1391ce3aedb8661eef472555611fd54540` | `087c00a523a6ec8c512d5eb9c65f657f6be8d5fb` | [Release](https://github.com/rushairer/gouno-cli/releases/tag/v1.3.0) |
 | gosso | v1.7.0 | `5bd45c8f9946662274117c4644b31ce90a003464` | `5bd45c8f9946662274117c4644b31ce90a003464` | [Release](https://github.com/rushairer/gosso/releases/tag/v1.7.0) |
 | gosso-admin | v0.7.24 | `51fe7448e3ff526e961630133443221507e9633f` | `974ddfce7c4efe5abe7edfa7b4e597e9258573d3` | [Release](https://github.com/rushairer/gosso-admin/releases/tag/v0.7.24) |
-| gouno-blog | v1.5.26 | `0aee82081676e4c560f7489b5eef8249a6cfc32f` | `107ee2e28eb96bda1409926fdb324550bb1bae98` | [Release](https://github.com/rushairer/gouno-blog/releases/tag/v1.5.26) |
+| gouno-blog | v1.5.26 | `9db30a6903f19e754ff8f42ac7aaf467143302c1` | `107ee2e28eb96bda1409926fdb324550bb1bae98` | [Release](https://github.com/rushairer/gouno-blog/releases/tag/v1.5.26) |
 | gouno-ui | v0.4.9 | `d17154139bb217be9cd61b140c78db73b1430b3e` | `4495147ae0b9807d2e5c9137187cfdc3e906cceb` | [Release](https://github.com/rushairer/gouno-ui/releases/tag/v0.4.9) |
 | gouno-doc | v1.3.1 | `fad499f7f28ff2e86d03d5c26ae6de127222d915` | `fad499f7f28ff2e86d03d5c26ae6de127222d915` | [Release](https://github.com/rushairer/gouno-doc/releases/tag/v1.3.1) |
 | gouno-agent-demo | v0.3.0 | `735794f1982a0f969e5b956a929f5e9a92440e86` | `ca372fc72379dbf63e6794f5d4e65af7c88e8ba7` | [Release](https://github.com/rushairer/gouno-agent-demo/releases/tag/v0.3.0) |
 
-Admin target v0.7.25 and Blog target v1.6.0 are **ABSENT**. No Gosso v1.7.1 tag exists. Open release-evidence work: [Admin PR #97](https://github.com/rushairer/gosso-admin/pull/97). [Blog PR #415](https://github.com/rushairer/gouno-blog/pull/415) merged after all current-head checks passed; formal v1.6.0 remains unpublished. Existing dependency PRs were left untouched. Documented PR review rules remain binding even where API branch-protection enforcement is absent.
+Admin target v0.7.25 and Blog target v1.6.0 are **ABSENT**. No Gosso v1.7.1 tag exists. Open release-evidence work: [Admin PR #97](https://github.com/rushairer/gosso-admin/pull/97). [Blog PR #415](https://github.com/rushairer/gouno-blog/pull/415) merged after all current-head checks passed; formal v1.6.0 remains unpublished. [Blog PR #421](https://github.com/rushairer/gouno-blog/pull/421) also merged after all triggered checks passed, curating final candidate notes and a reproducible diff inventory. Existing dependency PRs were left untouched. Documented PR review rules remain binding even where API branch-protection enforcement is absent.
 
 ## 2. Readiness and blocking matrix
 
 | State | GOSSO Admin v0.7.25 | Gouno Blog v1.6.0 |
 | --- | --- | --- |
-| Code Ready | Candidate; release tests expose an unresolved upstream defect; final merged SHA pending | Candidate with minimal x/net/zlib security remediation in PR #415; final acceptance pending; Connector freeze preserved |
+| Code Ready | Candidate; release tests expose an unresolved upstream defect; final merged SHA pending | Security fixes merged through PR #415; release scope/inventory curated through PR #421; full review and final acceptance remain pending; Connector freeze preserved |
 | CI Ready | **NO**: required released-Gosso rotation acceptance fails; other quality/security/image checks pass at the recorded test head | **YES for recorded technical gates on main0aee8208**; upstream release, manual and Staging blockers remain independent |
 | Manual Certification Ready | **NO**: gosso-admin-frozen needs maintainer direct review and separate sign-off | **NO**: blog-admin-ai remains needs-manual-recertification |
 | Staging Ready | **NO**: no identified authorized target or real restore/rollback acceptance receipt | **NO**: same operational gap; upstream Admin release also pending |
@@ -33,7 +33,7 @@ Admin target v0.7.25 and Blog target v1.6.0 are **ABSENT**. No Gosso v1.7.1 tag 
 
 Next blocking order: authorize a Gosso scope exception if accepting the proposed repair; review/merge/test/release a new immutable patch with full supply-chain verification; accept the actual released digest in downstream compatibility. Complete maintainer Showcase certification and authorized Staging gates. Only then accept/tag/release Admin, independently verify its artifacts, then do the equivalent for Blog. Formal Doc matrices must continue recording old formal downstream versions until actual publication.
 
-## 3. Confirmed upstream defect and independently tested repair proposal
+## 3. Confirmed upstream defect and November 8 repair proposal (historical)
 
 [Admin compatibility run 42203332667](https://github.com/rushairer/gosso-admin/actions/runs/42203332667), test commit `987da949062971f38a9f30643c38ff36f307dbef`, uses the genuine signed Gosso v1.7.0 digest below. After secret rotation, the retired secret reaches HTTP 400 `invalid_grant`, while the replacement receives HTTP 401 `invalid_client`. The deliberate nonexistent authorization code issues no token: this result proves the retired credential still authenticates and the replacement does not.
 
@@ -158,7 +158,7 @@ After all gates truly pass, fetch remote tags, confirm the target is absent and 
 
 Until upstream correctness, maintainer certification, operational acceptance and final artifact verification are complete, the ecosystem cannot be closed as Release Complete.
 
-## 9. Final recorded closeout outcome
+## 9. November 8 recorded closeout outcome (historical)
 
 Blog PR #415 is merged at main `0aee82081676e4c560f7489b5eef8249a6cfc32f`, byte-identical to the all-green PR source. Exact-main CI, BFF, Browser366, Parity86 and main Publish Images are completed/success as linked above. Core/UI/Client pins and Connector behavior remain unchanged. Formal Blog version is still v1.5.26; v1.6.0 tag/release/official images are absent.
 
@@ -167,3 +167,68 @@ Admin evidence head `362e28b3d8fd12f67e6b0f16e55dcc6a48fda85d` passed [CI4244185
 Current evidence delivery includes independently SHA-256/CRC-verified new Admin Browser/Parity and Blog Browser/Parity archives, the actual complete-policy PNGs, source/main equivalence, clean-original-worktree/cleanup receipts and sanitized proposal verification. Local workspace evidence is outside Git; no synthetic test session log is committed. The versioned repair patch and audit are in PR #97. New main SBOM/digest artifacts are explicitly labelled development-only and never fill the target release manifest.
 
 Still required: (1) explicit Gosso read-only scope exception, reviewed patch/new immutable release and actual downstream released-image acceptance; (2) maintainer direct Showcase state review and required separate approval; (3) identified authorized Staging with real preflight, restore, upgrade/rollback and operator receipts; (4) final candidate acceptance and immutable target artifact verification in Admin-then-Blog order. No target Tag, Release, production deployment or certification was fabricated. **Release Complete remains NO.**
+
+
+## 10. November 9 continued closeout
+
+Formal versions remain unchanged. Blog PR #421 merged at
+`9db30a6903f19e754ff8f42ac7aaf467143302c1`; the merged tree is identical to
+accepted PR head `49cc7f5cb7a963db5c302dca4509792efefa8b02`. All triggered PR
+checks passed: [CI42586441081](https://github.com/rushairer/gouno-blog/actions/runs/42586441081),
+[three-image build/scans42586440988](https://github.com/rushairer/gouno-blog/actions/runs/42586440988)
+and [Parity42586440956](https://github.com/rushairer/gouno-blog/actions/runs/42586440956).
+The merged main [CI42587147298](https://github.com/rushairer/gouno-blog/actions/runs/42587147298)
+has completed successfully. Main [Parity42587147037](https://github.com/rushairer/gouno-blog/actions/runs/42587147037)
+is still running at this documentation snapshot; wait for its actual conclusion.
+[Publish Images42587147084](https://github.com/rushairer/gouno-blog/actions/runs/42587147084)
+succeeded as a change-aware plan with all three image jobs and release manifest
+skipped: no new images or signatures were produced by this documentation merge.
+
+No application source, dependency lockfile, certification ledger, workflow or
+Connector behavior changed. The root Unreleased notes now describe final
+candidate behavior rather than superseded dependency steps; published entries
+are byte-identical. Documented x/net floor now matches the existing v0.62.0 guard.
+
+[Candidate review](https://github.com/rushairer/gouno-blog/blob/9db30a6903f19e754ff8f42ac7aaf467143302c1/docs/quality/blog-v1.6.0-candidate-review-2026-11-09.md)
+and its reproducible JSON inventory enumerate **810** entries from v1.5.26 to
+0aee8208: 529 additions, 191 modifications, 75 deletions and 15 detected renames.
+The inventory does not claim all changed code has been reviewed; migration,
+security, Connector and operational limits remain explicit. Five new dependency
+PRs (#416–#420) were observed and left untouched.
+
+The latest [Gosso local repair packet](proposals/gosso-v1.7.1-local-proposal-2026-11-09.md)
+supersedes the November8 proposal without erasing its historical receipts.
+Local source is `cb0035c013bf3f9552e7ba125cb66a2ce90aef14`, based on official
+5bd45c8; its no-remote clone has a clean worktree. Patch SHA-256:
+`fa833ed305dada05f0d27b93fa5e47d58182824b4da0e8ddf3b7d8aa496d0191`.
+A read-only apply check against the untouched original Gosso succeeds.
+The packet retains dedicated secret CAS/race fixes and adds security-required
+x/net0.62.0 with verified sums, leaving Core1.4.0/other requirements/API/schema
+unchanged. Published changelog and Chart version are untouched.
+
+| November9 local proposal gate | Actual result |
+| --- | --- |
+| Full unit Race / Vet / golangci-lint2.15.0 | Tests/Vet on supported Go1.26.10; pinned lint2.15.0 on Go1.27.3, zero issues (host-default2.12.2 result is not accepted) |
+| Aggregate CI coverage / critical package floors | 70.0% meets unchanged70%; Auth63.7/OAuth2 60.4/Token81.6/OIDC74.4/Session74.5 all pass |
+| Real PostgreSQL/Redis selected integration Race | 571 passed events, six passed packages; account has no test files; 20 existing miniredis/CJSON variants skip |
+| Newly added rotation regressions | Seven passed events, zero skips |
+| gosec2.27.1 | 149 files,19 unchanged nosec,zero findings |
+| govulncheck1.6.0 | Zero reachable/imported-package findings; one unused required-module advisory GO-2026-5932 (x/crypto/openpgp), explicitly disclosed |
+
+These are local preparation results, not upstream CI, official-image correctness,
+manual certification or Staging. Disposable loopback-bound PG/Redis containers
+were removed; unrelated new-api container was preserved. Raw synthetic-session
+logs stay outside Git; committed receipts retain their hashes and test scope.
+
+Admin PR #97 still requires its documented approving review and still fails
+real rotation against official Gosso1.7.0. Neither certification ledger was
+promoted. GitHub Environments lists were re-queried for Admin/Blog and are empty;
+this does not prove there is no external Staging. No authorized target or actual
+restore/rollback receipt has been supplied. Gosso upstream remains read-only:
+no remote branch, PR, tag, v1.7.1 image or release is asserted.
+
+Remaining chain: upstream scope exception and accepted patch release; actual
+released-image compatibility; maintainer rendered review/sign-off; authorized
+Staging preflight/backup restore/upgrade/rollback; final Admin acceptance and
+formal artifacts; then independent Blog acceptance/artifacts. Doc formal
+matrices stay on actual published downstream versions. **Release Complete: NO.**
