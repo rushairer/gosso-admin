@@ -17,12 +17,12 @@ Use this checklist before tagging a release, publishing an image, or handing the
 
 ## Verification Gate
 
-- [ ] `docker compose config` passes at repository root.
-- [ ] Frontend passes `npm run format:check`, `npm run lint`, `npx tsc -b --noEmit`, `npm run test:run`, and `npm run build`.
-- [ ] Frontend passes `npm run test:coverage` without lowering the committed coverage ratchet.
-- [ ] Seed passes `go test ./...` or `go build ./...`.
-- [ ] `go vet ./...`, `govulncheck`, CodeQL, dependency review, and container vulnerability scans pass.
-- [ ] The referenced `ghcr.io/rushairer/gosso` image has passed the `gosso` repository release gates.
+- [x] `docker compose config` passes at repository root.
+- [x] Frontend passes `npm run format:check`, `npm run lint`, `npx tsc -b --noEmit`, `npm run test:run`, and `npm run build`.
+- [x] Frontend passes `npm run test:coverage` without lowering the committed coverage ratchet.
+- [x] Seed passes `go test ./...` or `go build ./...`.
+- [x] `go vet ./...`, `govulncheck`, CodeQL, dependency review, and container vulnerability scans pass.
+- [x] The referenced `ghcr.io/rushairer/gosso` image has passed the `gosso` repository release gates.
 - [ ] `./scripts/smoke.sh` passes against the target deployment.
 - [ ] `ADMIN_PASSWORD=<secret> ./scripts/smoke.sh` or `SMOKE_ACCESS_TOKEN=<token> ./scripts/smoke.sh` passes against a disposable admin account or staging environment.
 - [ ] `SMOKE_MUTATE=true` smoke checks pass in staging, including temporary OAuth2 client and user create/cleanup.
@@ -102,3 +102,22 @@ Canonical development dependency findings are repaired through [UI PR163](https:
 Blog [PR423](https://github.com/rushairer/gouno-blog/pull/423) addresses actual settings panel-order drift and BFF version-label consistency. Its results remain independent from this Admin PR. No dependency upgrade, certification promotion, Staging receipt or downstream release is inferred.
 
 Admin PR97 code/test/workflow inputs remain identical to accepted852f527; this evidence update changes documentation only. Required approving review, maintainer direct certification and actual authorized Staging/restore/rollback remain open. Both target Tags stay prohibited until their mandatory gates pass.
+
+
+## November 10 exact automated checklist receipt
+
+The six checked automated verification rows above are supported by PR97 head
+`0cc209c2e23ec17f6bf86194a23f73e04668a1d4`: [CI42785996181](https://github.com/rushairer/gosso-admin/actions/runs/42785996181),
+[Security42785996346](https://github.com/rushairer/gosso-admin/actions/runs/42785996346),
+[Images42785996200](https://github.com/rushairer/gosso-admin/actions/runs/42785996200),
+[Browser42785996431](https://github.com/rushairer/gosso-admin/actions/runs/42785996431),
+[Parity42785996618](https://github.com/rushairer/gosso-admin/actions/runs/42785996618)
+and [released-Gosso42785996519](https://github.com/rushairer/gosso-admin/actions/runs/42785996519)
+all completed successfully. Coverage runs the unit suite; the committed ratchet
+was unchanged. Compose checks use CI fixture configuration, including placeholder
+production digests; they do not accept a real deployment or its secrets.
+Gosso1.7.1 independent publication evidence is recorded in the ecosystem report.
+Any successor final merged/release SHA still requires its own checks.
+All manual certification, real target preflight/smoke, backup/restore, rollback,
+operator and formal artifact rows remain unchecked until actually accepted.
+No Tag or deployment is authorized by checking these automated rows.

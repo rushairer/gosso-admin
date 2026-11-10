@@ -4,7 +4,7 @@
 
 ## 1. Remote state and formal versions
 
-Origin main and formal Releases were re-queried on November 9; target-tag and workflow receipts are retained separately. Latest Blog main includes the documentation-only PR #421 merge. Original worktrees remain clean and preserved; work uses isolated clones and PR branches. Existing tags were never rewritten. The table distinguishes main from the existing formal release's peeled commit.
+Origin main, formal Releases and peeled Tag commits were re-queried on November 10; exact receipts are retained in continuation-2026-11-10/formal-state-final.json. Latest Blog main includes the verified PR #423 merge. Original worktrees remain clean and preserved; work uses isolated clones and PR branches. Existing tags were never rewritten. The table distinguishes main from the existing formal release's peeled commit.
 
 | Repository | Formal version | Audited main SHA | Formal tag peeled commit SHA | GitHub Release |
 | --- | --- | --- | --- | --- |
@@ -13,7 +13,7 @@ Origin main and formal Releases were re-queried on November 9; target-tag and wo
 | gouno-cli | v1.3.0 | `a3930d1391ce3aedb8661eef472555611fd54540` | `087c00a523a6ec8c512d5eb9c65f657f6be8d5fb` | [Release](https://github.com/rushairer/gouno-cli/releases/tag/v1.3.0) |
 | gosso | v1.7.1 | `6c8ced618408f3625bbf022b67a08980a26a807d` | `6c8ced618408f3625bbf022b67a08980a26a807d` | [Release](https://github.com/rushairer/gosso/releases/tag/v1.7.1) |
 | gosso-admin | v0.7.24 | `51fe7448e3ff526e961630133443221507e9633f` | `974ddfce7c4efe5abe7edfa7b4e597e9258573d3` | [Release](https://github.com/rushairer/gosso-admin/releases/tag/v0.7.24) |
-| gouno-blog | v1.5.26 | `1bbd102548d601bed3f6dd62784a8ae81e9fe02e` | `107ee2e28eb96bda1409926fdb324550bb1bae98` | [Release](https://github.com/rushairer/gouno-blog/releases/tag/v1.5.26) |
+| gouno-blog | v1.5.26 | `8255b094bcdeac5a16ac2f29d717d57cacf43e87` | `107ee2e28eb96bda1409926fdb324550bb1bae98` | [Release](https://github.com/rushairer/gouno-blog/releases/tag/v1.5.26) |
 | gouno-ui | v0.4.9 | `ad29789e3583200deae486dc301d8c06b9c8ce2a` | `4495147ae0b9807d2e5c9137187cfdc3e906cceb` | [Release](https://github.com/rushairer/gouno-ui/releases/tag/v0.4.9) |
 | gouno-doc | v1.3.1 | `fad499f7f28ff2e86d03d5c26ae6de127222d915` | `fad499f7f28ff2e86d03d5c26ae6de127222d915` | [Release](https://github.com/rushairer/gouno-doc/releases/tag/v1.3.1) |
 | gouno-agent-demo | v0.3.0 | `735794f1982a0f969e5b956a929f5e9a92440e86` | `ca372fc72379dbf63e6794f5d4e65af7c88e8ba7` | [Release](https://github.com/rushairer/gouno-agent-demo/releases/tag/v0.3.0) |
@@ -24,8 +24,8 @@ Admin target v0.7.25 and Blog target v1.6.0 are **ABSENT**. Gosso v1.7.1 is now 
 
 | State | GOSSO Admin v0.7.25 | Gouno Blog v1.6.0 |
 | --- | --- | --- |
-| Code Ready | Candidate; upstream repaired/released and all PR97 automated checks pass; required review, certification and final merged SHA pending | Security fixes merged through PR #415; release scope/inventory curated through PR #421; full review and final acceptance remain pending; Connector freeze preserved |
-| CI Ready | **YES for PR97 source852f527**: all automated quality/security/images/browser/parity and real released-v1.7.1 rotation acceptance pass; final merge/release acceptance remains pending | Current main1bbd1025 CI and official-v1.7.1 BFF acceptance passed; Browser/Parity source evidence remains separate; final release-SHA acceptance still required |
+| Code Ready | Candidate; upstream repaired/released and all PR97 automated checks pass; required review, certification and final merged SHA pending | Security fixes and settings repairs merged through PR415/423; release scope/inventory curated through PR421; full review and final acceptance remain pending; Connector freeze preserved |
+| CI Ready | **YES for PR97 head0cc209c**: all automated quality/security/images/browser/parity and real released-v1.7.1 rotation acceptance pass; documentation successors and final merge/release SHA need their own checks | **YES for main8255b094**: CI, BFF, Browser366, Parity90 and frontend Publish Images all completed/success; formal release-SHA and artifact acceptance remain separate |
 | Manual Certification Ready | **NO**: gosso-admin-frozen needs maintainer direct review and separate sign-off | **NO**: blog-admin-ai remains needs-manual-recertification |
 | Staging Ready | **NO**: no identified authorized target or real restore/rollback acceptance receipt | **NO**: same operational gap; upstream Admin release also pending |
 | Release Published | **NO**, formal version stays v0.7.24 | **NO**, formal version stays v1.5.26 |
@@ -422,3 +422,71 @@ Outstanding: approving Admin PR97 review; required maintainer Showcase certifica
 
 
 Continued-candidate receipt: Blog PR423 code head9ff9ca73c5192db2b851652678b8396de6fe3d3c passes [CI42785195919](https://github.com/rushairer/gouno-blog/actions/runs/42785195919), [Images42785195353](https://github.com/rushairer/gouno-blog/actions/runs/42785195353), [BFF42785195846](https://github.com/rushairer/gouno-blog/actions/runs/42785195846) and [Parity42785195804](https://github.com/rushairer/gouno-blog/actions/runs/42785195804); Browser42785195362 is still running at this snapshot. No merge or publication is inferred. Static migration and External Capability review observations/limitations are retained separately; current read-only invocation auditing is best-effort, not a claimed durable fail-closed guarantee.
+
+
+## 17. November 10 merged Blog fixes and final automated readiness
+
+[PR423](https://github.com/rushairer/gouno-blog/pull/423) merged normally as
+`8255b094bcdeac5a16ac2f29d717d57cacf43e87`; its Git tree equals accepted
+9ff9ca73. All exact-main workflows complete/success:
+[CI42786659453](https://github.com/rushairer/gouno-blog/actions/runs/42786659453),
+[BFF42786659233](https://github.com/rushairer/gouno-blog/actions/runs/42786659233),
+[Browser42786659382](https://github.com/rushairer/gouno-blog/actions/runs/42786659382)
+(366 passed), [Parity42786659423](https://github.com/rushairer/gouno-blog/actions/runs/42786659423)
+(90 passed), [Publish42786659127](https://github.com/rushairer/gouno-blog/actions/runs/42786659127).
+Only frontend deployment inputs changed, so the selector correctly skipped
+backend/Seed publication; PR image builds/scans covered all three.
+
+The main-channel frontend index is
+`sha256:ef4644f4bc1c54868c6bf88b60209cf04a51db1d6bada5b815b9bc050b21bda6`.
+Independent local Cosign verification passes against that digest with exact
+`publish-images.yml@refs/heads/main` identity and GitHub OIDC issuer. Three
+digest/SPDX/CycloneDX artifact archives match GitHub API SHA256, pass ZIP CRC
+and both SBOM JSON format checks. This is a development artifact, never a
+formal v1.6.0 digest or a deployed environment.
+
+Admin PR97 head0cc209c also passes every required automated gate and has zero
+approving reviews. Its automated checklist rows can be checked from evidence;
+real target preflight/smoke, restore/rollback, operator and human certification
+remain open. No target Tag exists and no production deployment was performed.
+Required manual and authorized Staging acceptance, complete final Blog source
+acceptance and separately named Connector security repair remain blocking.
+**Release Complete:NO.**
+
+
+The independent provenance verifier initially rejected the image because it
+expected the older SLSA `predicate.materials` schema. Actual BuildKit provenance
+is SLSA v1. After explicit schema-aware inspection, both linux/amd64 and
+linux/arm64 pass OCI index/body hashes, platform subject linkage and exact
+repository/revision cross-checks in BuildKit VCS metadata, root request args
+and image labels. This local-directory build declares its source revision;
+it does not provide a Git material content hash, and none is claimed. The
+original diagnostic and successful schema-aware receipts are retained. The
+signed index binds the retrieved attestation descriptors. Formal version-tag
+identity and three-image v1.6.0 acceptance remain pending.
+
+## 18. Required external closeout inputs and next safe actions
+
+1. Maintainer review of [Admin PR97](https://github.com/rushairer/gosso-admin/pull/97).
+   `docs/REPOSITORY_SETTINGS.md` requires at least one approving review and
+   code-owner review; no approval exists in the observed review list.
+2. Actual maintainer rendered review/sign-off for both pending Showcase ledgers.
+   Admin's recertification record requires the maintainer's direct rendered
+   review and a separate approval; these automation receipts cannot provide it.
+3. An explicitly authorized Staging target and existing operations/runbook path.
+   Complete actual target production-preflight configuration, authenticated
+   mutation smoke, PostgreSQL restore, upgrade/rollback and operator acceptance
+   without printing or committing secrets. No target is inferred from historical
+   production domain names or empty GitHub Environments lists.
+4. Explicitly named authorization for the bounded Connector decoder-error
+   confidentiality repair. Blog AGENTS section5 says behavior changes require
+   “an explicit instruction that names the connector work”; section8 explicitly
+   records the raw-decoder response risk without overriding the hold. Preserve
+   OAuth, credential lifecycle and frozen business behavior. No such named
+   authorization has arrived in this continuation.
+
+Following source/security acceptance and all manual/operational gates, merge and
+validate Admin's exact final main, publish/verify0.7.25, then independently accept
+and publish/verify Blog1.6.0. Only after formal downstream artifacts exist may the
+formal bilingual compatibility matrix record the new versions. Production
+deployment remains a distinct state and needs a named production authorization.
