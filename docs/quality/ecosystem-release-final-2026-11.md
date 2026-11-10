@@ -25,7 +25,7 @@ Admin target v0.7.25 and Blog target v1.6.0 are **ABSENT**. Gosso v1.7.1 is now 
 | State | GOSSO Admin v0.7.25 | Gouno Blog v1.6.0 |
 | --- | --- | --- |
 | Code Ready | Candidate; upstream repaired/released and all PR97 automated checks pass; required review, certification and final merged SHA pending | Security fixes and settings repairs merged through PR415/423; release scope/inventory curated through PR421; full review and final acceptance remain pending; Connector freeze preserved |
-| CI Ready | **YES for PR97 head0cc209c**: all automated quality/security/images/browser/parity and real released-v1.7.1 rotation acceptance pass; documentation successors and final merge/release SHA need their own checks | Mainff5f2198 CI/BFF pass after bounded Connector fix; refreshed exact-main Browser/Parity/backend Publish checks running at this snapshot; prior source8255b094 full checks passed |
+| CI Ready | **YES for PR97 code head12dadb6**: all six quality/security/images/browser/parity/released-Gosso workflows completed/success; final merge/release SHA still needs its own acceptance | **YES for mainff5f2198**: CI, BFF, Browser, Parity and backend Publish Images all completed/success; backend digest/signature/SBOM/provenance independently verified; formal release acceptance remains separate |
 | Manual Certification Ready | **NO**: gosso-admin-frozen needs maintainer direct review and separate sign-off | **NO**: blog-admin-ai remains needs-manual-recertification |
 | Staging Ready | **NO**: no identified authorized target or real restore/rollback acceptance receipt | **NO**: same operational gap; upstream Admin release also pending |
 | Release Published | **NO**, formal version stays v0.7.24 | **NO**, formal version stays v1.5.26 |
@@ -478,12 +478,11 @@ identity and three-image v1.6.0 acceptance remain pending.
    mutation smoke, PostgreSQL restore, upgrade/rollback and operator acceptance
    without printing or committing secrets. No target is inferred from historical
    production domain names or empty GitHub Environments lists.
-4. Explicitly named authorization for the bounded Connector decoder-error
-   confidentiality repair. Blog AGENTS section5 says behavior changes require
-   “an explicit instruction that names the connector work”; section8 explicitly
-   records the raw-decoder response risk without overriding the hold. Preserve
-   OAuth, credential lifecycle and frozen business behavior. No such named
-   authorization has arrived in this continuation.
+4. Connector JSON decoder-error repair authorization is resolved by the user's
+   contextual instruction. The bounded repair merged through PR424 and passes
+   all exact-main checks; section19 retains scope and evidence. No additional
+   Connector permission is pending and the general product hold remains.
+
 
 Following source/security acceptance and all manual/operational gates, merge and
 validate Admin's exact final main, publish/verify0.7.25, then independently accept
@@ -538,3 +537,58 @@ TLS/MFA/SMTP, Redis loss/key recovery, historical Blog identity migration or
 maintainer approval. Required approving Admin PR97 review, direct human
 certification and actual target/operator acceptance remain blocking. Both
 formal target versions remain unpublished. **Release Complete:NO.**
+
+
+## 20. Verified final Blog main and independent-review configuration blocker
+
+Blog ff5f2198 exact-main workflows all complete/success:
+[CI42817744121](https://github.com/rushairer/gouno-blog/actions/runs/42817744121),
+[BFF42817744242](https://github.com/rushairer/gouno-blog/actions/runs/42817744242),
+[Browser42817840217](https://github.com/rushairer/gouno-blog/actions/runs/42817840217),
+[Parity42817849326](https://github.com/rushairer/gouno-blog/actions/runs/42817849326),
+[Publish42817744111](https://github.com/rushairer/gouno-blog/actions/runs/42817744111).
+Only backend publication is selected by actual deployment input changes. The
+frontend/Seed skips are expected selection, not new formal artifact acceptance.
+
+New main backend index:
+`sha256:785a63e08ed41044dad9417dc7e64703c16a8b221df16bb2c48408bd49c616d4`.
+Independent Cosign verification binds that digest to exact
+publish-images.yml@refs/heads/main and GitHub OIDC issuer. Both linux/amd64 and
+linux/arm64 pass OCI hashes, provenance subjects and SLSA-v1 source/revision
+metadata checks. Three downloaded digest/SPDX/CycloneDX archives match API
+SHA256, pass ZIP CRC and parse as their declared SBOM formats. These are main
+development artifacts; no version-tag identity or formal1.6.0 claim is made.
+
+Admin governance API/file inspection reveals an actionable configuration
+constraint: PR97 author is rushairer, every CODEOWNERS entry names rushairer,
+and the collaborator list contains only rushairer. Its written rules require
+at least one approving review and code-owner review. GitHub states that
+[authors cannot approve their own pull requests](https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/approving-a-pull-request-with-required-reviews).
+The connected GitHub app authenticates the same identity; Actions default permissions
+are read-only and can_approve_pull_request_reviews is false. No alternate identity, self-approval, policy relaxation
+or fabricated review was used. A legitimate separate PR/review arrangement
+is required: for example another real maintainer opens an identical reviewed
+source PR, allowing rushairer to perform the code-owner review. No collaborator
+was invented or invited without an identified and authorized arrangement.
+
+Both GitHub deployment lists are empty; repository metadata search found no
+Staging/runbook target. This does not prove no external environment exists,
+but none can be identified or accessed from the current task evidence. The
+required independent review arrangement and authorized Staging entry/runbook
+were requested while automated work continued. No independent human review, certification signature or Staging target is
+inferred from “continue/go do”. Direct human Showcase certification and actual
+TLS/MFA/SMTP, upgrade/rollback and operator target acceptance remain pending.
+Formal Admin0.7.25/Blog1.6.0 remain absent. **Release Complete:NO.**
+
+
+Accepted Admin code/tool head12dadb6c6f7f154aee9229e7decf869f93fb16d5 completes
+all six workflows successfully: [CI42818448768](https://github.com/rushairer/gosso-admin/actions/runs/42818448768),
+[Security42818448692](https://github.com/rushairer/gosso-admin/actions/runs/42818448692),
+[Images42818448500](https://github.com/rushairer/gosso-admin/actions/runs/42818448500),
+[Browser42818448911](https://github.com/rushairer/gosso-admin/actions/runs/42818448911),
+[Parity42818449006](https://github.com/rushairer/gosso-admin/actions/runs/42818449006),
+[Gosso42818448812](https://github.com/rushairer/gosso-admin/actions/runs/42818448812).
+This final documentation successor changes no application, test, workflow or
+recovery-tool inputs; its own exact-head check results are recorded in PR97 and
+the external evidence receipt after completion, avoiding self-referential
+documentation rebuild loops. The review list is still empty.
