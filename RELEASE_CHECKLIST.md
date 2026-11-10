@@ -121,3 +121,15 @@ Any successor final merged/release SHA still requires its own checks.
 All manual certification, real target preflight/smoke, backup/restore, rollback,
 operator and formal artifact rows remain unchecked until actually accepted.
 No Tag or deployment is authorized by checking these automated rows.
+
+
+## November10 real local recovery evidence
+
+- [x] [Disposable PostgreSQL15 recovery rehearsal](docs/quality/admin-disposable-recovery-2026-11-10.md) passes14 real checks using exact signed formal Gosso1.7.1, current Seed, encrypted custom-format backup, independent restore, fresh login and old/new Client Secret authentication. Operator secret-file inheritance is excluded and owned cleanup verified.
+- [ ] Perform real target Staging preflight, TLS/MFA/SMTP checks, historical-data upgrade/rollback, keys/Redis recovery and operator sign-off. The local snapshot exercise does not complete the mandatory target Operations Gate.
+
+Blog's bounded Connector decoder-error confidentiality repair is merged through
+[PR424](https://github.com/rushairer/gouno-blog/pull/424) atff5f2198. No separate
+Connector repair authorization is pending. Its final-main checks and artifacts
+remain independently recorded in the ecosystem report. Human Showcase ledgers
+and required approving PR review remain pending; no target Tag is permitted.

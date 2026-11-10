@@ -27,3 +27,17 @@ The bundled PostgreSQL and Redis communicate on an isolated Compose network. `GO
 ## Monitoring
 
 Scrape Gosso `/metrics` only from the monitoring network. Alert on readiness failures, elevated authentication failures, refresh failures, admin mutation errors, Redis/PostgreSQL latency, and sustained rate limiting. The public gateway intentionally blocks `/metrics` and Swagger.
+
+## Disposable recovery rehearsal
+
+Before a target-specific recovery drill, run the [bounded local rehearsal](quality/admin-disposable-recovery-2026-11-10.md):
+
+```sh
+python3 scripts/rehearse-postgres-recovery.py --output /tmp/gosso-admin-recovery-new
+```
+
+It uses fresh disposable data and the signature-verified formal Gosso image,
+checks encrypted backup/restore and post-restore authentication/secret rotation,
+and verifies cleanup of its own resources. It deliberately ignores inherited
+operator Seed secret-file settings. Its receipt does not replace real target
+Staging, historical upgrade/rollback, keys recovery or operator acceptance.

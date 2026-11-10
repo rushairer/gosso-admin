@@ -13,7 +13,7 @@ Origin main, formal Releases and peeled Tag commits were re-queried on November 
 | gouno-cli | v1.3.0 | `a3930d1391ce3aedb8661eef472555611fd54540` | `087c00a523a6ec8c512d5eb9c65f657f6be8d5fb` | [Release](https://github.com/rushairer/gouno-cli/releases/tag/v1.3.0) |
 | gosso | v1.7.1 | `6c8ced618408f3625bbf022b67a08980a26a807d` | `6c8ced618408f3625bbf022b67a08980a26a807d` | [Release](https://github.com/rushairer/gosso/releases/tag/v1.7.1) |
 | gosso-admin | v0.7.24 | `51fe7448e3ff526e961630133443221507e9633f` | `974ddfce7c4efe5abe7edfa7b4e597e9258573d3` | [Release](https://github.com/rushairer/gosso-admin/releases/tag/v0.7.24) |
-| gouno-blog | v1.5.26 | `8255b094bcdeac5a16ac2f29d717d57cacf43e87` | `107ee2e28eb96bda1409926fdb324550bb1bae98` | [Release](https://github.com/rushairer/gouno-blog/releases/tag/v1.5.26) |
+| gouno-blog | v1.5.26 | `ff5f2198a83faef74de459c91edafad8b22cda66` | `107ee2e28eb96bda1409926fdb324550bb1bae98` | [Release](https://github.com/rushairer/gouno-blog/releases/tag/v1.5.26) |
 | gouno-ui | v0.4.9 | `ad29789e3583200deae486dc301d8c06b9c8ce2a` | `4495147ae0b9807d2e5c9137187cfdc3e906cceb` | [Release](https://github.com/rushairer/gouno-ui/releases/tag/v0.4.9) |
 | gouno-doc | v1.3.1 | `fad499f7f28ff2e86d03d5c26ae6de127222d915` | `fad499f7f28ff2e86d03d5c26ae6de127222d915` | [Release](https://github.com/rushairer/gouno-doc/releases/tag/v1.3.1) |
 | gouno-agent-demo | v0.3.0 | `735794f1982a0f969e5b956a929f5e9a92440e86` | `ca372fc72379dbf63e6794f5d4e65af7c88e8ba7` | [Release](https://github.com/rushairer/gouno-agent-demo/releases/tag/v0.3.0) |
@@ -25,7 +25,7 @@ Admin target v0.7.25 and Blog target v1.6.0 are **ABSENT**. Gosso v1.7.1 is now 
 | State | GOSSO Admin v0.7.25 | Gouno Blog v1.6.0 |
 | --- | --- | --- |
 | Code Ready | Candidate; upstream repaired/released and all PR97 automated checks pass; required review, certification and final merged SHA pending | Security fixes and settings repairs merged through PR415/423; release scope/inventory curated through PR421; full review and final acceptance remain pending; Connector freeze preserved |
-| CI Ready | **YES for PR97 head0cc209c**: all automated quality/security/images/browser/parity and real released-v1.7.1 rotation acceptance pass; documentation successors and final merge/release SHA need their own checks | **YES for main8255b094**: CI, BFF, Browser366, Parity90 and frontend Publish Images all completed/success; formal release-SHA and artifact acceptance remain separate |
+| CI Ready | **YES for PR97 head0cc209c**: all automated quality/security/images/browser/parity and real released-v1.7.1 rotation acceptance pass; documentation successors and final merge/release SHA need their own checks | Mainff5f2198 CI/BFF pass after bounded Connector fix; refreshed exact-main Browser/Parity/backend Publish checks running at this snapshot; prior source8255b094 full checks passed |
 | Manual Certification Ready | **NO**: gosso-admin-frozen needs maintainer direct review and separate sign-off | **NO**: blog-admin-ai remains needs-manual-recertification |
 | Staging Ready | **NO**: no identified authorized target or real restore/rollback acceptance receipt | **NO**: same operational gap; upstream Admin release also pending |
 | Release Published | **NO**, formal version stays v0.7.24 | **NO**, formal version stays v1.5.26 |
@@ -490,3 +490,51 @@ validate Admin's exact final main, publish/verify0.7.25, then independently acce
 and publish/verify Blog1.6.0. Only after formal downstream artifacts exist may the
 formal bilingual compatibility matrix record the new versions. Production
 deployment remains a distinct state and needs a named production authorization.
+
+
+Post-commit receipt (no self-referential documentation rebuild loop): Admin
+PR97 final head `bf07f3b273d76e543fe8c52bd11647d1d458b86c` completes all six
+required workflows successfully: CI42788010014, Images42788010018,
+Security42788009636, Browser42788009615, Parity42788009546 and released-Gosso
+compatibility42788009577. PR-only formal release-manifest publication is
+correctly skipped. Exact URLs/head/status are retained in admin-final-head-runs.json.
+The review list remains empty; no certification or authorized Staging receipt
+has arrived. Public npm Registry version/tarball/integrity checks match both
+product locks for UI0.4.9 and Client0.9.3. Original nine worktrees remain clean.
+Versioned report/checklist is committed and pushed in Admin PR97 at bf07f3b;
+this post-CI workspace receipt supplements that snapshot. No Tag was created.
+**Admin0.7.25 and Blog1.6.0 remain unpublished; Release Complete:NO.**
+
+
+## 19. User-directed Connector repair and real local recovery
+
+The user instructed “你去弄啊！” directly after the closeout response named
+the narrow Connector JSON error-redaction repair. That contextual authorization
+was acted on; no repeated repair permission is pending. [Blog PR424](https://github.com/rushairer/gouno-blog/pull/424)
+merged asff5f2198a83faef74de459c91edafad8b22cda66 with a byte-identical accepted
+PR tree after CI42816990890, Images42816990852 and BFF42816990912 succeeded.
+All four actual handlers now return safe400/413 without decoder/schema details;
+oversized trailing whitespace retains413 and invalid requests stop before any
+service call.28 original failing handler cases now pass, with valid binding
+controls. Full local backend race/vet/module verification passes. OAuth,
+credentials, integrations, delivery and Sandbox behavior remain frozen.
+
+New exact-main CI42817744121 and BFF42817744242 pass. Publish42817744111,
+Browser42817840217 and Parity42817849326 are still running at this snapshot;
+no success is inferred. Final independent backend artifact receipts follow.
+
+The versioned Admin recovery tool and machine receipt demonstrate14 real local
+checks against signed Gosso1.7.1 and actual PostgreSQL15. This includes encrypted
+backup, separate-database restore, fresh login, snapshot boundary correctness,
+rotation authentication and verified cleanup. A deliberate inherited-secret-file
+negative scenario passes without reading the sentinel files. Both actual image
+references and backup hashes are recorded. Fresh ephemeral keys are destroyed.
+Only uniquely named owned resources were touched; existing new-api is preserved.
+No Staging configuration/runbook file was found in the repository metadata
+search; no external target is inferred or accessed.
+
+Local snapshot recovery is not real target Staging, version upgrade/rollback,
+TLS/MFA/SMTP, Redis loss/key recovery, historical Blog identity migration or
+maintainer approval. Required approving Admin PR97 review, direct human
+certification and actual target/operator acceptance remain blocking. Both
+formal target versions remain unpublished. **Release Complete:NO.**
