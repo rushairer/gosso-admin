@@ -93,3 +93,12 @@ refresh. It is AI-assisted fixture evidence, not maintainer certification or
 real Staging. The certification ledger remains needs-manual-recertification.
 Required approving PR review, real backup/restore/upgrade/rollback, target smoke
 and operational receipts remain open. Do not create v0.7.25 while they are open.
+
+
+## November 10 continued release preparation
+
+Canonical development dependency findings are repaired through [UI PR163](https://github.com/rushairer/gouno-ui/pull/163), merged asad29789e. Exact-main CI, Golden, reciprocal Admin/Blog parity and Pages all complete successfully; full npm audit reportszero vulnerabilities. Public Pages browser interaction/font checks also pass. Package0.4.9 and all canonical component/fixture paths remain unchanged. Earlier risk statements are historical and superseded by this verified repair.
+
+Blog [PR423](https://github.com/rushairer/gouno-blog/pull/423) addresses actual settings panel-order drift and BFF version-label consistency. Its results remain independent from this Admin PR. No dependency upgrade, certification promotion, Staging receipt or downstream release is inferred.
+
+Admin PR97 code/test/workflow inputs remain identical to accepted852f527; this evidence update changes documentation only. Required approving review, maintainer direct certification and actual authorized Staging/restore/rollback remain open. Both target Tags stay prohibited until their mandatory gates pass.
