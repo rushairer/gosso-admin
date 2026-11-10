@@ -391,3 +391,13 @@ The current authorized work is release preparation and evidence; missing
 required human review, real target deployment/backup/restore/rollback and
 operator acceptance still prohibit tagging. No production target is authorized.
 Admin must be accepted/released before Blog's formal Tag. **Release Complete:NO.**
+
+
+November10 supplemental qualification: the first local symlink-based Showcase
+setup failed font serving and is rejected for font parity. Recreated the exact
+Canonical checkout's lockfile dependencies and reran all four paired cases with
+explicit font loading, HTTP200/error checks and paint settling. Captures are
+original, not edited; full maintainer certification remains pending. The
+Canonical dev dependency audit reports3High/2Moderate findings, while omit-dev
+runtime audit reports0. No version churn, suppression or runtime workaround
+was introduced. See the bounded review for limitations and retained evidence.

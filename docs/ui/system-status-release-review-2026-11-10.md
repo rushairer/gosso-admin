@@ -34,3 +34,22 @@ This bounded fixture review does not certify all12frozen surfaces, all Loading/
 Empty/Error/modal/auth states or comprehensive accessibility. The full required
 maintainer review, PR approval and authorized Staging/restore/rollback remain
 release blockers; passing automation cannot sign the ledger.
+
+
+## Font readiness and audit qualification
+
+The first local setup symlinked another checkout's node_modules; Vite refused
+font requests outside its serving allow list. Those captures are rejected as
+font-parity evidence and preserved separately as initial-invalid-local-font-setup.
+The accepted rerun installs this checkout's unchanged lockfile, requires HTTP200
+font responses, explicitly loads Inter Variable/JetBrains Mono, waits for
+font readiness and subsequent paint frames, and asserts no font-face error.
+The four paired cases pass these stronger checks. Original PNGs and byte-identical
+review copies are outside Git; no screenshot pixels were edited.
+
+Installing Canonical dev dependencies additionally reports three High and two
+Moderate npm findings (@vitest/mocker, source-map-js, undici, vite, vitest).
+The separate omit-dev audit reports zero runtime findings. No audit suppression,
+automatic dependency upgrade or new UI package release was performed. This
+Canonical tooling risk remains disclosed for its owner and must not be confused
+with a clean full dependency graph or Product security certification.
