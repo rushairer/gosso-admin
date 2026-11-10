@@ -6,22 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-### Fixed
-- Accept the independently signature-verified Gosso v1.7.1 release image for persisted Client Secret rotation; retain full real old/new credential regression checks and existing authorization boundaries.
-
 ### Added
-- Extend the pinned Gosso v1.7.0 compatibility acceptance with a real second owner, global-governance privilege denials, owner-boundary checks, secret replacement and session revocation. The token endpoint must reject the retired secret and authenticate its replacement before rejecting a deliberately nonexistent authorization code. These automated checks do not replace manual Showcase certification or Staging acceptance.
+- Extend the pinned released-Gosso compatibility acceptance with a real second owner, global-governance privilege denials, owner-boundary checks, secret replacement and session revocation. The token endpoint must reject the retired secret and authenticate its replacement before rejecting a deliberately nonexistent authorization code. These automated checks do not replace manual Showcase certification or Staging acceptance.
 
 ### Fixed
 
+- Accept the independently signature-verified Gosso v1.7.1 release image for persisted Client Secret rotation; retain full real old/new credential regression checks and existing authorization boundaries.
 - Retain complete System Status security-panel screenshots in Showcase parity: scroll the whole nested panel and require full viewport intersection before capture, so the final MFA policy row cannot be clipped. No Product rendering or certification status change.
 - JSON-encode smoke credentials containing quotes or backslashes, read authenticated smoke responses from standard input correctly, retain TLS certificate verification and require Swagger to be disabled for release smoke; exercise authenticated mutation/cleanup against the isolated released Gosso image.
 
 ## [0.7.25] - 2026-11-05
 
 ### Added
-- Verify global Client list/create/update/secret rotation/delete against the signed Gosso v1.7.0 immutable release image in the isolated compatibility runner.
-- Manage OAuth2 clients globally through Gosso's administrator governance API: list, create, update, delete and rotate secrets across client owners. This surface requires Gosso v1.7.0; the older v1.6.1 compatibility smoke does not certify these endpoints.
+- Verify global Client list/create/update/secret rotation/delete against the signed Gosso v1.7.1 immutable release image in the isolated compatibility runner, including actual retired/replacement credential behavior.
+- Manage OAuth2 clients globally through Gosso's administrator governance API: list, create, update, delete and rotate secrets across client owners. The API was introduced in Gosso v1.7.0; the release baseline is v1.7.1, which persists rotated secrets correctly. Older compatibility smoke does not certify the fixed behavior.
 
 ### Changed
 - Consume exact published `@gouno/ui` 0.4.9 and `@gosso/client` 0.9.3. Replace historical vendored UI and local design-system styling with canonical registry components, AppShell navigation and direct surface ownership.

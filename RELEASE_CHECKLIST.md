@@ -49,7 +49,7 @@ Use this checklist before tagging a release, publishing an image, or handing the
 
 - [x] Version metadata pins 0.7.25; frontend dependencies pin @gouno/ui 0.4.9 and @gosso/client 0.9.3.
 - [ ] Renew `docs/ui/showcase-parity-certifications.json` through manual-first rendered review and a PR; current status is `needs-manual-recertification`.
-- [ ] Validate the complete global `/api/v1/admin/oauth2/clients` contract, including retired-secret rejection and replacement-secret authentication, against the signed published immutable Gosso release. Earlier v1.7.0 smoke observed a rotation response but did not verify credential behavior; the stronger November 6 acceptance proves the published image is defective. See the November 8 audit and repair proposal.
+- [x] Validate the complete global `/api/v1/admin/oauth2/clients` contract, including retired-secret rejection and replacement-secret authentication, against signed immutable Gosso v1.7.1. [Acceptance42605082483](https://github.com/rushairer/gosso-admin/actions/runs/42605082483) passes at source852f527; the earlier v1.7.0 failure is historical. This does not satisfy manual or Staging gates.
 - [ ] Complete the deployment, secret, backup/restore and operator gates above against an identified staging environment. No production deployment is authorized by this release task.
 
 No v0.7.25 tag may be created while these gates remain open. Historical green CI/browser/parity evidence is supporting evidence, not manual certification or staging acceptance.
@@ -77,3 +77,19 @@ still missing. No v0.7.25 tag, target image or deployment is asserted.
 Canonical font delivery is repaired in [UI PR #161](https://github.com/rushairer/gouno-ui/pull/161); exact UI main d171541 passes normal Golden (187), both consumers and Pages. Real public Chromium font-load/network verification succeeded November 8. This closes the delivery defect only; the ledger still requires maintainer direct rendered review and a separate approval.
 
 [Released-image acceptance 42203332667](https://github.com/rushairer/gosso-admin/actions/runs/42203332667) **fails**: old secret still authenticates, returned replacement does not. Keep the full governance checkbox open and retain the failing test. [The concrete local Gosso repair proposal](docs/quality/proposals/gosso-v1.7.1-local-proposal.md) passes local race/integration/security checks, but Gosso is read-only until a scope exception; no v1.7.1 publication or baseline is asserted. No Staging, backup restore, rollback or maintainer certification box may be checked from these tests.
+
+
+## November 10 release-gate refresh
+
+Gosso v1.7.1 is formally published at6c8ced618408f3625bbf022b67a08980a26a807d.
+Its independently verified index is
+`sha256:cdf81b3e6f532455aa8964e7921355c54e3bfca72bf5910cd21689d87fe80cbb`.
+The earlier read-only scope and missing upstream patch blockers are resolved.
+All Admin source852f527 automated gates passed, including actual rotation.
+
+[Supplemental rendered review](docs/ui/system-status-release-review-2026-11-10.md)
+covers desktop/mobile light/dark policy panels, complete scrolling and keyboard
+refresh. It is AI-assisted fixture evidence, not maintainer certification or
+real Staging. The certification ledger remains needs-manual-recertification.
+Required approving PR review, real backup/restore/upgrade/rollback, target smoke
+and operational receipts remain open. Do not create v0.7.25 while they are open.
