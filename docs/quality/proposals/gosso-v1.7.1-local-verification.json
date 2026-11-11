@@ -1,0 +1,161 @@
+{
+  "date": "2026-11-08",
+  "status": "LOCAL_PROPOSAL_NOT_PUBLISHED",
+  "base_commit": "5bd45c8f9946662274117c4644b31ce90a003464",
+  "proposal_patch": "gosso-v1.7.1-local-proposal.patch",
+  "proposal_sha256": "f4b77c60b0d5654cb0a35e9167b5e382f431b226ddb3f29adecadf47015d696b",
+  "clean_base_apply_check": "passed",
+  "upstream_remote": "none; Gosso source/remote read-only",
+  "dependencies_changed": false,
+  "test_environment": "isolated loopback PostgreSQL/Redis containers; synthetic accounts; not Staging",
+  "checks": {
+    "full_unit_race": "passed Go 1.27.3",
+    "vet": "passed Go 1.27.3",
+    "golangci_lint": "passed v2.15.0; 0 issues",
+    "gosec": "passed v2.27.1 with Go 1.26.10; 149 files; 19 unchanged nosec; zero findings/Go errors",
+    "govulncheck": "passed v1.6.0 Go 1.26.10; zero reachable; 3 unused required-module findings",
+    "integration_race": {
+      "toolchain": "go1.26.10",
+      "passed_test_events": 571,
+      "package_outcomes": [
+        {
+          "Package": "github.com/rushairer/gosso/internal/auth/service",
+          "Action": "pass",
+          "Elapsed": 35.247
+        },
+        {
+          "Package": "github.com/rushairer/gosso/internal/session/service",
+          "Action": "pass",
+          "Elapsed": 2.396
+        },
+        {
+          "Package": "github.com/rushairer/gosso/internal/token/service",
+          "Action": "pass",
+          "Elapsed": 8.85
+        },
+        {
+          "Package": "github.com/rushairer/gosso/internal/oauth2/service",
+          "Action": "pass",
+          "Elapsed": 37.016
+        },
+        {
+          "Package": "github.com/rushairer/gosso/internal/account",
+          "Action": "skip",
+          "Elapsed": 0
+        },
+        {
+          "Package": "github.com/rushairer/gosso/middleware",
+          "Action": "pass",
+          "Elapsed": 7.222
+        },
+        {
+          "Package": "github.com/rushairer/gosso/tests/http",
+          "Action": "pass",
+          "Elapsed": 20.46
+        }
+      ],
+      "existing_skipped_tests": [
+        "TestVerifyAndReset_InvalidToken",
+        "TestVerifyAndReset_TokenExhausted",
+        "TestVerifyCode_Success",
+        "TestVerifyCode_Wrong",
+        "TestVerifyCode_Exhausted",
+        "TestVerifyCode_Expired",
+        "TestVerifyCode_CodeReuse",
+        "TestVerifyCodeForAccount_Success",
+        "TestVerifyCodeForAccount_WrongAccount",
+        "TestSessionService_EnforceSessionLimit",
+        "TestSessionService_EnforceSessionLimit_PreservesProtectedSessionOnTimestampTie",
+        "TestDeviceCodeService_Authorize",
+        "TestDeviceCodeService_Deny",
+        "TestDeviceCodeService_PollRate",
+        "TestClaimAuthorizedDeviceCode_Success",
+        "TestClaimAuthorizedDeviceCode_AlreadyUsed",
+        "TestClaimAuthorizedDeviceCode_PendingNotClaimable",
+        "TestClaimAuthorizedDeviceCode_DeniedNotClaimable",
+        "TestAuthorizeDeviceCode_AlreadyDenied",
+        "TestDenyDeviceCode_AlreadyAuthorized"
+      ],
+      "new_rotation_cases": [
+        {
+          "Test": "TestClientSecretRotationPersistence/owner",
+          "Action": "pass"
+        },
+        {
+          "Test": "TestClientSecretRotationPersistence/administrator",
+          "Action": "pass"
+        },
+        {
+          "Test": "TestClientSecretRotationPersistence",
+          "Action": "pass"
+        },
+        {
+          "Test": "TestClientSecretRotationOwnershipDenied",
+          "Action": "pass"
+        },
+        {
+          "Test": "TestClientSecretRotationRollback",
+          "Action": "pass"
+        },
+        {
+          "Test": "TestClientSecretRotationConcurrentCAS",
+          "Action": "pass"
+        },
+        {
+          "Test": "TestClientSecretRotationDeletedClient",
+          "Action": "pass"
+        }
+      ]
+    },
+    "http_race_repeat": "19 tests x 3 passed with Go 1.27.3 after two narrow race fixes",
+    "red_control": "original rotation call fails fresh-database replacement authentication for both owner and administrator"
+  },
+  "limitations": [
+    "No upstream Linux CI, PR approval, patch tag or image exists for this proposal.",
+    "gosec v2.27.1 with Go1.27.3 failed importer export-data compatibility; successful supported-toolchain scan is separately retained.",
+    "20 existing miniredis/CJSON unit variants skipped; internal/account has no test files. New real-database rotation cases did not skip.",
+    "No authorized Staging, operational restore/rollback acceptance or maintainer Showcase sign-off."
+  ],
+  "local_log_receipts": {
+    "gosso-proposal-final-unit-race.log": {
+      "sha256": "c56e5cb2b06645c9c3dd581aba8c489bb46b63455b3217b90e5f8d6740edde08",
+      "bytes": 2767
+    },
+    "gosso-proposal-final-vet.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "gosso-proposal-final-lint.log": {
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "bytes": 10
+    },
+    "gosso-proposal-final-gosec.log": {
+      "sha256": "5329b65747cf6bf8ef7def03bb6f9b62d14515b423b5497b0e40a1108ad6cc69",
+      "bytes": 27073
+    },
+    "gosso-proposal-final-gosec.json": {
+      "sha256": "01d71a05bbbd2ec9de6cfb22c21b179e02996a8850d1600ced9d0457c1fe6733",
+      "bytes": 141
+    },
+    "gosso-proposal-final-govulncheck.log": {
+      "sha256": "a7e30932ffd938da5c72674cb4ddd967c2a8e331697800f89b7732b73d54818c",
+      "bytes": 301
+    },
+    "gosso-proposal-final-integration.jsonl": {
+      "sha256": "800be4d8162cdd5670db2603edf141d6e33189d73de69f24c053296c97492f40",
+      "bytes": 557121
+    },
+    "gosso-proposal-red.log": {
+      "sha256": "37af580516206f7da5b0b7d917193fbfae3686177c8dd807ca9792e40f76c718",
+      "bytes": 1833
+    },
+    "gosso-proposal-green.log": {
+      "sha256": "7c72e066b7ec682a392b062c662cd8911c7712cc60272e15a47a37222cb0e4a1",
+      "bytes": 1739
+    },
+    "gosso-proposal-http-race-fixed.jsonl": {
+      "sha256": "47f85c709efcbf6d7e4e6a3f73af6fe2cdb6e9b67c73289b93b6cf2ba34b77f9",
+      "bytes": 59259
+    }
+  }
+}

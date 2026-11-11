@@ -1,0 +1,39 @@
+{
+  "scope": "disposable local PostgreSQL15 recovery rehearsal; not target Staging, production, upgrade or version rollback acceptance",
+  "gosso_image": "ghcr.io/rushairer/gosso:v1.7.1@sha256:cdf81b3e6f532455aa8964e7921355c54e3bfca72bf5910cd21689d87fe80cbb",
+  "checks": {
+    "exact_formal_image_signature": true,
+    "current_Admin_seed_on_formal_Gosso": true,
+    "fresh_admin_login_2": true,
+    "create_baseline": true,
+    "backup_encrypted": true,
+    "encrypted_backup_roundtrip": true,
+    "create_after-backup": true,
+    "restore_into_separate_database": true,
+    "fresh_admin_login_8": true,
+    "restored_baseline_client_preserved": true,
+    "post_backup_mutation_absent": true,
+    "restored_client_rotation": true,
+    "restored_retired_secret_authentication": true,
+    "restored_replacement_secret_authentication": true
+  },
+  "ok": true,
+  "seed_repository_head": "bf07f3b273d76e543fe8c52bd11647d1d458b86c",
+  "postgres_image": "postgres@sha256:aae6554de426ae1990f1a939ff183a0299146cf7142a6f4c379c3357af9cc2d8",
+  "redis_image": "redis@sha256:7b1753b4c5ad8458906c272a8132b8c15f5557b000379eb115fb239706a384b7",
+  "backup": {
+    "format": "pg_dump custom",
+    "encryption": "AES-256-CBC PBKDF2; disposable key destroyed after rehearsal",
+    "encrypted_sha256": "93b313856857f7b76da740e920051748f5f0f26df82ea08ef867a2a89eb8d96c",
+    "plaintext_sha256": "17200d28a1cffec290923146b6303d5bb3abe46685340a3c9c344872c548810b",
+    "bytes": 40711
+  },
+  "limits": [
+    "No production credentials or existing volumes used.",
+    "Loopback HTTP and isolated fresh Redis; no TLS/MFA/SMTP/Redis recovery certification.",
+    "Fresh seeded PostgreSQL15 snapshot, not real historical production data or Blog identity migration.",
+    "Same-version recovery; not release upgrade/rollback acceptance.",
+    "Synthetic encryption/signing material destroyed after test; receipt is not an operational backup."
+  ],
+  "cleanup_owned_resources": true
+}

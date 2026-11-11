@@ -196,8 +196,12 @@ for (const theme of ["light", "dark"]) {
       await expect(row).toContainText("6");
       await expect(row).toContainText("10 min");
     }
-    await showcaseMfaRate.scrollIntoViewIfNeeded();
-    await productMfaRate.scrollIntoViewIfNeeded();
+    // Scroll the entire governed panel: a visible last row can still be clipped
+    // at the nested viewport edge and leave incomplete certification evidence.
+    await showcasePolicyCard.scrollIntoViewIfNeeded();
+    await productPolicyCard.scrollIntoViewIfNeeded();
+    await expect(showcasePolicyCard).toBeInViewport({ ratio: 1 });
+    await expect(productPolicyCard).toBeInViewport({ ratio: 1 });
     await pairViewportScreenshot(pair.showcase, pair.product, `system-status-security-${theme}`, testInfo);
 
     expect(pair.unknown).toEqual([]);
