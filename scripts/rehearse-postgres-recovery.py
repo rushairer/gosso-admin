@@ -23,7 +23,7 @@ if ROOT.exists() and any(ROOT.iterdir()):
     raise SystemExit('Output directory must be empty; preserve previous receipts.')
 ROOT.mkdir(parents=True, exist_ok=True)
 ADMIN_ROOT = pathlib.Path(__file__).resolve().parents[1]
-IMAGE = 'ghcr.io/rushairer/gosso:v1.7.1@sha256:cdf81b3e6f532455aa8964e7921355c54e3bfca72bf5910cd21689d87fe80cbb'
+IMAGE = 'ghcr.io/rushairer/gosso:v1.7.2@sha256:bf398c6c2129da2f68c030dece3ceb52f8f5a7a6036a58b797c8e3f0619b5e90'
 prefix = 'gouno-recovery-' + secrets.token_hex(5)
 network = prefix + '-net'
 volume = prefix + '-keys'
@@ -92,7 +92,7 @@ try:
         os.chmod(pwfile, 0o600)
         seed_binary = private / 'seed'
         command(['go', 'build', '-o', str(seed_binary), '.'], cwd=ADMIN_ROOT / 'seed')
-        verified = command([options.cosign, 'verify', '--certificate-identity', 'https://github.com/rushairer/gosso/.github/workflows/release.yml@refs/tags/v1.7.1', '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com', IMAGE])
+        verified = command([options.cosign, 'verify', '--certificate-identity', 'https://github.com/rushairer/gosso/.github/workflows/release.yml@refs/tags/v1.7.2', '--certificate-oidc-issuer', 'https://token.actions.githubusercontent.com', IMAGE])
         signatures = json.loads(verified)
         check('exact_formal_image_signature', bool(signatures))
         (ROOT / 'gosso-cosign-verification.json').write_text(json.dumps(signatures, indent=2) + '\n')

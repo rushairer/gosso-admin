@@ -133,3 +133,7 @@ Blog's bounded Connector decoder-error confidentiality repair is merged through
 Connector repair authorization is pending. Its final-main checks and artifacts
 remain independently recorded in the ecosystem report. Human Showcase ledgers
 and required approving PR review remain pending; no target Tag is permitted.
+
+## November 11 publication exception and patched upstream
+
+Current release inputs require signed Gosso v1.7.2@sha256:bf398c6c2129da2f68c030dece3ceb52f8f5a7a6036a58b797c8e3f0619b5e90, verified independently after its successful release workflow. Go 1.27.4 builders and Go 1.26.11 module floor address GO-2026-6859. Final exact-SHA automated acceptance remains mandatory. Historical v1.7.1 evidence above retains its original scope. Manual certification and external Staging checks remain unverified and are waived for publication only under [the maintainer exception](docs/quality/release-exception-2026-11-11.md). No production deployment is authorized.
