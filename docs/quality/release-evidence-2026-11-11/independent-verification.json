@@ -1,0 +1,143 @@
+{
+  "repo": "rushairer/gosso-admin",
+  "tag": "v0.7.25",
+  "sha": "4545495bcdc518af65cc6c15a9695b9ef5df5e19",
+  "release_url": "https://github.com/rushairer/gosso-admin/releases/tag/v0.7.25",
+  "assets": [
+    {
+      "name": "frontend-identity-admin.digest.txt",
+      "sha256": "2e974f8ac7c4e51a985694259a2ac23ea54ea372b1357e1c856eefb9d114a2d3",
+      "api_digest_verified": true
+    },
+    {
+      "name": "frontend.digest.txt",
+      "sha256": "8ee48ec53a7ba286fc1db5666210fbf2086450d6b1e77c6a333fee0a42e949ad",
+      "api_digest_verified": true
+    },
+    {
+      "name": "sbom-frontend-4545495bcdc518af65cc6c15a9695b9ef5df5e19.cyclonedx.json",
+      "sha256": "f7cdf49033cf572dc0a6a45addd5e26230f298a6a4d2fa467b3909b5d667087f",
+      "api_digest_verified": true
+    },
+    {
+      "name": "sbom-frontend-4545495bcdc518af65cc6c15a9695b9ef5df5e19.spdx.json",
+      "sha256": "1d5d462b52ae3e4331287f41071505565058b665ced4fdfd0d9ca75c49e44651",
+      "api_digest_verified": true
+    },
+    {
+      "name": "sbom-frontend-identity-admin-4545495bcdc518af65cc6c15a9695b9ef5df5e19.cyclonedx.json",
+      "sha256": "fa297b488c183691ed9cdc352a34ff5658c9809117ceddbc3a1da996cfe59e0d",
+      "api_digest_verified": true
+    },
+    {
+      "name": "sbom-frontend-identity-admin-4545495bcdc518af65cc6c15a9695b9ef5df5e19.spdx.json",
+      "sha256": "8a70800aa805866115cfadc57c42518ca8c87f704a785cb077d39df6c767a85b",
+      "api_digest_verified": true
+    },
+    {
+      "name": "sbom-seed-4545495bcdc518af65cc6c15a9695b9ef5df5e19.cyclonedx.json",
+      "sha256": "0bc51e5c35a1f47a836121e9511721e09c29d2123b507cff9e091d336b782f3c",
+      "api_digest_verified": true
+    },
+    {
+      "name": "sbom-seed-4545495bcdc518af65cc6c15a9695b9ef5df5e19.spdx.json",
+      "sha256": "c0eb55a50934ef16833ec8cfe22ace13512bb8ab8fddb3406365bace0934d1d4",
+      "api_digest_verified": true
+    },
+    {
+      "name": "seed.digest.txt",
+      "sha256": "01ee5582806ced29ce0fc3ed21345a1d052c28763c73b203e6fa69b6f64161a9",
+      "api_digest_verified": true
+    }
+  ],
+  "images": [
+    {
+      "kind": "frontend",
+      "image": "ghcr.io/rushairer/gosso-admin-frontend@sha256:955792f63712298b8d588ff2b2eceb66d1b110ea8e919bb2dd392eb4800b160c",
+      "tag_resolves_to_digest": true,
+      "cosign_identity": "https://github.com/rushairer/gosso-admin/.github/workflows/images.yml@refs/tags/v0.7.25",
+      "cosign_verified": true,
+      "sbom_formats": [
+        "CycloneDX",
+        "SPDX"
+      ],
+      "platforms": [
+        {
+          "arch": "amd64",
+          "digest": "sha256:3eef801db61de85b54229c6b874c536fd58b6a292aea03563647b28d443b8e44",
+          "source_sha": "4545495bcdc518af65cc6c15a9695b9ef5df5e19",
+          "qualification": "Local-directory build: declared VCS source/revision cross-checked in BuildKit metadata, root request args and OCI labels; not a Git material content-hash claim."
+        },
+        {
+          "arch": "arm64",
+          "digest": "sha256:06076e0942a39e04c64930b77126f22714ea265a70543d25b7d197231114e179",
+          "source_sha": "4545495bcdc518af65cc6c15a9695b9ef5df5e19",
+          "qualification": "Local-directory build: declared VCS source/revision cross-checked in BuildKit metadata, root request args and OCI labels; not a Git material content-hash claim."
+        }
+      ]
+    },
+    {
+      "kind": "frontend-identity-admin",
+      "image": "ghcr.io/rushairer/gosso-admin-frontend-identity-admin@sha256:36a9191a4128b80d48eb84f7c3ec02f74abc584c0d976dbe7d5d7ac45d412984",
+      "tag_resolves_to_digest": true,
+      "cosign_identity": "https://github.com/rushairer/gosso-admin/.github/workflows/images.yml@refs/tags/v0.7.25",
+      "cosign_verified": true,
+      "sbom_formats": [
+        "CycloneDX",
+        "SPDX"
+      ],
+      "platforms": [
+        {
+          "arch": "amd64",
+          "digest": "sha256:7cbbe54cc653c9dffb60cc07829fc5aeedf5ad18ba5fc0b9b60b5b0faf90313c",
+          "source_sha": "4545495bcdc518af65cc6c15a9695b9ef5df5e19",
+          "qualification": "Local-directory build: declared VCS source/revision cross-checked in BuildKit metadata, root request args and OCI labels; not a Git material content-hash claim."
+        },
+        {
+          "arch": "arm64",
+          "digest": "sha256:480692c3c1cfbdadc495e684a45908ba692cfdc6266d729005d431955ed53c0d",
+          "source_sha": "4545495bcdc518af65cc6c15a9695b9ef5df5e19",
+          "qualification": "Local-directory build: declared VCS source/revision cross-checked in BuildKit metadata, root request args and OCI labels; not a Git material content-hash claim."
+        }
+      ]
+    },
+    {
+      "kind": "seed",
+      "image": "ghcr.io/rushairer/gosso-admin-seed@sha256:ca6f1624c0908e9221ba98da5cb991d60c0b1f4702b5369131a885fda1c23eca",
+      "tag_resolves_to_digest": true,
+      "cosign_identity": "https://github.com/rushairer/gosso-admin/.github/workflows/images.yml@refs/tags/v0.7.25",
+      "cosign_verified": true,
+      "sbom_formats": [
+        "CycloneDX",
+        "SPDX"
+      ],
+      "platforms": [
+        {
+          "arch": "amd64",
+          "digest": "sha256:8269d64af4ff82f125bb706f4ef0befebf0c118d15ebaf58820f13f1a5ee92c3",
+          "source_sha": "4545495bcdc518af65cc6c15a9695b9ef5df5e19",
+          "qualification": "Local-directory build: declared VCS source/revision cross-checked in BuildKit metadata, root request args and OCI labels; not a Git material content-hash claim."
+        },
+        {
+          "arch": "arm64",
+          "digest": "sha256:52bd384a44fd879734854aa0818aebc9d002e4ce40491047bfc2100ac9851893",
+          "source_sha": "4545495bcdc518af65cc6c15a9695b9ef5df5e19",
+          "qualification": "Local-directory build: declared VCS source/revision cross-checked in BuildKit metadata, root request args and OCI labels; not a Git material content-hash claim."
+        }
+      ]
+    }
+  ],
+  "manual_certification": "not verified; maintainer publication exception",
+  "staging": "not verified; maintainer publication exception",
+  "production_deployed": false,
+  "publication_workflow": {
+    "id": 42996686038,
+    "url": "https://github.com/rushairer/gosso-admin/actions/runs/42996686038",
+    "sha": "4545495bcdc518af65cc6c15a9695b9ef5df5e19"
+  },
+  "independent_verifier": {
+    "repo": "rushairer/gouno-doc",
+    "source_sha": "db1ffc4d2ea933f74f18308a21f0561907114bb7",
+    "run_id": "42997051605"
+  }
+}
