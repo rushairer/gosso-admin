@@ -34,8 +34,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  gosso-1-7-1:
-    name: Gosso v1.7.1 acceptance
+  gosso-1-7-2:
+    name: Gosso v1.7.2 acceptance
     runs-on: ubuntu-latest
     timeout-minutes: 20
 

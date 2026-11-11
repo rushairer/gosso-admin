@@ -10,8 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Verify global Client list/create/update/secret rotation/delete against the signed Gosso v1.7.1 immutable release image in the isolated compatibility runner, including actual retired/replacement credential behavior.
-- Manage OAuth2 clients globally through Gosso's administrator governance API: list, create, update, delete and rotate secrets across client owners. The API was introduced in Gosso v1.7.0; the release baseline is v1.7.1, which persists rotated secrets correctly. Older compatibility smoke does not certify the fixed behavior.
+- Verify global Client list/create/update/secret rotation/delete against the signed Gosso v1.7.2 immutable release image in the isolated compatibility runner, including actual retired/replacement credential behavior.
+- Manage OAuth2 clients globally through Gosso's administrator governance API: list, create, update, delete and rotate secrets across client owners. The API was introduced in Gosso v1.7.0; the release baseline is v1.7.2, which persists rotated secrets correctly. Older compatibility smoke does not certify the fixed behavior.
 
 - Extend the pinned released-Gosso compatibility acceptance with a real second owner, global-governance privilege denials, owner-boundary checks, secret replacement and session revocation. The token endpoint must reject the retired secret and authenticate its replacement before rejecting a deliberately nonexistent authorization code. These automated checks do not replace manual Showcase certification or Staging acceptance.
 
@@ -26,11 +26,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Keep passkey errors in their owning modal, handle clipboard failures, and align authentication, destructive confirmation and collection recovery behavior with tested product interactions.
 
-- Accept the independently signature-verified Gosso v1.7.1 release image for persisted Client Secret rotation; retain full real old/new credential regression checks and existing authorization boundaries.
+- Accept the independently signature-verified Gosso v1.7.2 release image for persisted Client Secret rotation; retain full real old/new credential regression checks and existing authorization boundaries.
 - Retain complete System Status security-panel screenshots in Showcase parity: scroll the whole nested panel and require full viewport intersection before capture, so the final MFA policy row cannot be clipped. No Product rendering or certification status change.
 - JSON-encode smoke credentials containing quotes or backslashes, read authenticated smoke responses from standard input correctly, retain TLS certificate verification and require Swagger to be disabled for release smoke; exercise authenticated mutation/cleanup against the isolated released Gosso image.
 
 ### Security
+
+- Build Seed with immutable Go 1.27.4 and require Go 1.26.11; consume the patched Gosso v1.7.2 identity-server release after independently verifying its signed digest. This addresses the newly published GO-2026-6859 toolchain advisory without changing API or UI behavior.
 
 - Refresh frontend and Seed security dependencies, including the patched undici dependency chain; align SHA-pinned Actions and make npm audit fail closed after transient-service retries.
 
