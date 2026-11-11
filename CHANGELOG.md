@@ -6,31 +6,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-### Added
-- Extend the pinned released-Gosso compatibility acceptance with a real second owner, global-governance privilege denials, owner-boundary checks, secret replacement and session revocation. The token endpoint must reject the retired secret and authenticate its replacement before rejecting a deliberately nonexistent authorization code. These automated checks do not replace manual Showcase certification or Staging acceptance.
-
-### Fixed
-
-- Accept the independently signature-verified Gosso v1.7.1 release image for persisted Client Secret rotation; retain full real old/new credential regression checks and existing authorization boundaries.
-- Retain complete System Status security-panel screenshots in Showcase parity: scroll the whole nested panel and require full viewport intersection before capture, so the final MFA policy row cannot be clipped. No Product rendering or certification status change.
-- JSON-encode smoke credentials containing quotes or backslashes, read authenticated smoke responses from standard input correctly, retain TLS certificate verification and require Swagger to be disabled for release smoke; exercise authenticated mutation/cleanup against the isolated released Gosso image.
-
-## [0.7.25] - 2026-11-05
+## [0.7.25] - 2026-11-11
 
 ### Added
+
 - Verify global Client list/create/update/secret rotation/delete against the signed Gosso v1.7.1 immutable release image in the isolated compatibility runner, including actual retired/replacement credential behavior.
 - Manage OAuth2 clients globally through Gosso's administrator governance API: list, create, update, delete and rotate secrets across client owners. The API was introduced in Gosso v1.7.0; the release baseline is v1.7.1, which persists rotated secrets correctly. Older compatibility smoke does not certify the fixed behavior.
 
+- Extend the pinned released-Gosso compatibility acceptance with a real second owner, global-governance privilege denials, owner-boundary checks, secret replacement and session revocation. The token endpoint must reject the retired secret and authenticate its replacement before rejecting a deliberately nonexistent authorization code. These automated checks do not replace manual Showcase certification or Staging acceptance.
+
 ### Changed
+
 - Consume exact published `@gouno/ui` 0.4.9 and `@gosso/client` 0.9.3. Replace historical vendored UI and local design-system styling with canonical registry components, AppShell navigation and direct surface ownership.
 - Align account, authentication and system-management pages with the frozen Showcase, including Modal footers, explicit recovery/action copy, stable loading and refresh states, and lower System Status capability/security panels.
 - Make UI registry verification operator-triggered and preserve manual-first certification freshness checks. The current certification ledger remains `needs-manual-recertification`; automated parity alone does not renew it.
 - Require Node 24 LTS (>=24.15 and <25) consistently across Docker, CI, package metadata and Node types; retain the TypeScript 6 compiler API used by governance checks.
 
 ### Fixed
+
 - Keep passkey errors in their owning modal, handle clipboard failures, and align authentication, destructive confirmation and collection recovery behavior with tested product interactions.
 
+- Accept the independently signature-verified Gosso v1.7.1 release image for persisted Client Secret rotation; retain full real old/new credential regression checks and existing authorization boundaries.
+- Retain complete System Status security-panel screenshots in Showcase parity: scroll the whole nested panel and require full viewport intersection before capture, so the final MFA policy row cannot be clipped. No Product rendering or certification status change.
+- JSON-encode smoke credentials containing quotes or backslashes, read authenticated smoke responses from standard input correctly, retain TLS certificate verification and require Swagger to be disabled for release smoke; exercise authenticated mutation/cleanup against the isolated released Gosso image.
+
 ### Security
+
 - Refresh frontend and Seed security dependencies, including the patched undici dependency chain; align SHA-pinned Actions and make npm audit fail closed after transient-service retries.
 
 ## [0.7.24] - 2026-09-04
