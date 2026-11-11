@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Retain independently verified v0.7.25 publication evidence and actual image digests, while preserving the explicit manual/Staging publication exception and immutable release tag.
+
 ## [0.7.25] - 2026-11-11
 
 ### Added

@@ -137,3 +137,15 @@ and required approving PR review remain pending; no target Tag is permitted.
 ## November 11 publication exception and patched upstream
 
 Current release inputs require signed Gosso v1.7.2@sha256:bf398c6c2129da2f68c030dece3ceb52f8f5a7a6036a58b797c8e3f0619b5e90, verified independently after its successful release workflow. Go 1.27.4 builders and Go 1.26.11 module floor address GO-2026-6859. Final exact-SHA automated acceptance remains mandatory. Historical v1.7.1 evidence above retains its original scope. Manual certification and external Staging checks remain unverified and are waived for publication only under [the maintainer exception](docs/quality/release-exception-2026-11-11.md). No production deployment is authorized.
+
+## November 11 formal publication receipt — exception remains explicit
+
+- [x] Annotated `v0.7.25` points to final accepted source `4545495bcdc518af65cc6c15a9695b9ef5df5e19`; version equals package.json. No existing tag was changed.
+- [x] Exact final source passes CI42996206473, Security42996206593, Images42996206685, released-Gosso42996206636, Browser42996213474 and Showcase Parity42996219892.
+- [x] [Formal release workflow42996686038](https://github.com/rushairer/gosso-admin/actions/runs/42996686038) succeeds and publishes all three v0.7.25 images with release attachments.
+- [x] Separate [independent acceptance42997051605](https://github.com/rushairer/gouno-doc/actions/runs/42997051605) verifies tag source, each actual version/digest, exact Cosign workflow identity and issuer, amd64/arm64, release-asset hashes, SPDX/CycloneDX and declared source provenance. Seed SBOM confirms patched Go1.27.4. [Machine-readable receipt](docs/quality/release-evidence-2026-11-11/independent-verification.json).
+- [ ] Maintainer Showcase certification: not performed; ledger remains needs-manual-recertification, waived for publication only.
+- [ ] External Staging/target recovery/upgrade/rollback/operator acceptance: unverified, waived for publication only.
+- [ ] Production deployment: not requested or executed.
+
+This is a published release under the [explicit owner exception](docs/quality/release-exception-2026-11-11.md), not full completion of the original manual/operational gates. Read the preceding dated sections as historical receipts. This post-publication documentation commit does not move the validated tag.
