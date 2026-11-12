@@ -1,5 +1,7 @@
 # November 11 update — GOSSO Admin v0.7.25 published
 
+> **Historical release audit:** All statuses below are dated observations. The authoritative cross-repository publication record is [the Gouno documentation closeout](https://github.com/rushairer/gouno-doc/blob/main/docs/quality/ecosystem-release-final-2026-11.md), which also records Blog v1.6.0 publication. Old “unpublished candidate” statements within this audit must not be used as live TODO items.
+
 [Formal Release](https://github.com/rushairer/gosso-admin/releases/tag/v0.7.25) now exists at annotated tag commit `4545495bcdc518af65cc6c15a9695b9ef5df5e19`. Final exact-source CI, Security, Images, Gosso v1.7.2 compatibility, Browser Acceptance and automated Showcase Parity all pass. Publication workflow42996686038 and separate [independent artifact acceptance42997051605](https://github.com/rushairer/gouno-doc/actions/runs/42997051605) complete successfully for all three versioned images.
 
 [The permanent receipt](release-evidence-2026-11-11/independent-verification.json) records real immutable digests, exact Cosign identity, release-asset checksums, both architectures and declared source provenance. Manual certification and external Staging remain unverified under [the maintainer publication exception](release-exception-2026-11-11.md). No production deployment occurred. Publication success does not set those statuses to ready or promote the certification ledger.

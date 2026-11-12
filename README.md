@@ -11,6 +11,8 @@ The P0 goal of this repository is a professional, testable release baseline: loc
 - Local stack wiring: PostgreSQL, Redis, Mailpit, Gosso image, admin frontend, and same-origin gateway.
 - Operations: preflight checks, smoke checks, Dockerfile for the admin frontend, and Dockerfile for the seeder.
 
+For current/archived document ownership, see [the documentation index](docs/README.md). The formal v0.7.25 release is [published](https://github.com/rushairer/gosso-admin/releases/tag/v0.7.25); publication alone does not certify external Staging or production deployment.
+
 ## Architecture
 
 In the integrated Blog/SSO cluster, **Blog Admin is not this application**: it is `gouno-blog/blog-frontend`'s `/admin/*` route. This repository builds the **GOSSO identity UI** (login, account self-service, SSO administration). The distinct Blog Go backend embeds the Confidential BFF; it obtains OIDC tokens server-to-server. See the [source-verified integrated architecture](https://github.com/rushairer/gouno-blog/blob/main/docs/architecture/README.md).

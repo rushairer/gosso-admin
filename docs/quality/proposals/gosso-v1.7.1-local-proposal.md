@@ -1,5 +1,7 @@
 # Gosso secret rotation repair — local proposal
 
+> **SUPERSEDED HISTORICAL PATCH (status reconciliation 2026-11-12):** Gosso v1.7.1 and v1.7.2 are now [officially published](https://github.com/rushairer/gosso/releases/tag/v1.7.2); the Client Secret rotation fix and security rebuild must be assessed from the tagged upstream implementation, not by applying this old local proposal. Below, “not submitted/not released” refers only to the **original dated proposal snapshot**, not the current GOSSO project. Retained patch/receipts are audit evidence and must not be rerun against current main without a new defect and authorization.
+
 Latest proposal: [November 9 security-baseline and coverage refresh](gosso-v1.7.1-local-proposal-2026-11-09.md). The following November 8 patch and receipt are preserved as historical evidence; they are not the latest proposed dependency baseline.
 
 Status: **not submitted to Gosso, not published**. The task limits Gosso to read-only. This text patch makes the required scope decision reviewable without changing that repository or its remote. Proposed SemVer is v1.7.1; no published section, Chart version or target tag has been changed.
