@@ -13,6 +13,11 @@ The P0 goal of this repository is a professional, testable release baseline: loc
 
 ## Architecture
 
+In the integrated Blog/SSO cluster, **Blog Admin is not this application**: it is `gouno-blog/blog-frontend`'s `/admin/*` route. This repository builds the **GOSSO identity UI** (login, account self-service, SSO administration). The distinct Blog Go backend embeds the Confidential BFF; it obtains OIDC tokens server-to-server. See the [source-verified integrated architecture](https://github.com/rushairer/gouno-blog/blob/main/docs/architecture/README.md).
+
+The diagram below describes this repository's **standalone Nginx gateway** topology; the integrated Blog production Compose instead uses Caddy with independent `blog.<domain>` and `sso.<domain>` origins. Do not mistake these for identical deployments.
+
+
 ```text
 Browser
   |
@@ -132,9 +137,7 @@ npm ci
 npm run dev
 ```
 
-The frontend uses the exact registry-published `@gosso/client@0.4.0`
-stable release while validating the 0.3 release line. The committed lockfile
-records the npm integrity hash, and CI installs it with `npm ci`. OAuth/OIDC,
+The frontend consumes the exact registry-published `@gosso/client` version from `gosso-admin-frontend/package.json` and its integrity-pinned lockfile. Do not duplicate a historical version number here; CI uses `npm ci`. OAuth/OIDC,
 PKCE, session refresh, identity CSRF, MFA, passkey, profile, session, and
 password-reset protocol logic belongs to the SDK; React pages only manage UI
 state and call SDK methods.
@@ -171,7 +174,7 @@ For production, keep Swagger behind administrative network controls or disable i
 
 ## Release Status
 
-This repository is ready to be hardened toward a mature self-hosted identity platform. P0 intentionally does not include SAML, SCIM, LDAP/AD, multi-tenancy, or conditional access; those belong in later product milestones.
+This is an actively maintained identity administration frontend. Use the current changelog, compatibility file and release checklist rather than treating historical P0 milestone wording as current release certification. SAML, SCIM, LDAP/AD and conditional access are outside the verified functionality of this documentation snapshot.
 
 ## Community and license
 
