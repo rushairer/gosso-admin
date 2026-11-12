@@ -6,9 +6,11 @@ GOSSO Admin follows Semantic Versioning. During `0.x`, breaking changes may occu
 |---|---|---|---:|---|---|
 | `0.1.x` | `1.1.x` | OpenAPI `1.2.x` | `20` | `0.1.x` | Supported baseline |
 | `0.3.0` | `1.2.1` | OpenAPI `1.2.x` | `20` | `0.4.0` | Supported release combination |
-| `0.4.0` | `1.2.1` | OpenAPI `1.2.x` | `20` | `0.6.0` | Latest stable release combination |
+| `0.4.0` | `1.2.1` | OpenAPI `1.2.x` | `20` | `0.6.0` | Historical tested combination |
 
-Gosso `1.1.0` is the minimum supported server release. It includes the role-cache migration required for a newly issued admin access token to contain the permissions used by the Admin API; earlier server builds can return `403` until a token refresh.
+**The table above is a historical compatibility record, not a certification of the latest `main` or production deployment.** The current Admin source line is identified by `gosso-admin-frontend/package.json`; the exact SDK requirement and lockfile must be checked there, and a current Gosso/API/schema compatibility matrix needs integration evidence before being called supported. See [the integrated As-Is architecture](https://github.com/rushairer/gouno-blog/blob/main/docs/architecture/README.md).
+
+For the **historical 0.1.x baseline**, Gosso `1.1.0` is the minimum supported server release. It includes the role-cache migration required for a newly issued admin access token to contain the permissions used by the Admin API; earlier server builds can return `403` until a token refresh.
 
 The legacy Seeder validates the tables and columns it writes instead of pinning a migration number. Additive migrations therefore do not block bootstrap; a missing or renamed required capability fails with an explicit error.
 
